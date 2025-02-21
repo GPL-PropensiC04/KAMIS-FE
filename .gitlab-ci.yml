@@ -56,7 +56,6 @@ publish-frontend:
 deploy-services:
   stage: deploy
   dependencies:
-    - publish-asset
     - publish-frontend
     # (Include other services as dependencies...)
   extends: .setup-ssh
