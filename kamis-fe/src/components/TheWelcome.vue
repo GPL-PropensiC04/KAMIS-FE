@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue'
-import { RouterView } from 'vue-router'
-import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-
 </script>
 
 <template>
