@@ -1,7 +1,3 @@
-default:
-  tags:
-    - apap
-
 .setup-ssh:
   before_script:
     - 'which ssh-agent || ( apk add --no-cache openssh )'
