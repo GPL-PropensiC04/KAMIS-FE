@@ -25,6 +25,7 @@ build-frontend:
   stage: build
   script:
     - echo "Building Vue.js frontend..."
+    - cd kamis-fe
     - npm install --progress=false
     - npm run build
   artifacts:
@@ -39,6 +40,8 @@ publish-frontend:
     - build-frontend
   script:
     - echo "Building Docker image for Vue.js frontend..."
+    - echo "Checking GCLOUD_SERVICE_KEY"
+    - echo $GCLOUD_SERVICE_KEY | base64 -d | docker login -u _json_key --password-stdin https://gcr.io || true
     - docker build -t $IMAGE_REPO/frontend:latest -f Dockerfile .
     - echo "Pushing Docker image to Google Container Registry..."
     - docker push $IMAGE_REPO/frontend:latest
