@@ -1,6 +1,6 @@
 services:
   frontend:
-    container_name: frontend-tk-41
+    container_name: frontend-kamis
     image: gcr.io/propensi-451504/frontend:latest
     ports:
       - '80:5173'
