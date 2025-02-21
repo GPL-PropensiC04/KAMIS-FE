@@ -1,7 +1,3 @@
-default:
-  tags:
-    - apap
-
 .setup-ssh:
   before_script:
     - 'which ssh-agent || ( apk add --no-cache openssh )'
@@ -25,22 +21,23 @@ variables:
 
 # Build job for Vue.js frontend
 build-frontend:
-  image: node:18-alpine
+  image: node:18-alpine  
   stage: build
   script:
     - echo "Building Vue.js frontend..."
-    - npm --version
-    - cd kamis-fe
     - npm install --progress=false
     - npm run build
   artifacts:
     paths:
       - frontend/dist
 
+
 # Publish job for Vue.js frontend
 publish-frontend:
   image: $IMAGE_DOCKER_DIND
   stage: publish
+  tags:
+    - apap
   dependencies:
     - build-frontend
   script:
@@ -54,6 +51,8 @@ publish-frontend:
 # Deploy job for all services
 deploy-services:
   stage: deploy
+  tags:
+    - apap
   dependencies:
     - publish-frontend
     # (Include other services as dependencies...)
@@ -69,6 +68,8 @@ deploy-services:
 
 cleaning:
   stage: clean
+  tags:
+    - apap
   dependencies:
     - deploy-services
   extends: .setup-ssh
