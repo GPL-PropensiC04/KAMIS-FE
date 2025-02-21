@@ -1,0 +1,24 @@
+services:
+  frontend:
+    container_name: frontend-tk-41
+    image: gcr.io/propensi-451504/frontend:latest
+    ports:
+      - '80 :5173'
+    restart: 'always'
+    labels:
+      tk: "41"
+    environment:
+      - DATABASE_URL_DEV=jdbc:postgresql://db:5432/pharmacy
+      - DATABASE_USERNAME_DEV=${DATABASE_USERNAME_DEV}
+      - DATABASE_PASSWORD_DEV=${DATABASE_PASSWORD_DEV}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret99
+
+    networks:
+      - frontend-network
+      
+networks:
+  frontend-network:
+    driver: bridge
