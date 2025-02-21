@@ -21,10 +21,7 @@ variables:
   GCP_PROJECT_ID: "propensi-451504"
   IMAGE_REPO: "gcr.io/$GCP_PROJECT_ID"
   IMAGE_DOCKER_DIND: docker:27.3.1-alpine3.20
-  IMAGE_OPENJDK_GRADLE: gradle:8.11.1-jdk21-alpine
   IMAGE_NODE: node:18-alpine
-
-
 
 # Build job for Vue.js frontend
 build-frontend:
@@ -32,7 +29,6 @@ build-frontend:
   stage: build
   script:
     - echo "Building Vue.js frontend..."
-    - cd $CI_PROJECT_DIR/
     - npm install --progress=false
     - npm run build
   artifacts:
@@ -47,7 +43,6 @@ publish-frontend:
     - build-frontend
   script:
     - echo "Building Docker image for Vue.js frontend..."
-    - cd $CI_PROJECT_DIR/
     - docker build -t $IMAGE_REPO/frontend:latest -f Dockerfile .
     - echo "Pushing Docker image to Google Container Registry..."
     - docker push $IMAGE_REPO/frontend:latest
