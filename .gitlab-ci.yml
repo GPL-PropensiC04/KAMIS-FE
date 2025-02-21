@@ -60,10 +60,10 @@ deploy-services:
   extends: .setup-ssh
   script:
     - echo "Deploying services to GCP VM..."
-    - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "mkdir -p ~/microservices-deploy/"
-    - rsync -rahv $CI_PROJECT_DIR/docker-compose-deploy.yml "$DEPLOY_USERNAME@$DEPLOY_SERVER:~/microservices-deploy/"
+    - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "mkdir -p ~/frontend/"
+    - rsync -rahv $CI_PROJECT_DIR/docker-compose-deploy.yml "$DEPLOY_USERNAME@$DEPLOY_SERVER:~/frontend/"
     - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "
-        cd ~/microservices-deploy/ &&
+        cd ~/frontend/ &&
         docker compose -f docker-compose-deploy.yml pull &&
         docker compose -f docker-compose-deploy.yml up -d --remove-orphans"
 
