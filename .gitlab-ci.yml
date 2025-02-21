@@ -1,3 +1,7 @@
+default:
+  tags:
+    - apap
+
 .setup-ssh:
   before_script:
     - 'which ssh-agent || ( apk add --no-cache openssh )'
@@ -6,7 +10,6 @@
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    
 
 stages:
   - build
@@ -22,10 +25,11 @@ variables:
 
 # Build job for Vue.js frontend
 build-frontend:
+  image: node:18-alpine
   stage: build
   script:
-    - docker info
     - echo "Building Vue.js frontend..."
+    - npm --version
     - cd kamis-fe
     - npm install --progress=false
     - npm run build
