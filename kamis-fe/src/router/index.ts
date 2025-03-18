@@ -67,6 +67,18 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
     },
+    // {
+    //   path: '/dashboard',
+    //   name: 'dashboard',
+    //   component: () => import('@/views/DashboardView.vue'),
+    //   meta: { requiresAuth: true }
+    // },
+    {
+      path: '/resource/add',
+      name: 'add-resource',
+      component: () => import('@/views/AddResourceView.vue'),
+      meta: { requiresAuth: true }
+    },
     {
       path: '/resource/add',
       name: 'addResource',
