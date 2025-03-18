@@ -2,7 +2,7 @@
     <div class="info-aset-container">
       <div class="info-header">
         <h2>Informasi Aset</h2>
-        <div class="action-buttons">
+        <div v-if="canManageAssets" class="action-buttons">
           <button 
             class="btn btn-hapus" 
             @click="$emit('delete')"
@@ -31,15 +31,15 @@
         </div>
   
         <div class="info-row">
-          <div class="info-col">
+          <div v-if="canViewFinancialInfo" class="info-col">
             <h4>Nilai Perolehan</h4>
             <p>{{ formatCurrency(aset.nilaiPerolehan) }}</p>
           </div>
-          <div class="info-col">
+          <div v-if="canViewFinancialInfo" class="info-col">
             <h4>Tanggal Perolehan</h4>
             <p>{{ formatDate(aset.tanggalPerolehan) }}</p>
           </div>
-          <div class="info-col">
+          <div class="info-col" :class="{ 'full-width': !canViewFinancialInfo }">
             <h4>Status</h4>
             <p :class="getStatusClass(aset.status)">{{ aset.status }}</p>
           </div>
@@ -57,15 +57,22 @@
   
   <script setup lang="ts">
   import { computed } from 'vue';
-  import type { Aset } from '@/interfaces/asset.interface';
+  import type { AsetInterface } from '@/interfaces/asset.interface';
   import { formatCurrency, formatDate } from '@/utils/formatters';
   import { StatusColorMap } from '@/config/status.config';
+  import { useAuthStore } from '@/stores/auth';
   
   const props = defineProps<{
-    aset: Aset
+    aset: AsetInterface
   }>();
   
   defineEmits(['edit', 'delete']);
+  
+  const authStore = useAuthStore();
+  
+  // Computed permissions
+  const canManageAssets = computed(() => authStore.canManageAssets);
+  const canViewFinancialInfo = computed(() => authStore.canViewFinancialInfo);
   
   const getStatusClass = (status: string) => {
     return StatusColorMap[status as keyof typeof StatusColorMap] || '';

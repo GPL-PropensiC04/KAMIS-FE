@@ -25,12 +25,15 @@
           :aset="aset" 
           @edit="handleEditAset" 
           @delete="handleDeleteAset" 
+          :show-financial-info="showFinancialInfo"
+          :show-action-buttons="showActionButtons"
         />
   
         <!-- Maintenance History -->
         <MaintenanceTable 
           :maintenance-history="maintenanceHistory" 
-          @add-maintenance="handleAddMaintenance" 
+          @add-maintenance="handleAddMaintenance"
+          :show-add-button="showActionButtons"
         />
       </template>
     </div>
@@ -47,9 +50,11 @@
   import AssetImage from '@/components/AssetImage.vue';
   import AssetInfoCard from '@/components/AssetInfoCard.vue';
   import MaintenanceTable from '@/components/MaintenanceTable.vue';
+  import { useAuthStore } from '@/stores/auth'; // Import Auth Store
   
   const route = useRoute();
   const router = useRouter();
+  const authStore = useAuthStore(); // Use auth store
   const platNomor = route.params.platNomor as string;
   
   // State
@@ -57,6 +62,19 @@
   const maintenanceHistory = ref<Maintenance[]>([]);
   const isLoading = ref(true);
   const error = ref('');
+  
+  // Role-based permission computed properties
+  const showFinancialInfo = computed(() => {
+    const userRole = authStore.userRole;
+    // Only Direksi and Finance can see financial info
+    return userRole === 'Direksi' || userRole === 'Finance';
+  });
+  
+  const showActionButtons = computed(() => {
+    const userRole = authStore.userRole;
+    // Only Admin and Operasional can see action buttons
+    return userRole === 'Admin' || userRole === 'Operasional';
+  });
   
   // Computed value for image url
   const asetImageUrl = computed(() => {
@@ -143,7 +161,7 @@
   
   const handleAddMaintenance = () => {
     // Arahkan ke halaman Coming Soon
-    // router.push('/coming-soon');   
+    router.push('/coming-soon');   
   };
   
   onMounted(() => {
