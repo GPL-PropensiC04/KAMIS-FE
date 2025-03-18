@@ -20,20 +20,51 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
+      path: '/purchase',
+      name: 'purchase',
+      component:ListPurchase,
+    },
+    {
+      path: '/purchase/add',
+      name: 'addPurchase',
+      component:AddPurchaseStepOne,
+    },
+    {
+      path: '/purchase/add/resource',
+      name: 'addPurchaseResource',
+      component: AddPurchaseResource,
+    },
+    {
+      path: '/purchase/add/resource-summary',
+      name: 'addPurchaseResourceSummary',
+      component: AddPurchaseResourceSummary,
+    },
+    {
+      path: '/purchase/add/asset-summary',
+      name: 'addPurchaseAssetSummary',
+      component: AddPurchaseAssetSummary,
+    },
+    {
+      path: '/purchase/update-resource/:purchaseId',
+      name: 'updatePurchaseResource',
+      component: UpdatePurchaseResource,
+      props: true, // Kirim ID dari URL sebagai prop
+    },
+    {
+      path: '/purchase/update-asset/:purchaseId',
+      name: 'updatePurchaseAsset',
+      component: UpdatePurchaseAsset,
+      props: true, // Kirim ID dari URL sebagai prop
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
     },
-    // {
-    //   path: '/dashboard',
-    //   name: 'dashboard',
-    //   component: () => import('@/views/DashboardView.vue'),
-    //   meta: { requiresAuth: true }
-    // },
     {
       path: '/resource/add',
-      name: 'add-resource',
+      name: 'addResource',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
     },

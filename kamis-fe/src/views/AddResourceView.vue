@@ -30,7 +30,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- Harga Jual -->
           <div>
-            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="resourcePrice" class="block text-sm font-medium text-gray-700 mb-1">
               Harga Jual
             </label>
             <div class="relative">
@@ -38,8 +38,8 @@
                 Rp
               </span>
               <input
-                id="price"
-                v-model="formData.price"
+                id="resourcePrice"
+                v-model="formData.resourcePrice"
                 type="number"
                 required
                 min="0"
@@ -50,12 +50,12 @@
 
           <!-- Stok Barang -->
           <div>
-            <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="resourceStock" class="block text-sm font-medium text-gray-700 mb-1">
               Stok barang
             </label>
             <input
-              id="stock"
-              v-model="formData.stock"
+              id="resourceStock"
+              v-model="formData.resourceStock"
               type="number"
               required
               min="0"
@@ -66,12 +66,12 @@
 
         <!-- Deskripsi Barang -->
         <div>
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="resourceDescription" class="block text-sm font-medium text-gray-700 mb-1">
             Deskripsi Barang
           </label>
           <textarea
-            id="description"
-            v-model="formData.description"
+            id="resourceDescription"
+            v-model="formData.resourceDescription"
             rows="4"
             required
             class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
@@ -105,9 +105,9 @@ const isLoading = computed(() => resourceStore.loading);
 
 const formData = ref<AddResourceRequestInterface>({
   resourceName: '',
-  price: 0,
-  stock: 0,
-  description: ''
+  resourcePrice: 0,
+  resourceStock: 0,
+  resourceDescription: ''
 });
 
 const handleSubmit = async () => {

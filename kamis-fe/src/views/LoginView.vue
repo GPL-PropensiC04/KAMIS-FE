@@ -38,13 +38,12 @@
           />
         </div>
         
-        <button 
-          type="submit" 
-          class="w-full py-4 bg-[#1E3A5F] text-white rounded-md hover:bg-[#1a325a] transition-colors text-lg font-medium"
+        <VButton
+          type="submit"
+          :label="authStore.loading ? 'Logging in...' : 'Login'"
           :disabled="authStore.loading"
-        >
-          {{ authStore.loading ? 'Logging in...' : 'Login' }}
-        </button>
+          class="w-full"
+        />
       </form>
     </div>
   </div>
@@ -54,6 +53,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+// import VTextArea from '@/components/VTextArea.vue';
+import VButton from '@/components/VButton.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
