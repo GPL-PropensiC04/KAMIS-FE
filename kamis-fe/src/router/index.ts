@@ -7,6 +7,7 @@ import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import ListPurchase from '@/views/ListPurchase.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -19,42 +20,22 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
-      path: '/add-purchase',
-      name: 'addPurchase',
-      component:AddPurchaseStepOne,
-    },
-    {
-      path: '/add-purchase-resource',
-      name: 'addPurchaseResource',
-      component: AddPurchaseResource,
-    },
-    {
-      path: '/add-purchase-resource/summary',
-      name: 'addPurchaseResourceSummary',
-      component: AddPurchaseResourceSummary,
-    },
-    {
-      path: '/add-purchase-asset/summary',
-      name: 'addPurchaseAssetSummary',
-      component: AddPurchaseAssetSummary,
-    },
-    {
-      path: '/update-purchase-resource/:purchaseId',
-      name: 'updatePurchaseResource',
-      component: UpdatePurchaseResource,
-      props: true, // Kirim ID dari URL sebagai prop
-    },
-    {
-      path: '/update-purchase-asset/:purchaseId',
-      name: 'updatePurchaseAsset',
-      component: UpdatePurchaseAsset,
-      props: true, // Kirim ID dari URL sebagai prop
-    },
-    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
+    },
+    // {
+    //   path: '/dashboard',
+    //   name: 'dashboard',
+    //   component: () => import('@/views/DashboardView.vue'),
+    //   meta: { requiresAuth: true }
+    // },
+    {
+      path: '/resource/add',
+      name: 'add-resource',
+      component: () => import('@/views/AddResourceView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -81,12 +62,6 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
-  //   {
-  //     path: '/:pathMatch(.*)*',
-  //     name: 'not-found',
-  //     component: () => import('@/views/NotFoundView.vue')
-  //   }
-  // ]
 })
 
 // Navigation guard
