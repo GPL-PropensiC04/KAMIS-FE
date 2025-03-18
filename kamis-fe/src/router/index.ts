@@ -5,6 +5,7 @@ import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
 import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
 import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
+import DetailAssetView from '@/views/DetailAssetView.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
@@ -67,6 +68,18 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
     },
+    // {
+    //   path: '/dashboard',
+    //   name: 'dashboard',
+    //   component: () => import('@/views/DashboardView.vue'),
+    //   meta: { requiresAuth: true }
+    // },
+    {
+      path: '/resource/add',
+      name: 'add-resource',
+      component: () => import('@/views/AddResourceView.vue'),
+      meta: { requiresAuth: true }
+    },
     {
       path: '/resource/add',
       name: 'addResource',
@@ -77,6 +90,27 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
+    },
+    {
+      path: '/asset/:platNomor',
+      name: 'DetailAset',
+      component: () => DetailAssetView,
+      meta: {
+        title: 'Detail Aset'
+      }
+    },
+    {
+      path: '/asset/edit/:platNomor',
+      name: 'EditAset',
+      component: () => import('@/views/EditAssetView.vue'),
+      meta: {
+        title: 'Mengubah Aset'
+      }
+    },
+    {
+      path: '/coming-soon',
+      name: 'ComingSoon',
+      component: () => import('@/views/ComingSoonView.vue')
     }
   ]
 })

@@ -1,9 +1,19 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import type { LoginRequest, LoginResponse } from '@/interfaces/auth.interface';
+import type { LoginRequest, LoginResponse, UserRole } from '@/interfaces/auth.interface';
+
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+  exp: number;
+  iat: number;
+}
 
 interface JwtPayload {
   id: number;
@@ -41,6 +51,21 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('auth_token');
       delete axios.defaults.headers.common['Authorization'];
     }
+    try {
+      const decoded = jwtDecode<JwtPayload>(token.value);
+      user.value = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role
+      };
+    } catch (err) {
+      console.error('Error decoding token:', err);
+      // Invalid token, clear it
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
+    }
   }
 
   async function login(loginRequest: LoginRequest) {
@@ -49,10 +74,29 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await axios.post<LoginResponse>(`http://localhost:8080/api/auth/login`, loginRequest);
-      console.log(response.data);
+      console.log('Login response:', response.data);
+      
       if (response.data?.data?.token) {
+        // Set token
         token.value = response.data.data.token;
         localStorage.setItem('auth_token', response.data.data.token);
+        
+        // DEBUGGING: Hard-coded role for testing purposes
+        // For Admin testing
+        userRole.value = 'Admin';
+        localStorage.setItem('user_role', 'Admin');
+        console.log('Role set to:', userRole.value);
+        
+        // Save username if available
+        if (response.data.data.username) {
+          username.value = response.data.data.username;
+          localStorage.setItem('username', response.data.data.username);
+        } else {
+          // Fallback username
+          username.value = loginRequest.email;
+          localStorage.setItem('username', loginRequest.email);
+        }
+        
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
         
         // Decode the token to get user info including role
@@ -74,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (err: unknown) {
       if (err instanceof Error && axios.isAxiosError(err) && err.response?.data?.message) {
+      if (err instanceof Error && axios.isAxiosError(err) && err.response?.data?.message) {
         error.value = 'Email atau password salah';
       } else {
         error.value = 'An error occurred during login. Please try again.';
@@ -88,7 +133,11 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     token.value = null;
     user.value = null;
+    userRole.value = null;
+    username.value = null;
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('username');
     delete axios.defaults.headers.common['Authorization'];
     router.push('/login');
   }
@@ -103,15 +152,24 @@ export const useAuthStore = defineStore('auth', () => {
   //   }
   // }
 
+  // For testing purposes only - set role manually
+  function setUserRole(role: UserRole) {
+    userRole.value = role;
+    localStorage.setItem('user_role', role);
+    console.log('Role manually set to:', role);
+  }
+
   return {
     token,
     user,
+    userRole,
+    username,
     loading,
     error,
     isAuthenticated,
     userRole,
     login,
     logout,
-    // fetchUserProfile
+    setUserRole
   };
 }); 
