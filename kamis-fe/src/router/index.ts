@@ -7,8 +7,8 @@ import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
-// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +18,48 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/purchase',
+      name: 'purchase',
+      component:ListPurchase,
+    },
+    {
+      path: '/purchase/add',
+      name: 'addPurchase',
+      component:AddPurchaseStepOne,
+    },
+    {
+      path: '/purchase/add/asset',
+      name: 'addPurchaseAsset',
+      component:AddPurchaseAsset,
+    },
+    {
+      path: '/add-purchase-resource',
+      name: 'addPurchaseResource',
+      component: AddPurchaseResource,
+    },
+    {
+      path: '/purchase/add/resource-summary',
+      name: 'addPurchaseResourceSummary',
+      component: AddPurchaseResourceSummary,
+    },
+    {
+      path: '/purchase/add/asset-summary',
+      name: 'addPurchaseAssetSummary',
+      component: AddPurchaseAssetSummary,
+    },
+    {
+      path: '/purchase/update-resource/:purchaseId',
+      name: 'updatePurchaseResource',
+      component: UpdatePurchaseResource,
+      props: true, // Kirim ID dari URL sebagai prop
+    },
+    {
+      path: '/purchase/update-asset/:purchaseId',
+      name: 'updatePurchaseAsset',
+      component: UpdatePurchaseAsset,
+      props: true, // Kirim ID dari URL sebagai prop
     },
     {
       path: '/login',
@@ -34,6 +76,12 @@ const router = createRouter({
     {
       path: '/resource/add',
       name: 'add-resource',
+      component: () => import('@/views/AddResourceView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/resource/add',
+      name: 'addResource',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
     },
