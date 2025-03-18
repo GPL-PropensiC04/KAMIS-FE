@@ -7,6 +7,7 @@ import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import ListPurchase from '@/views/ListPurchase.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -19,33 +20,38 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
-      path: '/add-purchase',
+      path: '/purchase',
+      name: 'purchase',
+      component:ListPurchase,
+    },
+    {
+      path: '/purchase/add',
       name: 'addPurchase',
       component:AddPurchaseStepOne,
     },
     {
-      path: '/add-purchase-resource',
+      path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
     },
     {
-      path: '/add-purchase-resource/summary',
+      path: '/purchase/add/resource-summary',
       name: 'addPurchaseResourceSummary',
       component: AddPurchaseResourceSummary,
     },
     {
-      path: '/add-purchase-asset/summary',
+      path: '/purchase/add/asset-summary',
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
     },
     {
-      path: '/update-purchase-resource/:purchaseId',
+      path: '/purchase/update-resource/:purchaseId',
       name: 'updatePurchaseResource',
       component: UpdatePurchaseResource,
       props: true, // Kirim ID dari URL sebagai prop
     },
     {
-      path: '/update-purchase-asset/:purchaseId',
+      path: '/purchase/update-asset/:purchaseId',
       name: 'updatePurchaseAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
