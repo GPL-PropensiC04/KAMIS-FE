@@ -68,6 +68,19 @@ const router = createRouter({
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
     },
+    {
+      path: '/asset/:platNomor',
+      name: 'DetailAset',
+      component: () => DetailAssetView,
+      meta: {
+        title: 'Detail Aset'
+      }
+    },
+    {
+      path: '/coming-soon',
+      name: 'ComingSoon',
+      component: () => import('@/views/ComingSoonView.vue')
+    }
   ]
 })
 

@@ -1,4 +1,4 @@
-export interface Aset {
+export interface AsetInterface {
     platNomor: string;
     nama: string;
     jenisAset: string;

@@ -57,7 +57,7 @@
   
   <script setup lang="ts">
   import { computed } from 'vue';
-  import type { Aset } from '@/interfaces/asset';
+  import type { Aset } from '@/interfaces/asset.interface';
   import { formatCurrency, formatDate } from '@/utils/formatters';
   import { StatusColorMap } from '@/config/status.config';
   

@@ -39,10 +39,10 @@
   <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import type { Aset } from '@/interfaces/asset';
+  import type { AsetInterface } from '@/interfaces/asset.interface';
   import type { Maintenance } from '@/interfaces/maintenance';
-  import { AsetService } from '@/assets/assetservices';
-  import { MaintenanceService } from '@/assets/maintenanceservice';
+  import { AsetService } from '@/services/assetservices';
+  import { MaintenanceService } from '@/services/maintenanceservice';
   import { byteArrayToImageUrl } from '@/utils/formatters';
   import AssetImage from '@/components/AssetImage.vue';
   import AssetInfoCard from '@/components/AssetInfoCard.vue';
@@ -53,7 +53,7 @@
   const platNomor = route.params.platNomor as string;
   
   // State
-  const aset = ref<Aset>({} as Aset);
+  const aset = ref<AsetInterface>({} as AsetInterface);
   const maintenanceHistory = ref<Maintenance[]>([]);
   const isLoading = ref(true);
   const error = ref('');
@@ -73,12 +73,26 @@
   
     try {
       // Load asset details
-      const asetData = await AsetService.getAsetByPlatNomor(platNomor);
-      aset.value = asetData;
+      const response = await AsetService.getAsetByPlatNomor(platNomor);
+      
+      // Menggunakan respons langsung dari backend karena AsetService.getAsetByPlatNomor 
+      // sudah me-return response.data
+      aset.value = response;
   
-      // Load maintenance history
-      const maintenanceData = await MaintenanceService.getMaintenanceByAsetId(platNomor);
-      maintenanceHistory.value = maintenanceData;
+      // Load maintenance history (akan menggunakan data dummy jika API tidak tersedia)
+      try {
+        const maintenanceData = await MaintenanceService.getMaintenanceByAsetId(platNomor);
+        maintenanceHistory.value = maintenanceData;
+      } catch (errMaintenance) {
+        console.error('Error loading maintenance data:', errMaintenance);
+        // Tetap gunakan data dummy jika terjadi error
+        maintenanceHistory.value = [
+          { id: 1, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Penggantian Oli Mesin' },
+          { id: 2, assetId: platNomor, tanggalPengajuan: '2023-02-15', tanggalSelesai: '2023-02-20', catatan: 'Penggantian Filter Udara' },
+          { id: 3, assetId: platNomor, tanggalPengajuan: '2023-05-10', tanggalSelesai: '2023-05-18', catatan: 'Service Rutin 10.000 KM' },
+          { id: 4, assetId: platNomor, tanggalPengajuan: '2023-09-22', tanggalSelesai: '2023-09-30', catatan: 'Perbaikan Sistem Rem' }
+        ];
+      }
     } catch (err) {
       console.error('Error loading data:', err);
       error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
@@ -97,10 +111,10 @@
         };
   
         maintenanceHistory.value = [
-          { id: 1, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Alasan Rusak' },
-          { id: 2, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Alasan Rusak' },
-          { id: 3, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Alasan Rusak' },
-          { id: 4, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Alasan Rusak' }
+          { id: 1, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Penggantian Oli Mesin' },
+          { id: 2, assetId: platNomor, tanggalPengajuan: '2023-02-15', tanggalSelesai: '2023-02-20', catatan: 'Penggantian Filter Udara' },
+          { id: 3, assetId: platNomor, tanggalPengajuan: '2023-05-10', tanggalSelesai: '2023-05-18', catatan: 'Service Rutin 10.000 KM' },
+          { id: 4, assetId: platNomor, tanggalPengajuan: '2023-09-22', tanggalSelesai: '2023-09-30', catatan: 'Perbaikan Sistem Rem' }
         ];
       }
     } finally {
@@ -128,8 +142,8 @@
   };
   
   const handleAddMaintenance = () => {
-    // Navigate to add maintenance page or open add maintenance modal
-    router.push(`/asset/${platNomor}/maintenance/add`);
+    // Arahkan ke halaman Coming Soon
+    // router.push('/coming-soon');   
   };
   
   onMounted(() => {
