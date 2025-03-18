@@ -1,5 +1,18 @@
 <template>
   <div class="edit-asset-view">
+    <!-- Notification popup -->
+    <div 
+      v-if="showNotification" 
+      class="notification-popup"
+      :class="{ 'success': notificationType === 'success', 'error': notificationType === 'error' }"
+    >
+      <div class="notification-content">
+        <span v-if="notificationType === 'success'" class="notification-icon">✓</span>
+        <span v-else class="notification-icon">✕</span>
+        <span class="notification-message">{{ notificationMessage }}</span>
+      </div>
+    </div>
+    
     <div class="content-wrapper">
       <div class="breadcrumb-container">
         <div class="breadcrumb">
@@ -87,7 +100,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 import { AsetService } from '@/stores/assetservices';
 import { formatCurrency, byteArrayToImageUrl } from '@/utils/formatters';
@@ -105,6 +118,11 @@ const asset = ref<AsetInterface | null>(null);
 const assetImageUrl = ref('');
 const isLoading = ref(true);
 const error = ref('');
+
+// Notification state
+const showNotification = ref(false);
+const notificationMessage = ref('');
+const notificationType = ref('success');
 
 // Form data for editing
 const formData = ref({
@@ -140,6 +158,18 @@ const formattedPlateNumber = computed(() => {
   return platNomor;
 });
 
+// Show notification helper function
+const showNotificationPopup = (message: string, type: 'success' | 'error' = 'success') => {
+  notificationMessage.value = message;
+  notificationType.value = type;
+  showNotification.value = true;
+  
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    showNotification.value = false;
+  }, 3000);
+};
+
 const loadData = async () => {
   isLoading.value = true;
   error.value = '';
@@ -160,6 +190,7 @@ const loadData = async () => {
   } catch (err) {
     console.error('Failed to load asset:', err);
     error.value = 'Gagal memuat data aset. Silakan coba lagi.';
+    showNotificationPopup('Gagal memuat data aset', 'error');
   } finally {
     isLoading.value = false;
   }
@@ -174,11 +205,20 @@ const updateAsset = async () => {
     };
     
     await AsetService.updateAset(platNomor, updatedData);
-    // Remove the alert and redirect with query parameter to trigger notification
-    router.push(`/asset/detail/${platNomor}?edited=true`);
+    // Show success notification
+    showNotificationPopup('Berhasil mengubah detail aset');
+    
+    // Wait a bit before redirecting to allow user to see the notification
+    setTimeout(() => {
+      router.push({
+        path: `/asset/${platNomor}`,
+        query: { updated: 'true' } // Pass a query parameter to show notification on the detail page
+      });
+    }, 1000);
   } catch (err) {
     console.error('Failed to update asset:', err);
-    alert('Gagal memperbarui aset. Silakan coba lagi.');
+    error.value = 'Gagal memperbarui aset. Silakan coba lagi.';
+    showNotificationPopup('Gagal memperbarui aset', 'error');
   }
 };
 
@@ -201,6 +241,73 @@ onMounted(() => {
 .content-wrapper {
   flex: 1;
   margin-left: 60px;
+}
+
+/* Notification Popup Styling */
+.notification-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  min-width: 300px;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-popup.success {
+  background-color: #ecfdf5;
+  border-left: 4px solid #10b981;
+}
+
+.notification-popup.error {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+}
+
+.notification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.success .notification-icon {
+  background-color: #10b981;
+  color: white;
+}
+
+.error .notification-icon {
+  background-color: #ef4444;
+  color: white;
+}
+
+.notification-message {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .breadcrumb-container {
@@ -334,10 +441,9 @@ textarea.form-control {
 }
 
 .plate-locked-input {
-  color: #000000;
+  color: #0066cc; /* Blue color for plate number */
   font-weight: bold;
   font-size: 14px;
-  text-align: left;
 }
 
 .form-actions {

@@ -76,7 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.response && err.response.data && err.response.data.message) {
-        error.value = err.response.data.message;
+        error.value = 'Email atau password salah';
       } else {
         error.value = 'An error occurred during login. Please try again.';
       }
