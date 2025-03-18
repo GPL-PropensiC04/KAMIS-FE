@@ -10,6 +10,7 @@ import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import ListAsset from '@/views/ListAsset.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -90,6 +91,11 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
+    },
+    {
+      path: '/assets',
+      name: 'list-assets',
+      component: ListAsset,
     },
     {
       path: '/asset/:platNomor',
