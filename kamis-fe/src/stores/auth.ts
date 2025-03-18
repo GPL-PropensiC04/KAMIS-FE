@@ -23,15 +23,13 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
     
     try {
-      const response = await axios.post<LoginResponse>(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, loginRequest);
-      
-      if (response.data && response.data.token) {
-        token.value = response.data.token;
-        localStorage.setItem('auth_token', response.data.token);
+      const response = await axios.post<LoginResponse>(`http://localhost:8080/api/auth/login`, loginRequest);
+      console.log(response.data);
+      if (response.data?.data?.token) {
+        token.value = response.data.data.token;
+        localStorage.setItem('auth_token', response.data.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
         
-        // Fetch user data if needed
-        // await fetchUserProfile();
         
         return true;
       } else {

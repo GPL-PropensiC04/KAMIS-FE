@@ -5,11 +5,13 @@ export interface LoginRequest {
     password: string;
 }
 
-export interface LoginResponse {
+export interface LoginResponseData {
     token: string;
-    user: {
-        id: string;
-        email: string;
-        role: UserRole;
-    };
+}
+
+export interface LoginResponse {
+    status: number;
+    message: string;
+    timestamp: string;
+    data: LoginResponseData;
 }

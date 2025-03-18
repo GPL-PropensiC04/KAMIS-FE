@@ -62,7 +62,7 @@ router.beforeEach((to, from, next) => {
   } 
   // If the user is logged in and trying to access login page
   else if (to.path === '/login' && isAuthenticated) {
-    next('/dashboard')
+    next('/home')
   } 
   else {
     next()
