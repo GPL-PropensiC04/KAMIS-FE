@@ -10,7 +10,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="bg-[#8BA3BE] text-white font-inter text-lg font-semibold px-4 py-3 rounded-md w-full">
+  <div class="bg-[#8BA3BE] text-white font-inter font-semibold px-4 py-2 rounded-md w-full">
     {{ value }}
   </div>
 </template>

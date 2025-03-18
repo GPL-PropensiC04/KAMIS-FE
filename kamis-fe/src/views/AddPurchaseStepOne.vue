@@ -36,10 +36,10 @@ const handleNext = () => {
 
     // Pindahkan halaman berdasarkan tipe barang
     if (selectedType.value === "Resource") {
-        router.push("/add-purchase-resource");
+        router.push("/purchase/add/resource");
     } else {
         // router.push("/add-purchase-asset"); //nanti gunakan yang ini
-        router.push("/add-purchase-asset/summary")
+        router.push("/purchase/add/asset-summary")
     }
 };
 
