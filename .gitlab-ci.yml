@@ -31,7 +31,8 @@ build-frontend:
   artifacts:
     paths:
       - frontend/dist
-
+  only:
+    - gcp-deploy
 
 # Publish job for Vue.js frontend
 publish-frontend:
@@ -48,6 +49,8 @@ publish-frontend:
     - docker build -t $IMAGE_REPO/frontend:latest -f Dockerfile .
     - echo "Pushing Docker image to Google Container Registry..."
     - docker push $IMAGE_REPO/frontend:latest
+  only:
+    - gcp-deploy
 
 # Deploy job for all services
 deploy-services:
@@ -66,6 +69,8 @@ deploy-services:
         cd ~/frontend/ &&
         docker compose -f docker-compose-deploy.yml pull &&
         docker compose -f docker-compose-deploy.yml up -d --remove-orphans"
+  only:
+    - gcp-deploy
 
 cleaning:
   stage: clean
@@ -77,3 +82,5 @@ cleaning:
   script:
     - echo "Cleaning up unused Docker resources..."
     - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "docker system prune -af"
+  only:
+    - gcp-deploy

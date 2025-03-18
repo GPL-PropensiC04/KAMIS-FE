@@ -43,6 +43,26 @@ const router = createRouter({
       component: AddPurchaseAssetSummary,
     },
     {
+      path: '/add-purchase',
+      name: 'addPurchase',
+      component:AddPurchaseStepOne,
+    },
+    {
+      path: '/add-purchase-resource',
+      name: 'addPurchaseResource',
+      component: AddPurchaseResource,
+    },
+    {
+      path: '/add-purchase-resource/summary',
+      name: 'addPurchaseResourceSummary',
+      component: AddPurchaseResourceSummary,
+    },
+    {
+      path: '/add-purchase-asset/summary',
+      name: 'addPurchaseAssetSummary',
+      component: AddPurchaseAssetSummary,
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
