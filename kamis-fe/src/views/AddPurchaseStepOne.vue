@@ -19,7 +19,7 @@ const saveDraft = () => {
     const draftData = {
         purchaseSupplier: selectedSupplier.value,
         purchaseType: selectedType.value === "Resource",
-        purchaseAsset: selectedType.value === "Aset" ? 1 : null // Jika aset, simpan purchaseAsset = 1 (sementara)
+        purchaseAsset: null // Jika aset, simpan purchaseAsset = 1 (sementara)
     };
     
     purchaseStore.setDraftPurchase(draftData);
@@ -38,8 +38,7 @@ const handleNext = () => {
     if (selectedType.value === "Resource") {
         router.push("/purchase/add/resource");
     } else {
-        // router.push("/add-purchase-asset"); //nanti gunakan yang ini
-        router.push("/purchase/add/asset-summary")
+        router.push("/purchase/add/asset"); //nanti gunakan yang ini
     }
 };
 

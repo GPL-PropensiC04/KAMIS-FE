@@ -27,6 +27,7 @@
     "install": "^0.13.0",
     "jquery": "^3.7.1",
     "npm": "^11.2.0",
+    "jwt-decode": "^4.0.0",
     "pinia": "^2.2.6",
     "simple-datatables": "^10.0.0",
     "tailwindcss": "^4.0.7",
