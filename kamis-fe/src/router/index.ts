@@ -5,6 +5,9 @@ import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
 import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
 import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
+import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
+import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import ListPurchase from '@/views/ListPurchase.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -33,26 +36,6 @@ const router = createRouter({
       name: 'add-resource',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
-    },
-    {
-      path: '/add-purchase',
-      name: 'addPurchase',
-      component:AddPurchaseStepOne,
-    },
-    {
-      path: '/add-purchase-resource',
-      name: 'addPurchaseResource',
-      component: AddPurchaseResource,
-    },
-    {
-      path: '/add-purchase-resource/summary',
-      name: 'addPurchaseResourceSummary',
-      component: AddPurchaseResourceSummary,
-    },
-    {
-      path: '/add-purchase-asset/summary',
-      name: 'addPurchaseAssetSummary',
-      component: AddPurchaseAssetSummary,
     },
     {
       path: '/:pathMatch(.*)*',
