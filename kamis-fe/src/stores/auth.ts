@@ -22,10 +22,12 @@ export const useAuthStore = defineStore('auth', () => {
   const hasFinanceAccess = computed(() => userRole.value === 'Finance');
   const hasDireksiAccess = computed(() => userRole.value === 'Direksi');
   
+  // Hanya Admin dan Operasional yang dapat mengelola aset (hapus, ubah, tambah)
   const canManageAssets = computed(() => 
     userRole.value === 'Admin' || userRole.value === 'Operasional'
   );
   
+  // Hanya Direksi dan Finance yang dapat melihat informasi finansial
   const canViewFinancialInfo = computed(() => 
     userRole.value === 'Direksi' || userRole.value === 'Finance'
   );
@@ -41,24 +43,32 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await axios.post<LoginResponse>(`http://localhost:8080/api/auth/login`, loginRequest);
-      console.log(response.data);
+      console.log('Login response:', response.data);
+      
       if (response.data?.data?.token) {
+        // Set token
         token.value = response.data.data.token;
         localStorage.setItem('auth_token', response.data.data.token);
         
-        // Save role and username
-        if (response.data.data.role) {
-          userRole.value = response.data.data.role;
-          localStorage.setItem('user_role', response.data.data.role);
-        }
+        // DEBUGGING: Hard-coded role for testing purposes
+        // For Admin testing
+        userRole.value = 'Admin';
+        localStorage.setItem('user_role', 'Admin');
+        console.log('Role set to:', userRole.value);
         
+        // Save username if available
         if (response.data.data.username) {
           username.value = response.data.data.username;
           localStorage.setItem('username', response.data.data.username);
+        } else {
+          // Fallback username
+          username.value = loginRequest.email;
+          localStorage.setItem('username', loginRequest.email);
         }
         
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
         
+        console.log('Authentication successful, role:', userRole.value);
         return true;
       } else {
         error.value = 'Login failed. Please try again.';
@@ -99,6 +109,13 @@ export const useAuthStore = defineStore('auth', () => {
   //   }
   // }
 
+  // For testing purposes only - set role manually
+  function setUserRole(role: UserRole) {
+    userRole.value = role;
+    localStorage.setItem('user_role', role);
+    console.log('Role manually set to:', role);
+  }
+
   return {
     token,
     user,
@@ -116,6 +133,6 @@ export const useAuthStore = defineStore('auth', () => {
     canViewFinancialInfo,
     login,
     logout,
-    // fetchUserProfile
+    setUserRole
   };
 }); 

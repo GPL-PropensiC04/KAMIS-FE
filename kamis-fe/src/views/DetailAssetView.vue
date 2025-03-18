@@ -66,12 +66,14 @@
   // Role-based permission computed properties
   const showFinancialInfo = computed(() => {
     const userRole = authStore.userRole;
+    console.log('Current role for financial info check:', userRole);
     // Only Direksi and Finance can see financial info
     return userRole === 'Direksi' || userRole === 'Finance';
   });
   
   const showActionButtons = computed(() => {
     const userRole = authStore.userRole;
+    console.log('Current role for action buttons check:', userRole);
     // Only Admin and Operasional can see action buttons
     return userRole === 'Admin' || userRole === 'Operasional';
   });

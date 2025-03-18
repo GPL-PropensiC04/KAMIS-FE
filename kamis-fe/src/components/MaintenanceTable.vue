@@ -1,12 +1,14 @@
 <template>
     <div class="maintenance-container">
       <div class="maintenance-header">
-        <h2>Maintenance</h2>
-        <button v-if="canManageAssets" class="btn btn-tambah" @click="$emit('add-maintenance')">Tambah</button>
+        <h2 class="section-title">Maintenance</h2>
+        <button v-if="showAddButton" class="btn btn-ajukan" @click="$emit('add-maintenance')">Ajukan</button>
       </div>
   
+      <div class="divider"></div>
+  
       <div class="riwayat-header">
-        <h3>Riwayat Maintenance</h3>
+        <h3 class="subsection-title">Riwayat Maintenance</h3>
       </div>
   
       <div class="table-container">
@@ -32,21 +34,12 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Add button (only for Admin and Operasional) -->
-      <div v-if="showAddButton" class="maintenance-actions">
-        <button @click="$emit('add-maintenance')" class="btn-add">
-          <i class="fas fa-plus"></i> Tambah Maintenance
-        </button>
-      </div>
     </div>
   </template>
   
   <script setup lang="ts">
-  import { computed } from 'vue';
   import type { Maintenance } from '@/interfaces/maintenance';
   import { formatDate } from '@/utils/formatters';
-  import { useAuthStore } from '@/stores/auth';
   
   defineProps<{
     maintenanceHistory: Maintenance[],
@@ -54,11 +47,6 @@
   }>();
   
   defineEmits(['add-maintenance']);
-  
-  const authStore = useAuthStore();
-  
-  // Computed permissions
-  const canManageAssets = computed(() => authStore.canManageAssets);
   </script>
   
   <style scoped>
@@ -82,14 +70,29 @@
   .riwayat-header {
     background-color: #1a3c61;
     padding: 10px 20px;
+    border-top: 2px solid #ccc;
   }
   
-  .riwayat-header h3 {
+  .section-title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
   }
   
-  .btn-tambah {
+  .subsection-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .divider {
+    height: 3px;
+    background-color: #ccc;
+    margin: 0;
+    border: none;
+  }
+  
+  .btn-ajukan {
     background-color: #28a745;
     color: white;
     padding: 6px 12px;

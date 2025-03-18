@@ -39,6 +39,21 @@
           />
         </div>
         
+        <!-- Role Selector (Hanya untuk testing) -->
+        <div>
+          <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role (Untuk Testing)</label>
+          <select 
+            id="role" 
+            v-model="selectedRole" 
+            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+          >
+            <option value="Admin">Admin</option>
+            <option value="Operasional">Operasional</option>
+            <option value="Finance">Finance</option>
+            <option value="Direksi">Direksi</option>
+          </select>
+        </div>
+        
         <button 
           type="submit" 
           class="w-full py-3 bg-[#1E3A5F] text-white rounded-md hover:bg-[#1a325a] transition-colors"
@@ -55,15 +70,19 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import type { UserRole } from '@/interfaces/auth.interface';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
+const selectedRole = ref<UserRole>('Admin');
 
 const handleLogin = async () => {
   const success = await authStore.login({ email: email.value, password: password.value });
   if (success) {
+    // Set role manually for testing
+    authStore.setUserRole(selectedRole.value);
     router.push('/');
   }
 };

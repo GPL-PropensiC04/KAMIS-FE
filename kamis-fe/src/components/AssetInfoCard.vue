@@ -1,8 +1,8 @@
 <template>
     <div class="info-aset-container">
       <div class="info-header">
-        <h2>Informasi Aset</h2>
-        <div v-if="canManageAssets" class="action-buttons">
+        <h2 class="section-title">Informasi Aset</h2>
+        <div v-if="showActionButtons" class="action-buttons">
           <button 
             class="btn btn-hapus" 
             @click="$emit('delete')"
@@ -17,38 +17,38 @@
       <div class="info-content">
         <div class="info-row">
           <div class="info-col">
-            <h4>Nama Aset</h4>
-            <p>{{ aset.nama }}</p>
+            <h4 class="info-label">Nama Aset</h4>
+            <p class="info-value">{{ aset.nama }}</p>
           </div>
           <div class="info-col">
-            <h4>Jenis Aset</h4>
-            <p>{{ aset.jenisAset }}</p>
+            <h4 class="info-label">Jenis Aset</h4>
+            <p class="info-value">{{ aset.jenisAset }}</p>
           </div>
           <div class="info-col">
-            <h4>No Polisi</h4>
-            <p>{{ aset.platNomor }}</p>
+            <h4 class="info-label">No Polisi</h4>
+            <p class="info-value">{{ aset.platNomor }}</p>
           </div>
         </div>
   
         <div class="info-row">
-          <div v-if="canViewFinancialInfo" class="info-col">
-            <h4>Nilai Perolehan</h4>
-            <p>{{ formatCurrency(aset.nilaiPerolehan) }}</p>
+          <div v-if="showFinancialInfo" class="info-col">
+            <h4 class="info-label">Nilai Perolehan</h4>
+            <p class="info-value">{{ formatCurrency(aset.nilaiPerolehan) }}</p>
           </div>
-          <div v-if="canViewFinancialInfo" class="info-col">
-            <h4>Tanggal Perolehan</h4>
-            <p>{{ formatDate(aset.tanggalPerolehan) }}</p>
+          <div v-if="showFinancialInfo" class="info-col">
+            <h4 class="info-label">Tanggal Perolehan</h4>
+            <p class="info-value">{{ formatDate(aset.tanggalPerolehan) }}</p>
           </div>
-          <div class="info-col" :class="{ 'full-width': !canViewFinancialInfo }">
-            <h4>Status</h4>
-            <p :class="getStatusClass(aset.status)">{{ aset.status }}</p>
+          <div class="info-col" :class="{ 'full-width': !showFinancialInfo }">
+            <h4 class="info-label">Status</h4>
+            <p class="info-value" :class="getStatusClass(aset.status)">{{ aset.status }}</p>
           </div>
         </div>
   
         <div class="info-row">
           <div class="info-col full-width">
-            <h4>Deskripsi</h4>
-            <p>{{ aset.deskripsi }}</p>
+            <h4 class="info-label">Deskripsi</h4>
+            <p class="info-value">{{ aset.deskripsi }}</p>
           </div>
         </div>
       </div>
@@ -63,7 +63,9 @@
   import { useAuthStore } from '@/stores/auth';
   
   const props = defineProps<{
-    aset: AsetInterface
+    aset: AsetInterface,
+    showFinancialInfo: boolean,
+    showActionButtons: boolean
   }>();
   
   defineEmits(['edit', 'delete']);
@@ -95,6 +97,12 @@
     padding: 10px 20px;
     background-color: #1a3c61;
     color: white;
+  }
+  
+  .section-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
   }
   
   .action-buttons {
@@ -138,16 +146,18 @@
     flex: 3;
   }
   
-  .info-col h4 {
+  .info-label {
     margin: 0 0 5px 0;
     color: #666;
     font-size: 0.9rem;
+    font-weight: normal;
   }
   
-  .info-col p {
+  .info-value {
     margin: 0;
     font-weight: bold;
     color: #333;
+    font-size: 1.1rem;
   }
   
   .status-tersedia {
