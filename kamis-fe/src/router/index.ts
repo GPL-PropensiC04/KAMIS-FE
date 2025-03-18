@@ -5,6 +5,8 @@ import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
 import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
 import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
+import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
+import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -14,12 +16,6 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: false }
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
     },
     {
@@ -41,6 +37,24 @@ const router = createRouter({
       path: '/add-purchase-asset/summary',
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
+    },
+    {
+      path: '/update-purchase-resource/:purchaseId',
+      name: 'updatePurchaseResource',
+      component: UpdatePurchaseResource,
+      props: true, // Kirim ID dari URL sebagai prop
+    },
+    {
+      path: '/update-purchase-asset/:purchaseId',
+      name: 'updatePurchaseAsset',
+      component: UpdatePurchaseAsset,
+      props: true, // Kirim ID dari URL sebagai prop
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
+      meta: { requiresAuth: false }
     },
     {
       path: '/:pathMatch(.*)*',
