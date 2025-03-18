@@ -81,6 +81,34 @@ export const usePurchaseStore = defineStore('purchase', {
           } finally {
             this.loading = false;
           }
+        },
+
+        async addAssetTemp(body: AddAssetTemp) {
+          this.loading = true;
+          this.error = null;
+        
+          try {
+            const response = await axios.post<CommonResponseInterface<PurchaseInterface>>(
+              `http://localhost:8084/api/purchase/addAsset`, 
+              body,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              }
+            );
+
+            this.purchases.push(response.data.data);
+        
+            useToast().success('Sukses mengajukan Pembelian Aset');
+            await router.push('/purchase');
+          } catch (err: unknown) {
+            this.error = `Gagal menambahkan Aset ${err instanceof Error ? err.message : 'Unknown error'}`;
+            useToast().error(this.error);
+          } finally {
+            this.loading = false;
+          }
+        }
       },
 
       async viewAllPurchase(filters = {}) {
@@ -101,5 +129,4 @@ export const usePurchaseStore = defineStore('purchase', {
           this.loading = false;
         }
       },
-    },
 });

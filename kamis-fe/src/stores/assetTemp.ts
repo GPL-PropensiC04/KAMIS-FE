@@ -35,11 +35,6 @@ export const useAssetTempStore = defineStore('assetTemp', {
             const response = await axios.post<CommonResponseInterface<AssetTempInterface>>(
               `http://localhost:8084/api/purchase/addAsset`, 
               body,
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                }
-              }
             );
 
             const newAsset = response.data.data;

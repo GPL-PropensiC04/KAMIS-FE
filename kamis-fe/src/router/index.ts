@@ -9,7 +9,6 @@ import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
-// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
