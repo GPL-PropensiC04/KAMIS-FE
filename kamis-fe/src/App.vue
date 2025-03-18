@@ -1,4 +1,3 @@
-// filepath: d:\6th term\PROPENSI\Code\c4-gak-pake-lama-fe\kamis-fe\src\App.vue
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import LeftBar from './components/LeftBar.vue'

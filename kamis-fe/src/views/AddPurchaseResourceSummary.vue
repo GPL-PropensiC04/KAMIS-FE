@@ -58,7 +58,6 @@ const handleSubmit = async () => {
     try {
         await purchaseStore.addPurchase(purchaseData);
         purchaseStore.clearDraftPurchase();
-        toast.success("Pembelian berhasil diajukan!");
         router.push("/purchase");
     } catch (error) {
         toast.error("Gagal mengajukan pembelian.");
