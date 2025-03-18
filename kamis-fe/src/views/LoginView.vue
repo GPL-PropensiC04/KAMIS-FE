@@ -49,11 +49,12 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-// import VTextArea from '@/components/VTextArea.vue';
+import VTextArea from '@/components/VTextArea.vue';
 import VButton from '@/components/VButton.vue';
 
 const router = useRouter();
