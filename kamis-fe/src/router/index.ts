@@ -35,7 +35,7 @@ const router = createRouter({
       component:AddPurchaseAsset,
     },
     {
-      path: '/add-purchase-resource',
+      path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
     },

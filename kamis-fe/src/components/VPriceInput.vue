@@ -53,7 +53,7 @@ const decrement = () => {
 
 <template>
   <div class="relative w-full">
-    <div class="flex items-center border border-[#1E3A5F] bg-[#E5EAF2] rounded-md px-3 py-2">
+    <div class="flex items-center justify-between border border-[#1E3A5F] bg-[#E5EAF2] text-black px-4 py-2 rounded-md h-[45px]">
       <span class="text-black">Rp</span>
       <input
         type="text"

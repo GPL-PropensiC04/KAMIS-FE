@@ -47,7 +47,7 @@ const handleSubmit = async () => {
     });
     
     console.log('Draft asset:', assetTempStore.draftAssetTemp);
-    router.push('/add-purchase-asset/summary');
+    router.push('/purchase/add/asset-summary');
   } catch (error) {
     console.error('Error submitting asset:', error);
   }

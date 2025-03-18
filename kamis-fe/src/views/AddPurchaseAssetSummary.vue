@@ -5,38 +5,16 @@ import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
+import { useAssetTempStore } from "@/stores/assetTemp";
 
 // Router & Store
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
-
-// Ambil ID aset dari Pinia/localStorage
-const idAsset = computed(() => purchaseStore.draftPurchase?.purchaseAsset || null);
+const assetTempStore = useAssetTempStore();
 
 // State
-const assetDetails = ref(null);
+const assetDetails = ref(assetTempStore.draftAssetTemp);
 const purchaseNote = ref("");
-
-// Fetch data aset dari API berdasarkan `idAsset`
-const fetchAssetDetails = async () => {
-    if (!idAsset.value) {
-        alert("ID Aset tidak ditemukan!");
-        router.push("/purchase");
-        return;
-    }
-
-    try {
-        const response = await axios.get(`http://localhost:8084/api/purchase/asset/${idAsset.value}`, {
-            headers: {
-                "Content-Type": "application/json",
-            }
-        });
-
-        assetDetails.value = response.data.data;
-    } catch (error) {
-        console.error("Error fetching asset details:", error);
-    }
-};
 
 // Format harga
 const formatCurrency = (value ) => {
@@ -49,21 +27,39 @@ const currentDate = computed(() => {
     return today.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
 });
 
-// Fungsi Submit menggunakan `addPurchase`
 const handleSubmit = async () => {
-    if (!assetDetails.value) return;
+    try {
+        // 🔹 Tunggu ID Aset dari addAssetTemp()
+        await assetTempStore.addAssetTemp(assetTempStore.draftAssetTemp);
 
-    const purchaseData = {
-        purchaseSupplier: purchaseStore.draftPurchase?.purchaseSupplier || "Tidak Ada",
-        purchaseType: false, // Karena ini aset
-        purchaseAsset: idAsset.value, // ✅ **Ambil ID aset dari Pinia**
-        purchaseNote: purchaseNote.value
-    };
+        const idAsset = assetTempStore.assetTemps.at(-1)?.id
+        console.log(assetTempStore.assetTemps)
 
-    // Kirim ke API menggunakan metode `addPurchase()`
-    await purchaseStore.addPurchase(purchaseData);
-    purchaseStore.clearDraftPurchase();
+        // 🔹 Pastikan idAsset valid sebelum mengirim data ke backend
+        if (!idAsset || isNaN(idAsset)) {
+            throw new Error("Gagal mendapatkan ID Aset.");
+        }
+
+        const purchaseData = {
+            purchaseSupplier: purchaseStore.draftPurchase?.purchaseSupplier || "Tidak Ada",
+            purchaseType: false, // Karena ini aset
+            purchaseAsset: Number(idAsset), // ✅ Konversi ke Number
+            purchaseNote: purchaseNote.value
+        };
+
+        console.log("Mengirim purchaseData:", purchaseData); // 🔍 Debugging
+
+        // 🔹 Kirim data pembelian ke API
+        await purchaseStore.addPurchase(purchaseData);
+
+        // 🔹 Hapus draft setelah berhasil submit
+        purchaseStore.clearDraftPurchase();
+        assetTempStore.clearDraftAssetTemp();
+    } catch (error) {
+        console.error("Error saat submit pembelian:", error);
+    }
 };
+
 
 // Fungsi Batal
 const handleCancel = () => {
@@ -71,10 +67,6 @@ const handleCancel = () => {
     router.push("/purchase");
 };
 
-// Fetch data saat halaman dimuat
-onMounted(() => {
-    fetchAssetDetails();
-});
 </script>
 
 <template>
@@ -110,7 +102,7 @@ onMounted(() => {
                 <!-- Kolom Kiri (Detail Aset) -->
                 <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-0.5 items-center text-sm">
                     <p class="font-lato font-bold">Nama Aset</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetNameString }}</p>
+                    <p class="text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetName}}</p>
 
                     <p class="font-lato font-bold">Deskripsi</p>
                     <p class="text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetDescription }}</p>

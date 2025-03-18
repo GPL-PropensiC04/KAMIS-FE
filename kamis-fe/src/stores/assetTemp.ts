@@ -37,14 +37,12 @@ export const useAssetTempStore = defineStore('assetTemp', {
               body,
               {
                 headers: {
-                  'Content-Type': 'application/json',
+                  'Content-Type': 'multipart/form-data',
                 }
               }
             );
 
-            const newAsset = response.data.data;
             this.assetTemps.push(response.data.data);
-            return newAsset.id; // Mengembalikan ID Asset baru
           } catch (err: unknown) {
             this.error = `Gagal menambahkan Draf Aset ${err instanceof Error ? err.message : 'Unknown error'}`;
             useToast().error(this.error);
