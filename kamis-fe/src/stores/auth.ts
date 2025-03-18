@@ -1,8 +1,17 @@
 import { defineStore } from 'pinia';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { LoginRequest, LoginResponse, UserRole } from '@/interfaces/auth.interface';
+
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+  exp: number;
+  iat: number;
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('auth_token'));
@@ -32,9 +41,24 @@ export const useAuthStore = defineStore('auth', () => {
     userRole.value === 'Direksi' || userRole.value === 'Finance'
   );
 
-  // Initialize the auth header for axios
+  // Initialize the auth header and user from token
   if (token.value) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
+    try {
+      const decoded = jwtDecode<JwtPayload>(token.value);
+      user.value = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role
+      };
+    } catch (err) {
+      console.error('Error decoding token:', err);
+      // Invalid token, clear it
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
+    }
   }
 
   async function login(loginRequest: LoginRequest) {
@@ -75,7 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
         return false;
       }
     } catch (err: unknown) {
-      if (err instanceof AxiosError && err.response && err.response.data && err.response.data.message) {
+      if (err instanceof Error && axios.isAxiosError(err) && err.response?.data?.message) {
         error.value = 'Email atau password salah';
       } else {
         error.value = 'An error occurred during login. Please try again.';

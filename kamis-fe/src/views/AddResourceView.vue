@@ -22,7 +22,7 @@
             v-model="formData.resourceName"
             type="text"
             required
-            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
+            class="w-full p-2 border border-[#1E3A5F] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#E5EAF2]"
           />
         </div>
 
@@ -30,51 +30,40 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- Harga Jual -->
           <div>
-            <label for="resourcePrice" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
               Harga Jual
             </label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                Rp
-              </span>
-              <input
-                id="resourcePrice"
-                v-model="formData.resourcePrice"
-                type="number"
-                required
-                min="0"
-                class="w-full pl-10 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
-              />
-            </div>
+            <VPriceInput
+              id="resourcePrice"
+              v-model="formData.resourcePrice"
+              :min="0"
+              :step="10000"
+            />
           </div>
 
           <!-- Stok Barang -->
           <div>
-            <label for="resourceStock" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">
               Stok barang
             </label>
-            <input
+            <VNumberInput
               id="resourceStock"
               v-model="formData.resourceStock"
-              type="number"
-              required
-              min="0"
-              class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
+              :min="0"
             />
           </div>
         </div>
 
         <!-- Deskripsi Barang -->
         <div>
-          <label for="resourceDescription" class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
             Deskripsi Barang
           </label>
           <textarea
             id="resourceDescription"
             v-model="formData.resourceDescription"
-            rows="4"
             required
-            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
+            class="w-full p-2 border border-[#1E3A5F] rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#E5EAF2]"
           ></textarea>
         </div>
 
@@ -98,6 +87,8 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { AddResourceRequestInterface } from '@/interfaces/resource.interface';
 import { useResourceStore } from '@/stores/resource';
+import VPriceInput from '@/components/VPriceInput.vue';
+import VNumberInput from '@/components/VNumberInput.vue';
 
 const router = useRouter();
 const resourceStore = useResourceStore();
@@ -111,11 +102,6 @@ const formData = ref<AddResourceRequestInterface>({
 });
 
 const handleSubmit = async () => {
-  try {
-    await resourceStore.addResource(formData.value);
-  } catch (error) {
-    // Error handling is now done in the store
-    console.error('Failed to add resource:', error);
-  }
+  await resourceStore.addResource(formData.value);
 };
-</script> 
+</script>
