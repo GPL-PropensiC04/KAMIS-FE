@@ -13,13 +13,19 @@ export interface PurchaseInterface {
     purchaseAsset?: number | null;
   }
 
-  export interface AddPurchaseRequestInterface {
+export interface AddPurchaseRequestInterface {
     purchaseSupplier: string;
     purchaseType: boolean; // false = Aset, true = Resource
     purchaseAsset?: number | null; // Only for purchaseType = false
     purchaseResource?: AddResourceTempRequestInterface[]; // Only for purchaseType = true
     purchaseNote?: string;
-  }
+}
+
+export interface UpdatePurchaseRequestInterface {
+    purchaseSupplier: string;               // Supplier pembelian (wajib diisi)
+    purchaseResource?: ResourceTempInterface[]; // List resource (hanya untuk purchaseType = 1)
+    purchaseNote?: string;                   // Catatan pembelian (opsional)
+}
   
   
 
