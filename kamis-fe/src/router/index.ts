@@ -10,6 +10,9 @@ import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import ListResource from '@/views/ListResource.vue'
+import UpdateResource from '@/views/UpdateResource.vue'
+// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
 
 const router = createRouter({
@@ -80,6 +83,16 @@ const router = createRouter({
       name: 'add-resource',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/resource',
+      name: 'resource',
+      component:ListResource,
+    },
+    {
+      path: '/resource/update/:id',
+      name: 'updateResource',
+      component:UpdateResource,
     },
     {
       path: '/resource/add',

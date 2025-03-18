@@ -14,6 +14,11 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars } from '@fortawesome/free-solid-svg-icons'
 
+
+import $ from 'jquery';
+window.$ = $;
+window.jQuery = $;
+
 // Tambahkan ikon ke library
 library.add(faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars)
 
