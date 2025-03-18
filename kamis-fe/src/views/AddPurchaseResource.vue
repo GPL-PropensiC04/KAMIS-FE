@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "@/stores/purchase";
-import VDropDownInput from "@/components/VDropDownInput.vue";
-import VNumberInput from "@/components/VNumberInput.vue";
-import VPriceInput from "@/components/VPriceInput.vue";
-import VLockedInput from "@/components/VLockedInput.vue";
-import VButton from "@/components/VButton.vue";
-import VSuccessButton from "@/components/VSuccessButton.vue";
+import { usePurchaseStore } from "../stores/purchase";
+import VDropDownInput from "../components/VDropDownInput.vue";
+import VNumberInput from "../components/VNumberInput.vue";
+import VPriceInput from "../components/VPriceInput.vue";
+import VLockedInput from "../components/VLockedInput.vue";
+import VButton from "../components/VButton.vue";
+import VSuccessButton from "../components/VSuccessButton.vue";
 
 // Router & Store
 const router = useRouter();
@@ -37,7 +37,7 @@ const fetchResources = async () => {
         const data = await response.json();
 
         // **Pastikan kita menyimpan ID dan Nama**
-        resources.value = data.data.map(item => ({
+        resources.value = data.data.map((item: { id: any; resourceName: any; }) => ({
             id: item.id,
             name: item.resourceName
         }));
@@ -47,8 +47,8 @@ const fetchResources = async () => {
 };
 
 // Fungsi untuk memformat angka ke Rp X.XXX.XXX,00
-const formatCurrency = (value) => {
-    let number = parseInt(value) || 0;
+const formatCurrency = (value: string) => {
+    const number = parseInt(value) || 0;
     return `Rp ${number.toLocaleString("id-ID")},00`;
 };
 
@@ -67,7 +67,7 @@ const addResource = () => {
     }
 
     // **Cek apakah resource sudah ada dalam tabel**
-    const existingItem = resourceList.value.find(item => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item: { id: any; }) => item.id === selectedItem.id);
     if (existingItem) {
         alert("Resource ini sudah ditambahkan!");
         return;
@@ -96,7 +96,7 @@ const addResource = () => {
 
 // Hitung total harga
 const totalPrice = computed(() => {
-    return resourceList.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return resourceList.value.reduce((sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity, 0);
 });
 
 // Pastikan data tetap ada setelah refresh
