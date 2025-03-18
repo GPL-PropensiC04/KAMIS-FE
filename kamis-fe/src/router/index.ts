@@ -7,8 +7,8 @@ import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
-// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,7 +30,12 @@ const router = createRouter({
       component:AddPurchaseStepOne,
     },
     {
-      path: '/purchase/add/resource',
+      path: '/purchase/add/asset',
+      name: 'addPurchaseAsset',
+      component:AddPurchaseAsset,
+    },
+    {
+      path: '/add-purchase-resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
     },
