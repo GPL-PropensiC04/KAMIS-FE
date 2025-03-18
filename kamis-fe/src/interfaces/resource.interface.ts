@@ -1,16 +1,16 @@
 export interface ResourceInterface {
   id?: number;
   resourceName: string;
-  price: number;
-  stock: number;
-  description: string;
+  resourcePrice: number;
+  resourceStock: number;
+  resourceDescription: string;
 }
 
 export interface AddResourceRequestInterface {
   resourceName: string;
-  price: number;
-  stock: number;
-  description: string;
+  resourcePrice: number;
+  resourceStock: number;
+  resourceDescription: string;
 }
 
 export interface ResourceResponseInterface {
