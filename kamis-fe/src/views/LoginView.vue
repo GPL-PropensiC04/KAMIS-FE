@@ -55,19 +55,15 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
-import type { UserRole } from '@/interfaces/auth.interface';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
-const selectedRole = ref<UserRole>('Admin');
 
 const handleLogin = async () => {
   const success = await authStore.login({ email: email.value, password: password.value });
   if (success) {
-    // Set role manually for testing
-    authStore.setUserRole(selectedRole.value);
     router.push('/');
   }
 };
