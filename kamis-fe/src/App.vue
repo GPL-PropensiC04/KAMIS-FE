@@ -1,3 +1,4 @@
+// filepath: d:\6th term\PROPENSI\Code\c4-gak-pake-lama-fe\kamis-fe\src\App.vue
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import LeftBar from './components/LeftBar.vue'
@@ -6,7 +7,9 @@ import LeftBar from './components/LeftBar.vue'
 <template>
   <div class="app-layout">
     <LeftBar />
-    <RouterView />
+    <div class="content">
+      <RouterView />
+    </div>
   </div>
 </template>
 
@@ -14,5 +17,11 @@ import LeftBar from './components/LeftBar.vue'
 .app-layout {
   display: flex;
   flex-direction: row;
+  height: 100vh; /* Ensure it takes full height */
+}
+
+.content {
+  flex: 1; /* Take the remaining space */
+  overflow: auto; /* Allow scrolling if content overflows */
 }
 </style>

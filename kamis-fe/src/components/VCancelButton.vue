@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits } from "vue";
 
-const props = defineProps({
+defineProps({
     label: {
         type: String,
         default: "Batal", // Default teks tombol

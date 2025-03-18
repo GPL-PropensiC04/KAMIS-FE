@@ -1,13 +1,13 @@
-<script setup>
-import { defineProps } from "vue";
+<script setup lang="ts">
+import { defineProps, type PropType } from "vue";
 
-const props = defineProps({
+defineProps({
   label: {
     type: String,
     required: true,
   },
   type: {
-    type: String,
+    type: String as PropType<'button' | 'submit' | 'reset'>,
     default: "button",
   },
 });

@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref, defineProps, defineEmits } from "vue";
 
 const props = defineProps({
   options: {
-    type: Array,
+    type: Array as () => Array<string>,
     required: true,
   },
   modelValue: {
@@ -21,7 +21,7 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const selectOption = (option) => {
+const selectOption = (option: string) => {
   emit("update:modelValue", option);
   isOpen.value = false;
 };
@@ -53,9 +53,9 @@ const selectOption = (option) => {
     >
       <li 
         v-for="option in props.options" 
-        :key="option" 
+        :key="option.toString()" 
         class="px-4 py-2 hover:bg-[#1E3A5F] hover:text-white cursor-pointer"
-        @click="selectOption(option)"
+        @click="selectOption(option.toString())"
       >
         {{ option }}
       </li>

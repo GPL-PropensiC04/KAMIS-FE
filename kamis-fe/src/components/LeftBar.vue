@@ -1,3 +1,4 @@
+// filepath: d:\6th term\PROPENSI\Code\c4-gak-pake-lama-fe\kamis-fe\src\components\LeftBar.vue
 <template>
   <div :class="['leftbar', { collapsed: isCollapsed }]">
     <!-- Logo KAM -->
@@ -51,6 +52,7 @@ import BaseIcon from './BaseIcon.vue'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import logoImage from '@/assets/LogoKAM.jpg'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const isCollapsed = ref(false)
@@ -65,7 +67,8 @@ const goTo = (routeName: string) => {
 
 const logout = () => {
   console.log('Logging out...')
-  router.push({ name: 'login' })
+  const authStore = useAuthStore()
+  authStore.logout()
 }
 </script>
 
@@ -141,7 +144,7 @@ const logout = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 0;
+  padding: 5px 0;
 }
 
 .logo {
@@ -149,13 +152,6 @@ const logout = () => {
   height: auto;
   transition: all 0.3s ease;
   margin-bottom: 10px; /* Tambahkan ini untuk jarak ke icon */
-}
-
-.logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5px 0; /* Lebih rapat */
 }
 
 /* Saat sidebar collapse, kecilkan logo */
