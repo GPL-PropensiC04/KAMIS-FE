@@ -1,37 +1,47 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h1 class="login-title">Login</h1>
-      <div v-if="authStore.error" class="error-message">{{ authStore.error }}</div>
+  <div class="flex justify-center items-center min-h-screen bg-[#f5f5f5]">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+      <div class="flex justify-center mb-6">
+        <img src="@/assets/LogoKAM.jpg" alt="KAMIS Logo" class="w-24 h-24" />
+      </div>
       
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-[#1E3A5F]">KAMIS</h1>
+        <p class="text-gray-600">Karina Asa Madina Integrated System</p>
+      </div>
+      
+      <div v-if="authStore.error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+        {{ authStore.error }}
+      </div>
+      
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input 
             type="email" 
             id="email" 
             v-model="email" 
             required 
             placeholder="Enter your email"
-            class="form-control"
+            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           />
         </div>
         
-        <div class="form-group">
-          <label for="password">Password</label>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <input 
             type="password" 
             id="password" 
             v-model="password" 
             required 
             placeholder="Enter your password"
-            class="form-control"
+            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           />
         </div>
         
         <button 
           type="submit" 
-          class="login-button" 
+          class="w-full py-3 bg-[#1E3A5F] text-white rounded-md hover:bg-[#1a325a] transition-colors"
           :disabled="authStore.loading"
         >
           {{ authStore.loading ? 'Logging in...' : 'Login' }}
@@ -57,90 +67,4 @@ const handleLogin = async () => {
     router.push('/');
   }
 };
-</script>
-
-<style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.login-title {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 1.8rem;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: #555;
-}
-
-.form-control {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: #4a90e2;
-}
-
-.login-button {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover {
-  background-color: #3a7bc8;
-}
-
-.login-button:disabled {
-  background-color: #a0bfe0;
-  cursor: not-allowed;
-}
-
-.error-message {
-  padding: 0.75rem;
-  background-color: #ffebee;
-  color: #d32f2f;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-</style> 
+</script> 

@@ -18,12 +18,6 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
-      meta: { requiresAuth: false }
-    },
-    {
       path: '/add-purchase',
       name: 'addPurchase',
       component:AddPurchaseStepOne,
@@ -42,6 +36,12 @@ const router = createRouter({
       path: '/add-purchase-asset/summary',
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
+      meta: { requiresAuth: false }
     },
     {
       path: '/add-purchase',
@@ -69,6 +69,31 @@ const router = createRouter({
       component: () => import('@/views/NotFoundView.vue')
     },
   ]
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const isAuthenticated = authStore.isAuthenticated
+  
+  // If the route requires authentication and the user is not logged in
+  if (requiresAuth && !isAuthenticated) {
+    next('/login')
+  } 
+  // If the user is logged in and trying to access login page
+  else if (to.path === '/login' && isAuthenticated) {
+    next('/home')
+  } 
+  else {
+    next()
+  }
+  //   {
+  //     path: '/:pathMatch(.*)*',
+  //     name: 'not-found',
+  //     component: () => import('@/views/NotFoundView.vue')
+  //   }
+  // ]
 })
 
 // Navigation guard

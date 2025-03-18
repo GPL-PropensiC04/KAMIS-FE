@@ -6,7 +6,9 @@ import LeftBar from './components/LeftBar.vue'
 
 <template>
   <div class="app-layout">
-    <LeftBar />
+    <template v-if="$route.name !== 'login'">
+      <LeftBar />
+    </template>
     <div class="content">
       <RouterView />
     </div>
