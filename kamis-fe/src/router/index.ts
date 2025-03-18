@@ -7,6 +7,7 @@ import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
 import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
+import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -22,6 +23,11 @@ const router = createRouter({
       path: '/add-purchase',
       name: 'addPurchase',
       component:AddPurchaseStepOne,
+    },
+    {
+      path: '/purchase/add/asset',
+      name: 'addPurchaseAsset',
+      component:AddPurchaseAsset,
     },
     {
       path: '/add-purchase-resource',
