@@ -1,5 +1,5 @@
-<script setup>
-import { ref, defineProps, defineEmits, computed } from "vue";
+<script setup lang="ts">
+import {defineProps, defineEmits} from "vue";
 
 const props = defineProps({
   modelValue: {
@@ -33,8 +33,9 @@ const decrement = () => {
 };
 
 // Fungsi untuk menangani input manual dan memastikan hanya angka yang valid
-const updateValue = (event) => {
-  let rawValue = event.target.value.replace(/[^0-9]/g, ""); // Hanya angka
+const updateValue = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const rawValue = target.value.replace(/[^0-9]/g, ""); // Hanya angka
   let numericValue = rawValue ? parseInt(rawValue, 10) : 0;
 
   // Pastikan tidak melewati batas min/max
@@ -42,7 +43,7 @@ const updateValue = (event) => {
   if (numericValue > props.max) numericValue = props.max;
 
   emit("update:modelValue", numericValue);
-};
+}; 
 </script>
 
 <template>
@@ -52,7 +53,7 @@ const updateValue = (event) => {
     >
       <input 
         type="text" 
-        :value="modelValue" 
+        :value="modelValue.toString()" 
         @input="updateValue"
         class="w-full text-black bg-transparent border-none outline-none px-2"
       />

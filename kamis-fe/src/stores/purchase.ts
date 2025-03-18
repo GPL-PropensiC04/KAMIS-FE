@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { PurchaseInterface, AddPurchaseRequestInterface } from '@/interfaces/purchase.interface';
-import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
+// import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import router from '@/router';
@@ -16,7 +16,7 @@ export const usePurchaseStore = defineStore('purchase', {
         error: null as null | string,
     }),
     actions: {
-        setDraftPurchase(data) {
+        setDraftPurchase(data: PurchaseInterface) {
             this.draftPurchase = data;
             localStorage.setItem("draftPurchase", JSON.stringify(data)); // Simpan ke localStorage
         },

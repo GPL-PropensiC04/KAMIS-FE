@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
@@ -23,8 +23,8 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 // Fungsi untuk menangani input manual dan memastikan hanya angka yang valid
-const updateValue = (event) => {
-  let rawValue = event.target.value.replace(/[^0-9]/g, ""); // Hapus semua karakter kecuali angka
+const updateValue = (event: Event) => {
+  const rawValue = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, ""); // Hapus semua karakter kecuali angka
   let numericValue = rawValue ? parseInt(rawValue, 10) : 0;
 
   // Pastikan tidak melewati batas min/max
@@ -36,7 +36,7 @@ const updateValue = (event) => {
 
 // Fungsi untuk menambah harga dengan kelipatan `step`
 const increment = () => {
-  let newValue = props.modelValue + props.step;
+  const newValue = props.modelValue + props.step;
   if (newValue <= props.max) {
     emit("update:modelValue", newValue);
   }
@@ -44,7 +44,7 @@ const increment = () => {
 
 // Fungsi untuk mengurangi harga dengan kelipatan `step`
 const decrement = () => {
-  let newValue = props.modelValue - props.step;
+  const newValue = props.modelValue - props.step;
   if (newValue >= props.min) {
     emit("update:modelValue", newValue);
   }

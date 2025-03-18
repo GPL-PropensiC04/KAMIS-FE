@@ -52,6 +52,7 @@ import BaseIcon from './BaseIcon.vue'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import logoImage from '@/assets/LogoKAM.jpg'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const isCollapsed = ref(false)
@@ -66,7 +67,8 @@ const goTo = (routeName: string) => {
 
 const logout = () => {
   console.log('Logging out...')
-  router.push({ name: 'login' })
+  const authStore = useAuthStore()
+  authStore.logout()
 }
 </script>
 
