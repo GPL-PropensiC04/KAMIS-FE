@@ -19,7 +19,7 @@
         <BaseIcon icon="fa-solid fa-bag-shopping" clickable />
         <span v-if="!isCollapsed" class="icon-label">Pembelian</span>
       </div>
-      <div class="icon-item" @click="goTo('asset')">
+      <div class="icon-item" @click="goTo('list-assets')">
         <BaseIcon icon="fa-solid fa-truck" clickable />
         <span v-if="!isCollapsed" class="icon-label">Asset</span>
       </div>
