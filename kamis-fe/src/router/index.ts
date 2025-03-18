@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/HomeView.vue'
 import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
 import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
@@ -108,12 +107,12 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue')
-    }
-  ]
+  //   {
+  //     path: '/:pathMatch(.*)*',
+  //     name: 'not-found',
+  //     component: () => import('@/views/NotFoundView.vue')
+  //   }
+  // ]
 })
 
 // Navigation guard
