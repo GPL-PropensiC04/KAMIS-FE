@@ -22,6 +22,18 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
     },
+    // {
+    //   path: '/dashboard',
+    //   name: 'dashboard',
+    //   component: () => import('@/views/DashboardView.vue'),
+    //   meta: { requiresAuth: true }
+    // },
+    {
+      path: '/resource/add',
+      name: 'add-resource',
+      component: () => import('@/views/AddResourceView.vue'),
+      meta: { requiresAuth: true }
+    },
     {
       path: '/add-purchase',
       name: 'addPurchase',
@@ -67,12 +79,6 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
-  //   {
-  //     path: '/:pathMatch(.*)*',
-  //     name: 'not-found',
-  //     component: () => import('@/views/NotFoundView.vue')
-  //   }
-  // ]
 })
 
 // Navigation guard
