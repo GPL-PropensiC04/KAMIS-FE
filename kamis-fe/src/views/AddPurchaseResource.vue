@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
+import axios from "axios";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VNumberInput from "../components/VNumberInput.vue";
 import VPriceInput from "../components/VPriceInput.vue";
@@ -27,17 +28,15 @@ const resourceList = ref(purchaseStore.draftPurchase?.items || []);
 // Fetch data resource dari API
 const fetchResources = async () => {
     try {
-        const response = await fetch("http://localhost:8085/api/resource/viewall", {
-            method: "GET",
+        const response = await axios.get("http://localhost:8085/api/resource/viewall", {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0MjIyNDM1MywiZXhwIjoxNzQyMzEwNzUzfQ.J70CZ19O39Yc447iOaLXPyaaoaQNCVSVlzX1Kb3vF3idCVorhctLiKXTwYd11M4U4Jy7Td6IrDAjf6GmnksWAHjRdO15juVmARmLxQ9elG0tW7wb1tbw7kie0QChS_F3MmIt7yfN1zgihtaQivOWMBhJlNPOPbtsC_XTXllwgveRzrGHnBIIOs75_EUit8MhiPnGbNehZRQsW6irOJm_EoaFZIgZW76xI5WDRQjEJ7MnskIdRSi1E9jzFky7fzqthWPDK4-ibcmrJ-sDQ2vkDYznnCMDb0Jxzj-LOvSbHkRwbkcOj4WoatuXWcesczq7oOXc-xNvgoUPKv71e1iMDA` // Token Otentikasi
             }
         });
-        const data = await response.json();
 
         // **Pastikan kita menyimpan ID dan Nama**
-        resources.value = data.data.map((item: { id: any; resourceName: any; }) => ({
+        resources.value = response.data.data.map((item: { id: number; resourceName: string; }) => ({
             id: item.id,
             name: item.resourceName
         }));
@@ -60,14 +59,14 @@ const addResource = () => {
     }
 
     // **Temukan ID berdasarkan nama yang dipilih**
-    const selectedItem = resources.value.find(item => item.name === selectedResource.value);
+    const selectedItem = resources.value.find((item: { name: string; }) => item.name === selectedResource.value);
     if (!selectedItem) {
         alert("Resource tidak valid!");
         return;
     }
 
     // **Cek apakah resource sudah ada dalam tabel**
-    const existingItem = resourceList.value.find((item: { id: any; }) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item: { id: number; }) => item.id === selectedItem.id);
     if (existingItem) {
         alert("Resource ini sudah ditambahkan!");
         return;
