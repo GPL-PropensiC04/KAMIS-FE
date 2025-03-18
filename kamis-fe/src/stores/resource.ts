@@ -15,10 +15,10 @@ export const useResourceStore = defineStore('resource', {
         async fetchResources() {
             this.loading = true;
             this.error = null;
-            
+
             try {
                 const response = await axios.get<CommonResponseInterface<ResourceInterface[]>>(
-                    'http://localhost:8085/api/resource/all',
+                    'http://localhost:8085/api/resource/viewall',
                     {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -63,6 +63,116 @@ export const useResourceStore = defineStore('resource', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+
+        async viewAllResources() {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await axios.get<CommonResponseInterface<ResourceInterface[]>>(
+                    'http://localhost:8085/api/resource/viewall',
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+                this.resources = response.data.data;
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Failed to fetch all resources';
+                useToast().error(this.error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+
+        async fetchResourceById(id: number) {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await axios.get<CommonResponseInterface<ResourceInterface>>(
+                    `http://localhost:8085/api/resource/${id}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+                return response.data.data;
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Failed to fetch resource by ID';
+                useToast().error(this.error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async updateResource(id: number, body: Partial<ResourceInterface>) {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await axios.put<ResourceResponseInterface>(
+                    `http://localhost:8085/api/resource/update/${id}`,
+                    body,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+        
+                if (response.data.status === 200) {
+                    const updated = response.data.data;
+                    // Update resource di state
+                    const index = this.resources.findIndex(res => res.id === id);
+                    if (index !== -1) {
+                        this.resources[index] = updated;
+                    }
+                    useToast().success('Resource berhasil diupdate!');
+                    await router.push('/resource');
+                }
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat update resource';
+                useToast().error(this.error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async addResourceToDbById(id: number, stockUpdate: number) {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await axios.put<ResourceResponseInterface>(
+                    `http://localhost:8085/api/resource/addToDb/${id}/${stockUpdate}`,
+                    {},
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+        
+                if (response.data.status === 200) {
+                    const updatedResource = response.data.data;
+                    const index = this.resources.findIndex(res => res.id === id);
+                    if (index !== -1) {
+                        this.resources[index] = updatedResource;
+                    }
+                    useToast().success('Stock resource berhasil ditambahkan ke database!');
+                    return updatedResource;
+                }
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Gagal menambahkan resource ke DB';
+                useToast().error(this.error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },        
     }
 });

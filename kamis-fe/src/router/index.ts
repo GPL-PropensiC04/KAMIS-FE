@@ -8,6 +8,8 @@ import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import ListResource from '@/views/ListResource.vue'
+import UpdateResource from '@/views/UpdateResource.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 
 const router = createRouter({
@@ -61,6 +63,16 @@ const router = createRouter({
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/resource',
+      name: 'resource',
+      component:ListResource,
+    },
+    {
+      path: '/resource/update/:id',
+      name: 'updateResource',
+      component:UpdateResource,
     },
     {
       path: '/resource/add',
