@@ -120,7 +120,7 @@ const goToSummary = () => {
 
     localStorage.setItem("draftPurchase", JSON.stringify(purchaseStore.draftPurchase));
 
-    router.push("/add-purchase-resource/summary");
+    router.push("/purchase/add/resource-summary");
 };
 </script>
 

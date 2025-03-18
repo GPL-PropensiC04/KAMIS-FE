@@ -109,5 +109,24 @@ export const usePurchaseStore = defineStore('purchase', {
             this.loading = false;
           }
         }
-    },
+      },
+
+      async viewAllPurchase(filters = {}) {
+        this.loading = true;
+        this.error = null;
+  
+        try {
+          const response = await axios.get<CommonResponseInterface<PurchaseInterface[]>>(
+            "http://localhost:8084/api/purchase/viewall",
+            { params: filters } // ✅ Kirim filter sebagai query parameters
+          );
+  
+          this.purchases = response.data.data;
+        } catch (err: unknown) {
+          this.error = `Gagal mengambil data pembelian ${err instanceof Error ? err.message : "Unknown error"}`;
+          useToast().error(this.error);
+        } finally {
+          this.loading = false;
+        }
+      },
 });

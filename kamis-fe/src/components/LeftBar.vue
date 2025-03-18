@@ -15,7 +15,7 @@
         <BaseIcon icon="fa-solid fa-file" clickable />
         <span v-if="!isCollapsed" class="icon-label">Laporan</span>
       </div>
-      <div class="icon-item" @click="goTo('pembelian')">
+      <div class="icon-item" @click="goTo('purchase')">
         <BaseIcon icon="fa-solid fa-bag-shopping" clickable />
         <span v-if="!isCollapsed" class="icon-label">Pembelian</span>
       </div>
