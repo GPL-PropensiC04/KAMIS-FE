@@ -41,7 +41,7 @@ const selectOption = (option: string) => {
         {{ modelValue || "Select an option..." }}
       </span>
       <!-- Tailwind CSS Heroicons Chevron Down -->
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 9l-7.5 7.5L4.5 9" />
       </svg>
     </div>

@@ -36,18 +36,17 @@ const focusInput = () => {
 <template>
     <div class="relative w-full max-w-lg font-inter">
         <!-- Textbox -->
-        <div 
-            class="border px-4 py-3 cursor-text text-lg relative"
-            :class="{ 'border-[#1E3A5F] bg-[#E5EAF2] text-black rounded-md': true }"
+        <div
             @click="focusInput"
         >
-            <input
+            <textarea 
                 ref="inputRef"
                 v-model="textValue"
                 :placeholder="placeholder"
-                class="w-full bg-transparent focus:outline-none"
+                class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#E5EAF2] font-lato"
+                rows="4"
                 @input="updateValue"
-            />
+            ></textarea>
         </div>
     </div>
 </template>
