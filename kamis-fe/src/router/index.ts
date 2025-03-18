@@ -67,6 +67,31 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
+  //   {
+  //     path: '/:pathMatch(.*)*',
+  //     name: 'not-found',
+  //     component: () => import('@/views/NotFoundView.vue')
+  //   }
+  // ]
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const isAuthenticated = authStore.isAuthenticated
+  
+  // If the route requires authentication and the user is not logged in
+  if (requiresAuth && !isAuthenticated) {
+    next('/login')
+  } 
+  // If the user is logged in and trying to access login page
+  else if (to.path === '/login' && isAuthenticated) {
+    next('/home')
+  } 
+  else {
+    next()
+  }
 })
 
 export default router
