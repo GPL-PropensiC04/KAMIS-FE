@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { RouterView, RouterLink } from 'vue-router'
-import { onMounted } from 'vue';
-
-onMounted(() => {
-  console.log('App.vue mounted');
-});
+import { RouterView } from 'vue-router'
+import LeftBar from './components/LeftBar.vue'
 </script>
 
 <template>
-  <div id="app">
-    <router-view />
+  <div class="app-layout">
+    <LeftBar />
+    <RouterView />
   </div>
-</template> 
+</template>
+
+<style scoped>
+.app-layout {
+  display: flex;
+  flex-direction: row;
+}
+</style>
