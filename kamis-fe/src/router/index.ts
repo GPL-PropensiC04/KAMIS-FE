@@ -77,6 +77,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/asset/edit/:platNomor',
+      name: 'EditAset',
+      component: () => import('@/views/EditAssetView.vue'),
+      meta: {
+        title: 'Mengubah Aset'
+      }
+    },
+    {
       path: '/coming-soon',
       name: 'ComingSoon',
       component: () => import('@/views/ComingSoonView.vue')

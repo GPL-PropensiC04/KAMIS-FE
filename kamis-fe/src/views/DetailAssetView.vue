@@ -1,5 +1,10 @@
 <template>
     <div class="detail-aset-container">
+      <!-- Notification -->
+      <div v-if="showNotification" class="notification success-notification">
+        {{ notificationMessage }}
+      </div>
+      
       <!-- Tombol Kembali -->
       <div class="kembali-container">
         <router-link to="/asset" class="kembali-btn">
@@ -40,12 +45,12 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue';
+  import { ref, onMounted, computed, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import type { AsetInterface } from '@/interfaces/asset.interface';
   import type { Maintenance } from '@/interfaces/maintenance';
-  import { AsetService } from '@/services/assetservices';
-  import { MaintenanceService } from '@/services/maintenanceservice';
+  import { AsetService } from '@/stores/assetservices';
+  import { MaintenanceService } from '@/stores/maintenanceservice';
   import { byteArrayToImageUrl } from '@/utils/formatters';
   import AssetImage from '@/components/AssetImage.vue';
   import AssetInfoCard from '@/components/AssetInfoCard.vue';
@@ -56,6 +61,31 @@
   const router = useRouter();
   const authStore = useAuthStore(); // Use auth store
   const platNomor = route.params.platNomor as string;
+  
+  // Notification state
+  const showNotification = ref(false);
+  const notificationMessage = ref('');
+  
+  // Function to show notification
+  const showSuccessNotification = (message: string) => {
+    notificationMessage.value = message;
+    showNotification.value = true;
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
+  };
+  
+  // Check if coming from edit page
+  watch(() => route.query, (query) => {
+    if (query.edited === 'true') {
+      showSuccessNotification('Berhasil Mengubah Detail Aset');
+      
+      // Clean up query parameter
+      router.replace({ path: route.path });
+    }
+  }, { immediate: true });
   
   // State
   const aset = ref<AsetInterface>({} as AsetInterface);
@@ -168,6 +198,14 @@
   
   onMounted(() => {
     loadData();
+    
+    // Check if we've just navigated from edit page
+    if (route.query.edited === 'true') {
+      showSuccessNotification('Berhasil Mengubah Detail Aset');
+      
+      // Clean up query parameter
+      router.replace({ path: route.path });
+    }
   });
   </script>
   
@@ -207,5 +245,32 @@
     padding: 8px 16px;
     margin-top: 10px;
     cursor: pointer;
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slide-in 0.3s ease-out;
+  }
+  
+  .success-notification {
+    background-color: #28a745;
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
   </style>
