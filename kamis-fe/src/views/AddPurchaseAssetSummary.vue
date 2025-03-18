@@ -29,7 +29,6 @@ const fetchAssetDetails = async () => {
         const response = await axios.get(`http://localhost:8084/api/purchase/asset/${idAsset.value}`, {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0MjIyNDM1MywiZXhwIjoxNzQyMzEwNzUzfQ.J70CZ19O39Yc447iOaLXPyaaoaQNCVSVlzX1Kb3vF3idCVorhctLiKXTwYd11M4U4Jy7Td6IrDAjf6GmnksWAHjRdO15juVmARmLxQ9elG0tW7wb1tbw7kie0QChS_F3MmIt7yfN1zgihtaQivOWMBhJlNPOPbtsC_XTXllwgveRzrGHnBIIOs75_EUit8MhiPnGbNehZRQsW6irOJm_EoaFZIgZW76xI5WDRQjEJ7MnskIdRSi1E9jzFky7fzqthWPDK4-ibcmrJ-sDQ2vkDYznnCMDb0Jxzj-LOvSbHkRwbkcOj4WoatuXWcesczq7oOXc-xNvgoUPKv71e1iMDA` // Token Autentikasi
             }
         });
 

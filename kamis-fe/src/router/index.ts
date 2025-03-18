@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/HomeView.vue'
 import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
 import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
@@ -16,6 +15,26 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/add-purchase',
+      name: 'addPurchase',
+      component:AddPurchaseStepOne,
+    },
+    {
+      path: '/add-purchase-resource',
+      name: 'addPurchaseResource',
+      component: AddPurchaseResource,
+    },
+    {
+      path: '/add-purchase-resource/summary',
+      name: 'addPurchaseResourceSummary',
+      component: AddPurchaseResourceSummary,
+    },
+    {
+      path: '/add-purchase-asset/summary',
+      name: 'addPurchaseAssetSummary',
+      component: AddPurchaseAssetSummary,
     },
     {
       path: '/login',
@@ -68,12 +87,12 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue')
-    }
-  ]
+  //   {
+  //     path: '/:pathMatch(.*)*',
+  //     name: 'not-found',
+  //     component: () => import('@/views/NotFoundView.vue')
+  //   }
+  // ]
 })
 
 // Navigation guard
