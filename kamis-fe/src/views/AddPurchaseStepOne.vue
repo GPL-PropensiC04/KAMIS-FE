@@ -36,7 +36,7 @@ const handleNext = () => {
 
     // Pindahkan halaman berdasarkan tipe barang
     if (selectedType.value === "Resource") {
-        router.push("/add-purchase-resource");
+        router.push("/purchase/add/resource");
     } else {
         router.push("/purchase/add/asset"); //nanti gunakan yang ini
     }
