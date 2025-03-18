@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "@/stores/purchase";
-import VCancelButton from "@/components/VCancelButton.vue";
-import VSuccessButton from "@/components/VSuccessButton.vue";
+import { usePurchaseStore } from "../stores/purchase";
+import VCancelButton from "../components/VCancelButton.vue";
+import VSuccessButton from "../components/VSuccessButton.vue";
 
 // Router & Store
 const router = useRouter();
@@ -45,7 +45,7 @@ const fetchAssetDetails = async () => {
 };
 
 // Format harga
-const formatCurrency = (value) => {
+const formatCurrency = (value ) => {
     return `Rp ${parseInt(value || 0).toLocaleString("id-ID")},00`;
 };
 
