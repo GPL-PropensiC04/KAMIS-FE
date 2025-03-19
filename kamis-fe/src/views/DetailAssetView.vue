@@ -45,7 +45,7 @@
               Ubah
             </button>
             <button 
-              @click="handleDeleteAset" 
+              @click="showDeleteModal = true" 
               class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
             >
               Hapus
@@ -83,6 +83,28 @@
         <div class="p-4 border-t">
           <p class="text-gray-600 text-sm mb-2">Deskripsi</p>
           <p>{{ aset.deskripsi }}</p>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-md">
+          <div class="bg-[#1E3A5F] p-4">
+            <h3 class="text-lg font-bold text-white">Konfirmasi</h3>
+          </div>
+          <div class="p-6 text-center">
+            <p class="text-gray-700 text-lg mb-6">Apakah anda yakin ingin menghapus?</p>
+            <div class="flex justify-center space-x-4">
+              <VButton 
+                label="Tidak" 
+                @click="showDeleteModal = false"
+              />
+              <VCancelButton 
+                label="Ya" 
+                @click="confirmDelete"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -135,11 +157,16 @@ import { MaintenanceService } from '@/stores/maintenanceservice';
 import { byteArrayToImageUrl } from '@/utils/formatters';
 import AssetImage from '@/components/AssetImage.vue';
 import { useAuthStore } from '@/stores/auth';
+import VButton from '@/components/VButton.vue';
+import VCancelButton from '@/components/VCancelButton.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const platNomor = route.params.platNomor as string;
+
+// Delete modal state
+const showDeleteModal = ref(false);
 
 // Notification state
 const showNotification = ref(false);
@@ -264,18 +291,22 @@ const handleEditAset = () => {
   router.push(`/asset/edit/${platNomor}`);
 };
 
-const handleDeleteAset = async () => {
-  if (confirm('Apakah Anda yakin ingin menghapus aset ini?')) {
-    try {
-      await AsetService.deleteAset(platNomor);
-      alert('Aset berhasil dihapus');
-      showSuccessNotification('Aset berhasil dihapus');
-      router.push('/assets');
-    } catch (err) {
-      console.error('Error deleting asset:', err);
-      alert('Gagal menghapus aset. Silakan coba lagi.');
-    }
+const confirmDelete = async () => {
+  try {
+    await AsetService.deleteAset(platNomor);
+    showSuccessNotification('Aset berhasil dihapus');
+    router.push('/asset');
+  } catch (err) {
+    console.error('Error deleting asset:', err);
+    error.value = 'Gagal menghapus aset. Silakan coba lagi.';
+  } finally {
+    showDeleteModal.value = false;
   }
+};
+
+// Replaced the handleDeleteAset function with a function to show the modal
+const handleDeleteAset = () => {
+  showDeleteModal.value = true;
 };
 
 const handleAddMaintenance = () => {
