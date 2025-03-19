@@ -29,7 +29,7 @@ const updateDate = (field: "start" | "end", value: Date | null) => {
 </script>
 
 <template>
-  <div class="flex items-center space-x-4 p-2 border border-[#1E3A5F] rounded-md bg-[#E5EAF2] w-full max-w-lg">
+  <div class="flex items-center space-x-1 rounded-md w-full max-w-lg h-[45px]">
     <!-- Tanggal Mulai -->
     <div class="relative w-full">
       <Datepicker 
@@ -64,5 +64,13 @@ const updateDate = (field: "start" | "end", value: Date | null) => {
 
 * {
   font-family: 'Inter', sans-serif;
+}
+
+:deep(.dp__input) {
+  background-color: #E5EAF2 !important;
+  color: black;
+  border: 1px solid #1E3A5F;
+  border-radius: 6px;
+  height: 45px;
 }
 </style>

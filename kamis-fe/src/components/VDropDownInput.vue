@@ -31,7 +31,7 @@ const selectOption = (option: string) => {
   <div class="relative w-full max-w-md font-inter">
     <!-- Input Field -->
     <div 
-      class="flex items-center justify-between border px-4 py-2 cursor-pointer"
+      class="flex items-center justify-between border border-[#1E3A5F] bg-[#E5EAF2] text-black px-4 py-2 rounded-md h-[45px]"
       :class="{
         'border-[#1E3A5F] bg-[#E5EAF2] text-black rounded-md': true, 
       }"

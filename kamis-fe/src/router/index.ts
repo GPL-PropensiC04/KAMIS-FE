@@ -10,6 +10,10 @@ import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import ListResource from '@/views/ListResource.vue'
+import UpdateResource from '@/views/UpdateResource.vue'
+// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
+import ListAsset from '@/views/ListAsset.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,7 +40,7 @@ const router = createRouter({
       component:AddPurchaseAsset,
     },
     {
-      path: '/add-purchase-resource',
+      path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
     },
@@ -81,6 +85,16 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/resource',
+      name: 'resource',
+      component:ListResource,
+    },
+    {
+      path: '/resource/update/:id',
+      name: 'updateResource',
+      component:UpdateResource,
+    },
+    {
       path: '/resource/add',
       name: 'addResource',
       component: () => import('@/views/AddResourceView.vue'),
@@ -90,6 +104,11 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
+    },
+    {
+      path: '/assets',
+      name: 'list-assets',
+      component: ListAsset,
     },
     {
       path: '/asset/:platNomor',
