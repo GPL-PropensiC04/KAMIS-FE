@@ -10,7 +10,7 @@
     
     <!-- Back Button -->
     <div class="mb-4">
-      <router-link to="/asset" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
+      <router-link to="/assets" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
         <span>←</span>
       </router-link>
     </div>
@@ -295,7 +295,15 @@ const confirmDelete = async () => {
   try {
     await AsetService.deleteAset(platNomor);
     showSuccessNotification('Aset berhasil dihapus');
-    router.push('/asset');
+    
+    // Tambahkan timeout sebelum navigasi untuk memastikan notifikasi terlihat
+    setTimeout(() => {
+      // Navigasi ke halaman list asset dengan parameter deleted=true
+      router.push({
+        path: '/assets',
+        query: { deleted: 'true', platNomor: platNomor }
+      });
+    }, 1500);
   } catch (err) {
     console.error('Error deleting asset:', err);
     error.value = 'Gagal menghapus aset. Silakan coba lagi.';
