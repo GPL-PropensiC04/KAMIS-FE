@@ -1,107 +1,115 @@
 <template>
-    <div class="container mx-auto p-4">
-      <h2 class="text-xl font-bold mb-4">Daftar Aset</h2>
-      
-      <!-- Search Bar -->
-      <div class="mb-4">
-        <VSearchBar v-model="searchQuery" placeholder="Search" />
+  <div class="min-h-screen bg-[#E5EAF2] p-6">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
+      <h1 class="text-2xl font-bold mb-4">Daftar Aset</h1>
+
+      <div class="flex justify-between mb-4">
+        <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
       </div>
-      
-      <div v-if="loading" class="text-center py-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-        <p class="mt-2">Memuat data aset...</p>
-      </div>
-      
-      <div v-else-if="filteredAssets.length === 0" class="text-center py-4">
-        <p>Tidak ada data aset yang tersedia</p>
-      </div>
-      
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="py-2 px-4 border-b">Nama Aset</th>
-              <th class="py-2 px-4 border-b">Tanggal Perolehan</th>
-              <th class="py-2 px-4 border-b">Nilai Perolehan</th>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
+            <tr>
+              <th scope="col" class="px-6 py-3">Nama Aset</th>
+              <th scope="col" class="px-6 py-3">Tanggal Perolehan</th>
+              <th scope="col" class="px-6 py-3">{{ thirdColumnHeader }}</th>
+              <th scope="col" class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="asset in filteredAssets" :key="asset.platNomor" class="hover:bg-gray-50">
-              <td class="py-2 px-4 border-b">{{ asset.nama }}</td>
-              <td class="py-2 px-4 border-b">{{ formatDate(asset.tanggalPerolehan) }}</td>
-              <td class="py-2 px-4 border-b">{{ formatCurrency(asset.nilaiPerolehan) }}</td>
+            <tr v-for="asset in filteredAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
+              <td class="px-6 py-4">{{ asset.nama }}</td>
+              <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
+              <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
+              <td class="px-6 py-4">
+                <VSuccessButton
+                  label="Detail"
+                  @click="goToDetailAsset(asset.platNomor)"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
+
+        <p v-if="filteredAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
       </div>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
-  import { AsetService } from '@/stores/assetservices';
-  import type { AsetInterface } from '@/interfaces/asset.interface';
-  import VSearchBar from '@/components/VSearchBar.vue';
-  
-  const assets = ref<AsetInterface[]>([]);
-  const loading = ref(true);
-  const searchQuery = ref('');
-  
-  onMounted(async () => {
-    await fetchAssets();
-  });
-  
-  const fetchAssets = async () => {
-    try {
-      const data = await AsetService.viewAllAsset();
-      assets.value = data;
-    } catch (err) {
-      console.error('Error fetching assets:', err);
-    } finally {
-      loading.value = false;
-    }
-  };
-  
-  const filteredAssets = computed(() => {
-    if (!searchQuery.value) {
-      return assets.value;
-    }
-    return assets.value.filter(asset =>
-      asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  });
-  
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${String(date.getDate()).padStart(2, '0')} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${date.getFullYear()}`;
-  };
-  
-  const formatCurrency = (value: number) => {
-    return `Rp ${value.toLocaleString('id-ID')},00`;
-  };
-  </script>
-  
-  <style scoped>
-  .container {
-    max-width: 1000px;
-    margin: 0 auto;
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { AsetService } from '@/stores/assetservices';
+import type { AsetInterface } from '@/interfaces/asset.interface';
+import VSearchBar from '@/components/VSearchBar.vue';
+import VSuccessButton from '@/components/VSuccessButton.vue';
+
+const assets = ref<AsetInterface[]>([]);
+const loading = ref(true);
+const searchQuery = ref('');
+const userRole = ref<'DIREKSI' | 'FINANCE' | 'OPERASIONAL'>('OPERASIONAL'); // Ganti dengan logika untuk mendapatkan peran pengguna saat ini
+
+const router = useRouter();
+
+onMounted(async () => {
+  await fetchAssets();
+});
+
+const fetchAssets = async () => {
+  try {
+    const data = await AsetService.viewAllAsset();
+    assets.value = data;
+  } catch (err) {
+    console.error('Error fetching assets:', err);
+  } finally {
+    loading.value = false;
   }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
+};
+
+const filteredAssets = computed(() => {
+  if (!searchQuery.value) {
+    return assets.value;
   }
-  
-  th, td {
-    text-align: left;
-    padding: 8px;
+  return assets.value.filter(asset =>
+    asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${String(date.getDate()).padStart(2, '0')} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${date.getFullYear()}`;
+};
+
+const formatCurrency = (value: number) => {
+  return `Rp ${value.toLocaleString('id-ID')},00`;
+};
+
+const thirdColumnHeader = computed(() => {
+  if (userRole.value === 'OPERASIONAL') {
+    return 'Sisa Hari Maintenance';
+  } else {
+    return 'Nilai Perolehan';
   }
-  
-  th {
-    background-color: #f2f2f2;
+});
+
+const thirdColumnValue = (asset: AsetInterface) => {
+  if (userRole.value === 'OPERASIONAL') {
+    return 'Coming soon';
+  } else {
+    return formatCurrency(asset.nilaiPerolehan);
   }
-  
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  </style>
+};
+
+const goToDetailAsset = (platNomor: string) => {
+  router.push(`/asset/${platNomor}`);
+};
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+* {
+  font-family: 'Inter', sans-serif;
+}
+</style>
