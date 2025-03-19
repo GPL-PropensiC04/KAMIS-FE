@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-[#E5EAF2] p-6">
+    <div 
+      v-if="showNotification" 
+      class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-slide-in"
+    >
+      {{ notificationMessage }}
+    </div>
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <h1 class="text-2xl font-bold mb-4">Daftar Aset</h1>
 
@@ -39,8 +45,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { AsetService } from '@/stores/assetservices';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 import VSearchBar from '@/components/VSearchBar.vue';
@@ -51,7 +57,34 @@ const loading = ref(true);
 const searchQuery = ref('');
 const userRole = ref<'DIREKSI' | 'FINANCE' | 'OPERASIONAL'>('OPERASIONAL'); // Ganti dengan logika untuk mendapatkan peran pengguna saat ini
 
+// Notifikasi state
+const showNotification = ref(false);
+const notificationMessage = ref('');
+
 const router = useRouter();
+const route = useRoute();
+
+// Fungsi untuk menampilkan notifikasi
+const showSuccessNotification = (message: string) => {
+  notificationMessage.value = message;
+  showNotification.value = true;
+  
+  // Auto hide setelah 3 detik
+  setTimeout(() => {
+    showNotification.value = false;
+  }, 3000);
+};
+
+// Watch perubahan query untuk menampilkan notifikasi saat navigasi dari halaman detail setelah penghapusan
+watch(() => route.query, (query) => {
+  if (query.deleted === 'true') {
+    const platNomor = query.platNomor as string;
+    showSuccessNotification(`Aset ${platNomor} berhasil dihapus`);
+    
+    // Bersihkan parameter query
+    router.replace({ path: route.path });
+  }
+}, { immediate: true });
 
 onMounted(async () => {
   await fetchAssets();
@@ -111,5 +144,20 @@ const goToDetailAsset = (platNomor: string) => {
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 * {
   font-family: 'Inter', sans-serif;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }
 </style>
