@@ -3,7 +3,7 @@ import type { AddResourceTempRequestInterface, ResourceTempInterface } from "./r
 export interface PurchaseInterface {
     id: string;
     purchaseSupplier: string;
-    purchaseType: boolean; // false = Aset, true = Resource
+    purchaseType: string; // false = Aset, true = Resource
     purchaseStatus: string;
     purchasePrice: number;
     purchaseNote: string;
@@ -11,6 +11,7 @@ export interface PurchaseInterface {
     purchaseUpdateDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
     purchaseResource: ResourceTempInterface[];
     purchaseAsset?: number | null;
+    purchasePaymentDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
   }
 
 export interface AddPurchaseRequestInterface {
