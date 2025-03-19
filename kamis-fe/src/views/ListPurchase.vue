@@ -120,30 +120,32 @@ const goToAddPurchase = () => {
           class="rounded-lg shadow-md overflow-hidden bg-white"
         >
           <!-- Header -->
+          <router-link :to="purchase.purchaseId.startsWith('A-') ? `/purchase/detail/asset/${purchase.purchaseId}` : `/purchase/detail/resource/${purchase.purchaseId}`" class="block">
           <div class="bg-[#1E3A5F] text-white px-6 py-3 flex justify-between items-center">
             <h3 class="text-lg font-semibold">Pembelian {{ purchase.purchaseId }}</h3>
             <span class="text-xs">Last Updated: {{ formatDate(purchase.purchaseUpdateDate) }}</span>
           </div>
 
           <!-- Content -->
-          <div class="p-6 bg-[#E5EAF2] text-gray-800 text-sm">
-            <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center">
-              <p class="font-semibold">Tanggal Pengajuan</p>
-              <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
-              <p></p> <!-- Spacer -->
+            <div class="p-6 bg-[#E5EAF2] text-gray-800 text-sm">
+              <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center">
+                <p class="font-semibold">Tanggal Pengajuan</p>
+                <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
+                <p></p> <!-- Spacer -->
 
-              <p class="font-semibold">Supplier</p>
-              <p>: {{ purchase.purchaseSupplier }}</p>
-              <p></p>
+                <p class="font-semibold">Supplier</p>
+                <p>: {{ purchase.purchaseSupplier }}</p>
+                <p></p>
 
-              <p class="font-semibold">Tipe Barang</p>
-              <p>: {{ purchase.purchaseType ? "Resource" : "Aset" }}</p>
+                <p class="font-semibold">Tipe Barang</p>
+                <p>: {{ purchase.purchaseType ? "Resource" : "Aset" }}</p>
 
-              <p class="font-bold text-[#1E3A5F] text-right">
-                Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
-              </p>
+                <p class="font-bold text-[#1E3A5F] text-right">
+                  Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
+                </p>
+              </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
 
