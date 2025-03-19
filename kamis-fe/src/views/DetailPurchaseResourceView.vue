@@ -195,7 +195,7 @@ const updateStatus = async (isNextStatus: boolean = true) => {
 
 // Handle edit detail action
 const handleEditDetail = () => {
-  router.push(`/purchase/edit/${purchaseId.value}`);
+  router.push(`/purchase/update-resource/${purchaseId.value}`);
 };
 
 // Handle payment action

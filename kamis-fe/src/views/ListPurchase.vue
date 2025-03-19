@@ -122,7 +122,9 @@ const goToAddPurchase = () => {
           <!-- Header -->
           <router-link :to="purchase.purchaseId.startsWith('A-') ? `/purchase/detail/asset/${purchase.purchaseId}` : `/purchase/detail/resource/${purchase.purchaseId}`" class="block">
           <div class="bg-[#1E3A5F] text-white px-6 py-3 flex justify-between items-center">
-            <h3 class="text-lg font-semibold">Pembelian {{ purchase.purchaseId }}</h3>
+            <h3 class="text-lg font-semibold">
+              Pembelian {{ purchase.purchaseId }}
+            </h3>
             <span class="text-xs">Last Updated: {{ formatDate(purchase.purchaseUpdateDate) }}</span>
           </div>
 
@@ -132,6 +134,10 @@ const goToAddPurchase = () => {
                 <p class="font-semibold">Tanggal Pengajuan</p>
                 <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
                 <p></p> <!-- Spacer -->
+
+                <p class="font-semibold">Status Pembelian</p>
+                <p>: {{ purchase.purchaseStatus }}</p>
+                <p></p>
 
                 <p class="font-semibold">Supplier</p>
                 <p>: {{ purchase.purchaseSupplier }}</p>
@@ -143,6 +149,9 @@ const goToAddPurchase = () => {
                 <p class="font-bold text-[#1E3A5F] text-right">
                   Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
                 </p>
+
+                
+
               </div>
             </div>
           </router-link>
