@@ -269,7 +269,8 @@ const handleDeleteAset = async () => {
     try {
       await AsetService.deleteAset(platNomor);
       alert('Aset berhasil dihapus');
-      router.push('/asset');
+      showSuccessNotification('Aset berhasil dihapus');
+      router.push('/assets');
     } catch (err) {
       console.error('Error deleting asset:', err);
       alert('Gagal menghapus aset. Silakan coba lagi.');
