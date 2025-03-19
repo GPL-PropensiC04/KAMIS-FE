@@ -11,14 +11,6 @@ interface ApiResponse<T> {
 
 export const AsetService = {
   /**
-   * Fetch all assets
-   */
-  async viewAllAsset(): Promise<AsetInterface[]> {
-    const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_ALL}`);
-    return response.data.data;
-  },
-
-  /**
    * Fetch asset by platNomor
    */
   async getAsetByPlatNomor(platNomor: string): Promise<AsetInterface> {
