@@ -14,6 +14,8 @@ import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
+import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
+import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +61,18 @@ const router = createRouter({
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+    },
+    {
+      path: '/purchase/detail/resource/:id',
+      name: 'detailPurchaseResource',
+      component: DetailPurchaseResourceView,
+      props: true,
+    },
+    {
+      path: '/purchase/detail/asset/:id',
+      name: 'detailPurchaseAsset',
+      component: DetailPurchaseAssetView,
+      props: true,
     },
     {
       path: '/purchase/update-resource/:purchaseId',

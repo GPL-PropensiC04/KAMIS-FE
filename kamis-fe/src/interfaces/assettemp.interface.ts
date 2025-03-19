@@ -2,7 +2,7 @@ import FormData from 'form-data';
 
 export interface AssetTempInterface {
     id: number;
-    assetName: string;
+    assetNameString: string;
     assetDescription: string;
     assetType: string;
     assetPrice: number;

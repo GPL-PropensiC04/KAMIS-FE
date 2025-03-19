@@ -102,13 +102,13 @@ const handleCancel = () => {
                 <!-- Kolom Kiri (Detail Aset) -->
                 <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-0.5 items-center text-sm">
                     <p class="font-lato font-bold">Nama Aset</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetName}}</p>
+                    <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetName}}</p>
 
                     <p class="font-lato font-bold">Deskripsi</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetDescription }}</p>
+                    <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ assetDetails.assetDescription }}</p>
 
                     <p class="font-lato font-bold">Total Harga</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(assetDetails?.assetPrice) }}</p>
+                    <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(assetDetails?.assetPrice) }}</p>
                 </div>
 
                 <!-- Kolom Kanan (Gambar Aset) -->
