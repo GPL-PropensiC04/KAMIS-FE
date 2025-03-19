@@ -4,7 +4,7 @@ export interface PurchaseInterface {
     id: string;
     purchaseId: string;
     purchaseSupplier: string;
-    purchaseType: boolean; // false = Aset, true = Resource
+    purchaseType: string; // false = Aset, true = Resource
     purchaseStatus: string;
     purchasePrice: number;
     purchaseNote: string;
