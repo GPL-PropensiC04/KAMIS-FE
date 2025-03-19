@@ -14,6 +14,8 @@ import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
+import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
+import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,43 +30,63 @@ const router = createRouter({
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"] }
     },
     {
       path: '/purchase/add',
       name: 'addPurchase',
       component:AddPurchaseStepOne,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset',
       name: 'addPurchaseAsset',
       component:AddPurchaseAsset,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'addPurchaseResourceSummary',
       component: AddPurchaseResourceSummary,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+    },
+    {
+      path: '/purchase/detail/resource/:id',
+      name: 'detailPurchaseResource',
+      component: DetailPurchaseResourceView,
+      props: true,
+    },
+    {
+      path: '/purchase/detail/asset/:id',
+      name: 'detailPurchaseAsset',
+      component: DetailPurchaseAssetView,
+      props: true,
     },
     {
       path: '/purchase/update-resource/:purchaseId',
       name: 'updatePurchaseResource',
       component: UpdatePurchaseResource,
       props: true, // Kirim ID dari URL sebagai prop
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'updatePurchaseAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/login',
