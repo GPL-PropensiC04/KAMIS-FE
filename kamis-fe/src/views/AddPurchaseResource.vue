@@ -59,7 +59,7 @@ const addResource = () => {
         return;
     }
 
-    const existingItem = resourceList.value.find((item) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item: { id: number; }) => item.id === selectedItem.id);
     if (existingItem) {
         alert("Resource ini sudah ditambahkan!");
         return;
@@ -97,7 +97,7 @@ const updateDraftPurchase = () => {
 
 // Hitung total harga
 const totalPrice = computed(() => {
-    return resourceList.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return resourceList.value.reduce((sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity, 0);
 });
 
 // Pastikan data tetap ada setelah refresh

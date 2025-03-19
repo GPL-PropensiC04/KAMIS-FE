@@ -17,7 +17,7 @@ const assetDetails = ref(assetTempStore.draftAssetTemp);
 const purchaseNote = ref("");
 
 // Format harga
-const formatCurrency = (value ) => {
+const formatCurrency = (value: any ) => {
     return `Rp ${parseInt(value || 0).toLocaleString("id-ID")},00`;
 };
 
@@ -113,7 +113,7 @@ const handleCancel = () => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
-                    <img :src="assetDetails.imageUrl" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+                    <img :src="assetDetails.foto" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
                 </div>
             </div>
 
