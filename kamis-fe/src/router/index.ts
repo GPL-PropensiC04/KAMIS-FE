@@ -28,43 +28,51 @@ const router = createRouter({
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"] }
     },
     {
       path: '/purchase/add',
       name: 'addPurchase',
       component:AddPurchaseStepOne,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset',
       name: 'addPurchaseAsset',
       component:AddPurchaseAsset,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'addPurchaseResourceSummary',
       component: AddPurchaseResourceSummary,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'addPurchaseAssetSummary',
       component: AddPurchaseAssetSummary,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/update-resource/:purchaseId',
       name: 'updatePurchaseResource',
       component: UpdatePurchaseResource,
       props: true, // Kirim ID dari URL sebagai prop
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'updatePurchaseAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/login',
