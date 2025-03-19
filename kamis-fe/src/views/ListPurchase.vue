@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watchEffect } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import VSearchBar from "../components/VSearchBar.vue";
@@ -76,13 +76,23 @@ const updateNominalFilter = (selectedLabel: string) => {
   }
 };
 
-// **Panggil API saat filter berubah secara otomatis**
-watchEffect(() => {
-  fetchPurchases();
-  console.log(purchaseStore.purchases)
-});
+// Watch for changes in filter values only
+watch(
+  [
+    searchId,
+    dateRange,
+    selectedType,
+    sortByDate,
+    sortByNominal,
+    startNominal,
+    endNominal
+  ],
+  () => {
+    fetchPurchases();
+  }
+);
 
-// **Panggil data saat halaman dimuat**
+// Initial data fetch
 onMounted(() => {
   fetchPurchases();
 });

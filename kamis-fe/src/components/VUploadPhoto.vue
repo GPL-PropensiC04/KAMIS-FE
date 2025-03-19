@@ -16,8 +16,9 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, defineEmits } from 'vue';
   
+  const emit = defineEmits(['file-change']);
   const fileInput = ref<HTMLInputElement | null>(null);
   const uploadedImageUrl = ref<string | null>(null);
   const uploadSuccess = ref<boolean>(false);
@@ -26,18 +27,125 @@
     fileInput.value?.click();
   };
   
-  const handleFileChange = (event: Event) => {
+  const handleFileChange = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
       const file = target.files[0];
-      // Lakukan sesuatu dengan file yang diunggah, misalnya mengirim ke server
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedImageUrl.value = e.target?.result as string;
-        uploadSuccess.value = true;
-      };
-      reader.readAsDataURL(file);
+      
+      // Validate file size - 8MB max
+      const MAX_SIZE_MB = 8;
+      const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+      
+      if (file.size > MAX_SIZE_BYTES) {
+        alert(`Ukuran file terlalu besar. Maksimal ${MAX_SIZE_MB}MB.`);
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Hanya file gambar yang diperbolehkan.');
+        return;
+      }
+      
+      // For large images, resize before emitting
+      if (file.size > 2 * 1024 * 1024) { // If larger than 2MB
+        try {
+          const resizedFile = await resizeImage(file);
+          console.log(`Resized image from ${Math.round(file.size/1024)}KB to ${Math.round(resizedFile.size/1024)}KB`);
+          
+          // Show preview
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            uploadedImageUrl.value = e.target?.result as string;
+            uploadSuccess.value = true;
+          };
+          reader.readAsDataURL(resizedFile);
+          
+          // Emit the resized file to parent component
+          emit('file-change', resizedFile);
+        } catch (error) {
+          console.error('Error resizing image:', error);
+          showOriginalPreview(file);
+        }
+      } else {
+        // For smaller images, use as is
+        showOriginalPreview(file);
+      }
     }
+  };
+  
+  // Helper to show preview and emit original file
+  const showOriginalPreview = (file: File) => {
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedImageUrl.value = e.target?.result as string;
+      uploadSuccess.value = true;
+    };
+    reader.readAsDataURL(file);
+    
+    // Emit the file to parent component
+    emit('file-change', file);
+  };
+  
+  // Helper function to resize large images
+  const resizeImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        // Release object URL to avoid memory leaks
+        URL.revokeObjectURL(img.src);
+        
+        // Calculate new dimensions - aim for max 1600px width/height
+        let width = img.width;
+        let height = img.height;
+        const MAX_DIMENSION = 1600;
+        
+        if (width > height && width > MAX_DIMENSION) {
+          height = Math.round((height * MAX_DIMENSION) / width);
+          width = MAX_DIMENSION;
+        } else if (height > MAX_DIMENSION) {
+          width = Math.round((width * MAX_DIMENSION) / height);
+          height = MAX_DIMENSION;
+        }
+        
+        // Create canvas and resize
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Failed to create blob'));
+            return;
+          }
+          
+          // Create new File from the blob
+          const resizedFile = new File([blob], file.name, {
+            type: file.type,
+            lastModified: Date.now()
+          });
+          
+          resolve(resizedFile);
+        }, file.type, 0.85); // Quality 0.85 offers good balance between size and quality
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        reject(new Error('Failed to load image'));
+      };
+    });
   };
   </script>
   

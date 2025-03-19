@@ -100,15 +100,10 @@
           <p v-if="canViewFinancialInfo" class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(purchase.purchaseAsset.assetPrice) }}</p>
         </div>
 
-        <!-- Mid Column (Asset Details) -->
-        <!-- <div class="grid grid-cols-[auto,1fr] gap-x-2 gap-y-2 items-center">
-
-        </div> -->
-
         <!-- Right Column (Asset Image) -->
         <div class="flex justify-center items-start">
           <img 
-            :src="`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS46NajMgy3Ev7_Rhe_wtIgQQhILcdNwhClRw&s`" 
+            :src="imageUrl || '/placeholder-asset.jpg'" 
             :alt="purchase.purchaseAsset.assetNameString"
             class="rounded-md shadow-md w-[250px] h-auto object-cover"
           />
@@ -127,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePurchaseStore } from '@/stores/purchase';
 import { useAuthStore } from '@/stores/auth';
@@ -137,6 +132,7 @@ import VCancelButton from '@/components/VCancelButton.vue';
 import VLockedInput from '@/components/VLockedInput.vue';
 import type { AssetTempInterface } from '@/interfaces/assettemp.interface';
 import type { PurchaseInterface } from '@/interfaces/purchase.interface';
+import axios from 'axios';
 
 // Extended interface for the detail view
 interface DetailAssetPurchaseInterface extends Omit<PurchaseInterface, 'purchaseAsset'> {
@@ -206,9 +202,51 @@ const handlePayment = async () => {
   await purchaseStore.updatePurchaseStatus(purchaseId.value, "Pembayaran telah dilakukan", true);
 };
 
-// Load data on component mount
+// Add ref for image URL
+const imageUrl = ref('');
+
+// Add function to fetch image using axios
+const fetchAssetImage = async () => {
+  try {
+    if (!purchase.value?.purchaseAsset?.id) return;
+    
+    const assetId = purchase.value.purchaseAsset.id;
+    const response = await axios.get(`http://localhost:8084/api/purchase/asset/${assetId}/foto`, {
+      responseType: 'blob' // Important: we need the response as a Blob
+    });
+    
+    // Create a URL for the blob
+    const blob = new Blob([response.data], { 
+      type: response.headers['content-type'] 
+    });
+    
+    // Free memory from any previous blob URLs
+    if (imageUrl.value) {
+      URL.revokeObjectURL(imageUrl.value);
+    }
+    
+    // Create and store new blob URL
+    imageUrl.value = URL.createObjectURL(blob);
+    console.log('Image loaded successfully');
+  } catch (error) {
+    console.error('Error fetching asset image:', error);
+    imageUrl.value = '/placeholder-asset.jpg'; // Fallback image
+  }
+};
+
+// Update onMounted to also fetch the image
 onMounted(() => {
-  loadPurchaseData();
+  loadPurchaseData().then(() => {
+    fetchAssetImage();
+  });
+});
+
+// Add cleanup when component is unmounted
+onUnmounted(() => {
+  // Free memory
+  if (imageUrl.value) {
+    URL.revokeObjectURL(imageUrl.value);
+  }
 });
 </script>
 
