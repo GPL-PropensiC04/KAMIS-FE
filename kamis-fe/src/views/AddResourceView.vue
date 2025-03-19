@@ -3,12 +3,13 @@
     <!-- Main Content -->
     <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-3xl">
       <!-- Back Button -->
-      <button 
-        @click="router.back()" 
-        class="mb-6 text-[#1E3A5F] hover:text-[#1a325a] flex items-center gap-2"
-      >
-        <span class="text-2xl">←</span>
-      </button>
+        <!-- Back Button -->
+        <button 
+          @click="router.back()" 
+          class="hover:underline flex items-center mb-4 text-[28px]"
+        >
+          <span >←</span>
+        </button>
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-6">
