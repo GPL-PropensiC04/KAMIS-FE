@@ -45,7 +45,7 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
-      path: '/add-purchase-resource',
+      path: '/purchase/add/resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
