@@ -49,19 +49,19 @@
       <div v-else class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="p-6 flex flex-col md:flex-row gap-8">
           <!-- Asset Image -->
-          <div class="w-full md:w-1/3 lg:w-1/4">
-            <div class="bg-gray-100 rounded-lg overflow-hidden h-64 flex items-center justify-center">
+          <div class="w-full md:w-2/5 lg:w-1/3">
+            <div class="bg-gray-100 rounded-lg overflow-hidden h-80 flex items-center justify-center">
               <img 
                 :src="assetImageUrl || '/placeholder-truck.jpg'" 
                 alt="Asset Image" 
-                class="w-full h-full object-cover"
+                class="w-full h-full object-contain"
                 @error="handleImageError"
               />
             </div>
           </div>
 
           <!-- Form -->
-          <div class="w-full md:w-2/3 lg:w-3/4">
+          <div class="w-full md:w-3/5 lg:w-2/3">
             <form @submit.prevent="updateAsset" class="space-y-6">
               <!-- Name and Type in same row -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,7 +175,7 @@ const formData = ref({
   nama: '',
   jenisAset: '',
   deskripsi: '',
-  status: 'Tersedia',
+  status: '', // Remove the hardcoded value
   assetMaintenance: ''
 });
 
@@ -183,8 +183,7 @@ const formData = ref({
 const jenisAsetOptions = [
   { value: 'Truk', label: 'Truk' },
   { value: 'Mobil', label: 'Mobil' },
-  { value: 'Motor', label: 'Motor' },
-  { value: 'Lainnya', label: 'Lainnya' }
+  { value: 'Pick Up', label: 'Pick Up' },
 ];
 
 const statusOptions = ['Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
