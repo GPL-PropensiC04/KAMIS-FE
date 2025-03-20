@@ -46,7 +46,7 @@ export const usePurchaseStore = defineStore('purchase', {
               );
 
               this.purchases.push(response.data.data);
-          
+              
               useToast().success('Sukses mengajukan Pembelian');
               await router.push('/purchase');
             } catch (err: unknown) {
