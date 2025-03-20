@@ -115,6 +115,7 @@ const router = createRouter({
       path: '/resource/update/:id',
       name: 'updateResource',
       component:UpdateResource,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/resource/add',
