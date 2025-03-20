@@ -5,23 +5,36 @@ import VTextArea from '../components/VTextArea.vue'
 import VPriceInput from '../components/VPriceInput.vue'
 import VDropDownInput from '../components/VDropDownInput.vue'
 import VSuccessButton from '../components/VSuccessButton.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetTempStore } from '@/stores/assetTemp'
+import { useToast } from 'vue-toastification'
 
 const assetName = ref('');
 const assetDescription = ref('');
 const assetType = ref('');
 const assetPrice = ref(0);
 const foto = ref<File | null>(null);
+const toast = useToast();
 
 const router = useRouter();
 const assetTempStore = useAssetTempStore();
 
+const isFormValid = computed(() => {
+  return assetName.value.trim() !== '' && 
+         assetDescription.value.trim() !== '' && 
+         assetType.value !== '' && 
+         assetPrice.value > 0 && 
+         foto.value !== null;
+});
+
 const handleSubmit = async () => {
+  if (!isFormValid.value) {
+    toast.error('Harap isi semua field sebelum submit!');
+    return;
+  }
+
   try {
-    // We've already stored the file when it was selected, 
-    // now just add the form data
     assetTempStore.setDraftAssetTemp({
       ...assetTempStore.draftAssetTemp,
       assetName: assetName.value,
@@ -98,7 +111,7 @@ const handleFileChange = (file: File) => {
           <label class="block mb-1 font-medium text-gray-700">Jenis Aset</label>
           <VDropDownInput 
             v-model="assetType" 
-            :options="['Truk', 'Mobil', 'Pendar']" 
+            :options="['Truk', 'Mobil', 'Pickup']" 
             placeholder="Pilih Jenis Aset" 
             class="w-full"
           />

@@ -8,8 +8,8 @@ import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import DetailAssetView from '@/views/DetailAssetView.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
-import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
@@ -45,7 +45,7 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
-      path: '/purchase/add/resource',
+      path: '/add-purchase-resource',
       name: 'addPurchaseResource',
       component: AddPurchaseResource,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
