@@ -76,11 +76,7 @@ const updateNominalFilter = (selectedLabel: string) => {
   }
 };
 
-<<<<<<< HEAD
-// **Panggil API saat filter berubah secara otomatis**
-=======
 // Watch for changes in filter values only
->>>>>>> a17154299dfb546f8d215c617c1860fe8c3b353b
 watch(
   [
     searchId,
