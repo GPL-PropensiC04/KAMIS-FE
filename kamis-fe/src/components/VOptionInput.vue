@@ -20,7 +20,7 @@ const selectOption = (option: string) => {
 </script>
 
 <template>
-  <div class="flex border border-[#1E3A5F] rounded-md overflow-hidden font-inter">
+  <div class="flex border border-[#1E3A5F] rounded-md overflow-hidden font-inter h-[45px]">
     <button
       v-for="option in props.options"
       :key="option.toString()"

@@ -1,12 +1,10 @@
-import FormData from 'form-data';
-
 export interface AssetTempInterface {
     id: number;
-    assetName: string;
+    assetNameString: string;
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: string | null; // Base64-encoded image string
+    foto?: File; // Base64-encoded image string
     fotoContentType?: string | null;
   }
 
@@ -16,5 +14,7 @@ export interface AddAssetTemp {
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: FormData;
+    foto?: File | string | FormData; // Can be File, base64 string, or FormData
+    fotoContentType?: string;
+    originalFile?: File; // Store the original File object
   }

@@ -1,11 +1,11 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-[url('@/assets/BackgroundLogin.jpg')] bg-cover bg-center p-4">
+  <div class="flex justify-center items-center min-h-screen bg-black bg-[url('@/assets/BackgroundLogin.jpg')] bg-opacity-50 bg-cover bg-center p-4">
     <div class="w-full max-w-2xl bg-white rounded-lg shadow-md p-24">
       <div class="flex justify-center mb-12">
         <img src="@/assets/LogoKAM.jpg" alt="KAMIS Logo" class="w-28 h-28" />
         <div class="text-left pl-4 pt-6 mb-6">
           <h1 class="text-3xl font-bold text-black">KAMIS</h1>
-          <p class="text-lg text-black">Karina Asa Madina Integrated System</p>
+          <p class="text-lg text-black">Karina Aka Madina Integrated System</p>
         </div>  
       </div>
       
@@ -49,11 +49,11 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-// import VTextArea from '@/components/VTextArea.vue';
 import VButton from '@/components/VButton.vue';
 
 const router = useRouter();
@@ -67,4 +67,4 @@ const handleLogin = async () => {
     router.push('/');
   }
 };
-</script> 
+</script>

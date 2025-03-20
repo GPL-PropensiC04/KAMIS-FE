@@ -19,3 +19,8 @@ export interface ResourceResponseInterface {
   timestamp: string;
   data: ResourceInterface;
 }   
+
+export interface UpdateResourceRequestInterface {
+  resourcePrice: number;
+  resourceDescription: string;
+}
