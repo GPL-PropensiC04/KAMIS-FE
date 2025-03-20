@@ -35,7 +35,7 @@
         <img 
           :src="assetImage || '/placeholder-image.jpg'" 
           alt="Gambar Aset" 
-          class="rounded-md shadow-md w-[250px] h-auto object-cover"
+          class="rounded-md shadow-md w-full max-w-md h-auto object-cover"
           @error="handleImageError"
         />
       </div>
@@ -275,6 +275,14 @@ const loadData = async () => {
   try {
     // Load asset details
     const response = await AsetService.getAsetByPlatNomor(platNomor);
+    
+    // Check if the asset exists or has been deleted
+    if (!response || response.isDeleted) {
+      // Redirect to NotFoundView if asset is deleted or doesn't exist
+      router.replace('/not-found');
+      return;
+    }
+    
     aset.value = response;
     
     // Make sure we have a valid asset before fetching the image
@@ -302,8 +310,18 @@ const loadData = async () => {
     }
   } catch (err) {
     console.error('Error loading data:', err);
+    
+    // Check if the error is due to asset not found (404)
+    // Assuming your API returns a specific error status for not found
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      // Redirect to NotFoundView if asset is not found
+      router.replace('/not-found');
+      return;
+    }
+    
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
     assetImage.value = '/placeholder-image.jpg';
+    
     // Set dummy data for development
     if (import.meta.env.MODE === 'development') {
       aset.value = {
