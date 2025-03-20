@@ -312,10 +312,6 @@ const confirmDelete = async () => {
   }
 };
 
-// Replaced the handleDeleteAset function with a function to show the modal
-const handleDeleteAset = () => {
-  showDeleteModal.value = true;
-};
 
 const handleAddMaintenance = () => {
   router.push('/coming-soon');   

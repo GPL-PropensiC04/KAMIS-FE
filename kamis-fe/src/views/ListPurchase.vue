@@ -172,7 +172,7 @@ const goToAddPurchase = () => {
                 <p></p>
 
                 <p class="font-semibold">Tipe Barang</p>
-                <p>: {{ purchase.purchaseType ? "Resource" : "Aset" }}</p>
+                <p>: {{ purchase.purchaseType }}</p>
 
                 <din v-if="canViewFinancialInfo">
                   <p class="font-bold text-[#1E3A5F] text-right">
