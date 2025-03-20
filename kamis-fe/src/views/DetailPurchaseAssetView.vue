@@ -15,70 +15,49 @@
 
     <!-- Purchase Details -->
     <div v-else-if="purchase" class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
-      <!-- Header with Back Button -->
       <div class="flex items-center justify-between mb-2">
-        <button 
-          @click="router.back()" 
-          class="hover:underline flex items-center mb-2 text-[28px]">
-          <span >←</span>
+        <button @click="router.back()" class="hover:underline flex items-center mb-2 text-[28px]">
+          <span>←</span>
         </button>
+
         <div v-if="purchase.purchaseStatus !== 'Ditolak' && purchase.purchaseStatus !== 'Dibatalkan'" class="flex justify-end gap-2 mb-2">
-          <!-- When status is "Diajukan" -->
           <template v-if="purchase.purchaseStatus === 'Diajukan'">
-            <!-- For Operasional role -->
             <template v-if="userRole === 'Operasional'">
-              <VCancelButton label="Tolak" @click="updateStatus(false)" />
               <VButton label="Ubah Detail" @click="handleEditDetail" />
             </template>
-
-            <!-- For Finance or Direksi roles -->
             <template v-else>
-              <VCancelButton label="Tolak" @click="updateStatus(false)" />
-              <VSuccessButton label="Setuju" @click="updateStatus(true)" />
-            </template>
-          </template>
-          
-          <!-- When status is "Disetujui" -->
-          <template v-else-if="purchase.purchaseStatus === 'Disetujui'">
-            <!-- For Operasional role -->
-            <template v-if="userRole === 'Operasional'">
-              <VButton label="Update Status" @click="updateStatus(true)" />
-            </template>
-            
-            <!-- For Finance or Direksi roles -->
-            <template v-else-if="userRole === 'Admin'">
-              <VCancelButton label="Batalkan" @click="updateStatus(false)" />
-              <VButton label="Update Status" @click="updateStatus(true)" />
+              <VCancelButton label="Tolak" @click="openModal(false)" />
+              <VSuccessButton label="Setuju" @click="openModal(true)" />
             </template>
           </template>
 
-          <!-- When status is "Diproses" -->
-          <template v-else-if="purchase.purchaseStatus === 'Diproses'">
-            <!-- For Operasional role -->
+          <template v-else-if="purchase.purchaseStatus === 'Disetujui'">
             <template v-if="userRole === 'Operasional'">
-              <VCancelButton label="Batalkan" @click="updateStatus(false)" />
-              <VButton label="Update Status" @click="updateStatus(true)" />
+              <VButton label="Update Status" @click="openModal(true)" />
             </template>
-            
-            <!-- For Finance or Direksi roles -->
-            <template v-else-if="userRole === 'Finance'">
-              <VSuccessButton label="Pembayaran" @click="handlePayment" />
+            <template v-else-if="userRole === 'Admin'">
+              <VCancelButton label="Batalkan" @click="openModal(false)" />
+              <VButton label="Update Status" @click="openModal(true)" />
             </template>
           </template>
-          
-          <!-- When status is "Selesai" -->
+
+          <template v-else-if="purchase.purchaseStatus === 'Diproses'">
+            <template v-if="userRole === 'Operasional'">
+              <VCancelButton label="Batalkan" @click="openModal(false)" />
+              <VButton label="Update Status" @click="openModal(true)" />
+            </template>
+            <template v-else-if="userRole === 'Finance'">
+              <VSuccessButton v-if="!purchase.purchasePaymentDate" label="Pembayaran" @click="openPaymentModal()" />
+            </template>
+          </template>
+
           <template v-else-if="purchase.purchaseStatus === 'Selesai'">
-            <!-- For Finance -->
             <template v-if="userRole === 'Finance'">
-              <VSuccessButton label="Pembayaran" @click="handlePayment" />
+              <VSuccessButton v-if="!purchase.purchasePaymentDate" label="Pembayaran" @click="openPaymentModal()" />
             </template>
           </template>
         </div>
       </div>
-      
-      <!-- Top Section -->
-       <!-- Action Buttons -->
-      
 
       <!-- Supplier & Purchase Type Info -->
       <div class="grid grid-cols-3 gap-4 mb-4 border-b pb-5">   
@@ -98,7 +77,6 @@
           <p class="text-lg font-bold font-lato">Tanggal Pengajuan</p>
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ formatDate(purchase.purchaseSubmissionDate) }}</p>
         </div>
-
         <div>
           <p class="text-lg font-bold font-lato">Tanggal Terakhir Diperbarui</p>
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ formatDate(purchase.purchaseUpdateDate) }}</p>
@@ -115,14 +93,11 @@
 
       <!-- Asset Details -->
       <div v-if="purchase.purchaseAsset" class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Left Column (Asset Details) -->
         <div class="grid grid-cols-[auto,0fr] gap-x-2 gap-y-2 items-center">
           <p class="font-lato font-bold">Nama Aset:</p>
           <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ purchase.purchaseAsset.assetNameString }}</p>
-
           <p class="font-lato font-bold">Deskripsi</p>
           <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ purchase.purchaseAsset.assetDescription }}</p>
-          
           <p v-if="canViewFinancialInfo" class="font-lato font-bold">Total Harga</p>
           <p v-if="canViewFinancialInfo" class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(purchase.purchaseAsset.assetPrice) }}</p>
         </div>
@@ -139,11 +114,48 @@
 
       <!-- Note Section -->
       <div class="mb-6">
-        <VLockedInput label="Catatan" 
-        placeholder="Tidak ada catatan"
-        :value="purchase.purchaseNote" />
+        <VLockedInput label="Catatan" placeholder="Tidak ada catatan" :value="purchase.purchaseNote" />
       </div>
+    </div>
 
+    <!-- Modal -->
+    <!-- Modal Update Status -->
+    <div v-if="showUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded shadow-md w-full max-w-lg">
+        <h3 class="text-xl font-semibold mb-4">Konfirmasi Update Status</h3>
+        <div class="mb-4">
+          <label class="block text-sm font-medium">Catatan <span class="text-red-500">*</span></label>
+          <textarea v-model="noteUpdate" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        </div>
+
+        <!-- Muncul hanya jika Next & status sekarang Diproses -->
+        <div v-if="isNextStatus && purchase?.purchaseStatus === 'Diproses'" class="mb-4">
+          <label class="block text-sm font-medium">Plat Nomor <span class="text-red-500">*</span></label>
+          <input v-model="platNomor" type="text" class="w-full border border-gray-300 p-2 rounded" />
+        </div>
+
+        <p v-if="errorUpdate" class="text-red-500 text-sm">{{ errorUpdate }}</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button @click="showUpdateModal = false" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
+          <button @click="submitUpdateStatus" class="bg-blue-600 text-white px-4 py-2 rounded">Kirim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pembayaran -->
+    <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded shadow-md w-full max-w-lg">
+        <h3 class="text-xl font-semibold mb-4">Konfirmasi Pembayaran</h3>
+        <div class="mb-4">
+          <label class="block text-sm font-medium">Catatan <span class="text-red-500">*</span></label>
+          <textarea v-model="notePayment" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        </div>
+        <p v-if="errorPayment" class="text-red-500 text-sm">{{ errorPayment }}</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button @click="showPaymentModal = false" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
+          <button @click="submitPayment" class="bg-blue-600 text-white px-4 py-2 rounded">Kirim</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -159,6 +171,7 @@ import VCancelButton from '@/components/VCancelButton.vue';
 import VLockedInput from '@/components/VLockedInput.vue';
 import type { AssetTempInterface } from '@/interfaces/assettemp.interface';
 import type { PurchaseInterface } from '@/interfaces/purchase.interface';
+import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface';
 import axios from 'axios';
 
 // Extended interface for the detail view
@@ -175,6 +188,16 @@ const purchaseId = ref(route.params.id as string);
 const loading = computed(() => purchaseStore.loading);
 const error = computed(() => purchaseStore.error);
 const purchase = computed(() => purchaseStore.currentPurchase as DetailAssetPurchaseInterface);
+
+const showUpdateModal = ref(false)
+const showPaymentModal = ref(false)
+
+const isNextStatus = ref(true)
+const noteUpdate = ref('')
+const notePayment = ref('')
+const platNomor = ref('')
+const errorUpdate = ref('')
+const errorPayment = ref('')
 
 // User role for conditional rendering
 const userRole = computed(() => authStore.userRole);
@@ -207,26 +230,66 @@ const loadPurchaseData = async () => {
   await purchaseStore.getPurchaseById(purchaseId.value);
 };
 
-// Update purchase status
-const updateStatus = async (isNextStatus: boolean = true) => {
-  if (!purchaseId.value) return;
-  
-  const statusNote = isNextStatus 
-    ? "Status pembelian diperbarui ke tahap selanjutnya" 
-    : "Pembelian ditolak";
-  
-  await purchaseStore.updatePurchaseStatus(purchaseId.value, statusNote, isNextStatus);
-};
+// Buka Modal Update Status
+const openModal = (next: boolean) => {
+  isNextStatus.value = next
+  noteUpdate.value = ''
+  errorUpdate.value = ''
+  showUpdateModal.value = true
+}
+
+// Buka Modal Pembayaran
+const openPaymentModal = () => {
+  notePayment.value = ''
+  platNomor.value = ''
+  errorPayment.value = ''
+  showPaymentModal.value = true
+}
+
+const submitUpdateStatus = async () => {
+  if (!noteUpdate.value.trim()) {
+    errorUpdate.value = 'Catatan wajib diisi ❗'
+    return
+  }
+
+  // Plat Nomor wajib hanya kalau Next & status saat ini 'Diproses'
+  if (isNextStatus.value && purchase.value?.purchaseStatus === 'Diproses') {
+    if (!platNomor.value.trim()) {
+      errorUpdate.value = 'Plat Nomor wajib diisi ❗'
+      return
+    }
+  }
+
+  const body: UpdatePurchaseStatusRequestInterface = {
+    purchaseNote: noteUpdate.value,
+    platNomor: isNextStatus.value && purchase.value?.purchaseStatus === 'Diproses' ? platNomor.value : undefined
+  }
+
+  await purchaseStore.updatePurchaseStatus(purchaseId.value, isNextStatus.value, body)
+  showUpdateModal.value = false
+  await loadPurchaseData()
+}
+
+
+// Submit Pembayaran
+const submitPayment = async () => {
+  if (!notePayment.value.trim()) {
+    errorPayment.value = 'Catatan wajib diisi ❗'
+    return
+  }
+
+  const body: UpdatePurchaseStatusRequestInterface = {
+    purchaseNote: notePayment.value,
+  }
+
+  await purchaseStore.updatePurchaseStatusPembayaran(purchaseId.value, body)
+  showPaymentModal.value = false
+  await loadPurchaseData()
+}
 
 // Handle edit detail action
 const handleEditDetail = () => {
   router.push(`/purchase/update-asset/${purchaseId.value}`);
-};
-
-// Handle payment action
-const handlePayment = async () => {
-  if (!purchaseId.value) return;
-  await purchaseStore.updatePurchaseStatus(purchaseId.value, "Pembayaran telah dilakukan", true);
 };
 
 // Add ref for image URL
