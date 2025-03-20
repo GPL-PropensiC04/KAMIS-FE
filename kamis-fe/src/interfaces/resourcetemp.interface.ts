@@ -1,8 +1,10 @@
 export interface ResourceTempInterface {
-    id: string;
-    name: string;
+    resourceId?: number;
+    resourceName: string;
     quantity: number;
-    price: number;
+    resourcePrice: number
+    
+    resourceTotal: number;
   }  
 
   export interface AddResourceTempRequestInterface {
@@ -11,3 +13,11 @@ export interface ResourceTempInterface {
     resourceTotal: number;
     resourcePrice: number;
   }
+
+  export interface ResourceTempResponseInterface {
+    resourceId?: number;
+    resourceName: string;
+    resourceTotal: number;
+    resourcePrice: number;
+  }
+  

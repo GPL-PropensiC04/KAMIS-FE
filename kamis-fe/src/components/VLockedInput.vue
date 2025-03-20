@@ -6,12 +6,16 @@ defineProps({
     type: String,
     required: true,
   },
+  placeholder: {
+    type: String,
+    required: false,
+  },
 });
 </script>
 
 <template>
   <div class="bg-[#8BA3BE] flex items-center justify-between border text-white px-4 py-2 rounded-md h-[45px] font-semibold">
-    {{ value }}
+    {{ value || placeholder }}
   </div>
 </template>
 

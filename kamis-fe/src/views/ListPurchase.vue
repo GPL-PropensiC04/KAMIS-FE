@@ -8,12 +8,14 @@ import VSortButton from "../components/VSortButton.vue";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
+import { useAuthStore } from "@/stores/auth";
 
 // Router
 const router = useRouter();
 
 // Store
 const purchaseStore = usePurchaseStore();
+const authStore = useAuthStore();
 
 // **State untuk filter & sorting**
 const searchId = ref("");
@@ -26,6 +28,19 @@ const sortByNominal = ref(false);
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
 const selectedNominalLabel = ref("Semua");
+
+// Role-based permission computed properties
+const canViewFinancialInfo = computed(() => {
+  const userRole = authStore.userRole;
+  // Only Direksi and Finance can see financial info
+  return userRole === 'Direksi' || userRole === 'Finance' || userRole === 'Admin';
+});
+
+const canEditPurchase = computed(() => {
+  const userRole = authStore.userRole;
+  // Only Staf Operasional can edit assets
+  return userRole === 'Operasional' || userRole === 'Admin';
+});
 
 // **List Rentang Harga**
 const nominalOptions = [
@@ -64,6 +79,7 @@ const updateNominalFilter = (selectedLabel: string) => {
 // **Panggil API saat filter berubah secara otomatis**
 watchEffect(() => {
   fetchPurchases();
+  console.log(purchaseStore.purchases)
 });
 
 // **Panggil data saat halaman dimuat**
@@ -110,7 +126,9 @@ const goToAddPurchase = () => {
       <!-- Filter & Tombol Tambah Pembelian -->
       <div class="flex justify-between items-center mb-4">
         <VOptionInput v-model="selectedType" :options="['All', 'Aset', 'Resource']" class="w-1/4" />
-        <VButton label="Tambah Pembelian" @click="goToAddPurchase"/>
+        <din v-if="canEditPurchase">
+          <VButton label="Tambah Pembelian" @click="goToAddPurchase"/>
+        </din>
       </div>
 
       <div v-if="purchaseStore.purchases.length" class="mt-4 space-y-6">
@@ -120,30 +138,40 @@ const goToAddPurchase = () => {
           class="rounded-lg shadow-md overflow-hidden bg-white"
         >
           <!-- Header -->
+          <router-link :to="purchase.purchaseId.startsWith('A-') ? `/purchase/detail/asset/${purchase.purchaseId}` : `/purchase/detail/resource/${purchase.purchaseId}`" class="block">
           <div class="bg-[#1E3A5F] text-white px-6 py-3 flex justify-between items-center">
-            <h3 class="text-lg font-semibold">Pembelian {{ purchase.purchaseId }}</h3>
+            <h3 class="text-lg font-semibold">
+              Pembelian {{ purchase.purchaseId }}
+            </h3>
             <span class="text-xs">Last Updated: {{ formatDate(purchase.purchaseUpdateDate) }}</span>
           </div>
 
           <!-- Content -->
-          <div class="p-6 bg-[#E5EAF2] text-gray-800 text-sm">
-            <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center">
-              <p class="font-semibold">Tanggal Pengajuan</p>
-              <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
-              <p></p> <!-- Spacer -->
+            <div class="p-6 bg-[#E5EAF2] text-gray-800 text-sm">
+              <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center">
+                <p class="font-semibold">Tanggal Pengajuan</p>
+                <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
+                <p></p> <!-- Spacer -->
 
-              <p class="font-semibold">Supplier</p>
-              <p>: {{ purchase.purchaseSupplier }}</p>
-              <p></p>
+                <p class="font-semibold">Status Pembelian</p>
+                <p>: {{ purchase.purchaseStatus }}</p>
+                <p></p>
 
-              <p class="font-semibold">Tipe Barang</p>
-              <p>: {{ purchase.purchaseType ? "Resource" : "Aset" }}</p>
+                <p class="font-semibold">Supplier</p>
+                <p>: {{ purchase.purchaseSupplier }}</p>
+                <p></p>
 
-              <p class="font-bold text-[#1E3A5F] text-right">
-                Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
-              </p>
+                <p class="font-semibold">Tipe Barang</p>
+                <p>: {{ purchase.purchaseType ? "Resource" : "Aset" }}</p>
+
+                <din v-if="canViewFinancialInfo">
+                  <p class="font-bold text-[#1E3A5F] text-right">
+                  Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
+                  </p>
+                </din>
+              </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
 

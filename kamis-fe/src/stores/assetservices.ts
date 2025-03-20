@@ -14,10 +14,10 @@ export const AsetService = {
    * Fetch all assets
    */
   async viewAllAsset(): Promise<AsetInterface[]> {
-    const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_ALL}`);
+    const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_ALL}`);
     return response.data.data;
   },
-
+  
   /**
    * Fetch asset by platNomor
    */
