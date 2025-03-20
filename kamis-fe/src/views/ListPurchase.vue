@@ -76,7 +76,11 @@ const updateNominalFilter = (selectedLabel: string) => {
   }
 };
 
+<<<<<<< HEAD
 // **Panggil API saat filter berubah secara otomatis**
+=======
+// Watch for changes in filter values only
+>>>>>>> a17154299dfb546f8d215c617c1860fe8c3b353b
 watch(
   [
     searchId,
@@ -92,7 +96,7 @@ watch(
   }
 );
 
-// **Panggil data saat halaman dimuat**
+// Initial data fetch
 onMounted(() => {
   fetchPurchases();
 });
@@ -182,7 +186,7 @@ const goToAddPurchase = () => {
                 <p></p>
 
                 <p class="font-semibold">Tipe Barang</p>
-                <p>: {{ purchase.purchaseType}}</p>
+                <p>: {{ purchase.purchaseType }}</p>
 
                 <din v-if="canViewFinancialInfo">
                   <p class="font-bold text-[#1E3A5F] text-right">

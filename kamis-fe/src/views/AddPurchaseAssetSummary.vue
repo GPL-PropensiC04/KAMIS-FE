@@ -2,10 +2,10 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
-import axios from "axios";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useAssetTempStore } from "@/stores/assetTemp";
+import type { AddAssetTemp } from "@/interfaces/assettemp.interface";
 
 // Router & Store
 const router = useRouter();
@@ -15,10 +15,44 @@ const assetTempStore = useAssetTempStore();
 // State
 const assetDetails = ref(assetTempStore.draftAssetTemp);
 const purchaseNote = ref("");
+const fileObject = ref<File | null>(null);
+const imagePreview = ref<string | null>(null);
+
+// Create File object from base64 when component mounts
+onMounted(() => {
+  // Get the base64 data from sessionStorage
+  const base64Data = sessionStorage.getItem('tempFileData');
+  
+  if (base64Data && assetDetails.value?.fileName && assetDetails.value?.contentType) {
+    // Set the image preview
+    imagePreview.value = base64Data;
+    
+    // Convert base64 to Blob
+    const byteString = atob(base64Data.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    
+    const blob = new Blob([ab], { type: assetDetails.value.contentType });
+    
+    // Create File object
+    fileObject.value = new File(
+      [blob], 
+      assetDetails.value.fileName, 
+      { type: assetDetails.value.contentType }
+    );
+    
+    console.log('Created File object from sessionStorage data');
+    console.log(`File size: ${Math.round(fileObject.value.size / 1024)} KB`);
+  }
+});
 
 // Format harga
-const formatCurrency = (value: any ) => {
-    return `Rp ${parseInt(value || 0).toLocaleString("id-ID")},00`;
+const formatCurrency = (value: number) => {
+    return `Rp ${parseInt(String(value || 0)).toLocaleString("id-ID")},00`;
 };
 
 // Tanggal hari ini
@@ -29,13 +63,42 @@ const currentDate = computed(() => {
 
 const handleSubmit = async () => {
     try {
-        // 🔹 Tunggu ID Aset dari addAssetTemp()
-        await assetTempStore.addAssetTemp(assetTempStore.draftAssetTemp);
+        // Create asset data object that matches the AddAssetTemp interface
+        const assetData: AddAssetTemp = {
+            assetName: assetDetails.value.assetName,
+            assetDescription: assetDetails.value.assetDescription,
+            assetType: assetDetails.value.assetType,
+            assetPrice: assetDetails.value.assetPrice,
+        };
 
-        const idAsset = assetTempStore.assetTemps.at(-1)?.id
-        console.log(assetTempStore.assetTemps)
+        // If we have reconstructed the File object successfully
+        if (fileObject.value instanceof File) {
+            console.log('Submitting with reconstructed File object');
+            console.log(`File name: ${fileObject.value.name}, size: ${Math.round(fileObject.value.size / 1024)} KB`);
+            assetData.foto = fileObject.value;
+        } else if (imagePreview.value) {
+            // Fallback to base64 if File reconstruction failed
+            console.log('Submitting with base64 image (fallback)');
+            assetData.foto = imagePreview.value;
+            assetData.fotoContentType = assetDetails.value.contentType;
+        }
 
-        // 🔹 Pastikan idAsset valid sebelum mengirim data ke backend
+        console.log("Sending asset data:", {
+            ...assetData,
+            foto: assetData.foto instanceof File 
+                ? `File: ${assetData.foto.name} (${Math.round(assetData.foto.size / 1024)} KB)` 
+                : typeof assetData.foto === 'string' 
+                    ? 'Base64 image' 
+                    : 'No image'
+        });
+
+        // Use the store method instead of direct API call
+        await assetTempStore.addAssetTemp(assetData);
+
+        const idAsset = assetTempStore.assetTemps.at(-1)?.id;
+        console.log("Asset added, id:", idAsset);
+
+        // Ensure idAsset valid before sending data to backend
         if (!idAsset || isNaN(idAsset)) {
             throw new Error("Gagal mendapatkan ID Aset.");
         }
@@ -43,30 +106,32 @@ const handleSubmit = async () => {
         const purchaseData = {
             purchaseSupplier: purchaseStore.draftPurchase?.purchaseSupplier || "Tidak Ada",
             purchaseType: false, // Karena ini aset
-            purchaseAsset: Number(idAsset), // ✅ Konversi ke Number
+            purchaseAsset: Number(idAsset),
             purchaseNote: purchaseNote.value
         };
 
-        console.log("Mengirim purchaseData:", purchaseData); // 🔍 Debugging
+        console.log("Mengirim purchaseData:", purchaseData);
 
-        // 🔹 Kirim data pembelian ke API
+        // Send purchase data to API
         await purchaseStore.addPurchase(purchaseData);
 
-        // 🔹 Hapus draft setelah berhasil submit
+        // Clear drafts after successful submission
         purchaseStore.clearDraftPurchase();
         assetTempStore.clearDraftAssetTemp();
+        sessionStorage.removeItem('tempFileData'); // Clean up temporary file data
+        
+        // Navigate back to purchase list
+        router.push("/purchase");
     } catch (error) {
         console.error("Error saat submit pembelian:", error);
     }
 };
-
 
 // Fungsi Batal
 const handleCancel = () => {
     purchaseStore.clearDraftPurchase();
     router.push("/purchase");
 };
-
 </script>
 
 <template>
@@ -113,11 +178,17 @@ const handleCancel = () => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
+<<<<<<< HEAD
                     <img :src="assetDetails.foto" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+=======
+                    <img 
+                        :src="imagePreview || '/placeholder-asset.jpg'" 
+                        alt="Gambar Aset" 
+                        class="rounded-md shadow-md w-[250px] h-auto object-cover"
+                    >
+>>>>>>> a17154299dfb546f8d215c617c1860fe8c3b353b
                 </div>
             </div>
-
-
 
             <!-- Catatan Pembelian -->
             <div class="mt-4">

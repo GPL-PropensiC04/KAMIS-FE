@@ -22,12 +22,15 @@
           class="hover:underline flex items-center mb-2 text-[28px]">
           <span >←</span>
         </button>
-        <div v-if="purchase.purchaseStatus !== 'Selesai' && purchase.purchaseStatus !== 'Ditolak'" class="flex justify-end gap-2 mb-2">
+        <div v-if="purchase.purchaseStatus !== 'Ditolak' && purchase.purchaseStatus !== 'Dibatalkan'" class="flex justify-end gap-2 mb-2">
           <!-- When status is "Diajukan" -->
           <template v-if="purchase.purchaseStatus === 'Diajukan'">
             <!-- For Operasional role -->
-            <VButton v-if="userRole === 'Operasional'" label="Ubah Detail" @click="handleEditDetail" />
-            
+            <template v-if="userRole === 'Operasional'">
+              <VCancelButton label="Tolak" @click="updateStatus(false)" />
+              <VButton label="Ubah Detail" @click="handleEditDetail" />
+            </template>
+
             <!-- For Finance or Direksi roles -->
             <template v-else>
               <VCancelButton label="Tolak" @click="updateStatus(false)" />
@@ -38,11 +41,35 @@
           <!-- When status is "Disetujui" -->
           <template v-else-if="purchase.purchaseStatus === 'Disetujui'">
             <!-- For Operasional role -->
-            <VButton v-if="userRole === 'Operasional'" label="Update Status" @click="updateStatus(true)" />
+            <template v-if="userRole === 'Operasional'">
+              <VButton label="Update Status" @click="updateStatus(true)" />
+            </template>
             
             <!-- For Finance or Direksi roles -->
-            <template v-else>
+            <template v-else-if="userRole === 'Admin'">
+              <VCancelButton label="Batalkan" @click="updateStatus(false)" />
               <VButton label="Update Status" @click="updateStatus(true)" />
+            </template>
+          </template>
+
+          <!-- When status is "Diproses" -->
+          <template v-else-if="purchase.purchaseStatus === 'Diproses'">
+            <!-- For Operasional role -->
+            <template v-if="userRole === 'Operasional'">
+              <VCancelButton label="Batalkan" @click="updateStatus(false)" />
+              <VButton label="Update Status" @click="updateStatus(true)" />
+            </template>
+            
+            <!-- For Finance or Direksi roles -->
+            <template v-else-if="userRole === 'Finance'">
+              <VSuccessButton label="Pembayaran" @click="handlePayment" />
+            </template>
+          </template>
+          
+          <!-- When status is "Selesai" -->
+          <template v-else-if="purchase.purchaseStatus === 'Selesai'">
+            <!-- For Finance -->
+            <template v-if="userRole === 'Finance'">
               <VSuccessButton label="Pembayaran" @click="handlePayment" />
             </template>
           </template>
