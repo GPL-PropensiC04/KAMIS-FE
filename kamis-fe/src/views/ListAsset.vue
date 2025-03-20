@@ -49,13 +49,23 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { AsetService } from '@/stores/assetservices';
 import type { AsetInterface } from '@/interfaces/asset.interface';
+import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 
 const assets = ref<AsetInterface[]>([]);
 const loading = ref(true);
 const searchQuery = ref('');
-const userRole = ref<'DIREKSI' | 'FINANCE' | 'OPERASIONAL'>('OPERASIONAL'); // Ganti dengan logika untuk mendapatkan peran pengguna saat ini
+const authStore = useAuthStore();
+
+const canViewFinancialInfo = computed(() => {
+  const userRole = authStore.userRole;
+  return userRole === 'Direksi' || userRole === 'Finance';
+});
+
+const canViewMaintenanceInfo = computed(() => {
+  return authStore.userRole === 'Operasional';
+});
 
 // Notifikasi state
 const showNotification = ref(false);
@@ -120,17 +130,18 @@ const formatCurrency = (value: number) => {
 };
 
 const thirdColumnHeader = computed(() => {
-  if (userRole.value === 'OPERASIONAL') {
+  if (canViewMaintenanceInfo.value) {
     return 'Sisa Hari Maintenance';
-  } else {
+  } else if (canViewFinancialInfo.value) {
     return 'Nilai Perolehan';
   }
+  return '';
 });
 
 const thirdColumnValue = (asset: AsetInterface) => {
-  if (userRole.value === 'OPERASIONAL') {
+  if (canViewMaintenanceInfo.value) {
     return 'Coming soon';
-  } else {
+  } else if (canViewFinancialInfo.value) {
     return formatCurrency(asset.nilaiPerolehan);
   }
 };
