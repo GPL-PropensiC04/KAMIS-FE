@@ -60,19 +60,19 @@
       </div>
 
       <!-- Supplier & Purchase Type Info -->
-      <div class="grid grid-cols-3 gap-4 mb-4 border-b pb-5">
-        <div>
-          <p class="text-lg font-bold font-lato">ID Transaksi</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseId }}</p>
-        </div>
-        <div>
-          <p class="text-lg font-bold font-lato">Supplier</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
-        </div>
-        <div>
-          <p class="text-lg font-bold font-lato">Tipe Barang</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseType }}</p>
-        </div>
+      <div class="grid grid-cols-3 gap-4 mb-4 border-b pb-5">   
+          <div>
+            <p class="text-lg font-bold font-lato">ID Transaksi</p>
+            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseId }}</p>
+          </div>
+          <div>
+            <p class="text-lg font-bold font-lato">Supplier</p>
+            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
+          </div>
+          <div>
+            <p class="text-lg font-bold font-lato">Tipe Barang</p>
+            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseType }}</p>
+          </div>
         <div>
           <p class="text-lg font-bold font-lato">Tanggal Pengajuan</p>
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ formatDate(purchase.purchaseSubmissionDate) }}</p>
@@ -102,9 +102,13 @@
           <p v-if="canViewFinancialInfo" class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(purchase.purchaseAsset.assetPrice) }}</p>
         </div>
 
+        <!-- Right Column (Asset Image) -->
         <div class="flex justify-center items-start">
-          <img :src="imageUrl || '/placeholder-asset.jpg'" :alt="purchase.purchaseAsset.assetNameString"
-            class="rounded-md shadow-md w-[250px] h-auto object-cover" />
+          <img 
+            :src="imageUrl || '/placeholder-asset.jpg'" 
+            :alt="purchase.purchaseAsset.assetNameString"
+            class="rounded-md shadow-md w-[250px] h-auto object-cover"
+          />
         </div>
       </div>
 

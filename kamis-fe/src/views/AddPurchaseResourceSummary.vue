@@ -32,7 +32,7 @@ const setTodayDate = () => {
 
 // **Hitung Total Harga**
 const totalPrice = computed(() => {
-    return purchaseItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return purchaseItems.value.reduce((sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity, 0);
 });
 
 // **Handle Submit (Memanggil addPurchase API)**
@@ -47,7 +47,7 @@ const handleSubmit = async () => {
         purchaseSupplier: supplier.value,
         purchaseType: purchaseType.value === "Resource",
         purchaseNote: purchaseNote.value,
-        purchaseResource: purchaseItems.value.map(item => ({
+        purchaseResource: purchaseItems.value.map((item: { id: any; name: any; quantity: any; price: any; }) => ({
             resourceId: item.id,  // **Tambahkan ID dari database**
             resourceName: item.name,
             resourceTotal: item.quantity,
