@@ -31,7 +31,14 @@
 
     <template v-else>
       <!-- Asset Image -->
-      <AssetImage :image-url="asetImageUrl" :alt="aset.nama" class="mb-6 max-w-full h-auto rounded-lg shadow-md mx-auto" />
+      <div class="mb-6 flex justify-center">
+        <img 
+          :src="assetImage || '/placeholder-image.jpg'" 
+          alt="Gambar Aset" 
+          class="rounded-md shadow-md w-[250px] h-auto object-cover"
+          @error="handleImageError"
+        />
+      </div>
 
       <!-- Asset Info Card -->
       <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden mb-6">
@@ -155,11 +162,19 @@ import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const platNomor = route.params.platNomor as string;
+
+// State variables
+const aset = ref<AsetInterface>({} as AsetInterface);
+const maintenanceHistory = ref<Maintenance[]>([]);
+const isLoading = ref(true);
+const error = ref('');
+const assetImage = ref('');
 
 // Delete modal state
 const showDeleteModal = ref(false);
@@ -202,11 +217,42 @@ watch(() => route.query, (query) => {
   }
 }, { immediate: true });
 
-// State
-const aset = ref<AsetInterface>({} as AsetInterface);
-const maintenanceHistory = ref<Maintenance[]>([]);
-const isLoading = ref(true);
-const error = ref('');
+// Fetch asset image from backend
+const fetchAssetImage = async (id: string) => {
+  try {
+    // Check if the id is valid before making the request
+    if (!id || id === 'undefined' || id === 'null') {
+      console.warn('Invalid asset ID for image fetch:', id);
+      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
+      return;
+    }
+
+    const response = await axios.get(`http://localhost:8081/api/asset/${id}/foto`, {
+      responseType: 'blob',
+      // Add timeout and validate status to handle errors better
+      timeout: 5000,
+      validateStatus: (status) => status >= 200 && status < 300,
+    });
+    
+    // Check if we received valid image data
+    if (response.data && response.data.size > 0) {
+      assetImage.value = URL.createObjectURL(response.data);
+    } else {
+      console.warn('Empty image data received');
+      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
+    }
+  } catch (error) {
+    console.error("Error fetching asset image:", error);
+    // Set default image when fetching fails
+    assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
+  }
+};
+
+// Handle image loading errors
+const handleImageError = () => {
+  console.log('Image failed to load, using placeholder');
+  assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
+};
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -221,14 +267,6 @@ const canEditAsset = computed(() => {
   return userRole === 'Operasional' || userRole === 'Admin';
 });
 
-// Computed value for image url
-const asetImageUrl = computed(() => {
-  if (aset.value?.gambarAset) {
-    return byteArrayToImageUrl(aset.value.gambarAset as unknown as number[]);
-  }
-  return '';
-});
-
 // Load data from API
 const loadData = async () => {
   isLoading.value = true;
@@ -238,6 +276,15 @@ const loadData = async () => {
     // Load asset details
     const response = await AsetService.getAsetByPlatNomor(platNomor);
     aset.value = response;
+    
+    // Make sure we have a valid asset before fetching the image
+    if (aset.value && aset.value.platNomor) {
+      // Use the platNomor as the ID for image fetching
+      await fetchAssetImage(aset.value.platNomor);
+    } else {
+      console.warn('No valid asset data received');
+      assetImage.value = '/placeholder-image.jpg';
+    }
 
     // Load maintenance history
     try {
@@ -256,6 +303,7 @@ const loadData = async () => {
   } catch (err) {
     console.error('Error loading data:', err);
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
+    assetImage.value = '/placeholder-image.jpg';
     // Set dummy data for development
     if (import.meta.env.MODE === 'development') {
       aset.value = {
@@ -307,7 +355,6 @@ const confirmDelete = async () => {
     showDeleteModal.value = false;
   }
 };
-
 
 const handleAddMaintenance = () => {
   router.push('/coming-soon');   
