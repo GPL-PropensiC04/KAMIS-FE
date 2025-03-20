@@ -111,7 +111,7 @@ const handleFileChange = (file: File) => {
           <label class="block mb-1 font-medium text-gray-700">Jenis Aset</label>
           <VDropDownInput 
             v-model="assetType" 
-            :options="['Truk', 'Mobil', 'Pendar']" 
+            :options="['Truk', 'Mobil', 'Pickup']" 
             placeholder="Pilih Jenis Aset" 
             class="w-full"
           />
