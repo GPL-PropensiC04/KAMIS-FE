@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { PurchaseInterface, AddPurchaseRequestInterface, UpdatePurchaseRequestInterface } from '@/interfaces/purchase.interface';
+import type { PurchaseInterface, AddPurchaseRequestInterface, UpdatePurchaseRequestInterface, UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface';
 // import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
@@ -110,7 +110,7 @@ export const usePurchaseStore = defineStore('purchase', {
           }
         },
 
-        async updatePurchaseStatus(id: string, statusNote: string, isNextStatus: boolean = true) {
+        async updatePurchaseStatus(id: string, isNextStatus: boolean = true, body: UpdatePurchaseStatusRequestInterface) {
           this.loading = true;
           this.error = null;
         
@@ -121,7 +121,7 @@ export const usePurchaseStore = defineStore('purchase', {
             
             const response = await axios.put<CommonResponseInterface<PurchaseInterface>>(
               endpoint, 
-              { statusNote },
+              body,
               {
                 headers: {
                   'Content-Type': 'application/json',
@@ -145,6 +145,44 @@ export const usePurchaseStore = defineStore('purchase', {
             return response.data.data;
           } catch (err: unknown) {
             this.error = `Gagal memperbarui status pembelian ${err instanceof Error ? err.message : 'Unknown error'}`;
+            useToast().error(this.error);
+            return null;
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async updatePurchaseStatusPembayaran(id: string, body: UpdatePurchaseStatusRequestInterface) {
+          this.loading = true;
+          this.error = null;
+        
+          try {
+            const response = await axios.put<CommonResponseInterface<PurchaseInterface>>(
+              `http://localhost:8084/api/purchase/updatestatus/pembayaran/${id}`, 
+              body,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+              }
+            );
+        
+            // Update local state
+            if (this.currentPurchase && this.currentPurchase.id === id) {
+              this.currentPurchase = response.data.data;
+            }
+            
+            // Update in purchases array if exists
+            const index = this.purchases.findIndex(p => p.id === id);
+            if (index !== -1) {
+              this.purchases[index] = response.data.data;
+            }
+            
+            useToast().success('Status pembayaran berhasil diperbarui');
+            return response.data.data;
+          } catch (err: unknown) {
+            this.error = `Gagal memperbarui status pembayaran ${err instanceof Error ? err.message : 'Unknown error'}`;
             useToast().error(this.error);
             return null;
           } finally {

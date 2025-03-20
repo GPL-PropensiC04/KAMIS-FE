@@ -29,7 +29,10 @@ export interface UpdatePurchaseRequestInterface {
     purchaseNote?: string;                   // Catatan pembelian (opsional)
 }
   
-  
+export interface UpdatePurchaseStatusRequestInterface {
+    purchaseNote: string;                   // Catatan pembelian 
+    platNomor?: string;                      // Plat nomor kendaraan
+}
 
 
   
