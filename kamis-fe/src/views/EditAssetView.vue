@@ -1,9 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    <!-- Notification popup -->
+    <!-- Notification popup - dengan warna dinamis berdasarkan tipe notifikasi -->
     <div 
       v-if="showNotification" 
-      class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-slide-in"
+      :class="[
+        'fixed top-5 right-5 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-slide-in',
+        notificationType === 'error' ? 'bg-red-500' : 'bg-green-500'
+      ]"
     >
       {{ notificationMessage }}
     </div>
@@ -17,7 +20,7 @@
             <span class="mx-2 text-gray-400">&gt;</span>
           </li>
           <li class="flex items-center">
-            <router-link to="/asset" class="text-gray-600 hover:text-gray-900">Asset</router-link>
+            <router-link to="/assets" class="text-gray-600 hover:text-gray-900">Asset</router-link>
             <span class="mx-2 text-gray-400">&gt;</span>
           </li>
           <li class="flex items-center">
@@ -63,7 +66,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">
-                    Nama Aset
+                    Nama Aset <span class="text-red-500">*</span>
                   </label>
                   <VTextArea
                     id="nama"
@@ -71,6 +74,7 @@
                     placeholder="Masukkan nama aset"
                     required
                   />
+                  <p v-if="errors.nama" class="mt-1 text-sm text-red-600">{{ errors.nama }}</p>
                 </div>
                 
                 <div>
@@ -89,7 +93,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label for="platNomor" class="block text-sm font-medium text-gray-700 mb-1">
-                    Nomor Plat
+                    No Polisi
                   </label>
                   <VLockedInput
                     id="platNomor"
@@ -112,7 +116,7 @@
               <!-- Description -->
               <div>
                 <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">
-                  Deskripsi Aset
+                  Deskripsi Aset <span class="text-red-500">*</span>
                 </label>
                 <VTextBox
                   id="deskripsi"
@@ -120,6 +124,7 @@
                   placeholder="Masukkan deskripsi aset"
                   required
                 />
+                <p v-if="errors.deskripsi" class="mt-1 text-sm text-red-600">{{ errors.deskripsi }}</p>
               </div>
 
               <!-- Action Buttons -->
@@ -187,6 +192,33 @@ const formattedPlateNumber = computed(() => {
   return platNomor;
 });
 
+// Form validation
+const errors = ref({
+  nama: '',
+  deskripsi: ''
+});
+
+// Validate form function
+const validateForm = () => {
+  let isValid = true;
+  errors.value = {
+    nama: '',
+    deskripsi: ''
+  };
+  
+  if (!formData.value.nama.trim()) {
+    errors.value.nama = 'Nama aset tidak boleh kosong';
+    isValid = false;
+  }
+  
+  if (!formData.value.deskripsi.trim()) {
+    errors.value.deskripsi = 'Deskripsi aset tidak boleh kosong';
+    isValid = false;
+  }
+  
+  return isValid;
+};
+
 // Show notification helper function
 const showNotificationPopup = (message: string, type: 'success' | 'error' = 'success') => {
   notificationMessage.value = message;
@@ -226,6 +258,12 @@ const loadData = async () => {
 };
 
 const updateAsset = async () => {
+  // Validate form before submitting
+  if (!validateForm()) {
+    showNotificationPopup('Harap lengkapi semua field yang wajib diisi', 'error');
+    return;
+  }
+  
   try {
     // Update the form data using the original plate number
     const updatedData = {
