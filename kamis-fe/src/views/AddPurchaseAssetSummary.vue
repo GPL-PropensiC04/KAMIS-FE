@@ -176,7 +176,6 @@ const handleCancel = () => {
                     <p class="pl-5 text-[#1E3A5F] font-lato font-bold">{{ formatCurrency(assetDetails?.assetPrice) }}</p>
                 </div>
 
-                <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
                     <img 
                         :src="imagePreview || '/placeholder-asset.jpg'" 
