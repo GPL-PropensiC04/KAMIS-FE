@@ -178,11 +178,15 @@ const handleCancel = () => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
+<<<<<<< HEAD
+                    <img :src="assetDetails.foto" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+=======
                     <img 
                         :src="imagePreview || '/placeholder-asset.jpg'" 
                         alt="Gambar Aset" 
                         class="rounded-md shadow-md w-[250px] h-auto object-cover"
                     >
+>>>>>>> a17154299dfb546f8d215c617c1860fe8c3b353b
                 </div>
             </div>
 
