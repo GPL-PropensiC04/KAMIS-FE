@@ -15,11 +15,11 @@
       </router-link>
     </div>
 
-    <div v-if="isLoading" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
       <p>Memuat data...</p>
     </div>
 
-    <div v-else-if="error" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
       <p class="text-red-500">{{ error }}</p>
       <button 
         @click="loadData" 
@@ -34,22 +34,18 @@
       <AssetImage :image-url="asetImageUrl" :alt="aset.nama" class="mb-6 max-w-full h-auto rounded-lg shadow-md mx-auto" />
 
       <!-- Asset Info Card -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-          <h2 class="text-lg font-bold text-white">Informasi Aset</h2>
+          <h2 class="text-xl font-bold text-white">Informasi Aset</h2>
           <div v-if="canEditAsset" class="flex space-x-2">
-            <button 
+            <VSuccessButton 
+              label="Ubah" 
               @click="handleEditAset" 
-              class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded"
-            >
-              Ubah
-            </button>
-            <button 
+            />
+            <VCancelButton 
+              label="Hapus" 
               @click="showDeleteModal = true" 
-              class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
-            >
-              Hapus
-            </button>
+            />
           </div>
         </div>
         
@@ -78,17 +74,18 @@
             <p class="text-gray-600 text-sm">Nilai Perolehan</p>
             <p class="font-semibold">{{ formatCurrency(aset.nilaiPerolehan) }}</p>
           </div>
-        </div>
-        
-        <div class="p-4 border-t">
-          <p class="text-gray-600 text-sm mb-2">Deskripsi</p>
-          <p>{{ aset.deskripsi }}</p>
+          
+          <!-- Description section moved to the grid area with no border -->
+          <div class="col-span-2 mt-2">
+            <p class="text-gray-600 text-sm mb-2">Deskripsi</p>
+            <p>{{ aset.deskripsi }}</p>
+          </div>
         </div>
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-md">
+      <div v-if="showDeleteModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 w-full max-w-md">
           <div class="bg-[#1E3A5F] p-4">
             <h3 class="text-lg font-bold text-white">Konfirmasi</h3>
           </div>
@@ -109,25 +106,23 @@
       </div>
 
       <!-- Maintenance History -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-          <h2 class="text-lg font-bold text-white">Riwayat Maintenance</h2>
-          <button 
+          <h2 class="text-xl font-bold text-white">Riwayat Maintenance</h2>
+          <VSuccessButton 
             v-if="canEditAsset" 
+            label="Ajukan" 
             @click="handleAddMaintenance" 
-            class="bg-[#28a745] hover:bg-green-600 text-white px-4 py-1 rounded"
-          >
-            Ajukan
-          </button>
+          />
         </div>
         
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pengajuan</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Pengajuan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Catatan</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -159,6 +154,7 @@ import AssetImage from '@/components/AssetImage.vue';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
+import VSuccessButton from '@/components/VSuccessButton.vue';
 
 const route = useRoute();
 const router = useRouter();
