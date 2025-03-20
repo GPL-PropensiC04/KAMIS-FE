@@ -24,7 +24,16 @@ const emit = defineEmits(["update:modelValue"]);
 
 // Fungsi untuk menangani input manual dan memastikan hanya angka yang valid
 const updateValue = (event: Event) => {
-  const rawValue = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, ""); // Hapus semua karakter kecuali angka
+  const target = event.target as HTMLInputElement;
+  
+  // Immediately replace any non-numeric characters
+  const rawValue = target.value.replace(/[^0-9]/g, "");
+  
+  // If user entered non-numeric characters, update the input value to only contain numbers
+  if (target.value !== rawValue) {
+    target.value = rawValue;
+  }
+  
   let numericValue = rawValue ? parseInt(rawValue, 10) : 0;
 
   // Pastikan tidak melewati batas min/max
@@ -35,7 +44,10 @@ const updateValue = (event: Event) => {
 };
 
 // Fungsi untuk menambah harga dengan kelipatan `step`
-const increment = () => {
+const increment = (e: MouseEvent) => {
+  // Prevent default to avoid form submission
+  e.preventDefault();
+  
   const newValue = props.modelValue + props.step;
   if (newValue <= props.max) {
     emit("update:modelValue", newValue);
@@ -43,11 +55,63 @@ const increment = () => {
 };
 
 // Fungsi untuk mengurangi harga dengan kelipatan `step`
-const decrement = () => {
+const decrement = (e: MouseEvent) => {
+  // Prevent default to avoid form submission
+  e.preventDefault();
+  
   const newValue = props.modelValue - props.step;
   if (newValue >= props.min) {
     emit("update:modelValue", newValue);
   }
+};
+
+// Handle keyboard events to prevent form submission when arrow keys are pressed
+// and block non-numeric key input
+const handleKeyDown = (event: KeyboardEvent) => {
+  // Allow: backspace, delete, tab, escape, enter, ctrl+A, home, end, left, right
+  const allowedKeys = [
+    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'
+  ];
+  
+  // Also allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X for copy-paste operations
+  if (
+    (event.ctrlKey && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) ||
+    allowedKeys.includes(event.key)
+  ) {
+    // Allow these keys
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent form submission on Enter
+    }
+    return;
+  }
+
+  // Handle arrow up/down for increment/decrement with step value
+  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    event.preventDefault();
+    
+    if (event.key === 'ArrowUp') {
+      const newValue = props.modelValue + props.step;
+      if (newValue <= props.max) {
+        emit("update:modelValue", newValue);
+      }
+    } else if (event.key === 'ArrowDown') {
+      const newValue = props.modelValue - props.step;
+      if (newValue >= props.min) {
+        emit("update:modelValue", newValue);
+      }
+    }
+    return;
+  }
+
+  // Block if not a number key (0-9)
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault();
+  }
+};
+
+// Format price with thousand separators for display
+const formatPrice = (num: number): string => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 </script>
 
@@ -57,8 +121,9 @@ const decrement = () => {
       <span class="text-black">Rp</span>
       <input
         type="text"
-        :value="modelValue"
+        :value="formatPrice(modelValue)"
         @input="updateValue"
+        @keydown="handleKeyDown"
         class="w-full text-black bg-transparent border-none outline-none text-right px-2"
       />
       <div class="flex flex-col">

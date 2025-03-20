@@ -85,10 +85,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
+  function logout(removeToken: boolean = true) {
     token.value = null;
     user.value = null;
-    localStorage.removeItem('auth_token');
+    
+    // Only remove token from localStorage if specified (default true)
+    if (removeToken) {
+      localStorage.removeItem('auth_token');
+    }
+    
     delete axios.defaults.headers.common['Authorization'];
     router.push('/login');
   }
