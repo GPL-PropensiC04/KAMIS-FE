@@ -84,8 +84,8 @@
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-md">
+      <div v-if="showDeleteModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 w-full max-w-md">
           <div class="bg-[#1E3A5F] p-4">
             <h3 class="text-lg font-bold text-white">Konfirmasi</h3>
           </div>
