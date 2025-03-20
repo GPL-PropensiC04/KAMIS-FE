@@ -27,29 +27,29 @@
             </template>
             <template v-else>
               <VCancelButton label="Tolak" @click="openModal(false)" />
-              <VSuccessButton label="Setuju" @click="openModal(true)" />
+              <VSuccessButton label="Setujui" @click="openModal(true)" />
             </template>
           </template>
 
           <template v-else-if="purchase.purchaseStatus === 'Disetujui'">
             <template v-if="userRole === 'Operasional'">
-              <VButton label="Update Status" @click="openModal(true)" />
+              <VButton label="Proses Pembelian" @click="openModal(true)" />
             </template>
             <template v-else-if="userRole === 'Admin'">
               <VCancelButton label="Batalkan" @click="openModal(false)" />
-              <VButton label="Update Status" @click="openModal(true)" />
+              <VButton label="Proses Pembelian" @click="openModal(true)" />
             </template>
           </template>
 
           <template v-else-if="purchase.purchaseStatus === 'Diproses'">
             <template v-if="userRole === 'Operasional'">
               <VCancelButton label="Batalkan" @click="openModal(false)" />
-              <VButton label="Update Status" @click="openModal(true)" />
+              <VButton label="Selesaikan Pembelian" @click="openModal(true)" />
             </template>
             <template v-else-if="userRole === 'Finance'">
               <VSuccessButton 
                 v-if="!purchase.purchasePaymentDate" 
-                label="Pembayaran" 
+                label="Konfirmasi Pembayaran" 
                 @click="openPaymentModal()" 
               />
             </template>
@@ -59,7 +59,7 @@
             <template v-if="userRole === 'Finance'">
               <VSuccessButton 
                 v-if="!purchase.purchasePaymentDate" 
-                label="Pembayaran" 
+                label="Konfirmasi Pembayaran" 
                 @click="openPaymentModal()" 
               />
             </template>
