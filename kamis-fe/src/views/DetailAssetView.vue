@@ -15,11 +15,11 @@
       </router-link>
     </div>
 
-    <div v-if="isLoading" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
       <p>Memuat data...</p>
     </div>
 
-    <div v-else-if="error" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
       <p class="text-red-500">{{ error }}</p>
       <button 
         @click="loadData" 
@@ -31,25 +31,28 @@
 
     <template v-else>
       <!-- Asset Image -->
-      <AssetImage :image-url="asetImageUrl" :alt="aset.nama" class="mb-6 max-w-full h-auto rounded-lg shadow-md mx-auto" />
+      <div class="mb-6 flex justify-center">
+        <img 
+          :src="assetImage || '/placeholder-image.jpg'" 
+          alt="Gambar Aset" 
+          class="rounded-md shadow-md w-[250px] h-auto object-cover"
+          @error="handleImageError"
+        />
+      </div>
 
       <!-- Asset Info Card -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-          <h2 class="text-lg font-bold text-white">Informasi Aset</h2>
+          <h2 class="text-xl font-bold text-white">Informasi Aset</h2>
           <div v-if="canEditAsset" class="flex space-x-2">
-            <button 
+            <VSuccessButton 
+              label="Ubah" 
               @click="handleEditAset" 
-              class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded"
-            >
-              Ubah
-            </button>
-            <button 
+            />
+            <VCancelButton 
+              label="Hapus" 
               @click="showDeleteModal = true" 
-              class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
-            >
-              Hapus
-            </button>
+            />
           </div>
         </div>
         
@@ -78,17 +81,18 @@
             <p class="text-gray-600 text-sm">Nilai Perolehan</p>
             <p class="font-semibold">{{ formatCurrency(aset.nilaiPerolehan) }}</p>
           </div>
-        </div>
-        
-        <div class="p-4 border-t">
-          <p class="text-gray-600 text-sm mb-2">Deskripsi</p>
-          <p>{{ aset.deskripsi }}</p>
+          
+          <!-- Description section moved to the grid area with no border -->
+          <div class="col-span-2 mt-2">
+            <p class="text-gray-600 text-sm mb-2">Deskripsi</p>
+            <p>{{ aset.deskripsi }}</p>
+          </div>
         </div>
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-md">
+      <div v-if="showDeleteModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 w-full max-w-md">
           <div class="bg-[#1E3A5F] p-4">
             <h3 class="text-lg font-bold text-white">Konfirmasi</h3>
           </div>
@@ -109,25 +113,23 @@
       </div>
 
       <!-- Maintenance History -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-          <h2 class="text-lg font-bold text-white">Riwayat Maintenance</h2>
-          <button 
+          <h2 class="text-xl font-bold text-white">Riwayat Maintenance</h2>
+          <VSuccessButton 
             v-if="canEditAsset" 
+            label="Ajukan" 
             @click="handleAddMaintenance" 
-            class="bg-[#28a745] hover:bg-green-600 text-white px-4 py-1 rounded"
-          >
-            Ajukan
-          </button>
+          />
         </div>
         
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pengajuan</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Pengajuan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Catatan</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -159,11 +161,20 @@ import AssetImage from '@/components/AssetImage.vue';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
+import VSuccessButton from '@/components/VSuccessButton.vue';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const platNomor = route.params.platNomor as string;
+
+// State variables
+const aset = ref<AsetInterface>({} as AsetInterface);
+const maintenanceHistory = ref<Maintenance[]>([]);
+const isLoading = ref(true);
+const error = ref('');
+const assetImage = ref('');
 
 // Delete modal state
 const showDeleteModal = ref(false);
@@ -206,11 +217,42 @@ watch(() => route.query, (query) => {
   }
 }, { immediate: true });
 
-// State
-const aset = ref<AsetInterface>({} as AsetInterface);
-const maintenanceHistory = ref<Maintenance[]>([]);
-const isLoading = ref(true);
-const error = ref('');
+// Fetch asset image from backend
+const fetchAssetImage = async (id: string) => {
+  try {
+    // Check if the id is valid before making the request
+    if (!id || id === 'undefined' || id === 'null') {
+      console.warn('Invalid asset ID for image fetch:', id);
+      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
+      return;
+    }
+
+    const response = await axios.get(`http://localhost:8081/api/asset/${id}/foto`, {
+      responseType: 'blob',
+      // Add timeout and validate status to handle errors better
+      timeout: 5000,
+      validateStatus: (status) => status >= 200 && status < 300,
+    });
+    
+    // Check if we received valid image data
+    if (response.data && response.data.size > 0) {
+      assetImage.value = URL.createObjectURL(response.data);
+    } else {
+      console.warn('Empty image data received');
+      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
+    }
+  } catch (error) {
+    console.error("Error fetching asset image:", error);
+    // Set default image when fetching fails
+    assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
+  }
+};
+
+// Handle image loading errors
+const handleImageError = () => {
+  console.log('Image failed to load, using placeholder');
+  assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
+};
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -225,14 +267,6 @@ const canEditAsset = computed(() => {
   return userRole === 'Operasional' || userRole === 'Admin';
 });
 
-// Computed value for image url
-const asetImageUrl = computed(() => {
-  if (aset.value?.gambarAset) {
-    return byteArrayToImageUrl(aset.value.gambarAset as unknown as number[]);
-  }
-  return '';
-});
-
 // Load data from API
 const loadData = async () => {
   isLoading.value = true;
@@ -242,6 +276,15 @@ const loadData = async () => {
     // Load asset details
     const response = await AsetService.getAsetByPlatNomor(platNomor);
     aset.value = response;
+    
+    // Make sure we have a valid asset before fetching the image
+    if (aset.value && aset.value.platNomor) {
+      // Use the platNomor as the ID for image fetching
+      await fetchAssetImage(aset.value.platNomor);
+    } else {
+      console.warn('No valid asset data received');
+      assetImage.value = '/placeholder-image.jpg';
+    }
 
     // Load maintenance history
     try {
@@ -260,6 +303,7 @@ const loadData = async () => {
   } catch (err) {
     console.error('Error loading data:', err);
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
+    assetImage.value = '/placeholder-image.jpg';
     // Set dummy data for development
     if (import.meta.env.MODE === 'development') {
       aset.value = {
@@ -310,11 +354,6 @@ const confirmDelete = async () => {
   } finally {
     showDeleteModal.value = false;
   }
-};
-
-// Replaced the handleDeleteAset function with a function to show the modal
-const handleDeleteAset = () => {
-  showDeleteModal.value = true;
 };
 
 const handleAddMaintenance = () => {
