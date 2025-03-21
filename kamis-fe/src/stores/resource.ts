@@ -27,9 +27,9 @@ export const useResourceStore = defineStore('resource', {
                 );
                 this.resources = response.data.data;
                 
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Failed to fetch resources';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
             } finally {
                 this.loading = false;
             }
@@ -56,9 +56,9 @@ export const useResourceStore = defineStore('resource', {
                     useToast().success('Resource berhasil ditambahkan!');
                     await router.push('/resource');
                 }
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan resource';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
                 throw error;
             } finally {
                 this.loading = false;
@@ -78,9 +78,9 @@ export const useResourceStore = defineStore('resource', {
                     }
                 );
                 this.resources = response.data.data;
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Failed to fetch all resources';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
             } finally {
                 this.loading = false;
             }
@@ -100,9 +100,9 @@ export const useResourceStore = defineStore('resource', {
                     }
                 );
                 return response.data.data;
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Failed to fetch resource by ID';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
                 throw error;
             } finally {
                 this.loading = false;
@@ -134,9 +134,9 @@ export const useResourceStore = defineStore('resource', {
                     useToast().success('Resource berhasil diupdate!');
                     await router.push('/resource');
                 }
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat update resource';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
                 throw error;
             } finally {
                 this.loading = false;
@@ -166,9 +166,9 @@ export const useResourceStore = defineStore('resource', {
                     useToast().success('Stock resource berhasil ditambahkan ke database!');
                     return updatedResource;
                 }
-            } catch (error) {
+            } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Gagal menambahkan resource ke DB';
-                useToast().error(this.error);
+                useToast().error(error.response.data.message);
                 throw error;
             } finally {
                 this.loading = false;
