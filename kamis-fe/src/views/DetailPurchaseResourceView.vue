@@ -17,57 +17,74 @@
     <div v-else-if="purchase" class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
       <!-- Header with Back Button -->
       <div class="flex items-center justify-between mb-2">
-        <button 
-          @click="router.back()" 
-          class="hover:underline flex items-center mb-2 text-[28px]">
-          <span >←</span>
+        <button @click="router.back()" class="hover:underline flex items-center mb-2 text-[28px]">
+          <span>←</span>
         </button>
-        <div v-if="purchase.purchaseStatus !== 'Selesai' && purchase.purchaseStatus !== 'Ditolak'" class="flex justify-end gap-2 mb-2">
-          <!-- When status is "Diajukan" -->
+        <div v-if="purchase.purchaseStatus !== 'Ditolak' && purchase.purchaseStatus !== 'Dibatalkan'" class="flex justify-end gap-2 mb-2">
           <template v-if="purchase.purchaseStatus === 'Diajukan'">
-            <!-- For Operasional role -->
-            <VButton v-if="userRole === 'Operasional'" label="Ubah Detail" @click="handleEditDetail" />
-            
-            <!-- For Finance or Direksi roles -->
+            <template v-if="userRole === 'Operasional'">
+              <VButton label="Ubah Detail" @click="handleEditDetail" />
+            </template>
             <template v-else>
-              <VCancelButton label="Tolak" @click="updateStatus(false)" />
-              <VSuccessButton label="Setuju" @click="updateStatus(true)" />
+              <VCancelButton label="Tolak" @click="openModal(false)" />
+              <VSuccessButton label="Setujui" @click="openModal(true)" />
             </template>
           </template>
-          
-          <!-- When status is "Disetujui" -->
+
           <template v-else-if="purchase.purchaseStatus === 'Disetujui'">
-            <!-- For Operasional role -->
-            <VButton v-if="userRole === 'Operasional'" label="Update Status" @click="updateStatus(true)" />
-            
-            <!-- For Finance or Direksi roles -->
-            <template v-else>
-              <VButton label="Update Status" @click="updateStatus(true)" />
-              <VSuccessButton label="Pembayaran" @click="handlePayment" />
+            <template v-if="userRole === 'Operasional'">
+              <VButton label="Proses Pembelian" @click="openModal(true)" />
+            </template>
+            <template v-else-if="userRole === 'Admin'">
+              <VCancelButton label="Batalkan" @click="openModal(false)" />
+              <VButton label="Proses Pembelian" @click="openModal(true)" />
+            </template>
+          </template>
+
+          <template v-else-if="purchase.purchaseStatus === 'Diproses'">
+            <template v-if="userRole === 'Operasional'">
+              <VCancelButton label="Batalkan" @click="openModal(false)" />
+              <VButton label="Selesaikan Pembelian" @click="openModal(true)" />
+            </template>
+            <template v-else-if="userRole === 'Finance'">
+              <VSuccessButton 
+                v-if="!purchase.purchasePaymentDate" 
+                label="Konfirmasi Pembayaran" 
+                @click="openPaymentModal()" 
+              />
+            </template>
+          </template>
+
+          <template v-else-if="purchase.purchaseStatus === 'Selesai'">
+            <template v-if="userRole === 'Finance'">
+              <VSuccessButton 
+                v-if="!purchase.purchasePaymentDate" 
+                label="Konfirmasi Pembayaran" 
+                @click="openPaymentModal()" 
+              />
             </template>
           </template>
         </div>
       </div>
 
-      <!-- Supplier & Purchase Type Info -->
+      <!-- Info -->
       <div class="grid grid-cols-3 gap-4 mb-4 border-b pb-4">   
-          <div>
-            <p class="text-lg font-bold font-lato">ID Transaksi</p>
-            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseId }}</p>
-          </div>
-          <div>
-            <p class="text-lg font-bold font-lato">Supplier</p>
-            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
-          </div>
-          <div>
-            <p class="text-lg font-bold font-lato">Tipe Barang</p>
-            <p class="text-[#1E3A5F] text-lg font-lato font-bold">Resource</p>
-          </div>
+        <div>
+          <p class="text-lg font-bold font-lato">ID Transaksi</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseId }}</p>
+        </div>
+        <div>
+          <p class="text-lg font-bold font-lato">Supplier</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
+        </div>
+        <div>
+          <p class="text-lg font-bold font-lato">Tipe Barang</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">Resource</p>
+        </div>
         <div>
           <p class="text-lg font-bold font-lato">Tanggal Pengajuan</p>
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ formatDate(purchase.purchaseSubmissionDate) }}</p>
         </div>
-
         <div>
           <p class="text-lg font-bold font-lato">Tanggal Terakhir Diperbarui</p>
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ formatDate(purchase.purchaseUpdateDate) }}</p>
@@ -81,11 +98,9 @@
           <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseStatus }}</p>
         </div>
       </div>
-      <!-- Top Section -->
-
 
       <!-- Resource Table -->
-      <div v-if="purchase.purchaseResource && purchase.purchaseResource.length > 0">
+      <div v-if="purchase.purchaseResource?.length">
         <table class="w-full border-collapse border border-[#1E3A5F] mb-4">
           <thead>
             <tr class="bg-[#1E3A5F] text-white">
@@ -110,111 +125,114 @@
             <p class="text-black text-lg font-lato font-bold">{{ formatCurrency(purchase.purchasePrice) }}</p>
           </div>
         </div>
-        
       </div>
 
       <!-- Note Section -->
       <div class="mb-6">
-        <VLockedInput label="Catatan" 
-        placeholder="Tidak ada catatan"
-        :value="purchase.purchaseNote" />
+        <VLockedInput label="Catatan" placeholder="Tidak ada catatan" :value="purchase.purchaseNote" />
       </div>
+    </div>
 
+    <!-- Modal Konfirmasi -->
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded shadow-md w-full max-w-lg">
+        <h3 class="text-xl font-semibold mb-4">Konfirmasi Update Status</h3>
+        <div class="mb-4">
+          <label class="block text-sm font-medium">Catatan <span class="text-red-500">*</span></label>
+          <textarea v-model="note" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        </div>
+        <p v-if="modalError" class="text-red-500 text-sm">{{ modalError }}</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button @click="showModal = false" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Batal</button>
+          <button @click="submitUpdateStatus" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Kirim</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { usePurchaseStore } from '@/stores/purchase';
-import { useAuthStore } from '@/stores/auth';
-import VButton from '@/components/VButton.vue';
-import VSuccessButton from '@/components/VSuccessButton.vue';
-import VCancelButton from '@/components/VCancelButton.vue';
-import VLockedInput from '@/components/VLockedInput.vue';
-import type { ResourceTempInterface } from '@/interfaces/resourcetemp.interface';
-import type { PurchaseInterface } from '@/interfaces/purchase.interface';
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { usePurchaseStore } from '@/stores/purchase'
+import { useAuthStore } from '@/stores/auth'
+import VButton from '@/components/VButton.vue'
+import VSuccessButton from '@/components/VSuccessButton.vue'
+import VCancelButton from '@/components/VCancelButton.vue'
+import VLockedInput from '@/components/VLockedInput.vue'
+import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface'
 
-// Extended interface for the detail view
-interface DetailResourcePurchaseInterface extends Omit<PurchaseInterface, 'purchaseResource'> {
-  purchaseResource?: ResourceTempInterface[];
+const route = useRoute()
+const router = useRouter()
+const purchaseStore = usePurchaseStore()
+const authStore = useAuthStore()
+
+const purchaseId = ref(route.params.id as string)
+const loading = computed(() => purchaseStore.loading)
+const error = computed(() => purchaseStore.error)
+const purchase = computed(() => purchaseStore.currentPurchase)
+const userRole = computed(() => authStore.userRole)
+
+const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
+const formatCurrency = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val)
+
+const canViewFinancialInfo = computed(() => userRole.value !== 'Operasional')
+
+// Modal State
+const showModal = ref(false)
+const isNextStatus = ref(true)
+const isPaymentModal = ref(false)
+const note = ref('')
+const modalError = ref('')
+
+const openModal = (next: boolean) => {
+  isNextStatus.value = next
+  isPaymentModal.value = false
+  note.value = ''
+  showModal.value = true
 }
 
-const route = useRoute();
-const router = useRouter();
-const purchaseStore = usePurchaseStore();
-const authStore = useAuthStore();
+const openPaymentModal = () => {
+  isPaymentModal.value = true
+  isNextStatus.value = false // payment tidak pakai next status flow
+  note.value = ''
+  showModal.value = true
+}
 
-const purchaseId = ref(route.params.id as string);
-const loading = computed(() => purchaseStore.loading);
-const error = computed(() => purchaseStore.error);
-const purchase = computed(() => purchaseStore.currentPurchase as DetailResourcePurchaseInterface);
+const submitUpdateStatus = async () => {
+  if (!note.value.trim()) {
+    modalError.value = 'Catatan wajib diisi ❗'
+    return
+  }
 
-// User role for conditional rendering
-const userRole = computed(() => authStore.userRole);
+  const body: UpdatePurchaseStatusRequestInterface = {
+    purchaseNote: note.value,
+  }
 
-// Format date 
-const formatDate = (dateString: string): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric'
-  });
-};
+  if (isPaymentModal.value) {
+    await purchaseStore.updatePurchaseStatusPembayaran(purchaseId.value, body)
+  } else {
+    await purchaseStore.updatePurchaseStatus(purchaseId.value, isNextStatus.value, body)
+  }
 
-// Format currency
-const formatCurrency = (value: number): string => {
-  if (value === undefined || value === null) return 'Rp 0';
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
-};
+  showModal.value = false
+  await loadPurchaseData()
+}
 
-// Access control - only operational staff cannot see financial details
-const canViewFinancialInfo = computed(() => {
-  return userRole.value !== 'Operasional';
-});
+const handleEditDetail = () => router.push(`/purchase/update-resource/${purchaseId.value}`)
 
-// Load purchase data
 const loadPurchaseData = async () => {
-  if (!purchaseId.value) return;
-  await purchaseStore.getPurchaseById(purchaseId.value);
-};
+  if (!purchaseId.value) return
+  await purchaseStore.getPurchaseById(purchaseId.value)
+}
 
-// Update purchase status
-const updateStatus = async (isNextStatus: boolean = true) => {
-  if (!purchaseId.value) return;
-  
-  const statusNote = isNextStatus 
-    ? "Status pembelian diperbarui ke tahap selanjutnya" 
-    : "Pembelian ditolak";
-  
-  await purchaseStore.updatePurchaseStatus(purchaseId.value, statusNote, isNextStatus);
-};
-
-// Handle edit detail action
-const handleEditDetail = () => {
-  router.push(`/purchase/update-resource/${purchaseId.value}`);
-};
-
-// Handle payment action
-const handlePayment = async () => {
-  if (!purchaseId.value) return;
-  await purchaseStore.updatePurchaseStatus(purchaseId.value, "Pembayaran telah dilakukan", true);
-};
-
-// Load data on component mount
-onMounted(() => {
-  loadPurchaseData();
-});
+onMounted(() => loadPurchaseData())
 </script>
 
-<style scoped>
-/* Using Lato font */
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 .font-lato {
   font-family: 'Lato', sans-serif;
 }
-</style> 
+</style>

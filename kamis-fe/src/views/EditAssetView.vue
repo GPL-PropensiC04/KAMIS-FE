@@ -49,18 +49,19 @@
       <div v-else class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="p-6 flex flex-col md:flex-row gap-8">
           <!-- Asset Image -->
-          <div class="w-full md:w-1/3 lg:w-1/4">
-            <div class="bg-gray-100 rounded-lg overflow-hidden h-64 flex items-center justify-center">
+          <div class="w-full md:w-2/5 lg:w-1/3">
+            <div class="bg-gray-100 rounded-lg overflow-hidden h-80 flex items-center justify-center">
               <img 
                 :src="assetImageUrl || '/placeholder-truck.jpg'" 
                 alt="Asset Image" 
-                class="w-full h-full object-cover"
+                class="w-full h-full object-contain"
+                @error="handleImageError"
               />
             </div>
           </div>
 
           <!-- Form -->
-          <div class="w-full md:w-2/3 lg:w-3/4">
+          <div class="w-full md:w-3/5 lg:w-2/3">
             <form @submit.prevent="updateAsset" class="space-y-6">
               <!-- Name and Type in same row -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,6 +153,7 @@ import VTextBox from '@/components/VTextBox.vue';
 import VTextArea from '@/components/VTextArea.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -173,7 +175,7 @@ const formData = ref({
   nama: '',
   jenisAset: '',
   deskripsi: '',
-  status: 'Tersedia',
+  status: '', // Remove the hardcoded value
   assetMaintenance: ''
 });
 
@@ -181,8 +183,7 @@ const formData = ref({
 const jenisAsetOptions = [
   { value: 'Truk', label: 'Truk' },
   { value: 'Mobil', label: 'Mobil' },
-  { value: 'Motor', label: 'Motor' },
-  { value: 'Lainnya', label: 'Lainnya' }
+  { value: 'Pick Up', label: 'Pick Up' },
 ];
 
 const statusOptions = ['Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
@@ -231,6 +232,43 @@ const showNotificationPopup = (message: string, type: 'success' | 'error' = 'suc
   }, 3000);
 };
 
+// Handle image loading errors
+const handleImageError = () => {
+  console.log('Image failed to load, using placeholder');
+  assetImageUrl.value = '/placeholder-truck.jpg'; // Path to your placeholder image
+};
+
+// Fetch asset image from backend
+const fetchAssetImage = async (id: string) => {
+  try {
+    // Check if the id is valid before making the request
+    if (!id || id === 'undefined' || id === 'null') {
+      console.warn('Invalid asset ID for image fetch:', id);
+      assetImageUrl.value = '/placeholder-truck.jpg'; // Use placeholder
+      return;
+    }
+
+    const response = await axios.get(`http://localhost:8081/api/asset/${id}/foto`, {
+      responseType: 'blob',
+      // Add timeout and validate status to handle errors better
+      timeout: 5000,
+      validateStatus: (status) => status >= 200 && status < 300,
+    });
+    
+    // Check if we received valid image data
+    if (response.data && response.data.size > 0) {
+      assetImageUrl.value = URL.createObjectURL(response.data);
+    } else {
+      console.warn('Empty image data received');
+      assetImageUrl.value = '/placeholder-truck.jpg'; // Use placeholder
+    }
+  } catch (error) {
+    console.error("Error fetching asset image:", error);
+    // Set default image when fetching fails
+    assetImageUrl.value = '/placeholder-truck.jpg'; // Path to your placeholder image
+  }
+};
+
 const loadData = async () => {
   isLoading.value = true;
   error.value = '';
@@ -245,13 +283,21 @@ const loadData = async () => {
     formData.value.status = loadedAsset.status;
     formData.value.assetMaintenance = loadedAsset.assetMaintenance;
     
+    // Fetch asset image using platNomor as ID
+    await fetchAssetImage(platNomor);
+    
     if (loadedAsset.gambarAset) {
-      assetImageUrl.value = byteArrayToImageUrl(loadedAsset.gambarAset as unknown as number[]);
+      // Keep this as a fallback in case direct image fetch fails
+      const byteArrayImage = byteArrayToImageUrl(loadedAsset.gambarAset as unknown as number[]);
+      if (byteArrayImage && !assetImageUrl.value) {
+        assetImageUrl.value = byteArrayImage;
+      }
     }
   } catch (err) {
     console.error('Failed to load asset:', err);
     error.value = 'Gagal memuat data aset. Silakan coba lagi.';
     showNotificationPopup('Gagal memuat data aset', 'error');
+    assetImageUrl.value = '/placeholder-truck.jpg'; // Use placeholder on error
   } finally {
     isLoading.value = false;
   }
@@ -265,13 +311,16 @@ const updateAsset = async () => {
   }
   
   try {
-    // Update the form data using the original plate number
-    const updatedData = {
-      ...formData.value,
-      platNomor: platNomor
+    // Instead of using FormData, create a regular JSON object
+    const assetData = {
+      platNomor: platNomor,
+      nama: formData.value.nama,
+      jenisAset: formData.value.jenisAset,
+      deskripsi: formData.value.deskripsi,
+      status: formData.value.status
     };
     
-    await AsetService.updateAset(platNomor, updatedData);
+    await AsetService.updateAset(platNomor, assetData);
     
     // Only show a brief success notification here
     showNotificationPopup('Berhasil mengubah detail aset');

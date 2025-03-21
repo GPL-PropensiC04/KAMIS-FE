@@ -8,8 +8,8 @@ import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
 import DetailAssetView from '@/views/DetailAssetView.vue'
 import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
 import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
-import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListPurchase from '@/views/ListPurchase.vue'
+import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
@@ -115,6 +115,7 @@ const router = createRouter({
       path: '/resource/update/:id',
       name: 'updateResource',
       component:UpdateResource,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/resource/add',
@@ -162,36 +163,34 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const isAuthenticated = authStore.isAuthenticated
   
-  // If the route requires authentication and the user is not logged in
-  if (requiresAuth && !isAuthenticated) {
-    next('/login')
-  } 
-  // If the user is logged in and trying to access login page
-  else if (to.path === '/login' && isAuthenticated) {
-    next('/home')
-  } 
-  else {
-    next()
+  // Check if app was previously closed
+  const appWasClosed = sessionStorage.getItem('app_was_closed')
+  if (appWasClosed === 'true') {
+    // Clear the flag
+    sessionStorage.removeItem('app_was_closed')
+    
+    // Only logout if this wasn't a browser refresh (handled in App.vue)
+    // The localStorage auth_token would have been removed already on real close
+    if (localStorage.getItem('auth_token') === null) {
+      console.log('Session ended due to tab/browser close')
+      // Complete the logout process but we don't need to remove the token
+      // as it was already removed during the close event
+      authStore.logout(false) // passing false to avoid removing token again
+      return next('/login')
+    }
   }
-})
-
-// Navigation guard
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const isAuthenticated = authStore.isAuthenticated
   
+  // Regular auth checks
   // If the route requires authentication and the user is not logged in
   if (requiresAuth && !isAuthenticated) {
     next('/login')
   } 
   // If the user is logged in and trying to access login page
   else if (to.path === '/login' && isAuthenticated) {
-    next('/home')
+    next('/')
   } 
   else {
     next()
   }
 })
-
 export default router

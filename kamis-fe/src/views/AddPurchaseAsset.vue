@@ -5,52 +5,76 @@ import VTextArea from '../components/VTextArea.vue'
 import VPriceInput from '../components/VPriceInput.vue'
 import VDropDownInput from '../components/VDropDownInput.vue'
 import VSuccessButton from '../components/VSuccessButton.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetTempStore } from '@/stores/assetTemp'
+import { useToast } from 'vue-toastification'
 
 const assetName = ref('');
 const assetDescription = ref('');
 const assetType = ref('');
 const assetPrice = ref(0);
 const foto = ref<File | null>(null);
+const toast = useToast();
 
 const router = useRouter();
 const assetTempStore = useAssetTempStore();
 
+const isFormValid = computed(() => {
+  return assetName.value.trim() !== '' && 
+         assetDescription.value.trim() !== '' && 
+         assetType.value !== '' && 
+         assetPrice.value > 0 && 
+         foto.value !== null;
+});
+
 const handleSubmit = async () => {
-  const formData = new FormData();
-  formData.append('assetName', assetName.value);
-  formData.append('assetDescription', assetDescription.value);
-  formData.append('assetType', assetType.value);
-  formData.append('assetPrice', assetPrice.value.toString());
-  if (foto.value) {
-    formData.append('foto', foto.value);
+  if (!isFormValid.value) {
+    toast.error('Harap isi semua field sebelum submit!');
+    return;
   }
 
   try {
-    console.log('Submitting asset with data:', {
-      assetName: assetName.value,
-      assetDescription: assetDescription.value,
-      assetType: assetType.value,
-      assetPrice: assetPrice.value,
-      foto: foto.value ? URL.createObjectURL(foto.value) : null
-    });
-
     assetTempStore.setDraftAssetTemp({
       ...assetTempStore.draftAssetTemp,
       assetName: assetName.value,
       assetDescription: assetDescription.value,
       assetType: assetType.value,
-      assetPrice: assetPrice.value,
-      foto: foto.value ? URL.createObjectURL(foto.value) : null
+      assetPrice: assetPrice.value
     });
     
-    console.log('Draft asset:', assetTempStore.draftAssetTemp);
+    console.log('Draft asset stored, navigating to summary');
     router.push('/purchase/add/asset-summary');
   } catch (error) {
     console.error('Error submitting asset:', error);
   }
+};
+
+// Add a file change handler function
+const handleFileChange = (file: File) => {
+  console.log('File received:', file);
+  foto.value = file;
+  
+  // Generate preview using FileReader
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64String = e.target?.result as string;
+    
+    // Store only metadata in localStorage, not the image itself
+    assetTempStore.setDraftAssetTemp({
+      ...assetTempStore.draftAssetTemp,
+      fileName: foto.value?.name,
+      fileSize: foto.value?.size,
+      contentType: foto.value?.type,
+      // Don't store imageBase64 in localStorage - it's too large
+      hasImage: true // Just a flag to indicate an image exists
+    });
+    
+    // Store the actual image data only in sessionStorage
+    sessionStorage.setItem('tempFileData', base64String);
+    console.log(`Image stored in sessionStorage (${Math.round((base64String.length * 0.75) / 1024)} KB)`);
+  };
+  reader.readAsDataURL(file);
 };
 </script>
 
@@ -61,8 +85,13 @@ const handleSubmit = async () => {
         <!-- Upload Foto Aset Besar dan Centered -->
         <div class="col-span-2 flex justify-center">
           <div class="w-full max-w-md">
-            <VUploadPhoto class="w-full h-48" @file-change="foto = $event" />
+            <VUploadPhoto class="w-full h-48" @file-change="handleFileChange" />
           </div>
+        </div>
+
+        <!-- Debugging info -->
+        <div v-if="foto" class="col-span-2 text-xs text-gray-500">
+          File selected: {{ foto.name }} ({{ Math.round(foto.size / 1024) }} KB)
         </div>
 
         <!-- Nama Aset -->
@@ -82,7 +111,7 @@ const handleSubmit = async () => {
           <label class="block mb-1 font-medium text-gray-700">Jenis Aset</label>
           <VDropDownInput 
             v-model="assetType" 
-            :options="['Truk', 'Mobil', 'Pendar']" 
+            :options="['Truk', 'Mobil', 'Pickup']" 
             placeholder="Pilih Jenis Aset" 
             class="w-full"
           />

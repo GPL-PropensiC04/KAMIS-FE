@@ -2,6 +2,9 @@ import axios from 'axios';
 import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 
+// Define API_URL - this was missing and causing the error
+const API_URL = 'http://localhost:8081/api';
+
 interface ApiResponse<T> {
   status: number;
   message: string;
@@ -9,19 +12,19 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export const AsetService = {
+export class AsetService {
   /**
    * Fetch all assets
    */
-  async viewAllAsset(): Promise<AsetInterface[]> {
+  static async viewAllAsset(): Promise<AsetInterface[]> {
     const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_ALL}`);
     return response.data.data;
-  },
+  }
   
   /**
    * Fetch asset by platNomor
    */
-  async getAsetByPlatNomor(platNomor: string): Promise<AsetInterface> {
+  static async getAsetByPlatNomor(platNomor: string): Promise<AsetInterface> {
     const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_BY_PLATNOMOR(platNomor)}`);
     
     // Cek apakah response menggunakan format baru (dengan field data)
@@ -57,52 +60,25 @@ export const AsetService = {
         isDeleted: false
       };
     }
-  },
+  }
 
   /**
    * Update asset
    */
-  async updateAset(platNomor: string, data: Partial<AsetInterface>): Promise<AsetInterface> {
-    const response = await axios.put(`${API_BASE_URL}${API_ENDPOINTS.ASET.UPDATE(platNomor)}`, data);
-    
-    // Cek apakah response menggunakan format baru (dengan field data)
-    if (response.data && response.data.data) {
-      const asetData = response.data.data;
-      
-      return {
-        platNomor: asetData.platNomor,
-        nama: asetData.nama,
-        jenisAset: asetData.jenisAset,
-        status: asetData.status,
-        tanggalPerolehan: asetData.tanggalPerolehan,
-        nilaiPerolehan: asetData.nilaiPerolehan,
-        deskripsi: asetData.deskripsi,
-        assetMaintenance: asetData.assetMaintenance,
-        gambarAset: asetData.gambarAset || '',
-        isDeleted: false
-      };
-    } else {
-      // Jika menggunakan format lama (tanpa field data)
-      const asetData = response.data;
-      return {
-        platNomor: asetData.platNomor,
-        nama: asetData.nama,
-        jenisAset: asetData.jenisAset,
-        status: asetData.status,
-        tanggalPerolehan: asetData.tanggalPerolehan,
-        nilaiPerolehan: asetData.nilaiPerolehan,
-        deskripsi: asetData.deskripsi,
-        assetMaintenance: asetData.assetMaintenance,
-        gambarAset: asetData.gambarAset || '',
-        isDeleted: false
-      };
+  static async updateAset(platNomor: string, updateData: Partial<AsetInterface>): Promise<AsetInterface> {
+    try {
+      const response = await axios.put(`${API_URL}/asset/${platNomor}`, updateData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating asset:', error);
+      throw error;
     }
-  },
+  }
 
   /**
    * Delete asset (soft delete)
    */
-  async deleteAset(platNomor: string): Promise<void> {
+  static async deleteAset(platNomor: string): Promise<void> {
     await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.ASET.DELETE(platNomor)}`);
   }
 };
