@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
@@ -19,14 +19,7 @@ const purchaseId = route.params.purchaseId as string;
 const purchaseDate = ref(""); // Tanggal Pengajuan
 const selectedSupplier = ref(""); // Supplier yang bisa diubah
 const purchaseNote = ref(""); // Catatan yang bisa diubah
-const assetDetails = ref<{
-  assetId: number;
-  assetNameString: string;
-  assetDescription: string;
-  assetPrice: number;
-  fotoUrl?: string;
-} | null>(null); // Data aset
-const assetImage = ref<string>(""); // URL gambar aset
+const assetDetails = ref(null); // Data aset
 
 // Opsi dropdown supplier
 const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
@@ -38,43 +31,25 @@ const formatDate = (dateString: string) => {
     return `${String(date.getDate()).padStart(2, "0")} / ${String(date.getMonth() + 1).padStart(2, "0")} / ${date.getFullYear()}`;
 };
 
+// Fetch data purchase detail dari API
 const fetchPurchaseDetail = async () => {
     try {
-        const data = await purchaseStore.getPurchaseById(purchaseId);
+        const response = await axios.get(`http://localhost:8084/api/purchase/detail/${purchaseId}`, {
+            headers: { "Content-Type": "application/json" }
+        });
 
-        if (data) {
-            // Prefill data dari store
-            purchaseDate.value = formatDate(data.purchaseSubmissionDate);
-            selectedSupplier.value = data.purchaseSupplier;
-            purchaseNote.value = data.purchaseNote;
-            assetDetails.value = data.purchaseAsset;
+        const data = response.data.data;
 
-            // Ambil gambar setelah data aset tersedia
-            fetchAssetImage(data.purchaseAsset?.fotoUrl);
-        }
+        // Prefill data dari API
+        purchaseDate.value = formatDate(data.purchaseSubmissionDate);
+        selectedSupplier.value = data.purchaseSupplier;
+        purchaseNote.value = data.purchaseNote;
+        assetDetails.value = data.purchaseAsset; // Ambil detail aset dari API
+
     } catch (error) {
         console.error("Error fetching purchase details:", error);
     }
 };
-
-// Fetch gambar berdasarkan URL
-const fetchAssetImage = async (imagePath?: string) => {
-    if (!imagePath) return;
-    
-    try {
-        const response = await axios.get(`http://localhost:8084${imagePath}`, { responseType: "blob" });
-        assetImage.value = URL.createObjectURL(response.data); // Konversi ke URL objek
-    } catch (error) {
-        console.error("Error fetching asset image:", error);
-    }
-};
-
-// Watch untuk mengambil gambar setiap kali `assetDetails` berubah
-watch(assetDetails, (newAsset) => {
-    if (newAsset?.fotoUrl) {
-        fetchAssetImage(newAsset.fotoUrl);
-    }
-});
 
 // Format harga ke rupiah
 const formatCurrency = (value: number) => {
@@ -150,7 +125,7 @@ onMounted(() => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
-                    <img :src="assetImage" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+                    <img :src="assetDetails.imageUrl" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
                 </div>
             </div>
 

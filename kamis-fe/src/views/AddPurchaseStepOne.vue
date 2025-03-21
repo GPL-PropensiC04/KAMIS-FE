@@ -5,7 +5,6 @@ import { usePurchaseStore } from "@/stores/purchase";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
-import { useToast } from "vue-toastification";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -37,7 +36,7 @@ const saveDraft = () => {
 // Fungsi untuk menangani tombol "Selanjutnya"
 const handleNext = () => {
     if (!selectedSupplier.value) {
-        useToast().error("Silakan pilih Supplier terlebih dahulu!");
+        alert("Silakan pilih Supplier terlebih dahulu!");
         return;
     }
 

@@ -21,13 +21,13 @@ const authStore = useAuthStore();
 const searchId = ref("");
 const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
-const sortByDate = ref(null);
-const sortByNominal = ref(null);
+const sortByDate = ref(false);
+const sortByNominal = ref(false);
 
 // **State untuk Filter Rentang Nominal**
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
-const selectedNominalLabel = ref("Seluruh Total Harga");
+const selectedNominalLabel = ref("Semua");
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -44,7 +44,7 @@ const canEditPurchase = computed(() => {
 
 // **List Rentang Harga**
 const nominalOptions = [
-  { label: "Seluruh Total Harga", start: null, end: null },
+  { label: "Semua", start: null, end: null },
   { label: "0 - 1 Juta", start: 0, end: 1000000 },
   { label: "1 Juta - 10 Juta", start: 1000000, end: 10000000 },
   { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
@@ -60,7 +60,7 @@ const fetchPurchases = async () => {
     startNominal: startNominal.value,
     endNominal: endNominal.value,
     highNominal: sortByNominal.value || null,
-    newDate: !sortByDate.value || null,
+    newDate: sortByDate.value || null,
     type: selectedType.value,
   });
 };
@@ -118,29 +118,19 @@ const goToAddPurchase = () => {
 <template>
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <template v-if="canViewFinancialInfo">
-        <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
-          <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
-          <VDateRangeFilter v-model="dateRange" class="w-1/4" />
-          <VSortButton v-model:sortOrder="sortByDate" />
-          <VDropDownInput
-            :options="nominalOptions.map((opt) => opt.label)"
-            v-model="selectedNominalLabel"
-            @update:modelValue="updateNominalFilter"
-            class="w-1/4"
-          />
-          <VSortButton v-model:sortOrder="sortByNominal" />
-        </div>
-      </template>
-      <template v-else>
-        <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-          <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
-          <VDateRangeFilter v-model="dateRange" class="w-1/4" />
-          <VSortButton v-model:sortOrder="sortByDate" />
-        </div>
-      </template>
+      <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
+        <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
+        <VDateRangeFilter v-model="dateRange" class="w-1/4" />
+        <VSortButton v-model:sortOrder="sortByDate" />
+        <VDropDownInput
+          :options="nominalOptions.map((opt) => opt.label)"
+          v-model="selectedNominalLabel"
+          @update:modelValue="updateNominalFilter"
+          class="w-1/4"
+        />
+        <VSortButton v-model:sortOrder="sortByNominal" />
+      </div>
     </div>
-
 
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <!-- Filter & Tombol Tambah Pembelian -->

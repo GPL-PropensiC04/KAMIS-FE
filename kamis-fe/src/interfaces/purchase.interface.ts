@@ -12,7 +12,8 @@ export interface PurchaseInterface {
     purchaseUpdateDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
     purchaseResource: ResourceTempInterface[];
     purchaseAsset?: number | null;
-    purchasePaymentDate?: string | null; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
+    purchaseFotoUrl?: string | null;
+    purchasePaymentDate?: string | null;
   }
 
 export interface AddPurchaseRequestInterface {

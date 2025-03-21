@@ -9,7 +9,6 @@ import VPriceInput from "../components/VPriceInput.vue";
 import VLockedInput from "../components/VLockedInput.vue";
 import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
-import { useToast } from "vue-toastification";
 
 // Router & Store
 const router = useRouter();
@@ -50,19 +49,19 @@ const formatCurrency = (value: number) => {
 // Tambah resource ke tabel
 const addResource = () => {
     if (!selectedResource.value || quantity.value <= 0 || price.value <= 0) {
-        useToast().error("Harap isi semua field dengan benar!");
+        alert("Harap isi semua field dengan benar!");
         return;
     }
 
     const selectedItem = resources.value.find((item) => item.name === selectedResource.value);
     if (!selectedItem) {
-        useToast().error("Resource tidak valid!");
+        alert("Resource tidak valid!");
         return;
     }
 
-    const existingItem = resourceList.value.find((item: { id: number; }) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item) => item.id === selectedItem.id);
     if (existingItem) {
-        useToast().error("Resource ini sudah ditambahkan!");
+        alert("Resource ini sudah ditambahkan!");
         return;
     }
 
@@ -98,7 +97,7 @@ const updateDraftPurchase = () => {
 
 // Hitung total harga
 const totalPrice = computed(() => {
-    return resourceList.value.reduce((sum: number, item: { price: number; quantity: number; }) => sum + item.price * item.quantity, 0);
+    return resourceList.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
 });
 
 // Pastikan data tetap ada setelah refresh
@@ -111,36 +110,8 @@ onMounted(() => {
     }
 });
 
-// Fungsi untuk menambah jumlah
-const increaseQuantity = (index: number) => {
-    resourceList.value[index].quantity++;
-    updateDraftPurchase();
-};
-
-// Fungsi untuk mengurangi jumlah (minimal 1)
-const decreaseQuantity = (index: number) => {
-    if (resourceList.value[index].quantity > 1) {
-        resourceList.value[index].quantity--;
-        updateDraftPurchase();
-    }
-};
-
-// Fungsi untuk validasi input jumlah
-const validateQuantity = (index: number) => {
-    if (resourceList.value[index].quantity < 1 || isNaN(resourceList.value[index].quantity)) {
-        resourceList.value[index].quantity = 1;
-    }
-    updateDraftPurchase();
-};
-
-
-
 // Navigasi ke halaman berikutnya
 const goToSummary = () => {
-    if (resourceList.value.length === 0) {
-        useToast().error("Harap tambahkan resource!");
-        return;
-    }
     purchaseStore.setDraftPurchase({
         ...purchaseStore.draftPurchase,
         items: resourceList.value,
@@ -198,7 +169,7 @@ const goToSummary = () => {
             </div>
 
             <!-- Tabel Resource -->
-            <div class="mt-6" v-if="resourceList.length > 0">
+            <div class="mt-6">
                 <table class="w-full border-collapse border border-[#1E3A5F]">
                     <thead>
                         <tr class="bg-[#1E3A5F] text-white">
@@ -211,29 +182,7 @@ const goToSummary = () => {
                     <tbody>
                         <tr v-for="(item, index) in resourceList" :key="index" class="text-center">
                             <td class="p-2 border border-[#1E3A5F]">{{ item.name }}</td>
-                            <td class="p-2 border border-[#1E3A5F]">
-                                <div class="flex items-center justify-center gap-2">
-                                    <!-- Tombol Kurang (-) -->
-                                    <button @click="decreaseQuantity(index)" class="text-red-500 font-bold text-xl hover:text-red-700">
-                                        −
-                                    </button>
-
-                                    <!-- Input Jumlah (Bisa Diketik) -->
-                                    <input 
-                                        type="number"
-                                        v-model.number="resourceList[index].quantity"
-                                        @change="validateQuantity(index)"
-                                        class="w-14 text-center border border-gray-400 rounded no-spinner"
-                                        min="1"
-                                    />
-
-
-                                    <!-- Tombol Tambah (+) -->
-                                    <button @click="increaseQuantity(index)" class="text-green-500 font-bold text-xl hover:text-green-700">
-                                        +
-                                    </button>
-                                </div>
-                            </td>
+                            <td class="p-2 border border-[#1E3A5F]">{{ item.quantity }}</td>
                             <td class="p-2 border border-[#1E3A5F]">{{ formatCurrency(item.price) }}</td>
                             <td class="p-2 border border-[#1E3A5F]">
                                 <button @click="removeResource(index)" class="text-red-500 hover:text-red-700">
@@ -254,16 +203,3 @@ const goToSummary = () => {
         </div>
     </div>
 </template>
-
-<style>
-/* Hilangkan spinner pada input number */
-.no-spinner::-webkit-inner-spin-button,
-.no-spinner::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.no-spinner {
-    -moz-appearance: textfield; /* Firefox */
-}
-</style>
