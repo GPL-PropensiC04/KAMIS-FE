@@ -49,8 +49,8 @@ export const useAssetTempStore = defineStore('assetTemp', {
               headers = { 'Content-Type': 'multipart/form-data' };
               console.log('Sending as multipart/form-data with File');
             } 
-            else if (body.foto instanceof FormData) {
-              // If already FormData, use as is
+            else if (typeof body.foto === 'object' && body.foto !== null && 'append' in body.foto) {
+              // If already FormData, use as is (replaced instanceof FormData check)
               requestData = body.foto;
               headers = { 'Content-Type': 'multipart/form-data' };
               console.log('Sending as multipart/form-data with FormData');

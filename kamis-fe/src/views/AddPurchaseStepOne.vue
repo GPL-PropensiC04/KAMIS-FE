@@ -20,7 +20,15 @@ const saveDraft = () => {
     const draftData = {
         purchaseSupplier: selectedSupplier.value,
         purchaseType: selectedType.value === "Resource",
-        purchaseAsset: null // Jika aset, simpan purchaseAsset = 1 (sementara)
+        purchaseAsset: null,
+        purchaseStatus: 'PENDING',
+        id: '',
+        purchaseId: '',
+        purchasePrice: 0,
+        purchaseNote: '',
+        purchaseSubmissionDate: new Date().toISOString(),
+        purchaseUpdateDate: new Date().toISOString(),
+        purchaseResource: []
     };
     
     purchaseStore.setDraftPurchase(draftData);

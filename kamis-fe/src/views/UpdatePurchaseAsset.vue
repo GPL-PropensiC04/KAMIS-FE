@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
@@ -19,8 +19,14 @@ const purchaseId = route.params.purchaseId as string;
 const purchaseDate = ref(""); // Tanggal Pengajuan
 const selectedSupplier = ref(""); // Supplier yang bisa diubah
 const purchaseNote = ref(""); // Catatan yang bisa diubah
-const assetDetails = ref(null); // Data aset
-const assetImage = ref(""); // URL gambar aset
+const assetDetails = ref<{
+  assetId: number;
+  assetNameString: string;
+  assetDescription: string;
+  assetPrice: number;
+  fotoUrl?: string;
+} | null>(null); // Data aset
+const assetImage = ref<string>(""); // URL gambar aset
 
 // Opsi dropdown supplier
 const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
@@ -52,7 +58,9 @@ const fetchPurchaseDetail = async () => {
 };
 
 // Fetch gambar berdasarkan URL
-const fetchAssetImage = async (imagePath: string) => {
+const fetchAssetImage = async (imagePath?: string) => {
+    if (!imagePath) return;
+    
     try {
         const response = await axios.get(`http://localhost:8084${imagePath}`, { responseType: "blob" });
         assetImage.value = URL.createObjectURL(response.data); // Konversi ke URL objek
@@ -63,8 +71,8 @@ const fetchAssetImage = async (imagePath: string) => {
 
 // Watch untuk mengambil gambar setiap kali `assetDetails` berubah
 watch(assetDetails, (newAsset) => {
-    if (newAsset?.imageUrl) {
-        fetchAssetImage(newAsset.imageUrl);
+    if (newAsset?.fotoUrl) {
+        fetchAssetImage(newAsset.fotoUrl);
     }
 });
 

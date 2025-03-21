@@ -40,7 +40,7 @@ const updateDate = (field: "start" | "end", value: Date | null) => {
         format="dd/MM/yyyy"
         placeholder="Tanggal Mulai"
         class="w-full"
-        auto-apply="true"
+        :auto-apply="true"
       />
     </div>
 
@@ -54,7 +54,7 @@ const updateDate = (field: "start" | "end", value: Date | null) => {
         format="dd/MM/yyyy"
         placeholder="Tanggal Akhir"
         class="w-full"
-        auto-apply="true"
+        :auto-apply="true"
       />
     </div>
   </div>

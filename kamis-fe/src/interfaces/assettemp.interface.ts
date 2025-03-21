@@ -14,7 +14,7 @@ export interface AddAssetTemp {
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: File ; // Can be File, base64 string, or FormData
+    foto?: File | FormData | string; // Can be File, base64 string, or FormData
     fotoContentType?: string;
     originalFile?: File; // Store the original File object
   }

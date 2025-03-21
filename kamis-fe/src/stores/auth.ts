@@ -106,6 +106,6 @@ export const useAuthStore = defineStore('auth', () => {
     userRole,
     login,
     logout,
-    // fetchUserProfile
+
   };
 });

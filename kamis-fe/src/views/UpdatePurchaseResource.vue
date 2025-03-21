@@ -31,7 +31,12 @@ const resources = ref<{ id: number; name: string }[]>([]);
 const selectedResource = ref("");
 const quantity = ref(1);
 const price = ref(0);
-const resourceList = ref([]);
+const resourceList = ref<{
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}[]>([]);
 
 // **Format Tanggal (dd / MM / yyyy)**
 const formatDate = (dateString: string) => {
@@ -127,7 +132,7 @@ const addResource = () => {
         return;
     }
 
-    const existingItem = resourceList.value.find((item: { id: number; }) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item) => item.id === selectedItem.id);
     if (existingItem) {
         useToast().error("Resource ini sudah ditambahkan!");
         return;
@@ -158,10 +163,11 @@ const handleUpdatePurchase = async () => {
         purchaseSupplier: selectedSupplier.value,
         purchaseNote: purchaseNote.value,
         purchaseResource: resourceList.value.map((item) => ({
-            resourceId: item.id,  // **Tambahkan ID dari database**
+            resourceId: item.id,
             resourceName: item.name,
             resourceTotal: item.quantity,
-            resourcePrice: item.price
+            resourcePrice: item.price,
+            quantity: item.quantity
         })),
     };
 
