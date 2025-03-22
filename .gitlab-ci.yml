@@ -27,7 +27,7 @@ build-frontend:
     - echo "Building Vue.js frontend..."
     - cd kamis-fe
     - npm install --progress=false
-    - npm run build
+    - npx vite build
   artifacts:
     paths:
       - frontend/dist
