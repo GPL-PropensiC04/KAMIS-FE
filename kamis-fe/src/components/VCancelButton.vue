@@ -13,7 +13,7 @@ const emit = defineEmits(["click"]);
 
 <template>
     <button 
-        class="bg-[#F04438] text-white px-6 py-2 rounded-md font-inter font-medium text-center transition hover:bg-[#245C40] active:scale-95"
+        class="bg-[#F04438] text-white px-6 py-2 rounded-md font-inter font-medium text-center transition hover:cursor-pointer active:scale-95"
         @click="emit('click')"
     >
         {{ label }}

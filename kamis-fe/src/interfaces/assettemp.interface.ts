@@ -9,12 +9,10 @@ export interface AssetTempInterface {
   }
 
 export interface AddAssetTemp {
-    assetId?: number;
     assetName: string;
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: File ; // Can be File, base64 string, or FormData
+    foto: File | string;
     fotoContentType?: string;
-    originalFile?: File; // Store the original File object
   }

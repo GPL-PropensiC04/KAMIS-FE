@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { AssetTempInterface } from '@/interfaces/assettemp.interface';
-// import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
+import type { AssetTempInterface, AddAssetTemp } from '@/interfaces/assettemp.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
-import type { AddAssetTemp } from '@/interfaces/assettemp.interface';
 
 export const useAssetTempStore = defineStore('assetTemp', {
     state: () => ({
@@ -49,12 +47,6 @@ export const useAssetTempStore = defineStore('assetTemp', {
               headers = { 'Content-Type': 'multipart/form-data' };
               console.log('Sending as multipart/form-data with File');
             } 
-            else if (body.foto instanceof FormData) {
-              // If already FormData, use as is
-              requestData = body.foto;
-              headers = { 'Content-Type': 'multipart/form-data' };
-              console.log('Sending as multipart/form-data with FormData');
-            }
             else if (typeof body.foto === 'string' && body.foto.startsWith('data:')) {
               // If base64 string, send as JSON
               requestData = body;
