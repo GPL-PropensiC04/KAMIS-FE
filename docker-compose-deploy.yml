@@ -9,5 +9,10 @@ services:
       - frontend-network
 
 networks:
+  shared-network:
+    external: true
+    driver: bridge
+    name: kamis-network 
   frontend-network:
     driver: bridge
+
