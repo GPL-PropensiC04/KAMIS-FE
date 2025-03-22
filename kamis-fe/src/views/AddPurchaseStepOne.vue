@@ -19,9 +19,19 @@ const selectedType = ref(purchaseStore.draftPurchase?.purchaseType ? "Resource" 
 const saveDraft = () => {
     const draftData = {
         purchaseSupplier: selectedSupplier.value,
-        purchaseType: selectedType.value === "Resource",
-        purchaseAsset: null // Jika aset, simpan purchaseAsset = 1 (sementara)
+        purchaseType: selectedType.value,
+        purchaseAsset: null, // Jika aset, simpan purchaseAsset = 1 (sementara)
+        id: "",
+        purchaseId: "",
+        purchaseStatus: "",
+        purchasePrice: 0,
+        purchaseNote: "",
+        purchaseSubmissionDate: "", // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
+        purchaseUpdateDate: "", // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
+        purchaseResource: [],
+        purchasePaymentDate: null
     };
+
     
     purchaseStore.setDraftPurchase(draftData);
 };

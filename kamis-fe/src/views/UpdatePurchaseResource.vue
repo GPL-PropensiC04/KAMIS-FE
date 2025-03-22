@@ -11,7 +11,7 @@ import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
-
+import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -31,7 +31,7 @@ const resources = ref<{ id: number; name: string }[]>([]);
 const selectedResource = ref("");
 const quantity = ref(1);
 const price = ref(0);
-const resourceList = ref([]);
+const resourceList = ref<ResourceTempInterface[]>([]);
 
 // **Format Tanggal (dd / MM / yyyy)**
 const formatDate = (dateString: string) => {
@@ -56,10 +56,10 @@ const fetchPurchaseDetail = async () => {
         purchaseNote.value = data.purchaseNote;
 
         resourceList.value = data.purchaseResource.map((item: { resourceId: number; resourceName: string; resourceTotal: number; resourcePrice: number }) => ({
-            id: item.resourceId,
-            name: item.resourceName,
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
             quantity: item.resourceTotal,
-            price: item.resourcePrice
+            resourcePrice: item.resourcePrice
         }));
 
         // **Simpan ke Pinia & LocalStorage**
@@ -92,7 +92,7 @@ const formatCurrency = (value: number) => {
 
 // **Hitung Total Harga**
 const totalPrice = computed(() => {
-    return resourceList.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return resourceList.value.reduce((sum, item) => sum + item.resourcePrice * item.quantity, 0);
 });
 
 // **Hapus Resource dari List**
@@ -103,15 +103,23 @@ const removeResource = (index: number) => {
 
 // **Simpan Perubahan ke Store & LocalStorage**
 const updateDraftPurchase = () => {
-    purchaseStore.setDraftPurchase({
+    // Create a structure that matches PurchaseInterface
+    const draftData = {
+        id: purchaseId,
+        purchaseId: purchaseId,
         purchaseSupplier: selectedSupplier.value,
-        purchaseType: purchaseType.value,
-        items: resourceList.value,
-        totalPrice: totalPrice.value,
+        purchaseType: purchaseType.value, // Keep as string for now
+        purchaseStatus: '',
+        purchasePrice: totalPrice.value,
         purchaseNote: purchaseNote.value,
-    });
-
-    localStorage.setItem("draftPurchase", JSON.stringify(purchaseStore.draftPurchase));
+        purchaseSubmissionDate: '', 
+        purchaseUpdateDate: '',
+        purchaseResource: resourceList.value,
+        purchaseAsset: null
+    };
+    
+    purchaseStore.setDraftPurchase(draftData);
+    localStorage.setItem("draftPurchase", JSON.stringify(draftData));
 };
 
 // **Tambah Resource ke List**
@@ -127,17 +135,18 @@ const addResource = () => {
         return;
     }
 
-    const existingItem = resourceList.value.find((item: { id: number; }) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item) => item.resourceId === selectedItem.id);
     if (existingItem) {
         useToast().error("Resource ini sudah ditambahkan!");
         return;
     }
 
     resourceList.value.push({
-        id: selectedItem.id,
-        name: selectedItem.name,
+        resourceId: selectedItem.id,
+        resourceName: selectedItem.name,
         quantity: quantity.value,
-        price: price.value,
+        resourceTotal: quantity.value,
+        resourcePrice: price.value
     });
 
     updateDraftPurchase();
@@ -157,12 +166,7 @@ const handleUpdatePurchase = async () => {
     const body = {
         purchaseSupplier: selectedSupplier.value,
         purchaseNote: purchaseNote.value,
-        purchaseResource: resourceList.value.map((item) => ({
-            resourceId: item.id,  // **Tambahkan ID dari database**
-            resourceName: item.name,
-            resourceTotal: item.quantity,
-            resourcePrice: item.price
-        })),
+        purchaseResource: resourceList.value,
     };
 
     await purchaseStore.updatePurchase(body, purchaseId);
@@ -172,6 +176,7 @@ const handleUpdatePurchase = async () => {
 // Fungsi untuk menambah jumlah
 const increaseQuantity = (index: number) => {
     resourceList.value[index].quantity++;
+    resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
     updateDraftPurchase();
 };
 
@@ -179,6 +184,7 @@ const increaseQuantity = (index: number) => {
 const decreaseQuantity = (index: number) => {
     if (resourceList.value[index].quantity > 1) {
         resourceList.value[index].quantity--;
+        resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
         updateDraftPurchase();
     }
 };
@@ -188,6 +194,7 @@ const validateQuantity = (index: number) => {
     if (resourceList.value[index].quantity < 1 || isNaN(resourceList.value[index].quantity)) {
         resourceList.value[index].quantity = 1;
     }
+    resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
     updateDraftPurchase();
 };
 
@@ -267,7 +274,7 @@ const handleCancel = () => {
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in resourceList" :key="index" class="text-center">
-                            <td class="p-2 border border-[#1E3A5F]">{{ item.name }}</td>
+                            <td class="p-2 border border-[#1E3A5F]">{{ item.resourceName }}</td>
                             <td class="p-2 border border-[#1E3A5F]">
                                 <div class="flex items-center justify-center gap-2">
                                     <!-- Tombol Kurang (-) -->
@@ -291,7 +298,7 @@ const handleCancel = () => {
                                     </button>
                                 </div>
                             </td>
-                            <td class="p-2 border border-[#1E3A5F]">{{ formatCurrency(item.price) }}</td>
+                            <td class="p-2 border border-[#1E3A5F]">{{ formatCurrency(item.resourcePrice) }}</td>
                             <td class="p-2 border border-[#1E3A5F]">
                                 <button @click="removeResource(index)" class="text-red-500 hover:text-red-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">

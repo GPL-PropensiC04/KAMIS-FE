@@ -6,6 +6,7 @@ export interface AssetTempInterface {
     assetPrice: number;
     foto?: File; // Base64-encoded image string
     fotoContentType?: string | null;
+    fotoUrl?: string | null;
   }
 
 export interface AddAssetTemp {
@@ -13,6 +14,7 @@ export interface AddAssetTemp {
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto: File | string;
+    foto?: File | string;
     fotoContentType?: string;
+    fotoUrl?: string | null;
   }
