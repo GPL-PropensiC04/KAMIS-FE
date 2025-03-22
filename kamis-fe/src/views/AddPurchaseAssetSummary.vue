@@ -77,19 +77,45 @@ const handleSubmit = async () => {
             console.log(`File name: ${fileObject.value.name}, size: ${Math.round(fileObject.value.size / 1024)} KB`);
             assetData.foto = fileObject.value;
         } else if (imagePreview.value) {
-            // Fallback to base64 if File reconstruction failed
-            console.log('Submitting with base64 image (fallback)');
-            assetData.foto = imagePreview.value;
-            assetData.fotoContentType = assetDetails.value.contentType;
+            // Convert base64 to File object if file reconstruction failed
+            console.log('Converting base64 image to File object');
+            
+            // Extract the content type and base64 data
+            const matches = imagePreview.value.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+            
+            if (matches && matches.length === 3) {
+                const contentType = matches[1];
+                const base64Data = matches[2];
+                const byteCharacters = atob(base64Data);
+                const byteArrays = [];
+                
+                for (let i = 0; i < byteCharacters.length; i += 512) {
+                    const slice = byteCharacters.slice(i, i + 512);
+                    const byteNumbers = new Array(slice.length);
+                    
+                    for (let j = 0; j < slice.length; j++) {
+                        byteNumbers[j] = slice.charCodeAt(j);
+                    }
+                    
+                    byteArrays.push(new Uint8Array(byteNumbers));
+                }
+                
+                const blob = new Blob(byteArrays, { type: contentType });
+                const fileName = `asset_image_${Date.now()}.${contentType.split('/')[1] || 'jpg'}`;
+                
+                // Create a File object from the blob
+                assetData.foto = new File([blob], fileName, { type: contentType });
+                assetData.fotoContentType = contentType;
+                
+                console.log(`Created File from base64: ${fileName}, size: ${Math.round(assetData.foto.size / 1024)} KB`);
+            } else {
+                throw new Error("Invalid base64 image format");
+            }
         }
-
+        
         console.log("Sending asset data:", {
             ...assetData,
-            foto: assetData.foto instanceof File 
-                ? `File: ${assetData.foto.name} (${Math.round(assetData.foto.size / 1024)} KB)` 
-                : typeof assetData.foto === 'string' 
-                    ? 'Base64 image' 
-                    : 'No image'
+            foto: assetData.foto ? `File: ${assetData.foto.name} (${Math.round(assetData.foto.size / 1024)} KB)` : 'No image'
         });
 
         // Use the store method instead of direct API call

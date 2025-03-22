@@ -2,9 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
-
+import type { AsetInterface } from '../interfaces/asset.interface'
 const router = useRouter()
-const assets = ref([])
+const assets = ref<AsetInterface[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
@@ -28,7 +28,7 @@ const fetchAssets = async () => {
   }
 }
 
-const viewAssetDetail = (platNomor) => {
+const viewAssetDetail = (platNomor: string) => {
   router.push(`/asset/${platNomor}`)
 }
 </script>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
-
+import type { AsetInterface } from "../interfaces/asset.interface";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -19,7 +19,7 @@ const purchaseId = route.params.purchaseId as string;
 const purchaseDate = ref(""); // Tanggal Pengajuan
 const selectedSupplier = ref(""); // Supplier yang bisa diubah
 const purchaseNote = ref(""); // Catatan yang bisa diubah
-const assetDetails = ref(null); // Data aset
+const assetDetails = ref<AsetInterface>(); // Data aset
 const assetImage = ref(""); // URL gambar aset
 
 // Opsi dropdown supplier
