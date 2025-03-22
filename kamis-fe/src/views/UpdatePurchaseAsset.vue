@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
-
+import type { AssetTempInterface } from "../interfaces/assettemp.interface";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -19,7 +19,8 @@ const purchaseId = route.params.purchaseId as string;
 const purchaseDate = ref(""); // Tanggal Pengajuan
 const selectedSupplier = ref(""); // Supplier yang bisa diubah
 const purchaseNote = ref(""); // Catatan yang bisa diubah
-const assetDetails = ref(null); // Data aset
+const assetDetails = ref<AssetTempInterface>(); // Data aset
+// const assetImage = ref(""); // URL gambar aset
 
 // Opsi dropdown supplier
 const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
@@ -53,7 +54,7 @@ const fetchPurchaseDetail = async () => {
 
 // Format harga ke rupiah
 const formatCurrency = (value: number) => {
-    return `Rp ${parseInt(value || 0).toLocaleString("id-ID")},00`;
+    return `Rp ${parseInt(String(value) || "0").toLocaleString("id-ID")},00`;
 };
 
 // Handle update purchase
@@ -125,7 +126,7 @@ onMounted(() => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
-                    <img :src="assetDetails.imageUrl" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+                    <img :src="assetDetails.fotoUrl" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
                 </div>
             </div>
 

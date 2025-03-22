@@ -1,11 +1,13 @@
 export interface AssetTempInterface {
     id: number;
+    assetId: number;
     assetNameString: string;
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: File; // Base64-encoded image string
+    foto?: Blob; // Base64-encoded image string
     fotoContentType?: string | null;
+    fotoUrl?: string;
   }
 
 export interface AddAssetTemp {
@@ -14,7 +16,7 @@ export interface AddAssetTemp {
     assetDescription: string;
     assetType: string;
     assetPrice: number;
-    foto?: File | FormData | string; // Can be File, base64 string, or FormData
+    foto?: File; // ONLY accepts File objects as per backend requirements
     fotoContentType?: string;
     originalFile?: File; // Store the original File object
   }

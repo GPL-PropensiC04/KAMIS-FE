@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
 import type { AsetInterface } from '../interfaces/asset.interface'
-
 const router = useRouter()
 const assets = ref<AsetInterface[]>([])
 const loading = ref(true)

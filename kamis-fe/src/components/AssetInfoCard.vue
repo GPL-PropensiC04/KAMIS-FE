@@ -56,13 +56,11 @@
   </template>
   
   <script setup lang="ts">
-  // import { computed } from 'vue';
   import type { AsetInterface } from '@/interfaces/asset.interface';
   import { formatCurrency, formatDate } from '@/utils/formatters';
   import { StatusColorMap } from '@/config/status.config';
-  // import { useAuthStore } from '@/stores/auth';
   
-  defineProps<{
+defineProps<{
     aset: AsetInterface,
     showFinancialInfo: boolean,
     showActionButtons: boolean
@@ -70,7 +68,7 @@
   
   defineEmits(['edit', 'delete']);
   
-  // const authStore = useAuthStore();
+
   
   const getStatusClass = (status: string) => {
     return StatusColorMap[status as keyof typeof StatusColorMap] || '';
