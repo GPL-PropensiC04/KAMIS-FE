@@ -18,6 +18,9 @@ variables:
   IMAGE_REPO: "gcr.io/$GCP_PROJECT_ID"
   IMAGE_DOCKER_DIND: docker:27.3.1-alpine3.20
   IMAGE_NODE: node:18-alpine
+  # Default API URLs if not set in GitLab CI/CD variables
+  API_URL: ${API_URL}
+
 
 # Build job for Vue.js frontend
 build-frontend:
@@ -27,6 +30,14 @@ build-frontend:
     - echo "Building Vue.js frontend..."
     - cd kamis-fe
     - npm install --progress=false
+    # Copy the appropriate .env file based on deployment target
+    - if [ "$CI_COMMIT_REF_NAME" = "main" ] || [ "$CI_COMMIT_REF_NAME" = "gcp-deploy" ]; then
+        echo "Using production environment";
+        cp .env.production .env;
+      else
+        echo "Using development environment";
+        cp .env .env.local;
+      fi
     - npm run build
   artifacts:
     paths:
@@ -64,6 +75,8 @@ deploy-services:
   script:
     - echo "Deploying services to GCP VM..."
     - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "mkdir -p ~/frontend/"
+    # Replace API URLs in docker-compose file with GitLab variables
+    - sed -i "s|VITE_API_URL=.*|VITE_API_URL=$API_URL|g" docker-compose-deploy.yml
     - rsync -rahv $CI_PROJECT_DIR/docker-compose-deploy.yml "$DEPLOY_USERNAME@$DEPLOY_SERVER:~/frontend/"
     - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "
         cd ~/frontend/ &&

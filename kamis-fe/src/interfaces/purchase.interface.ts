@@ -1,4 +1,5 @@
 import type { AddResourceTempRequestInterface, ResourceTempInterface } from "./resourcetemp.interface";
+import type { AssetTempInterface } from "./assettemp.interface";
 
 export interface PurchaseInterface {
     id: string;
@@ -11,7 +12,7 @@ export interface PurchaseInterface {
     purchaseSubmissionDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
     purchaseUpdateDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
     purchaseResource: ResourceTempInterface[];
-    purchaseAsset?: number | null;
+    purchaseAsset?: AssetTempInterface | null;
     purchasePaymentDate?: string | null; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
   }
 

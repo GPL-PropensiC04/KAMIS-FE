@@ -3,6 +3,7 @@ import axios from 'axios';
 import type { AssetTempInterface, AddAssetTemp } from '@/interfaces/assettemp.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
+import { API_URLS } from '@/config/api.config';
 
 export const useAssetTempStore = defineStore('assetTemp', {
     state: () => ({
@@ -63,7 +64,7 @@ export const useAssetTempStore = defineStore('assetTemp', {
             console.log('Request headers:', headers);
             
             const response = await axios.post<CommonResponseInterface<AssetTempInterface>>(
-              `http://localhost:8084/api/purchase/addAsset`, 
+              `${API_URLS.PURCHASE}/purchase/addAsset`,
               requestData,
               { headers }
             );

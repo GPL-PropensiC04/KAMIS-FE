@@ -3,7 +3,7 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 
 // Define API_URL - this was missing and causing the error
-const API_URL = 'http://localhost:8081/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface ApiResponse<T> {
   status: number;

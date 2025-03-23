@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
 import type { AsetInterface } from '../interfaces/asset.interface'
-
+import { API_URLS } from '@/config/api.config'
 const router = useRouter()
 const assets = ref<AsetInterface[]>([])
 const loading = ref(true)
@@ -14,7 +14,7 @@ onMounted(async () => {
 
 const fetchAssets = async () => {
   try {
-    const response = await fetch('http://localhost:8081/api/asset/all')
+    const response = await fetch(`${API_URLS.ASSET}/asset/all`)
     const data = await response.json()
     
     if (data.status === 200) {

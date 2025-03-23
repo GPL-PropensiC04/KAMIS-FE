@@ -12,6 +12,7 @@ import VSuccessButton from "../components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
 import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
+import { API_URLS } from "@/config/api.config";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -43,7 +44,7 @@ const formatDate = (dateString: string) => {
 // **Fetch Detail Purchase dari API**
 const fetchPurchaseDetail = async () => {
     try {
-        const response = await axios.get(`http://localhost:8084/api/purchase/detail/${purchaseId}`, {
+        const response = await axios.get(`${API_URLS.PURCHASE}/purchase/detail/${purchaseId}`, {
             headers: { "Content-Type": "application/json" }
         });
 
@@ -72,7 +73,7 @@ const fetchPurchaseDetail = async () => {
 // **Fetch Data Resource dari API**
 const fetchResources = async () => {
     try {
-        const response = await axios.get("http://localhost:8085/api/resource/viewall", {
+        const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
             headers: { "Content-Type": "application/json" }
         });
 

@@ -154,7 +154,7 @@ import VTextArea from '@/components/VTextArea.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import axios from 'axios';
-
+import { API_URLS } from '@/config/api.config';
 const route = useRoute();
 const router = useRouter();
 const platNomor = route.params.platNomor as string;
@@ -248,7 +248,7 @@ const fetchAssetImage = async (id: string) => {
       return;
     }
 
-    const response = await axios.get(`http://localhost:8081/api/asset/${id}/foto`, {
+    const response = await axios.get(`${API_URLS.ASSET}/asset/${id}/foto`, {
       responseType: 'blob',
       // Add timeout and validate status to handle errors better
       timeout: 5000,

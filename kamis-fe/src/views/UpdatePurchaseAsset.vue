@@ -7,6 +7,7 @@ import VDropDownInput from "../components/VDropDownInput.vue";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import type { AssetTempInterface } from "../interfaces/assettemp.interface";
+import { API_URLS } from "@/config/api.config";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -14,6 +15,8 @@ const purchaseStore = usePurchaseStore();
 
 // Ambil ID pembelian dari route
 const purchaseId = route.params.purchaseId as string;
+console.log("Route params:", route.params);
+console.log("Purchase ID from route:", purchaseId);
 
 // State
 const purchaseDate = ref(""); // Tanggal Pengajuan
@@ -34,29 +37,35 @@ const formatDate = (dateString: string) => {
 
 const fetchPurchaseDetail = async () => {
     try {
+        console.log("Fetching purchase details for ID:", purchaseId);
         const data = await purchaseStore.getPurchaseById(purchaseId);
-
+        console.log("Purchase data returned:", data);
+        
         if (data) {
             // Prefill data dari store
             purchaseDate.value = formatDate(data.purchaseSubmissionDate);
             selectedSupplier.value = data.purchaseSupplier;
             purchaseNote.value = data.purchaseNote;
             
-            // Fetch asset details if we have a valid asset ID
+            // In the response, purchaseAsset is already a full object, not just an ID
             if (data.purchaseAsset) {
-                // Fetch asset details from API using the asset ID
-                const assetResponse = await axios.get(`http://localhost:8084/api/purchase/asset/${data.purchaseAsset}`);
-                if (assetResponse.data?.status === 200) {
-                    assetDetails.value = assetResponse.data.data;
-                    
-                    // Fetch asset image if available
-                    if (assetDetails.value?.fotoUrl) {
-                        fetchAssetImage(assetDetails.value.fotoUrl);
-                    }
+                console.log("Asset details found in purchase:", data.purchaseAsset);
+                
+                // Direct use the asset from response - no need for another API call
+                assetDetails.value = data.purchaseAsset;
+                
+                // Fetch asset image if available
+                if (data.purchaseAsset.fotoUrl) {
+                    fetchAssetImage(data.purchaseAsset.fotoUrl);
                 }
+            } else {
+                console.warn("No asset found in purchase data");
             }
+        } else {
+            console.warn("No purchase data returned");
         }
     } catch (error) {
+        console.log("MASUK ERROR:", error);
         console.error("Error fetching purchase details:", error);
     }
 };
@@ -66,7 +75,7 @@ const fetchAssetImage = async (imagePath?: string) => {
     if (!imagePath) return;
     
     try {
-        const response = await axios.get(`http://localhost:8084${imagePath}`, { responseType: "blob" });
+        const response = await axios.get(`${API_URLS.PURCHASE}${imagePath}`, { responseType: "blob" });
         assetImage.value = URL.createObjectURL(response.data); // Konversi ke URL objek
     } catch (error) {
         console.error("Error fetching asset image:", error);

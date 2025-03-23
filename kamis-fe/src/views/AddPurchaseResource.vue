@@ -10,7 +10,7 @@ import VLockedInput from "../components/VLockedInput.vue";
 import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
-
+import { API_URLS } from '@/config/api.config';
 // Router & Store
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -29,7 +29,7 @@ const resourceList = ref(purchaseStore.draftPurchase?.items || []);
 // Fetch data resource dari API
 const fetchResources = async () => {
     try {
-        const response = await axios.get("http://localhost:8085/api/resource/viewall", {
+        const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
             headers: { "Content-Type": "application/json" }
         });
 

@@ -12,7 +12,7 @@ export const MaintenanceService = {
       // Coba panggil API, jika tersedia
       const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.MAINTENANCE.GET_BY_ASET_ID(platNomor)}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.log('API maintenance belum tersedia, menggunakan data dummy');
       // Jika error, kembalikan data dummy
       return [
@@ -32,7 +32,7 @@ export const MaintenanceService = {
     try {
       const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.MAINTENANCE.CREATE}`, data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.log('API maintenance belum tersedia');
       // Redirect akan ditangani di komponen
       throw new Error('API maintenance belum tersedia');

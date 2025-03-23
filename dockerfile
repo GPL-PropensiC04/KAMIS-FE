@@ -10,6 +10,8 @@ RUN npm install
 
 COPY kamis-fe .
 
+COPY kamis-fe/.env .env
+
 RUN npm run build
 
 EXPOSE 5173
