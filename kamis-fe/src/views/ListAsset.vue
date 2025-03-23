@@ -17,14 +17,22 @@
         <table class="w-full text-sm text-left text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
           <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
-              <th scope="col" class="px-6 py-3">Nama Aset</th>
-              <th scope="col" class="px-6 py-3">Tanggal Perolehan</th>
+              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('nama')">
+                Nama Aset
+                <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
+                <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
+              </th>
+              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('tanggalPerolehan')">
+                Tanggal Perolehan
+                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
+                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
+              </th>
               <th scope="col" class="px-6 py-3">{{ thirdColumnHeader }}</th>
               <th scope="col" class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="asset in filteredAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
+            <tr v-for="asset in sortedAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
               <td class="px-6 py-4">{{ asset.nama }}</td>
               <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
               <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
@@ -38,7 +46,7 @@
           </tbody>
         </table>
 
-        <p v-if="filteredAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
+        <p v-if="sortedAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
       </div>
     </div>
   </div>
@@ -73,6 +81,10 @@ const notificationMessage = ref('');
 
 const router = useRouter();
 const route = useRoute();
+
+// Sorting state
+const sortKey = ref<string>('nama');
+const sortOrder = ref<string>('asc');
 
 // Fungsi untuk menampilkan notifikasi
 const showSuccessNotification = (message: string) => {
@@ -120,6 +132,23 @@ const filteredAssets = computed(() => {
   );
 });
 
+const sortedAssets = computed(() => {
+  return filteredAssets.value.slice().sort((a, b) => {
+    let modifier = 1;
+    if (sortOrder.value === 'desc') modifier = -1;
+    if (sortKey.value === 'nama') {
+      if (a.nama < b.nama) return -1 * modifier;
+      if (a.nama > b.nama) return 1 * modifier;
+      return 0;
+    } else if (sortKey.value === 'tanggalPerolehan') {
+      if (a.tanggalPerolehan < b.tanggalPerolehan) return -1 * modifier;
+      if (a.tanggalPerolehan > b.tanggalPerolehan) return 1 * modifier;
+      return 0;
+    }
+    return 0;
+  });
+});
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return `${String(date.getDate()).padStart(2, '0')} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${date.getFullYear()}`;
@@ -149,6 +178,15 @@ const thirdColumnValue = (asset: AsetInterface) => {
 const goToDetailAsset = (platNomor: string) => {
   router.push(`/asset/${platNomor}`);
 };
+
+const sortTable = (key: string) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
+};
 </script>
 
 <style scoped>
@@ -170,5 +208,13 @@ const goToDetailAsset = (platNomor: string) => {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+th {
+  cursor: pointer;
+}
+
+th span {
+  margin-left: 4px;
 }
 </style>
