@@ -296,6 +296,7 @@ const loadData = async () => {
 
     // Load maintenance history
     try {
+      
       const maintenanceData = await MaintenanceService.getMaintenanceByAsetId(platNomor);
       maintenanceHistory.value = maintenanceData;
     } catch (errMaintenance) {
