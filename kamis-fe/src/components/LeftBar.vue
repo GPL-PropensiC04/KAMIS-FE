@@ -1,4 +1,3 @@
-// filepath: d:\6th term\PROPENSI\Code\c4-gak-pake-lama-fe\kamis-fe\src\components\LeftBar.vue
 <template>
   <div :class="['leftbar', { collapsed: isCollapsed }]">
     <!-- Logo KAM -->
@@ -7,27 +6,27 @@
     </div>
     <!-- Top Icons -->
     <div class="top-icons">
-      <div class="icon-item" @click="goTo('dashboard')">
+      <div :class="['icon-item', { active: isActive('dashboard') }]" @click="goTo('dashboard')">
         <BaseIcon icon="fa-solid fa-chart-simple" clickable />
         <span v-if="!isCollapsed" class="icon-label">Dashboard</span>
       </div>
-      <div class="icon-item" @click="goTo('laporan')">
+      <div :class="['icon-item', { active: isActive('laporan') }]" @click="goTo('laporan')">
         <BaseIcon icon="fa-solid fa-file" clickable />
         <span v-if="!isCollapsed" class="icon-label">Laporan</span>
       </div>
-      <div class="icon-item" @click="goTo('purchase')">
+      <div :class="['icon-item', { active: isActive('purchase') }]" @click="goTo('purchase')">
         <BaseIcon icon="fa-solid fa-bag-shopping" clickable />
         <span v-if="!isCollapsed" class="icon-label">Pembelian</span>
       </div>
-      <div class="icon-item" @click="goTo('list-assets')">
+      <div :class="['icon-item', { active: isActive('list-assets') }]" @click="goTo('list-assets')">
         <BaseIcon icon="fa-solid fa-truck" clickable />
         <span v-if="!isCollapsed" class="icon-label">Asset</span>
       </div>
-      <div class="icon-item" @click="goTo('resource')">
+      <div :class="['icon-item', { active: isActive('resource') }]" @click="goTo('resource')">
         <BaseIcon icon="fa-solid fa-screwdriver-wrench" clickable />
         <span v-if="!isCollapsed" class="icon-label">Resource</span>
       </div>
-      <div class="icon-item" @click="goTo('klien')">
+      <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
         <BaseIcon icon="fa-solid fa-user" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
       </div>
@@ -49,12 +48,13 @@
 
 <script setup lang="ts">
 import BaseIcon from './BaseIcon.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ref } from 'vue'
 import logoImage from '@/assets/LogoKAM.jpg'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const isCollapsed = ref(false)
 
 const toggleSidebar = () => {
@@ -69,6 +69,10 @@ const logout = () => {
   console.log('Logging out...')
   const authStore = useAuthStore()
   authStore.logout()
+}
+
+const isActive = (routeName: string) => {
+  return route.name === routeName
 }
 </script>
 
@@ -129,6 +133,10 @@ const logout = () => {
   background-color: #8CC4A7;
 }
 
+.icon-item.active {
+  background-color: #8CC4A7; /* Highlight color for active item */
+}
+
 .icon-label {
   font-size: 14px;
   color: #ffffff;
@@ -159,7 +167,6 @@ const logout = () => {
   max-width: 40px;
   margin-bottom: 10px; /* Sama juga di mode collapsed */
 }
-
 
 /* Toggle Button Styling */
 .toggle-button {
