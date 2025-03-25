@@ -21,13 +21,13 @@ const authStore = useAuthStore();
 const searchId = ref("");
 const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
-const sortByDate = ref(false);
-const sortByNominal = ref(false);
+const sortByDate = ref(null);
+const sortByNominal = ref(null);
 
 // **State untuk Filter Rentang Nominal**
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
-const selectedNominalLabel = ref("Semua");
+const selectedNominalLabel = ref("Seluruh Total Harga");
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -44,7 +44,7 @@ const canEditPurchase = computed(() => {
 
 // **List Rentang Harga**
 const nominalOptions = [
-  { label: "Semua", start: null, end: null },
+  { label: "Seluruh Total Harga", start: null, end: null },
   { label: "0 - 1 Juta", start: 0, end: 1000000 },
   { label: "1 Juta - 10 Juta", start: 1000000, end: 10000000 },
   { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
@@ -60,7 +60,7 @@ const fetchPurchases = async () => {
     startNominal: startNominal.value,
     endNominal: endNominal.value,
     highNominal: sortByNominal.value || null,
-    newDate: sortByDate.value || null,
+    newDate: !sortByDate.value || null,
     type: selectedType.value,
   });
 };
@@ -113,86 +113,111 @@ const formatDate = (dateString: string) => {
 const goToAddPurchase = () => {
   router.push("/purchase/add");
 };
+
+const goToPurchaseDetail = (purchaseId: string) => {
+  if (purchaseId.startsWith("A-")) {
+    router.push(`/purchase/detail/asset/${purchaseId}`);
+  } else {
+    router.push(`/purchase/detail/resource/${purchaseId}`);
+  }
+};
 </script>
 
 <template>
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
-        <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
-        <VDateRangeFilter v-model="dateRange" class="w-1/4" />
-        <VSortButton v-model:sortOrder="sortByDate" />
-        <VDropDownInput
-          :options="nominalOptions.map((opt) => opt.label)"
-          v-model="selectedNominalLabel"
-          @update:modelValue="updateNominalFilter"
-          class="w-1/4"
-        />
-        <VSortButton v-model:sortOrder="sortByNominal" />
-      </div>
+      <template v-if="canViewFinancialInfo">
+        <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
+          <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
+          <VDateRangeFilter v-model="dateRange" class="w-1/4" />
+          <VSortButton v-model:sortOrder="sortByDate" />
+          <VDropDownInput
+            :options="nominalOptions.map((opt) => opt.label)"
+            v-model="selectedNominalLabel"
+            @update:modelValue="updateNominalFilter"
+            class="w-1/4"
+          />
+          <VSortButton v-model:sortOrder="sortByNominal" />
+        </div>
+      </template>
+      <template v-else>
+        <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+          <VSearchBar v-model="searchId" placeholder="Cari ID..." class="w-1/4" />
+          <VDateRangeFilter v-model="dateRange" class="w-1/4" />
+          <VSortButton v-model:sortOrder="sortByDate" />
+        </div>
+      </template>
     </div>
 
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <!-- Filter & Tombol Tambah Pembelian -->
       <div class="flex justify-between items-center mb-4">
         <VOptionInput v-model="selectedType" :options="['All', 'Aset', 'Resource']" class="w-1/4" />
-        <din v-if="canEditPurchase">
-          <VButton label="Tambah Pembelian" @click="goToAddPurchase"/>
-        </din>
-      </div>
-
-      <div v-if="purchaseStore.purchases.length" class="mt-4 space-y-6">
-        <div 
-          v-for="purchase in purchaseStore.purchases" 
-          :key="purchase.id" 
-          class="rounded-lg shadow-md overflow-hidden bg-white"
-        >
-          <!-- Header -->
-          <router-link :to="purchase.purchaseId.startsWith('A-') ? `/purchase/detail/asset/${purchase.purchaseId}` : `/purchase/detail/resource/${purchase.purchaseId}`" class="block">
-          <div class="bg-[#1E3A5F] text-white px-6 py-3 flex justify-between items-center">
-            <h3 class="text-lg font-semibold">
-              Pembelian {{ purchase.purchaseId }}
-            </h3>
-            <span class="text-xs">Last Updated: {{ formatDate(purchase.purchaseUpdateDate) }}</span>
-          </div>
-
-          <!-- Content -->
-            <div class="p-6 bg-[#E5EAF2] text-gray-800 text-sm">
-              <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center">
-                <p class="font-semibold">Tanggal Pengajuan</p>
-                <p>: {{ formatDate(purchase.purchaseSubmissionDate) }}</p>
-                <p></p> <!-- Spacer -->
-
-                <p class="font-semibold">Status Pembelian</p>
-                <p>: {{ purchase.purchaseStatus }}</p>
-                <p></p>
-
-                <p class="font-semibold">Supplier</p>
-                <p>: {{ purchase.purchaseSupplier }}</p>
-                <p></p>
-
-                <p class="font-semibold">Tipe Barang</p>
-                <p>: {{ purchase.purchaseType }}</p>
-
-                <din v-if="canViewFinancialInfo">
-                  <p class="font-bold text-[#1E3A5F] text-right">
-                  Total Harga : <span class="text-[#1E3A5F] font-bold">{{ formatCurrency(purchase.purchasePrice) }}</span>
-                  </p>
-                </din>
-              </div>
-            </div>
-          </router-link>
+        <div v-if="canEditPurchase">
+          <VButton label="Tambah Pembelian" @click="goToAddPurchase" />
         </div>
       </div>
 
+      <!-- Tabel Daftar Pembelian -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-800 border border-gray-200">
+          <thead class="bg-[#1E3A5F] text-white">
+            <tr>
+              <th class="px-4 py-3">ID Pembelian</th>
+              <th class="px-4 py-3">Tanggal Pengajuan</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3">Supplier</th>
+              <th class="px-4 py-3">Tipe Barang</th>
+              <th v-if="canViewFinancialInfo" class="px-4 py-3 text-right">Total Harga</th>
+              <th class="px-4 py-3 text-right">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-if="purchaseStore.purchases.length">
+              <tr 
+                v-for="purchase in purchaseStore.purchases" 
+                :key="purchase.id" 
+                class="bg-[#E5EAF2] border-t border-gray-200 hover:bg-[#dbe3eb] transition-colors cursor-pointer"
+                @click="goToPurchaseDetail(purchase.purchaseId)"
+              >
+                <td class="px-4 py-3">{{ purchase.purchaseId }}</td>
+                <td class="px-4 py-3">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
+                <td class="px-4 py-3">{{ purchase.purchaseStatus }}</td>
+                <td class="px-4 py-3">{{ purchase.purchaseSupplier }}</td>
+                <td class="px-4 py-3">{{ purchase.purchaseType }}</td>
+                <td 
+                  v-if="canViewFinancialInfo" 
+                  class="px-4 py-3 text-right font-bold text-[#1E3A5F]"
+                >
+                  {{ formatCurrency(purchase.purchasePrice) }}
+                </td>
+                <td class="px-4 py-3 text-right text-xs">
+                  {{ formatDate(purchase.purchaseUpdateDate) }}
+                </td>
+              </tr>
+            </template>
+
+            <!-- Baris Kosong jika tidak ada data -->
+            <tr v-else>
+              <td 
+                :colspan="canViewFinancialInfo ? 7 : 6" 
+                class="text-center py-6 text-gray-500 italic"
+              >
+                Tidak ada data pembelian ditemukan.
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+
       <!-- ⚠ Jika Tidak Ada Data -->
-      <p v-else class="text-center text-gray-500 mt-4">Tidak ada data pembelian ditemukan.</p>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Menggunakan font Inter */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
 * {
