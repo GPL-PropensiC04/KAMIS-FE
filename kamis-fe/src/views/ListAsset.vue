@@ -11,34 +11,55 @@
 
       <div class="flex justify-between mb-4">
         <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
+        <VDropDownInput
+          v-model="selectedJenisAset"
+          :options="jenisAsetOptions"
+          placeholder="Pilih Jenis Aset"
+          class="dropdown-input"
+        />
+        <VDropDownInput
+          v-model="selectedStatus"
+          :options="statusOptions"
+          placeholder="Pilih Status Aset"
+          class="dropdown-input"
+        />
       </div>
 
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
           <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
-              <th scope="col" class="px-6 py-3">Nama Aset</th>
-              <th scope="col" class="px-6 py-3">Tanggal Perolehan</th>
+              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('nama')">
+                Nama
+                <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
+                <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
+              </th>
+              <th scope="col" class="px-6 py-3">Plat Nomor</th>
+              <th scope="col" class="px-6 py-3">Jenis</th>
+              <th scope="col" class="px-6 py-3">Status</th>
+              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('tanggalPerolehan')">
+                Tanggal Perolehan
+                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
+                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
+              </th>
               <th scope="col" class="px-6 py-3">{{ thirdColumnHeader }}</th>
-              <th scope="col" class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="asset in filteredAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
-              <td class="px-6 py-4">{{ asset.nama }}</td>
-              <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
-              <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
-              <td class="px-6 py-4">
-                <VSuccessButton
-                  label="Detail"
-                  @click="goToDetailAsset(asset.platNomor)"
-                />
-              </td>
+            <tr v-for="asset in sortedAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
+              <router-link :to="`/asset/${asset.platNomor}`" class="contents">
+                <td class="px-6 py-4">{{ asset.nama }}</td>
+                <td class="px-6 py-4">{{ asset.platNomor }}</td>
+                <td class="px-6 py-4">{{ asset.jenisAset }}</td>
+                <td class="px-6 py-4">{{ asset.status }}</td>
+                <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
+                <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
+              </router-link>
             </tr>
           </tbody>
         </table>
 
-        <p v-if="filteredAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
+        <p v-if="sortedAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
       </div>
     </div>
   </div>
@@ -51,12 +72,17 @@ import { AsetService } from '@/stores/assetservices';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
-import VSuccessButton from '@/components/VSuccessButton.vue';
+import VDropDownInput from '@/components/VDropDownInput.vue';
 
 const assets = ref<AsetInterface[]>([]);
 const loading = ref(true);
 const searchQuery = ref('');
+const selectedJenisAset = ref('All');
+const selectedStatus = ref('All');
 const authStore = useAuthStore();
+
+const jenisAsetOptions = ['All', 'Truk', 'Mobil', 'Pickup'];
+const statusOptions = ['All', 'Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
 
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
@@ -73,6 +99,10 @@ const notificationMessage = ref('');
 
 const router = useRouter();
 const route = useRoute();
+
+// Sorting state
+const sortKey = ref<string>('nama');
+const sortOrder = ref<string>('asc');
 
 // Fungsi untuk menampilkan notifikasi
 const showSuccessNotification = (message: string) => {
@@ -112,12 +142,29 @@ const fetchAssets = async () => {
 };
 
 const filteredAssets = computed(() => {
-  if (!searchQuery.value) {
-    return assets.value;
-  }
-  return assets.value.filter(asset =>
-    asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  return assets.value.filter(asset => {
+    const matchesSearchQuery = asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesJenisAset = selectedJenisAset.value === 'All' || asset.jenisAset === selectedJenisAset.value;
+    const matchesStatus = selectedStatus.value === 'All' || asset.status === selectedStatus.value;
+    return matchesSearchQuery && matchesJenisAset && matchesStatus;
+  });
+});
+
+const sortedAssets = computed(() => {
+  return filteredAssets.value.slice().sort((a, b) => {
+    let modifier = 1;
+    if (sortOrder.value === 'desc') modifier = -1;
+    if (sortKey.value === 'nama') {
+      if (a.nama < b.nama) return -1 * modifier;
+      if (a.nama > b.nama) return 1 * modifier;
+      return 0;
+    } else if (sortKey.value === 'tanggalPerolehan') {
+      if (a.tanggalPerolehan < b.tanggalPerolehan) return -1 * modifier;
+      if (a.tanggalPerolehan > b.tanggalPerolehan) return 1 * modifier;
+      return 0;
+    }
+    return 0;
+  });
 });
 
 const formatDate = (dateString: string) => {
@@ -146,8 +193,17 @@ const thirdColumnValue = (asset: AsetInterface) => {
   }
 };
 
-const goToDetailAsset = (platNomor: string) => {
-  router.push(`/asset/${platNomor}`);
+// const goToDetailAsset = (platNomor: string) => {
+//   router.push(`/asset/${platNomor}`);
+// };
+
+const sortTable = (key: string) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
 };
 </script>
 
@@ -170,5 +226,37 @@ const goToDetailAsset = (platNomor: string) => {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+th {
+  cursor: pointer;
+}
+
+th span {
+  margin-left: 4px;
+}
+
+th, td {
+  padding: 12px 16px; /* Adjust padding for consistent spacing */
+}
+
+th {
+  text-align: left;
+}
+
+td {
+  text-align: left;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9; /* Light gray background on hover */
+}
+
+.router-link {
+  display: contents; /* Make router-link act like a span */
+}
+
+.dropdown-input {
+  width: 200px; /* Adjust the width as needed */
 }
 </style>

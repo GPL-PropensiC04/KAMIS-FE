@@ -26,6 +26,10 @@
         <BaseIcon icon="fa-solid fa-screwdriver-wrench" clickable />
         <span v-if="!isCollapsed" class="icon-label">Resource</span>
       </div>
+      <div :class="['icon-item', { active: isActive('project') }]" @click="goTo('project')">
+        <BaseIcon icon="fa-solid fa-helmet-safety" clickable />
+        <span v-if="!isCollapsed" class="icon-label">Proyek</span>
+      </div>
       <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
         <BaseIcon icon="fa-solid fa-user" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
@@ -109,17 +113,57 @@ const isActive = (routeName: string) => {
   align-items: center;
 }
 
+/* Default style */
 .icon-item {
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 10px 15px;    /* Sesuaikan padding kiri-kanan */
+  padding: 10px 15px;
   border-radius: 6px;
-  transition: background 0.2s ease;
-  width: calc(100% - 20px); /* Kurangi padding kiri-kanan dari lebar total */
-  margin: 0 10px;       /* Tambahkan margin kiri-kanan */
+  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+  width: calc(100% - 20px);
+  margin: 0 10px;
   box-sizing: border-box;
+  color: white; /* Warna default teks */
+}
+
+/* Target ikon Font Awesome di dalam .icon-item */
+.icon-item :deep(svg) {
+  color: white; /* Warna default ikon */
+  transition: color 0.2s ease;
+}
+
+/* Hover Effect */
+.icon-item:hover {
+  background-color: #ffffff; /* Background putih saat hover */
+  color: #1E3A5F; /* Warna teks jadi biru */
+}
+
+.icon-item:hover .icon-label {
+  color: #1E3A5F; /* Warna teks jadi biru saat hover */
+  font-weight: bold; /* Teks jadi tebal saat hover */
+}
+
+/* Target ikon Font Awesome saat hover */
+.icon-item:hover :deep(svg) {
+  color: #1E3A5F; /* Warna ikon berubah jadi biru */
+}
+
+/* Active State */
+.icon-item.active {
+  background-color: #ffffff; /* Background putih saat aktif */
+  color: #1E3A5F !important; /* Warna teks jadi biru */
+  font-weight: bold; /* Tulisan jadi bold */
+}
+
+.icon-item.active :deep(svg) {
+  color: #1E3A5F !important; /* Warna ikon berubah jadi biru */
+}
+
+.icon-item.active :deep(i),
+.icon-item.active .icon-label {
+  color: #1E3A5F;
 }
 
 .leftbar.collapsed .icon-item {
@@ -127,14 +171,6 @@ const isActive = (routeName: string) => {
   padding: 10px;        /* Samakan padding dengan non-collapsed */
   width: 40px;          /* Sesuaikan dengan lebar collapsed sidebar */
   margin: 0;            /* Hapus margin untuk collapsed */
-}
-
-.icon-item:hover {
-  background-color: #8CC4A7;
-}
-
-.icon-item.active {
-  background-color: #8CC4A7; /* Highlight color for active item */
 }
 
 .icon-label {
