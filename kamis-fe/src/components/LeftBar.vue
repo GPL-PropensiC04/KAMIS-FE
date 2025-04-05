@@ -3,6 +3,10 @@
     <!-- Logo KAM -->
     <div class="logo-container">
       <img :src="logoImage" alt="Logo KAM" :class="['logo', { collapsed: isCollapsed }]" />
+      <div v-if="!isCollapsed" class="logo-text">
+        <div class="title">KAMIS</div>
+        <div class="subtitle">Karina Aka Madina Integrated System</div>
+      </div>
     </div>
     <!-- Top Icons -->
     <div class="top-icons">
@@ -25,6 +29,10 @@
       <div :class="['icon-item', { active: isActive('resource') }]" @click="goTo('resource')">
         <BaseIcon icon="fa-solid fa-screwdriver-wrench" clickable />
         <span v-if="!isCollapsed" class="icon-label">Resource</span>
+      </div>
+      <div :class="['icon-item', { active: isActive('project') }]" @click="goTo('project')">
+        <BaseIcon icon="fa-solid fa-helmet-safety" clickable />
+        <span v-if="!isCollapsed" class="icon-label">Distribusi & Penjualan</span>
       </div>
       <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
         <BaseIcon icon="fa-solid fa-user" clickable />
@@ -100,7 +108,6 @@ const isActive = (routeName: string) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-left: 10px;
 }
 
 .leftbar.collapsed .top-icons,
@@ -109,17 +116,57 @@ const isActive = (routeName: string) => {
   align-items: center;
 }
 
+/* Default style */
 .icon-item {
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 10px 15px;    /* Sesuaikan padding kiri-kanan */
+  padding: 10px 15px;
   border-radius: 6px;
-  transition: background 0.2s ease;
-  width: calc(100% - 20px); /* Kurangi padding kiri-kanan dari lebar total */
-  margin: 0 10px;       /* Tambahkan margin kiri-kanan */
+  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+  width: calc(100% - 20px);
+  margin: 0 10px;
   box-sizing: border-box;
+  color: white; /* Warna default teks */
+}
+
+/* Target ikon Font Awesome di dalam .icon-item */
+.icon-item :deep(svg) {
+  color: white; /* Warna default ikon */
+  transition: color 0.2s ease;
+}
+
+/* Hover Effect */
+.icon-item:hover {
+  background-color: #ffffff; /* Background putih saat hover */
+  color: #1E3A5F; /* Warna teks jadi biru */
+}
+
+.icon-item:hover .icon-label {
+  color: #1E3A5F; /* Warna teks jadi biru saat hover */
+  font-weight: bold; /* Teks jadi tebal saat hover */
+}
+
+/* Target ikon Font Awesome saat hover */
+.icon-item:hover :deep(svg) {
+  color: #1E3A5F; /* Warna ikon berubah jadi biru */
+}
+
+/* Active State */
+.icon-item.active {
+  background-color: #ffffff; /* Background putih saat aktif */
+  color: #1E3A5F !important; /* Warna teks jadi biru */
+  font-weight: bold; /* Tulisan jadi bold */
+}
+
+.icon-item.active :deep(svg) {
+  color: #1E3A5F !important; /* Warna ikon berubah jadi biru */
+}
+
+.icon-item.active :deep(i),
+.icon-item.active .icon-label {
+  color: #1E3A5F;
 }
 
 .leftbar.collapsed .icon-item {
@@ -140,26 +187,49 @@ const isActive = (routeName: string) => {
 .icon-label {
   font-size: 14px;
   color: #ffffff;
-  white-space: nowrap;
+  white-space: normal; /* Changed from nowrap to normal */
   flex-shrink: 0;
-  line-height: 24px;     /* Menyesuaikan dengan tinggi ikon */
-  display: flex;         /* Memastikan alignment vertikal */
-  align-items: center;   /* Ratakan secara vertikal */
+  line-height: 1.2; /* Changed from 24px to 1.2 for better wrapping */
+  display: flex;
+  align-items: center;
+  max-width: 100px; /* Add max-width to control wrapping width */
+  word-wrap: break-word; /* Ensure long words wrap */
 }
+
 
 /* Logo Styling */
 .logo-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 5px 0;
+  gap: 10px;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Pastikan teks rata tengah secara vertikal */
+  color: white;
+}
+
+.logo-text .title {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.logo-text .subtitle {
+  font-size: 8px;
+  opacity: 0.8;
+  max-width: 100px;
+  line-height: 1.2;
 }
 
 .logo {
-  max-width: 100px;
+  max-width: 40px;
   height: auto;
   transition: all 0.3s ease;
-  margin-bottom: 10px; /* Tambahkan ini untuk jarak ke icon */
 }
 
 /* Saat sidebar collapse, kecilkan logo */
