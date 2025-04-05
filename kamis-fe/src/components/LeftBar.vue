@@ -254,6 +254,7 @@ const isActive = (routeName: string) => {
   cursor: pointer;
   transition: background 0.2s ease;
   z-index: 10;
+  
 }
 
 .toggle-button:hover {
