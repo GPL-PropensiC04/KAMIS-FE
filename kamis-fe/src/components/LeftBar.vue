@@ -3,6 +3,10 @@
     <!-- Logo KAM -->
     <div class="logo-container">
       <img :src="logoImage" alt="Logo KAM" :class="['logo', { collapsed: isCollapsed }]" />
+      <div v-if="!isCollapsed" class="logo-text">
+        <div class="title">KAMIS</div>
+        <div class="subtitle">Karina Aka Madina Integrated System</div>
+      </div>
     </div>
     <!-- Top Icons -->
     <div class="top-icons">
@@ -28,7 +32,7 @@
       </div>
       <div :class="['icon-item', { active: isActive('project') }]" @click="goTo('project')">
         <BaseIcon icon="fa-solid fa-helmet-safety" clickable />
-        <span v-if="!isCollapsed" class="icon-label">Proyek</span>
+        <span v-if="!isCollapsed" class="icon-label">Distribusi & Penjualan</span>
       </div>
       <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
         <BaseIcon icon="fa-solid fa-user" clickable />
@@ -104,7 +108,6 @@ const isActive = (routeName: string) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-left: 10px;
 }
 
 .leftbar.collapsed .top-icons,
@@ -176,26 +179,49 @@ const isActive = (routeName: string) => {
 .icon-label {
   font-size: 14px;
   color: #ffffff;
-  white-space: nowrap;
+  white-space: normal; /* Changed from nowrap to normal */
   flex-shrink: 0;
-  line-height: 24px;     /* Menyesuaikan dengan tinggi ikon */
-  display: flex;         /* Memastikan alignment vertikal */
-  align-items: center;   /* Ratakan secara vertikal */
+  line-height: 1.2; /* Changed from 24px to 1.2 for better wrapping */
+  display: flex;
+  align-items: center;
+  max-width: 100px; /* Add max-width to control wrapping width */
+  word-wrap: break-word; /* Ensure long words wrap */
 }
+
 
 /* Logo Styling */
 .logo-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 5px 0;
+  gap: 10px;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Pastikan teks rata tengah secara vertikal */
+  color: white;
+}
+
+.logo-text .title {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.logo-text .subtitle {
+  font-size: 8px;
+  opacity: 0.8;
+  max-width: 100px;
+  line-height: 1.2;
 }
 
 .logo {
-  max-width: 100px;
+  max-width: 40px;
   height: auto;
   transition: all 0.3s ease;
-  margin-bottom: 10px; /* Tambahkan ini untuk jarak ke icon */
 }
 
 /* Saat sidebar collapse, kecilkan logo */
