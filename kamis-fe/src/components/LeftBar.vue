@@ -30,11 +30,7 @@
         <BaseIcon icon="fa-solid fa-screwdriver-wrench" clickable />
         <span v-if="!isCollapsed" class="icon-label">Resource</span>
       </div>
-      <div :class="['icon-item', { active: isActive('project') }]" @click="goTo('project')">
-        <BaseIcon icon="fa-solid fa-helmet-safety" clickable />
-        <span v-if="!isCollapsed" class="icon-label">Distribusi & Penjualan</span>
-      </div>
-      <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
+      <div class="icon-item" @click="goTo('klien')">
         <BaseIcon icon="fa-solid fa-user" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
       </div>
@@ -174,6 +170,10 @@ const isActive = (routeName: string) => {
   padding: 10px;        /* Samakan padding dengan non-collapsed */
   width: 40px;          /* Sesuaikan dengan lebar collapsed sidebar */
   margin: 0;            /* Hapus margin untuk collapsed */
+}
+
+.icon-item:hover {
+  background-color: #8CC4A7;
 }
 
 .icon-label {
