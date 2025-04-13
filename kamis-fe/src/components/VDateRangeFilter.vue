@@ -18,9 +18,7 @@ const emit = defineEmits(["update:modelValue"]);
 // Fungsi untuk mengubah format tanggal ke "dd-MM-yyyy"
 const formatDate = (date: Date | null) => {
   if (!date) return "";
-  
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().split("T")[0].split("-").reverse().join("-");
+  return date.toISOString().split("T")[0].split("-").reverse().join("-");
 };
 
 // Fungsi untuk memperbarui nilai tanggal dengan format yang diinginkan
