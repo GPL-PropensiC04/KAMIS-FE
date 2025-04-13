@@ -156,14 +156,14 @@ import type { AsetInterface } from '@/interfaces/asset.interface';
 import type { Maintenance } from '@/interfaces/maintenance';
 import { AsetService } from '@/stores/assetservices';
 import { MaintenanceService } from '@/stores/maintenanceservice';
-import { byteArrayToImageUrl } from '@/utils/formatters';
-import AssetImage from '@/components/AssetImage.vue';
+// import { byteArrayToImageUrl } from '@/utils/formatters';
+// import AssetImage from '@/components/AssetImage.vue';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import axios from 'axios';
-
+import { API_URLS } from '@/config/api.config';
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -227,7 +227,7 @@ const fetchAssetImage = async (id: string) => {
       return;
     }
 
-    const response = await axios.get(`http://localhost:8081/api/asset/${id}/foto`, {
+    const response = await axios.get(`${API_URLS.ASSET}/asset/${id}/foto`, {
       responseType: 'blob',
       // Add timeout and validate status to handle errors better
       timeout: 5000,
@@ -296,6 +296,7 @@ const loadData = async () => {
 
     // Load maintenance history
     try {
+      
       const maintenanceData = await MaintenanceService.getMaintenanceByAsetId(platNomor);
       maintenanceHistory.value = maintenanceData;
     } catch (errMaintenance) {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
+import { API_BASE_URL, API_ENDPOINTS, API_URLS } from '@/config/api.config';
 import type { Maintenance } from '@/interfaces/maintenance';
 
 export const MaintenanceService = {
@@ -10,9 +10,9 @@ export const MaintenanceService = {
   async getMaintenanceByAsetId(platNomor: string): Promise<Maintenance[]> {
     try {
       // Coba panggil API, jika tersedia
-      const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.MAINTENANCE.GET_BY_ASET_ID(platNomor)}`);
+      const response = await axios.get(`${API_URLS.ASSET}${API_ENDPOINTS.MAINTENANCE.GET_BY_ASET_ID(platNomor)}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.log('API maintenance belum tersedia, menggunakan data dummy');
       // Jika error, kembalikan data dummy
       return [
@@ -30,9 +30,9 @@ export const MaintenanceService = {
    */
   async addMaintenance(data: Partial<Maintenance>): Promise<Maintenance> {
     try {
-      const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.MAINTENANCE.CREATE}`, data);
+      const response = await axios.post(`${API_URLS.ASSET}${API_ENDPOINTS.MAINTENANCE.CREATE}`, data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.log('API maintenance belum tersedia');
       // Redirect akan ditangani di komponen
       throw new Error('API maintenance belum tersedia');

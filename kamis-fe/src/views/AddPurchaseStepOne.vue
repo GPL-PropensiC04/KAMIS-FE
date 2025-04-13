@@ -30,6 +30,7 @@ const saveDraft = () => {
         purchaseResource: [],
         purchasePaymentDate: null
     };
+
     
     purchaseStore.setDraftPurchase(draftData);
 };

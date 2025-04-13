@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { usePurchaseStore } from "../stores/purchase";
 import axios from "axios";
@@ -7,6 +7,7 @@ import VDropDownInput from "../components/VDropDownInput.vue";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import type { AssetTempInterface } from "../interfaces/assettemp.interface";
+import { API_URLS } from "@/config/api.config";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -14,13 +15,15 @@ const purchaseStore = usePurchaseStore();
 
 // Ambil ID pembelian dari route
 const purchaseId = route.params.purchaseId as string;
+console.log("Route params:", route.params);
+console.log("Purchase ID from route:", purchaseId);
 
 // State
 const purchaseDate = ref(""); // Tanggal Pengajuan
 const selectedSupplier = ref(""); // Supplier yang bisa diubah
 const purchaseNote = ref(""); // Catatan yang bisa diubah
 const assetDetails = ref<AssetTempInterface>(); // Data aset
-// const assetImage = ref(""); // URL gambar aset
+const assetImage = ref(""); // URL gambar aset
 
 // Opsi dropdown supplier
 const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
@@ -32,29 +35,63 @@ const formatDate = (dateString: string) => {
     return `${String(date.getDate()).padStart(2, "0")} / ${String(date.getMonth() + 1).padStart(2, "0")} / ${date.getFullYear()}`;
 };
 
-// Fetch data purchase detail dari API
 const fetchPurchaseDetail = async () => {
     try {
-        const response = await axios.get(`http://localhost:8084/api/purchase/detail/${purchaseId}`, {
-            headers: { "Content-Type": "application/json" }
-        });
-
-        const data = response.data.data;
-
-        // Prefill data dari API
-        purchaseDate.value = formatDate(data.purchaseSubmissionDate);
-        selectedSupplier.value = data.purchaseSupplier;
-        purchaseNote.value = data.purchaseNote;
-        assetDetails.value = data.purchaseAsset; // Ambil detail aset dari API
-
+        console.log("Fetching purchase details for ID:", purchaseId);
+        const data = await purchaseStore.getPurchaseById(purchaseId);
+        console.log("Purchase data returned:", data);
+        
+        if (data) {
+            // Prefill data dari store
+            purchaseDate.value = formatDate(data.purchaseSubmissionDate);
+            selectedSupplier.value = data.purchaseSupplier;
+            purchaseNote.value = data.purchaseNote;
+            
+            // In the response, purchaseAsset is already a full object, not just an ID
+            if (data.purchaseAsset) {
+                console.log("Asset details found in purchase:", data.purchaseAsset);
+                
+                // Direct use the asset from response - no need for another API call
+                assetDetails.value = data.purchaseAsset;
+                
+                // Fetch asset image if available
+                if (data.purchaseAsset.fotoUrl) {
+                    fetchAssetImage(data.purchaseAsset.fotoUrl);
+                }
+            } else {
+                console.warn("No asset found in purchase data");
+            }
+        } else {
+            console.warn("No purchase data returned");
+        }
     } catch (error) {
+        console.log("MASUK ERROR:", error);
         console.error("Error fetching purchase details:", error);
     }
 };
 
+// Fetch gambar berdasarkan URL
+const fetchAssetImage = async (imagePath?: string) => {
+    if (!imagePath) return;
+    
+    try {
+        const response = await axios.get(`${API_URLS.PURCHASE}${imagePath}`, { responseType: "blob" });
+        assetImage.value = URL.createObjectURL(response.data); // Konversi ke URL objek
+    } catch (error) {
+        console.error("Error fetching asset image:", error);
+    }
+};
+
+// Watch untuk mengambil gambar setiap kali `assetDetails` berubah
+watch(assetDetails, (newAsset) => {
+    if (newAsset?.fotoUrl) {
+        fetchAssetImage(newAsset.fotoUrl);
+    }
+});
+
 // Format harga ke rupiah
 const formatCurrency = (value: number) => {
-    return `Rp ${parseInt(String(value) || "0").toLocaleString("id-ID")},00`;
+    return `Rp ${parseInt(value.toString()).toLocaleString("id-ID")},00`;
 };
 
 // Handle update purchase
@@ -64,7 +101,7 @@ const handleUpdatePurchase = async () => {
     const body = {
         purchaseSupplier: selectedSupplier.value,
         purchaseNote: purchaseNote.value,
-        purchaseAsset: assetDetails.value.assetId // Kirim ID aset
+        purchaseAsset: assetDetails.value.id // Kirim ID aset
     };
 
     await purchaseStore.updatePurchase(body, purchaseId);
@@ -126,7 +163,7 @@ onMounted(() => {
 
                 <!-- Kolom Kanan (Gambar Aset) -->
                 <div class="flex justify-center items-start">
-                    <img :src="assetDetails.fotoUrl" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
+                    <img :src="assetImage" alt="Gambar Aset" class="rounded-md shadow-md w-[250px] h-auto object-cover">
                 </div>
             </div>
 

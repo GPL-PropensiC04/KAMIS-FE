@@ -16,6 +16,7 @@ import UpdateResource from '@/views/UpdateResource.vue'
 import ListAsset from '@/views/ListAsset.vue'
 import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
 import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
+import EditAssetView from '@/views/EditAssetView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +25,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: true }
     },
     {
       path: '/purchase',
@@ -110,6 +111,7 @@ const router = createRouter({
       path: '/resource',
       name: 'resource',
       component:ListResource,
+      meta: { requiresAuth: true }
     },
     {
       path: '/resource/update/:id',
@@ -132,21 +134,22 @@ const router = createRouter({
       path: '/assets',
       name: 'list-assets',
       component: ListAsset,
+      meta: { requiresAuth: true }
     },
     {
       path: '/asset/:platNomor',
       name: 'DetailAset',
-      component: () => DetailAssetView,
+      component: DetailAssetView,
       meta: {
-        title: 'Detail Aset'
+        title: 'Detail Aset', requiresAuth: true
       }
     },
     {
       path: '/asset/edit/:platNomor',
       name: 'EditAset',
-      component: () => import('@/views/EditAssetView.vue'),
+      component: EditAssetView,
       meta: {
-        title: 'Mengubah Aset'
+        title: 'Mengubah Aset', requiresAuth: true
       }
     },
     {

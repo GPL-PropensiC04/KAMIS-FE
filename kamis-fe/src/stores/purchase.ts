@@ -6,7 +6,7 @@ import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import router from '@/router';
 import type { AddAssetTemp } from '@/interfaces/assettemp.interface';
-
+import { API_URLS } from '@/config/api.config';
 export const usePurchaseStore = defineStore('purchase', {
     state: () => ({
         purchases: [] as PurchaseInterface[],
@@ -36,7 +36,7 @@ export const usePurchaseStore = defineStore('purchase', {
           
             try {
               const response = await axios.post<CommonResponseInterface<PurchaseInterface>>(
-                'http://localhost:8084/api/purchase/add', 
+                `${API_URLS.PURCHASE}/purchase/add`, 
                 body,
                 {
                   headers: {
@@ -64,7 +64,7 @@ export const usePurchaseStore = defineStore('purchase', {
         
           try {
             const response = await axios.get<CommonResponseInterface<PurchaseInterface>>(
-              `http://localhost:8084/api/purchase/detail/${id}`,
+              `${API_URLS.PURCHASE}/purchase/detail/${id}`,
               {
                 headers: {
                   'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -89,7 +89,7 @@ export const usePurchaseStore = defineStore('purchase', {
         
           try {
             const response = await axios.put<CommonResponseInterface<PurchaseInterface>>(
-              `http://localhost:8084/api/purchase/update/${id}`, 
+              `${API_URLS.PURCHASE}/purchase/update/${id}`, 
               body,
               {
                 headers: {
@@ -116,8 +116,8 @@ export const usePurchaseStore = defineStore('purchase', {
         
           try {
             const endpoint = isNextStatus 
-              ? `http://localhost:8084/api/purchase/updatestatus/next/${id}`
-              : `http://localhost:8084/api/purchase/updatestatus/cancel/${id}`;
+              ? `${API_URLS.PURCHASE}/purchase/updatestatus/next/${id}`
+              : `${API_URLS.PURCHASE}/purchase/updatestatus/cancel/${id}`;
             
             const response = await axios.put<CommonResponseInterface<PurchaseInterface>>(
               endpoint, 
@@ -158,7 +158,7 @@ export const usePurchaseStore = defineStore('purchase', {
         
           try {
             const response = await axios.put<CommonResponseInterface<PurchaseInterface>>(
-              `http://localhost:8084/api/purchase/updatestatus/pembayaran/${id}`, 
+              `${API_URLS.PURCHASE}/purchase/updatestatus/pembayaran/${id}`, 
               body,
               {
                 headers: {
@@ -196,7 +196,7 @@ export const usePurchaseStore = defineStore('purchase', {
         
           try {
             const response = await axios.post<CommonResponseInterface<PurchaseInterface>>(
-              `http://localhost:8084/api/purchase/addAsset`, 
+              `${API_URLS.PURCHASE}/purchase/addAsset`, 
               body,
               {
                 headers: {
@@ -222,7 +222,7 @@ export const usePurchaseStore = defineStore('purchase', {
     
           try {
             const response = await axios.get<CommonResponseInterface<PurchaseInterface[]>>(
-              "http://localhost:8084/api/purchase/viewall",
+              `${API_URLS.PURCHASE}/purchase/viewall`,
               { params: filters } // ✅ Kirim filter sebagai query parameters
             );
     

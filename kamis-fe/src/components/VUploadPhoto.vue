@@ -18,11 +18,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import UploadIcon from '@/components/icons/UploadIcon.vue'
+import { useToast } from 'vue-toastification'
 
 const emit = defineEmits(['file-change', 'upload-status'])
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedImageUrl = ref<string | null>(null)
 const uploadSuccess = ref<boolean>(false)
+const toast = useToast()
 
 const triggerFileInput = () => {
   fileInput.value?.click()
@@ -34,17 +36,17 @@ const handleFileChange = async (event: Event) => {
     const file = target.files[0]
     
     // Validate file size - 8MB max
-    const MAX_SIZE_MB = 8
+    const MAX_SIZE_MB = 10
     const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
     
     if (file.size > MAX_SIZE_BYTES) {
-      alert(`Ukuran file terlalu besar. Maksimal ${MAX_SIZE_MB}MB.`)
+      toast.error(`Ukuran file terlalu besar. Maksimal ${MAX_SIZE_MB}MB.`)
       return
     }
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Hanya file gambar yang diperbolehkan.')
+      toast.error('Hanya file gambar yang diperbolehkan.')
       return
     }
     
@@ -160,6 +162,7 @@ const resizeImage = (file: File): Promise<File> => {
   padding: 16px;
   cursor: pointer;
   transition: border-color 0.3s;
+  height: 200px; 
 }
 
 .upload-card:hover {
@@ -173,6 +176,7 @@ const resizeImage = (file: File): Promise<File> => {
   width: 100%;
   height: 150px;
   position: relative;
+  justify-content: center;
 }
 
 .upload-content {

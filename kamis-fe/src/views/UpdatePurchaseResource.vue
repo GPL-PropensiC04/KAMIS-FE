@@ -10,7 +10,9 @@ import VLockedInput from "../components/VLockedInput.vue";
 import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
-
+import { useToast } from "vue-toastification";
+import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
+import { API_URLS } from "@/config/api.config";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -30,12 +32,7 @@ const resources = ref<{ id: number; name: string }[]>([]);
 const selectedResource = ref("");
 const quantity = ref(1);
 const price = ref(0);
-const resourceList = ref<{
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-}[]>([]);
+const resourceList = ref<ResourceTempInterface[]>([]);
 
 // **Format Tanggal (dd / MM / yyyy)**
 const formatDate = (dateString: string) => {
@@ -47,7 +44,7 @@ const formatDate = (dateString: string) => {
 // **Fetch Detail Purchase dari API**
 const fetchPurchaseDetail = async () => {
     try {
-        const response = await axios.get(`http://localhost:8084/api/purchase/detail/${purchaseId}`, {
+        const response = await axios.get(`${API_URLS.PURCHASE}/purchase/detail/${purchaseId}`, {
             headers: { "Content-Type": "application/json" }
         });
 
@@ -60,10 +57,10 @@ const fetchPurchaseDetail = async () => {
         purchaseNote.value = data.purchaseNote;
 
         resourceList.value = data.purchaseResource.map((item: { resourceId: number; resourceName: string; resourceTotal: number; resourcePrice: number }) => ({
-            id: item.resourceId,
-            name: item.resourceName,
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
             quantity: item.resourceTotal,
-            price: item.resourcePrice
+            resourcePrice: item.resourcePrice
         }));
 
         // **Simpan ke Pinia & LocalStorage**
@@ -76,7 +73,7 @@ const fetchPurchaseDetail = async () => {
 // **Fetch Data Resource dari API**
 const fetchResources = async () => {
     try {
-        const response = await axios.get("http://localhost:8085/api/resource/viewall", {
+        const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
             headers: { "Content-Type": "application/json" }
         });
 
@@ -96,7 +93,7 @@ const formatCurrency = (value: number) => {
 
 // **Hitung Total Harga**
 const totalPrice = computed(() => {
-    return resourceList.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return resourceList.value.reduce((sum, item) => sum + item.resourcePrice * item.quantity, 0);
 });
 
 // **Hapus Resource dari List**
@@ -107,42 +104,50 @@ const removeResource = (index: number) => {
 
 // **Simpan Perubahan ke Store & LocalStorage**
 const updateDraftPurchase = () => {
-    purchaseStore.setDraftPurchase({
+    // Create a structure that matches PurchaseInterface
+    const draftData = {
+        id: purchaseId,
+        purchaseId: purchaseId,
         purchaseSupplier: selectedSupplier.value,
-        purchaseType: purchaseType.value,
-        items: resourceList.value,
-        totalPrice: totalPrice.value,
+        purchaseType: purchaseType.value, // Keep as string for now
+        purchaseStatus: '',
+        purchasePrice: totalPrice.value,
         purchaseNote: purchaseNote.value,
-    });
-
-    localStorage.setItem("draftPurchase", JSON.stringify(purchaseStore.draftPurchase));
+        purchaseSubmissionDate: '', 
+        purchaseUpdateDate: '',
+        purchaseResource: resourceList.value,
+        purchaseAsset: null
+    };
+    
+    purchaseStore.setDraftPurchase(draftData);
+    localStorage.setItem("draftPurchase", JSON.stringify(draftData));
 };
 
 // **Tambah Resource ke List**
 const addResource = () => {
     if (!selectedResource.value || quantity.value <= 0 || price.value <= 0) {
-        alert("Harap isi semua field dengan benar!");
+        useToast().error("Harap isi semua field dengan benar!");
         return;
     }
 
     const selectedItem = resources.value.find((item) => item.name === selectedResource.value);
     if (!selectedItem) {
-        alert("Resource tidak valid!");
+        useToast().error("Resource tidak valid!");
         return;
     }
 
-    // ✅ **Cek apakah barang sudah ada di daftar**
-    const existingItem = resourceList.value.find((item) => item.id === selectedItem.id);
+    const existingItem = resourceList.value.find((item) => item.resourceId === selectedItem.id);
     if (existingItem) {
-        alert("Barang ini sudah ada dalam daftar!");
+        useToast().error("Resource ini sudah ditambahkan!");
         return;
     }
 
     resourceList.value.push({
-        id: selectedItem.id,
-        name: selectedItem.name,
+        resourceId: selectedItem.id,
+        resourceName: selectedItem.name,
         quantity: quantity.value,
-        price: price.value,
+        resourceTotal: quantity.value,
+        resourcePrice: price.value
     });
 
     updateDraftPurchase();
@@ -154,20 +159,44 @@ const addResource = () => {
 
 
 const handleUpdatePurchase = async () => {
+    if (resourceList.value.length === 0) {
+        useToast().error("Harap tambahkan resource!");
+        return;
+    }
+    
     const body = {
         purchaseSupplier: selectedSupplier.value,
         purchaseNote: purchaseNote.value,
-        purchaseResource: resourceList.value.map((item) => ({
-            resourceId: item.id,
-            resourceName: item.name,
-            resourceTotal: item.quantity,
-            resourcePrice: item.price,
-            quantity: item.quantity
-        })),
+        purchaseResource: resourceList.value,
     };
 
     await purchaseStore.updatePurchase(body, purchaseId);
     router.push(`/purchase`);
+};
+
+// Fungsi untuk menambah jumlah
+const increaseQuantity = (index: number) => {
+    resourceList.value[index].quantity++;
+    resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
+    updateDraftPurchase();
+};
+
+// Fungsi untuk mengurangi jumlah (minimal 1)
+const decreaseQuantity = (index: number) => {
+    if (resourceList.value[index].quantity > 1) {
+        resourceList.value[index].quantity--;
+        resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
+        updateDraftPurchase();
+    }
+};
+
+// Fungsi untuk validasi input jumlah
+const validateQuantity = (index: number) => {
+    if (resourceList.value[index].quantity < 1 || isNaN(resourceList.value[index].quantity)) {
+        resourceList.value[index].quantity = 1;
+    }
+    resourceList.value[index].resourceTotal = resourceList.value[index].quantity;
+    updateDraftPurchase();
 };
 
 
@@ -234,7 +263,7 @@ const handleCancel = () => {
 
 
             <!-- Tabel Resource -->
-            <div class="mt-6">
+            <div class="mt-6" v-if="resourceList.length > 0">
                 <table class="w-full border-collapse border border-[#1E3A5F]">
                     <thead>
                         <tr class="bg-[#1E3A5F] text-white">
@@ -246,9 +275,31 @@ const handleCancel = () => {
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in resourceList" :key="index" class="text-center">
-                            <td class="p-2 border border-[#1E3A5F]">{{ item.name }}</td>
-                            <td class="p-2 border border-[#1E3A5F]">{{ item.quantity }}</td>
-                            <td class="p-2 border border-[#1E3A5F]">{{ formatCurrency(item.price) }}</td>
+                            <td class="p-2 border border-[#1E3A5F]">{{ item.resourceName }}</td>
+                            <td class="p-2 border border-[#1E3A5F]">
+                                <div class="flex items-center justify-center gap-2">
+                                    <!-- Tombol Kurang (-) -->
+                                    <button @click="decreaseQuantity(index)" class="text-red-500 font-bold text-xl hover:text-red-700">
+                                        −
+                                    </button>
+
+                                    <!-- Input Jumlah (Bisa Diketik) -->
+                                    <input 
+                                        type="number"
+                                        v-model.number="item.quantity"
+                                        @change="validateQuantity(index)"
+                                        class="w-14 text-center border border-gray-400 rounded no-spinner"
+                                        min="1"
+                                    />
+
+
+                                    <!-- Tombol Tambah (+) -->
+                                    <button @click="increaseQuantity(index)" class="text-green-500 font-bold text-xl hover:text-green-700">
+                                        +
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="p-2 border border-[#1E3A5F]">{{ formatCurrency(item.resourcePrice) }}</td>
                             <td class="p-2 border border-[#1E3A5F]">
                                 <button @click="removeResource(index)" class="text-red-500 hover:text-red-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -256,7 +307,6 @@ const handleCancel = () => {
                                     </svg>
                                 </button>
                             </td>
-
                         </tr>
                     </tbody>
                 </table>

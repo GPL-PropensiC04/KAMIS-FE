@@ -11,18 +11,6 @@
 
       <div class="flex justify-between mb-4">
         <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
-        <VDropDownInput
-          v-model="selectedJenisAset"
-          :options="jenisAsetOptions"
-          placeholder="Pilih Jenis Aset"
-          class="dropdown-input"
-        />
-        <VDropDownInput
-          v-model="selectedStatus"
-          :options="statusOptions"
-          placeholder="Pilih Status Aset"
-          class="dropdown-input"
-        />
       </div>
 
       <div class="overflow-x-auto">
@@ -30,31 +18,30 @@
           <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
               <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('nama')">
-                Nama
+                Nama Aset
                 <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
                 <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
               </th>
-              <th scope="col" class="px-6 py-3">Plat Nomor</th>
-              <th scope="col" class="px-6 py-3">Jenis</th>
-              <th scope="col" class="px-6 py-3">Status</th>
               <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('tanggalPerolehan')">
                 Tanggal Perolehan
                 <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
                 <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
               </th>
               <th scope="col" class="px-6 py-3">{{ thirdColumnHeader }}</th>
+              <th scope="col" class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="asset in sortedAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
-              <router-link :to="`/asset/${asset.platNomor}`" class="contents">
-                <td class="px-6 py-4">{{ asset.nama }}</td>
-                <td class="px-6 py-4">{{ asset.platNomor }}</td>
-                <td class="px-6 py-4">{{ asset.jenisAset }}</td>
-                <td class="px-6 py-4">{{ asset.status }}</td>
-                <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
-                <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
-              </router-link>
+              <td class="px-6 py-4">{{ asset.nama }}</td>
+              <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
+              <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
+              <td class="px-6 py-4">
+                <VSuccessButton
+                  label="Detail"
+                  @click="goToDetailAsset(asset.platNomor)"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -72,17 +59,12 @@ import { AsetService } from '@/stores/assetservices';
 import type { AsetInterface } from '@/interfaces/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
-import VDropDownInput from '@/components/VDropDownInput.vue';
+import VSuccessButton from '@/components/VSuccessButton.vue';
 
 const assets = ref<AsetInterface[]>([]);
 const loading = ref(true);
 const searchQuery = ref('');
-const selectedJenisAset = ref('All');
-const selectedStatus = ref('All');
 const authStore = useAuthStore();
-
-const jenisAsetOptions = ['All', 'Truk', 'Mobil', 'Pickup'];
-const statusOptions = ['All', 'Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
 
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
@@ -142,12 +124,12 @@ const fetchAssets = async () => {
 };
 
 const filteredAssets = computed(() => {
-  return assets.value.filter(asset => {
-    const matchesSearchQuery = asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const matchesJenisAset = selectedJenisAset.value === 'All' || asset.jenisAset === selectedJenisAset.value;
-    const matchesStatus = selectedStatus.value === 'All' || asset.status === selectedStatus.value;
-    return matchesSearchQuery && matchesJenisAset && matchesStatus;
-  });
+  if (!searchQuery.value) {
+    return assets.value;
+  }
+  return assets.value.filter(asset =>
+    asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
 });
 
 const sortedAssets = computed(() => {
@@ -193,9 +175,9 @@ const thirdColumnValue = (asset: AsetInterface) => {
   }
 };
 
-// const goToDetailAsset = (platNomor: string) => {
-//   router.push(`/asset/${platNomor}`);
-// };
+const goToDetailAsset = (platNomor: string) => {
+  router.push(`/asset/${platNomor}`);
+};
 
 const sortTable = (key: string) => {
   if (sortKey.value === key) {
@@ -234,29 +216,5 @@ th {
 
 th span {
   margin-left: 4px;
-}
-
-th, td {
-  padding: 12px 16px; /* Adjust padding for consistent spacing */
-}
-
-th {
-  text-align: left;
-}
-
-td {
-  text-align: left;
-}
-
-tbody tr:hover {
-  background-color: #f1f5f9; /* Light gray background on hover */
-}
-
-.router-link {
-  display: contents; /* Make router-link act like a span */
-}
-
-.dropdown-input {
-  width: 200px; /* Adjust the width as needed */
 }
 </style>

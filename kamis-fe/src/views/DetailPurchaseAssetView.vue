@@ -173,7 +173,7 @@ import type { AssetTempInterface } from '@/interfaces/assettemp.interface';
 import type { PurchaseInterface } from '@/interfaces/purchase.interface';
 import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface';
 import axios from 'axios';
-
+import { API_URLS } from '@/config/api.config';
 // Extended interface for the detail view
 interface DetailAssetPurchaseInterface extends Omit<PurchaseInterface, 'purchaseAsset'> {
   purchaseAsset?: AssetTempInterface;
@@ -301,7 +301,7 @@ const fetchAssetImage = async () => {
     if (!purchase.value?.purchaseAsset?.id) return;
     
     const assetId = purchase.value.purchaseAsset.id;
-    const response = await axios.get(`http://localhost:8084/api/purchase/asset/${assetId}/foto`, {
+    const response = await axios.get(`${API_URLS.PURCHASE}/purchase/asset/${assetId}/foto`, {
       responseType: 'blob' // Important: we need the response as a Blob
     });
     

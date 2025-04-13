@@ -82,6 +82,12 @@ const handleFileChange = (file: File) => {
   <div class="p-6">
     <div class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
       <div class="grid grid-cols-2 gap-4">
+
+        <!-- Tombol Back -->
+        <button @click="router.back()" class="hover:underline flex items-center mb-4 text-[28px]">
+                ←
+        </button>
+        
         <!-- Upload Foto Aset Besar dan Centered -->
         <div class="col-span-2 flex justify-center">
           <div class="w-full max-w-md">

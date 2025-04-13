@@ -1,9 +1,6 @@
 import axios from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
+import { API_ENDPOINTS, API_URLS } from '@/config/api.config';
 import type { AsetInterface } from '@/interfaces/asset.interface';
-
-// Define API_URL - this was missing and causing the error
-const API_URL = 'http://localhost:8081/api';
 
 interface ApiResponse<T> {
   status: number;
@@ -17,7 +14,7 @@ export class AsetService {
    * Fetch all assets
    */
   static async viewAllAsset(): Promise<AsetInterface[]> {
-    const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_ALL}`);
+    const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_ALL}`);
     return response.data.data;
   }
   
@@ -25,7 +22,7 @@ export class AsetService {
    * Fetch asset by platNomor
    */
   static async getAsetByPlatNomor(platNomor: string): Promise<AsetInterface> {
-    const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.ASET.GET_BY_PLATNOMOR(platNomor)}`);
+    const response = await axios.get(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_BY_PLATNOMOR(platNomor)}`);
     
     // Cek apakah response menggunakan format baru (dengan field data)
     if (response.data && response.data.data) {
@@ -67,7 +64,7 @@ export class AsetService {
    */
   static async updateAset(platNomor: string, updateData: Partial<AsetInterface>): Promise<AsetInterface> {
     try {
-      const response = await axios.put(`${API_URL}/asset/${platNomor}`, updateData);
+      const response = await axios.put(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.UPDATE(platNomor)}`, updateData);
       return response.data;
     } catch (error) {
       console.error('Error updating asset:', error);
@@ -79,6 +76,6 @@ export class AsetService {
    * Delete asset (soft delete)
    */
   static async deleteAset(platNomor: string): Promise<void> {
-    await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.ASET.DELETE(platNomor)}`);
+    await axios.delete(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.DELETE(platNomor)}`);
   }
 };

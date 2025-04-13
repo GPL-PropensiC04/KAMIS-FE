@@ -10,7 +10,9 @@ RUN npm install
 
 COPY kamis-fe .
 
-RUN npx vite build
+COPY kamis-fe/.env .env
+
+RUN npm run build
 
 EXPOSE 5173
 

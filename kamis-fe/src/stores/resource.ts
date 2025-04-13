@@ -4,7 +4,7 @@ import type { ResourceInterface, AddResourceRequestInterface, ResourceResponseIn
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import router from '@/router';
-
+import { API_URLS } from '@/config/api.config';
 export const useResourceStore = defineStore('resource', {
     state: () => ({
         resources: [] as ResourceInterface[],
@@ -18,7 +18,7 @@ export const useResourceStore = defineStore('resource', {
 
             try {
                 const response = await axios.get<CommonResponseInterface<ResourceInterface[]>>(
-                    'http://localhost:8085/api/resource/viewall',
+                    `${API_URLS.RESOURCE}/resource/viewall`,
                     {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -41,7 +41,7 @@ export const useResourceStore = defineStore('resource', {
           
             try {
                 const response = await axios.post<ResourceResponseInterface>(
-                    'http://localhost:8085/api/resource/add', 
+                    `${API_URLS.RESOURCE}/resource/add`, 
                     body,
                     {
                         headers: {
@@ -70,7 +70,7 @@ export const useResourceStore = defineStore('resource', {
             this.error = null;
             try {
                 const response = await axios.get<CommonResponseInterface<ResourceInterface[]>>(
-                    'http://localhost:8085/api/resource/viewall',
+                    `${API_URLS.RESOURCE}/resource/viewall`,
                     {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -92,7 +92,7 @@ export const useResourceStore = defineStore('resource', {
             this.error = null;
             try {
                 const response = await axios.get<CommonResponseInterface<ResourceInterface>>(
-                    `http://localhost:8085/api/resource/${id}`,
+                    `${API_URLS.RESOURCE}/resource/${id}`,
                     {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -114,7 +114,7 @@ export const useResourceStore = defineStore('resource', {
             this.error = null;
             try {
                 const response = await axios.put<ResourceResponseInterface>(
-                    `http://localhost:8085/api/resource/update/${id}`,
+                    `${API_URLS.RESOURCE}/resource/update/${id}`,
                     body,
                     {
                         headers: {
@@ -148,7 +148,7 @@ export const useResourceStore = defineStore('resource', {
             this.error = null;
             try {
                 const response = await axios.put<ResourceResponseInterface>(
-                    `http://localhost:8085/api/resource/addToDb/${id}/${stockUpdate}`,
+                    `${API_URLS.RESOURCE}/resource/addToDb/${id}/${stockUpdate}`,
                     {},
                     {
                         headers: {

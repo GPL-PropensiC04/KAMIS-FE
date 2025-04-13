@@ -59,6 +59,7 @@
   import type { AsetInterface } from '@/interfaces/asset.interface';
   import { formatCurrency, formatDate } from '@/utils/formatters';
   import { StatusColorMap } from '@/config/status.config';
+
   
 defineProps<{
     aset: AsetInterface,
@@ -67,9 +68,7 @@ defineProps<{
   }>();
   
   defineEmits(['edit', 'delete']);
-  
 
-  
   const getStatusClass = (status: string) => {
     return StatusColorMap[status as keyof typeof StatusColorMap] || '';
   };

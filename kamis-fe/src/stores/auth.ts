@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { LoginRequest, LoginResponse } from '@/interfaces/auth.interface';
-
+import { API_URLS } from '@/config/api.config';
 interface JwtPayload {
   id: number;
   email: string;
@@ -48,7 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
     
     try {
-      const response = await axios.post<LoginResponse>(`http://localhost:8080/api/auth/login`, loginRequest);
+      const response = await axios.post<LoginResponse>(`${API_URLS.AUTH}/login`, loginRequest);
       console.log(response.data);
       if (response.data?.data?.token) {
         token.value = response.data.data.token;
