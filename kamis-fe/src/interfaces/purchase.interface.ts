@@ -1,5 +1,6 @@
 import type { AddResourceTempRequestInterface, ResourceTempInterface } from "./resourcetemp.interface";
 import type { AssetTempInterface } from "./assettemp.interface";
+import type { LogPurchaseInterface } from "./logproject.interface";
 
 export interface PurchaseInterface {
     id: string;
@@ -14,6 +15,7 @@ export interface PurchaseInterface {
     purchaseResource: ResourceTempInterface[];
     purchaseAsset?: AssetTempInterface | null;
     purchasePaymentDate?: string | null; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
+    purchaseLogs: LogPurchaseInterface[];
   }
 
 export interface AddPurchaseRequestInterface {
