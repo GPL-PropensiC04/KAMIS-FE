@@ -17,6 +17,7 @@ import ListAsset from '@/views/ListAsset.vue'
 import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
 import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 import EditAssetView from '@/views/EditAssetView.vue'
+import AddClientView from '@/views/AddClientView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,12 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/client/add',
+      name: 'addClient',
+      component:AddClientView,
+      meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {
       path: '/purchase',

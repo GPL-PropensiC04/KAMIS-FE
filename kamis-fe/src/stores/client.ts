@@ -1,6 +1,6 @@
 import { API_URLS } from "@/config/api.config";
-import { AddClientRequestInterface, ClientInterface } from "@/interfaces/client.interface";
-import { CommonResponseInterface } from "@/interfaces/common.interface";
+import type { AddClientRequestInterface, ClientInterface } from "@/interfaces/client.interface";
+import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
 import { defineStore } from "pinia";
@@ -30,12 +30,12 @@ export const useClientStore = defineStore('client', {
                 );
 
                 if (response.data.status === 200) {
-                    this.client.push(response.data.data);
+                    this.clients.push(response.data.data);
                     useToast().success('Client berhasil ditambahkan!');
                     await router.push('/client');
                 }
             } catch (error: any) {
-                this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan resource';
+                this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan client';
                 useToast().error(error.response.data.message);
                 throw error;
             } finally {
