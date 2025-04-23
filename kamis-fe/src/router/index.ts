@@ -13,6 +13,7 @@ import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 import ListClient from '@/views/ListClient.vue'
+import DetailClientView from '@/views/DetailClientView.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
 import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
@@ -40,6 +41,12 @@ const router = createRouter({
       name: 'addClient',
       component:AddClientView,
       meta: { requiresAuth: true, roles: ["Operational"] }
+    },
+    {
+      path: '/client/:id',
+      name: 'detail-client',
+      component:DetailClientView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/purchase',

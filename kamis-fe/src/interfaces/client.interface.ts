@@ -20,7 +20,29 @@ export interface ClientInterface {
   }
 
   export interface ClientListResponseInterface {
+    id: string;
     nameClient: string;
     typeClient: boolean;
     companyClient: string;
+    projectCount?: number;
+  }
+
+  export interface ProjectInterface {
+    id: string;
+    name: string;
+    startDate: string;
+    status: string;
+  }
+  
+  export interface ClientDetailInterface {
+    id: string;
+    nameClient: string;
+    noTelpClient: string;
+    emailClient: string;
+    typeClient: string;
+    companyClient: string;
+    addressClient: string;
+    createdDate: string;
+    updatedDate: string;
+    projects?: ProjectInterface[]; // Tambahkan jika backend mengirimkan
   }
