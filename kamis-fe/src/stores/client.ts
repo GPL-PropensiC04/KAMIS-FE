@@ -36,7 +36,7 @@ export const useClientStore = defineStore('client', {
                     await router.push('/client');
                 }
             } catch (error: any) {
-                this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan resource';
+                this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan client';
                 useToast().error(error.response.data.message);
                 throw error;
             } finally {
