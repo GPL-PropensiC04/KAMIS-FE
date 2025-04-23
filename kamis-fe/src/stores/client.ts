@@ -1,5 +1,9 @@
 import { API_URLS } from "@/config/api.config";
+<<<<<<< HEAD
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface } from "@/interfaces/client.interface";
+=======
 import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface } from "@/interfaces/client.interface";
+>>>>>>> a1332d7e74fec308ab94fedef1cc9f1517d7d789
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -10,6 +14,10 @@ export const useClientStore = defineStore('client', {
     state: () => ({
         clients: [] as ClientInterface[],
         clientList : [] as ClientListResponseInterface[],
+<<<<<<< HEAD
+        clientDetail : null as ClientDetailInterface | null,
+=======
+>>>>>>> a1332d7e74fec308ab94fedef1cc9f1517d7d789
         loading: false,
         error: null as null | string,
     }),
@@ -57,6 +65,25 @@ export const useClientStore = defineStore('client', {
             } catch (err: unknown) {
                 this.error = `Gagal mengambil data client ${err instanceof Error ? err.message : "Unknown error"}`;
                 useToast().error(this.error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async getClientDetail(id: string) {
+            this.loading = true;
+            this.error = null;
+            this.clientDetail = null;
+            try {
+                const response = await axios.get<CommonResponseInterface<ClientDetailInterface>>(
+                    `${API_URLS.PROFILE}/client/${id}`
+                );
+                this.clientDetail = response.data.data;
+                return this.clientDetail;
+            } catch (err: unknown) {
+                this.error = `Gagal mengambil detail client ${err instanceof Error ? err.message : "Unknown error"}`;
+                useToast().error(this.error);
+                return null;
             } finally {
                 this.loading = false;
             }
