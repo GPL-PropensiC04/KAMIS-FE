@@ -1,5 +1,9 @@
 import { API_URLS } from "@/config/api.config";
+<<<<<<< HEAD
 import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface } from "@/interfaces/client.interface";
+=======
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface } from "@/interfaces/client.interface";
+>>>>>>> a1332d7e74fec308ab94fedef1cc9f1517d7d789
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -10,7 +14,10 @@ export const useClientStore = defineStore('client', {
     state: () => ({
         clients: [] as ClientInterface[],
         clientList : [] as ClientListResponseInterface[],
+<<<<<<< HEAD
         clientDetail : null as ClientDetailInterface | null,
+=======
+>>>>>>> a1332d7e74fec308ab94fedef1cc9f1517d7d789
         loading: false,
         error: null as null | string,
     }),
