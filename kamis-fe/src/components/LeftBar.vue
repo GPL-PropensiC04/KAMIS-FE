@@ -34,7 +34,7 @@
         <BaseIcon icon="fa-solid fa-helmet-safety" clickable />
         <span v-if="!isCollapsed" class="icon-label">Distribusi & Penjualan</span>
       </div>
-      <div :class="['icon-item', { active: isActive('klien') }]" @click="goTo('klien')">
+      <div :class="['icon-item', { active: isActive('client') }]" @click="goTo('client')">
         <BaseIcon icon="fa-solid fa-user" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
       </div>

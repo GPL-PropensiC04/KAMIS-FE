@@ -1,5 +1,5 @@
 import { API_URLS } from "@/config/api.config";
-import type { AddClientRequestInterface, ClientInterface } from "@/interfaces/client.interface";
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface } from "@/interfaces/client.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -9,6 +9,7 @@ import { useToast } from "vue-toastification";
 export const useClientStore = defineStore('client', {
     state: () => ({
         clients: [] as ClientInterface[],
+        clientList : [] as ClientListResponseInterface[],
         loading: false,
         error: null as null | string,
     }),
@@ -41,6 +42,24 @@ export const useClientStore = defineStore('client', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+
+        async viewAllClient(filters = {}) {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await axios.get<CommonResponseInterface<ClientListResponseInterface[]>>(
+                    `${API_URLS.PROFILE}/client/all`,
+                    { params: filters }
+                );
+                this.clientList = response.data.data;
+            } catch (err: unknown) {
+                this.error = `Gagal mengambil data client ${err instanceof Error ? err.message : "Unknown error"}`;
+                useToast().error(this.error);
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 });

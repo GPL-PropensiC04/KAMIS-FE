@@ -12,6 +12,7 @@ import ListPurchase from '@/views/ListPurchase.vue'
 import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
+import ListClient from '@/views/ListClient.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
 import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
@@ -26,6 +27,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/client',
+      name: 'client',
+      component:ListClient,
       meta: { requiresAuth: true }
     },
     {
