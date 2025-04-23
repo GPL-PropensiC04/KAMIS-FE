@@ -18,4 +18,9 @@ export interface ClientInterface {
     companyClient?: string;
     addressClient?: string;
   }
-  
+
+  export interface ClientListResponseInterface {
+    nameClient: string;
+    typeClient: boolean;
+    companyClient: string;
+  }
