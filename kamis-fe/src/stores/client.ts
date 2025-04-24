@@ -1,5 +1,5 @@
 import { API_URLS } from "@/config/api.config";
-import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface } from "@/interfaces/client.interface";
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface, UpdateClientInterface } from "@/interfaces/client.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -77,6 +77,33 @@ export const useClientStore = defineStore('client', {
                 this.error = `Gagal mengambil detail client ${err instanceof Error ? err.message : "Unknown error"}`;
                 useToast().error(this.error);
                 return null;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async updateClient(body: UpdateClientInterface, id: string){
+            this.loading = true;
+            this.error = null;
+            
+            try {
+                const response = await axios.put<CommonResponseInterface<ClientInterface>>(
+                    `${API_URLS.PROFILE}/client/update/${id}`,
+                    body,
+                    {
+                        headers : {
+                            'Content-Type': 'application/json' 
+                        }
+                    }
+                )
+                if (response.data.status === 200) {
+                    this.clients.push(response.data.data)
+                    useToast().success('Sukses mengedit klien!');
+                    await router.push(`/client`)
+                };
+            } catch (err:unknown) {
+                this.error = `Gagal mengedit klien ${err instanceof Error ? err.message : `Unknown Error`}`;
+                useToast().error(this.error);
             } finally {
                 this.loading = false;
             }

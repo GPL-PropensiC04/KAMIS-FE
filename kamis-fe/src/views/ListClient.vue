@@ -61,10 +61,9 @@ router.push('/client/add');
 }
 
 function goToDetailClient(client: any) {
-if (client.id) {
-  router.push(`/client/${client.id}`);
-} else {
-}
+  if (client.id) {
+    router.push(`/client/${client.id}`);
+  } 
 }
 
 onMounted(() => {
