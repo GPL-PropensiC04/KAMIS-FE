@@ -46,3 +46,10 @@ export interface ClientInterface {
     updatedDate: string;
     projects?: ProjectInterface[]; // Tambahkan jika backend mengirimkan
   }
+
+  export interface UpdateClientInterface{
+    nameClient: string;
+    noTelpClient: string;
+    emailClient: string;
+    addressClient: string
+  }
