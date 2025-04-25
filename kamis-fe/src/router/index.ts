@@ -13,12 +13,14 @@ import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
 import ListResource from '@/views/ListResource.vue'
 import UpdateResource from '@/views/UpdateResource.vue'
 import ListClient from '@/views/ListClient.vue'
+import DetailClientView from '@/views/DetailClientView.vue'
 // import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
 import ListAsset from '@/views/ListAsset.vue'
 import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
 import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 import EditAssetView from '@/views/EditAssetView.vue'
 import AddClientView from '@/views/AddClientView.vue'
+import UpdateClient from '@/views/UpdateClient.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +41,18 @@ const router = createRouter({
       path: '/client/add',
       name: 'addClient',
       component:AddClientView,
+      meta: { requiresAuth: true, roles: ["Operational"] }
+    },
+    {
+      path: '/client/:id',
+      name: 'detail-client',
+      component:DetailClientView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/client/update/:id',
+      name: 'update-client',
+      component:UpdateClient,
       meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {

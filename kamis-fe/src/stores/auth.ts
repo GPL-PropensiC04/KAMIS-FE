@@ -8,6 +8,7 @@ import { API_URLS } from '@/config/api.config';
 interface JwtPayload {
   id: number;
   email: string;
+  sub: string;
   role: string;
   exp: number;
   iat: number;
@@ -15,13 +16,14 @@ interface JwtPayload {
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('auth_token'));
-  const user = ref<{ id: number; email: string; role: string } | null>(null);
+  const user = ref<{ id: number; email: string; role: string; username: string } | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const router = useRouter();
 
   const isAuthenticated = computed(() => !!token.value);
   const userRole = computed(() => user.value?.role || null);
+  const currentUsername = computed(() => user.value?.username || null);
 
   // Initialize the auth header and user from token
   if (token.value) {
@@ -31,7 +33,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = {
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role
+        role: decoded.role,
+        username: decoded.sub
       };
     } catch (err) {
       console.error('Error decoding token:', err);
@@ -61,7 +64,8 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = {
             id: decoded.id,
             email: decoded.email,
-            role: decoded.role
+            role: decoded.role,
+            username: decoded.sub
           };
         } catch (err) {
           console.error('Error decoding token:', err);
@@ -104,6 +108,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     isAuthenticated,
     userRole,
+    currentUsername,
     login,
     logout,
 

@@ -20,7 +20,37 @@ export interface ClientInterface {
   }
 
   export interface ClientListResponseInterface {
+    id: string;
     nameClient: string;
     typeClient: boolean;
     companyClient: string;
+    projectCount?: number;
+    totalProfit?: number;
+  }
+
+  export interface ProjectInterface {
+    id: string;
+    projectName: string;
+    projectType: boolean;
+    projectStatus: string;
+  }
+  
+  export interface ClientDetailInterface {
+    id: string;
+    nameClient: string;
+    noTelpClient: string;
+    emailClient: string;
+    typeClient: string;
+    companyClient: string;
+    addressClient: string;
+    createdDate: string;
+    updatedDate: string;
+    projects?: ProjectInterface[];
+  }
+
+  export interface UpdateClientInterface{
+    nameClient: string;
+    noTelpClient: string;
+    emailClient: string;
+    addressClient: string
   }

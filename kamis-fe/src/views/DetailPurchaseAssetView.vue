@@ -116,7 +116,82 @@
       <div class="mb-6">
         <VLockedInput label="Catatan" placeholder="Tidak ada catatan" :value="purchase.purchaseNote" />
       </div>
-    </div>
+
+      <!-- Log Pembelian -->
+      <div v-if="purchase.purchaseLogs?.length" class="mt-10">
+          <h2 class="text-lg font-bold font-lato mb-2">Log Pembelian</h2>
+          <hr class="border-t-1 border-black mb-4" />
+
+          <div class="flex flex-col space-y-6 relative">
+              <div 
+                  v-for="(log, index) in paginatedLogs" 
+                  :key="log.id" 
+                  class="relative flex items-start gap-3"
+                  :class="{
+                      'flex-row-reverse pr-6': log.user === currentUsername,
+                      'pl-6': log.user !== currentUsername
+                  }"
+              >
+                  <!-- Icon bulat -->
+                  <div class="w-3 h-3 bg-[#1E3A5F] rounded-full mt-1.5 flex-shrink-0"></div>
+
+                  <!-- Isi log -->
+                  <div class="flex flex-col max-w-[80%]">
+                      <p class="text-[#1E3A5F] font-semibold text-sm mb-1"
+                      :class="{
+                      'text-right': log.user === currentUsername,
+                      'text-left': log.user !== currentUsername
+                      }">
+                          {{ formatTime(log.actionDate) }} - {{ formatDate(log.actionDate) }}
+                      </p>
+                      <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
+                          <p>
+                              <strong>User</strong> : 
+                              {{ log.user === currentUsername ? 'You (' + log.user + ')' : log.user }}
+                          </p>
+                          <p class="mt-1"><strong>Action</strong> :</p>
+                          <p>{{ log.action }}</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Search + Pagination di bawah dan sejajar -->
+          <div class="flex flex-wrap justify-between items-center mt-6 gap-4">
+              <!-- Search Input -->
+              <input 
+                  v-model="searchLog" 
+                  placeholder="Cari log..." 
+                  class="w-full sm:w-[250px] px-3 py-1 border border-[#1E3A5F] rounded-md text-sm bg-[#F8FAFC]"
+              />
+
+              <!-- Pagination Controls -->
+              <div class="flex items-center gap-2">
+                  <button
+                      @click="currentPage--"
+                      :disabled="currentPage === 1"
+                      class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                  >
+                      ‹
+                  </button>
+
+                  <span class="text-sm font-semibold text-[#1E3A5F]">
+                      Halaman {{ currentPage }} dari {{ totalPages }}
+                  </span>
+
+                  <button
+                      @click="currentPage++"
+                      :disabled="currentPage === totalPages"
+                      class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                  >
+                      ›
+                  </button>
+              </div>
+          </div>
+      </div>
+
+
+      </div>
 
     <!-- Modal -->
     <!-- Modal Update Status -->
@@ -161,7 +236,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePurchaseStore } from '@/stores/purchase';
 import { useAuthStore } from '@/stores/auth';
@@ -198,9 +273,12 @@ const notePayment = ref('')
 const platNomor = ref('')
 const errorUpdate = ref('')
 const errorPayment = ref('')
+const searchLog = ref('');
+
 
 // User role for conditional rendering
 const userRole = computed(() => authStore.userRole);
+const currentUsername = computed(() => authStore.currentUsername);
 
 // Format date 
 const formatDate = (dateString: string): string => {
@@ -324,6 +402,44 @@ const fetchAssetImage = async () => {
   }
 };
 
+// Format Jam dari ISO (jam:menit)
+const formatTime = (iso: string): string => {
+    const date = new Date(iso);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+};
+
+// Urutkan log terbaru ke terlama
+const sortedLogs = computed(() => {
+    console.log(purchase.value.purchaseLogs)
+    return [...(purchase.value?.purchaseLogs || [])].sort((a, b) =>
+        new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
+    );
+});
+
+const logsPerPage = 3;
+const currentPage = ref(1);
+
+const filteredLogs = computed(() => {
+    const search = searchLog.value.toLowerCase();
+    return sortedLogs.value.filter(log =>
+        log.action.toLowerCase().includes(search) || 
+        log.user.toLowerCase().includes(search)
+    );
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredLogs.value.length / logsPerPage);
+});
+
+const paginatedLogs = computed(() => {
+    const start = (currentPage.value - 1) * logsPerPage;
+    return filteredLogs.value.slice(start, start + logsPerPage);
+});
+
+
+
 // Update onMounted to also fetch the image
 onMounted(() => {
   loadPurchaseData().then(() => {
@@ -338,6 +454,11 @@ onUnmounted(() => {
     URL.revokeObjectURL(imageUrl.value);
   }
 });
+
+watch(() => purchase.value?.purchaseLogs, () => {
+    currentPage.value = 1;
+});
+
 </script>
 
 <style scoped>
@@ -347,4 +468,17 @@ onUnmounted(() => {
 .font-lato {
   font-family: 'Lato', sans-serif;
 }
+
+/* Timeline vertical line (optional enhancement) */
+div.relative::before {
+    content: '';
+    position: absolute;
+    top: 0.75rem;
+    left: -0.65rem;
+    width: 2px;
+    height: 100%;
+    background-color: #1E3A5F;
+    z-index: -1;
+}
+
 </style> 
