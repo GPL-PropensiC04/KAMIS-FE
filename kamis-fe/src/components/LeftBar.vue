@@ -22,7 +22,7 @@
         <BaseIcon icon="fa-solid fa-bag-shopping" clickable />
         <span v-if="!isCollapsed" class="icon-label">Pembelian</span>
       </div>
-      <div :class="['icon-item', { active: isActive('list-assets') }]" @click="goTo('list-assets')">
+      <div :class="['icon-item', { active: isActive('assets') }]" @click="goTo('list-assets')">
         <BaseIcon icon="fa-solid fa-truck" clickable />
         <span v-if="!isCollapsed" class="icon-label">Asset</span>
       </div>
@@ -80,8 +80,8 @@ const logout = () => {
 }
 
 const isActive = (routeName: string) => {
-  return route.name === routeName
-}
+  return route.name && route.name.toString().includes(routeName);
+};
 </script>
 
 <style scoped>
@@ -177,11 +177,11 @@ const isActive = (routeName: string) => {
 }
 
 .icon-item:hover {
-  background-color: #8CC4A7;
+  background-color: #fff;
 }
 
 .icon-item.active {
-  background-color: #8CC4A7; /* Highlight color for active item */
+  background-color: #fff; /* Highlight color for active item */
 }
 
 .icon-label {

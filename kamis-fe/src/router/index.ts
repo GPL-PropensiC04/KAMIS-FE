@@ -20,6 +20,7 @@ import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
 import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 import EditAssetView from '@/views/EditAssetView.vue'
 import AddClientView from '@/views/AddClientView.vue'
+import UpdateClient from '@/views/UpdateClient.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,15 +39,21 @@ const router = createRouter({
     },
     {
       path: '/client/add',
-      name: 'addClient',
+      name: 'client-add',
       component:AddClientView,
       meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {
       path: '/client/:id',
-      name: 'detail-client',
+      name: 'client-detail',
       component:DetailClientView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/client/update/:id',
+      name: 'client-update',
+      component:UpdateClient,
+      meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {
       path: '/purchase',
@@ -56,56 +63,56 @@ const router = createRouter({
     },
     {
       path: '/purchase/add',
-      name: 'addPurchase',
+      name: 'purchase-add',
       component:AddPurchaseStepOne,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset',
-      name: 'addPurchaseAsset',
+      name: 'purchase-addAsset',
       component:AddPurchaseAsset,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource',
-      name: 'addPurchaseResource',
+      name: 'purchase-addResource',
       component: AddPurchaseResource,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/resource-summary',
-      name: 'addPurchaseResourceSummary',
+      name: 'purchase-addResourceSummary',
       component: AddPurchaseResourceSummary,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/add/asset-summary',
-      name: 'addPurchaseAssetSummary',
+      name: 'purchase-addAssetSummary',
       component: AddPurchaseAssetSummary,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/detail/resource/:id',
-      name: 'detailPurchaseResource',
+      name: 'purchase-detailResource',
       component: DetailPurchaseResourceView,
       props: true,
     },
     {
       path: '/purchase/detail/asset/:id',
-      name: 'detailPurchaseAsset',
+      name: 'purchase-addAsset',
       component: DetailPurchaseAssetView,
       props: true,
     },
     {
       path: '/purchase/update-resource/:purchaseId',
-      name: 'updatePurchaseResource',
+      name: 'purchase-updateResource',
       component: UpdatePurchaseResource,
       props: true, // Kirim ID dari URL sebagai prop
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
-      name: 'updatePurchaseAsset',
+      name: 'purchase-updateAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
@@ -124,7 +131,7 @@ const router = createRouter({
     // },
     {
       path: '/resource/add',
-      name: 'add-resource',
+      name: 'resource-add',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
     },
@@ -136,13 +143,13 @@ const router = createRouter({
     },
     {
       path: '/resource/update/:id',
-      name: 'updateResource',
+      name: 'resource-update',
       component:UpdateResource,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
     },
     {
       path: '/resource/add',
-      name: 'addResource',
+      name: 'resource-add',
       component: () => import('@/views/AddResourceView.vue'),
       meta: { requiresAuth: true }
     },
@@ -153,13 +160,13 @@ const router = createRouter({
     },
     {
       path: '/assets',
-      name: 'list-assets',
+      name: 'assets-list',
       component: ListAsset,
       meta: { requiresAuth: true }
     },
     {
       path: '/asset/:platNomor',
-      name: 'DetailAset',
+      name: 'assets-detail',
       component: DetailAssetView,
       meta: {
         title: 'Detail Aset', requiresAuth: true
@@ -167,7 +174,7 @@ const router = createRouter({
     },
     {
       path: '/asset/edit/:platNomor',
-      name: 'EditAset',
+      name: 'assets-edit',
       component: EditAssetView,
       meta: {
         title: 'Mengubah Aset', requiresAuth: true
