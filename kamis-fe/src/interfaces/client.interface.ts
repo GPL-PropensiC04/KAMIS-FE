@@ -33,6 +33,8 @@ export interface ClientInterface {
     projectName: string;
     projectType: boolean;
     projectStatus: string;
+    projectTotalPemasukkan?: number;
+    projectTotalPengeluaran?: number;
   }
   
   export interface ClientDetailInterface {
