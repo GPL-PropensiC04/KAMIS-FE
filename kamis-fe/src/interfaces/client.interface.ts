@@ -25,13 +25,14 @@ export interface ClientInterface {
     typeClient: boolean;
     companyClient: string;
     projectCount?: number;
+    totalProfit?: number;
   }
 
   export interface ProjectInterface {
     id: string;
-    name: string;
-    startDate: string;
-    status: string;
+    projectName: string;
+    projectType: boolean;
+    projectStatus: string;
   }
   
   export interface ClientDetailInterface {
@@ -44,7 +45,7 @@ export interface ClientInterface {
     addressClient: string;
     createdDate: string;
     updatedDate: string;
-    projects?: ProjectInterface[]; // Tambahkan jika backend mengirimkan
+    projects?: ProjectInterface[];
   }
 
   export interface UpdateClientInterface{

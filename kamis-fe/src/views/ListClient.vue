@@ -22,7 +22,8 @@
               <th class="px-6 py-3">Nama Klien</th>
               <th class="px-6 py-3">Tipe Klien</th>
               <th class="px-6 py-3">Perusahaan</th>
-              <th class="px-6 py-3">Jumlah Proyek</th>
+              <th v-if="isOperational" class="px-6 py-3">Jumlah Proyek</th>
+              <th v-if="isFinance" class="px-6 py-3">Total Profit</th>
             </tr>
           </thead>
           <tbody>
@@ -37,7 +38,8 @@
                 {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Individu' : client.typeClient }}
               </td>
               <td class="px-6 py-4">{{ client.companyClient || '-' }}</td>
-              <td class="px-6 py-4">{{ client.projectCount ?? 0 }}</td>
+              <td v-if="isOperational" class="px-6 py-4">{{ client.projectCount ?? 0 }}</td>
+              <td v-if="isFinance" class="px-6 py-4">{{ client.totalProfit != null ? 'Rp' + client.totalProfit.toLocaleString('id-ID') : 'Rp0' }}</td>
             </tr>
           </tbody>
         </table>
@@ -48,45 +50,52 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/client';
+import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
+import type { ClientListResponseInterface } from '@/interfaces/client.interface';
 
 const clientStore = useClientStore();
+const authStore = useAuthStore();
 const router = useRouter();
 
 function goToAddClient() {
-router.push('/client/add');
+  router.push('/client/add');
 }
 
-function goToDetailClient(client: any) {
+function goToDetailClient(client: ClientListResponseInterface) {
   if (client.id) {
     router.push(`/client/${client.id}`);
-  } 
+  }
 }
+
+const isFinance = computed(() => authStore.userRole === 'Finance');
+const isOperational = computed(() => authStore.userRole === 'Operasional');
 
 onMounted(() => {
-clientStore.viewAllClient();
+  clientStore.viewAllClient();
 });
 </script>
+
 <style scoped>
-.custom-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-}
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+  .custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-.custom-table thead {
-  background-color: #1E3A5F;
-  color: white;
-}
+  .custom-table thead {
+    background-color: #1E3A5F;
+    color: white;
+  }
 
-.custom-table th, .custom-table td {
-  padding: 12px 16px;
-}
+  .custom-table th, .custom-table td {
+    padding: 12px 16px;
+  }
 </style>

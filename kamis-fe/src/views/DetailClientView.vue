@@ -40,15 +40,15 @@
           <thead>
             <tr>
               <th class="px-6 py-3">Nama Proyek</th>
-              <th class="px-6 py-3">Tanggal Mulai</th>
               <th class="px-6 py-3">Status</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="project in client.projects" :key="project.id">
-              <td class="px-6 py-4">{{ project.name }}</td>
-              <td class="px-6 py-4">{{ formatDate(project.startDate) }}</td>
-              <td class="px-6 py-4">{{ project.status }}</td>
+              <td class="px-6 py-4">{{ project.projectName }}</td>
+              <td class="px-6 py-4">
+                {{ getStatusText(Number(project.projectStatus), project.projectType) }}
+              </td>
             </tr>
             <tr v-if="!client.projects || client.projects.length === 0">
               <td colspan="3" class="text-center text-gray-500">Belum ada proyek terkait.</td>
@@ -61,48 +61,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
-import { API_URLS } from '@/config/api.config';
-import VButton from '@/components/VButton.vue';
+  import { ref, onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+  import { API_URLS } from '@/config/api.config';
+  import VButton from '@/components/VButton.vue';
+  import type { ClientDetailInterface } from '@/interfaces/client.interface';
 
-const route = useRoute();
-const router = useRouter();
-const clientId = route.params.id as string;
+  const route = useRoute();
+  const router = useRouter();
+  const clientId = route.params.id as string;
 
-const loading = ref(true);
-const error = ref('');
-const client = ref<any>({});
+  const loading = ref(true);
+  const error = ref('');
+  const client = ref<ClientDetailInterface>({
+    id: '',
+    nameClient: '',
+    noTelpClient: '',
+    emailClient: '',
+    typeClient: '',
+    companyClient: '',
+    addressClient: '',
+    createdDate: '',
+    updatedDate: '',
+    projects: []
+  });
 
-const formatDate = (date: string) => {
-if (!date) return '-';
-const d = new Date(date);
-return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-};
+  const fetchClientDetail = async () => {
+    loading.value = true;
+    error.value = '';
+    try {
+      const res = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`);
+      if (res.data.status === 200) {
+        client.value = res.data.data;
+      } else {
+        error.value = res.data.message || 'Gagal memuat data klien';
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        error.value = e.message || 'Gagal memuat data klien';
+      } else {
+        error.value = 'Gagal memuat data klien';
+      }
+    } finally {
+      loading.value = false;
+    }
+  };
 
-const fetchClientDetail = async () => {
-loading.value = true;
-error.value = '';
-try {
-  const res = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`);
-  if (res.data.status === 200) {
-    client.value = res.data.data;
-  } else {
-    error.value = res.data.message || 'Gagal memuat data klien';
+  function goToEditClient() {
+    router.push(`/client/update/${clientId}`);
   }
-} catch (e: any) {
-  error.value = e.message || 'Gagal memuat data klien';
-} finally {
-  loading.value = false;
-}
-};
 
-function goToEditClient() {
-router.push(`/client/update/${clientId}`);
-}
+  function getStatusText(status: number, type: boolean) {
+    if (status === 0) return "Direncanakan";
+    if (status === 1) return type ? "Dilaksanakan" : "Dalam Pengiriman";
+    if (status === 2) return "Selesai";
+    if (status === 3) return "Batal";
+    return "-";
+  }
 
-onMounted(fetchClientDetail);
+  onMounted(fetchClientDetail);
 </script>
   
 <style scoped>
