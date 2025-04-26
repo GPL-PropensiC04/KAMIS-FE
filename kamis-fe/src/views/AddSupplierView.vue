@@ -6,6 +6,7 @@ import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
+import Breadcrumb from "@/components/Breadcrumb.vue";
 
 const router = useRouter();
 const supplierStore = useSupplierStore();
@@ -112,6 +113,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <!-- Tombol Back -->
