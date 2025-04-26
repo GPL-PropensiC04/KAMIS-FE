@@ -188,6 +188,8 @@ const goToPurchaseDetail = (purchaseId: string) => {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
 .custom-table {
   width: 100%;
   border-collapse: separate;
@@ -196,7 +198,6 @@ const goToPurchaseDetail = (purchaseId: string) => {
   overflow: hidden;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
 .custom-table thead {
   background-color: #1E3A5F;

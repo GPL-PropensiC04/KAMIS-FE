@@ -56,6 +56,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 
+
 const router = useRouter();
 const authStore = useAuthStore();
 const email = ref('');
