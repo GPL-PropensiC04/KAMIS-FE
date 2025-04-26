@@ -11,6 +11,7 @@ export interface AddResourceRequestInterface {
   resourcePrice: number;
   resourceStock: number;
   resourceDescription: string;
+  resourceSupplierId: string;
 }
 
 export interface ResourceResponseInterface {
