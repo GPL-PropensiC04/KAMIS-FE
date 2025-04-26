@@ -6,6 +6,7 @@ import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useAssetTempStore } from "@/stores/assetTemp";
 import type { AddAssetTemp } from "@/interfaces/assettemp.interface";
+import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // Router & Store
 const router = useRouter();
@@ -161,6 +162,7 @@ const handleCancel = () => {
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
         <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
             

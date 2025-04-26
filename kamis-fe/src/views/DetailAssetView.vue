@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Notification -->
     <div 
@@ -117,8 +118,8 @@
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
           <h2 class="text-xl font-bold text-white">Riwayat Maintenance</h2>
           <VSuccessButton 
-            v-if="canEditAsset" 
-            label="Ajukan" 
+            v-if="canEditAsset && aset.status === 'Tersedia'" 
+            label="Tambah" 
             @click="showMaintenanceModal = true" 
           />
         </div>
@@ -131,14 +132,22 @@
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Deskripsi Pekerjaan</th>
                 <th v-if="canViewFinancialInfo" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Biaya</th>
+                <th v-if="canEditAsset" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="item in maintenanceHistory" :key="item.id">
+              <tr v-for="item in sortedMaintenanceHistory" :key="item.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalMulaiMaintenance) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ item.tanggalSelesaiMaintenance ? formatDate(item.tanggalSelesaiMaintenance) : '-' }}</td>
                 <td class="px-6 py-4">{{ item.deskripsiPekerjaan }}</td>
                 <td v-if="canViewFinancialInfo" class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(item.biaya) }}</td>
+                <td v-if="canEditAsset" class="px-6 py-4 whitespace-nowrap">
+                  <VSuccessButton
+                    v-if="item.tanggalSelesaiMaintenance === null"
+                    label="Selesai"
+                    @click="completeMaintenance(item.id)"
+                  />
+                </td>
               </tr>
               <tr v-if="maintenanceHistory.length === 0">
                 <td :colspan="getColspanUpdated()" class="px-6 py-4 text-center text-gray-500">Tidak ada data maintenance</td>
@@ -152,7 +161,7 @@
       <div v-if="showMaintenanceModal" class="fixed inset-0 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 w-full max-w-md">
           <div class="bg-[#1E3A5F] p-4">
-            <h3 class="text-lg font-bold text-white">Ajukan Maintenance</h3>
+            <h3 class="text-lg font-bold text-white">Tambah Maintenance</h3>
           </div>
           <div class="p-6">
             <form @submit.prevent="submitMaintenance">
@@ -165,13 +174,15 @@
                   required
                 ></textarea>
               </div>
-              <div v-if="canViewFinancialInfo" class="mb-4">
+              <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Biaya <span class="text-red-500">*</span></label>
                 <input 
                   type="number" 
                   v-model="newMaintenance.biaya" 
                   class="w-full border border-gray-300 p-2 rounded"
                   required
+                  min="0"
+                  placeholder="Masukkan biaya maintenance"
                 />
               </div>
               
@@ -179,7 +190,7 @@
               
               <div class="flex justify-end gap-2 mt-4">
                 <VCancelButton label="Batal" @click="showMaintenanceModal = false" />
-                <VSuccessButton label="Ajukan" type="submit" />
+                <VSuccessButton label="Tambah" type="submit" />
               </div>
             </form>
           </div>
@@ -271,12 +282,24 @@ const canEditAsset = computed(() => {
   return userRole === 'Operasional' || userRole === 'Admin';
 });
 
-// Helper function for table colspan (updated without status and action columns)
+// Helper function for table colspan (updated to account for action column)
 const getColspanUpdated = () => {
   let span = 3; // Default columns (Tanggal Pengajuan, Tanggal Selesai, Deskripsi)
   if (canViewFinancialInfo.value) span++;
+  if (canEditAsset.value) span++; // Add column for actions
   return span;
 };
+
+// Add this computed property after your other computed properties
+const sortedMaintenanceHistory = computed(() => {
+  // Make a copy of the array to avoid mutation issues
+  return [...maintenanceHistory.value].sort((a, b) => {
+    // Compare dates in descending order (newest first)
+    const dateA = new Date(a.tanggalMulaiMaintenance);
+    const dateB = new Date(b.tanggalMulaiMaintenance);
+    return dateB.getTime() - dateA.getTime();
+  });
+});
 
 // Fetch maintenance data
 const fetchMaintenanceHistory = async () => {
@@ -343,7 +366,7 @@ const submitMaintenance = async () => {
     });
     
     if (response.data && response.data.status === 201) {
-      toast.success('Maintenance berhasil diajukan');
+      toast.success('Maintenance berhasil ditambah');
       showMaintenanceModal.value = false;
       
       // Reset form
@@ -365,7 +388,7 @@ const submitMaintenance = async () => {
     if (err.response && err.response.data && err.response.data.message) {
       maintenanceError.value = err.response.data.message;
     } else {
-      maintenanceError.value = 'Gagal mengajukan maintenance. Silakan coba lagi.';
+      maintenanceError.value = 'Gagal menambah maintenance. Silakan coba lagi.';
     }
   }
 };

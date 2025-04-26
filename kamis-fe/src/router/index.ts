@@ -31,7 +31,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
     {
       path: '/supplier/add',
@@ -43,87 +43,89 @@ const router = createRouter({
       path: '/client',
       name: 'client',
       component:ListClient,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Klien' }
     },
     {
       path: '/client/add',
       name: 'client-add',
       component:AddClientView,
-      meta: { requiresAuth: true, roles: ["Operational"] }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Klien', parent: '/client' }
     },
     {
       path: '/client/:id',
       name: 'client-detail',
       component:DetailClientView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
     },
     {
       path: '/client/update/:id',
       name: 'client-update',
       component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"] }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client' }
     },
     {
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
     },
     {
       path: '/purchase/add',
       name: 'purchase-add',
       component:AddPurchaseStepOne,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
     },
     {
       path: '/purchase/add/asset',
       name: 'purchase-addAsset',
       component:AddPurchaseAsset,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource',
       name: 'purchase-addResource',
       component: AddPurchaseResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'purchase-addResourceSummary',
       component: AddPurchaseResourceSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'purchase-addAssetSummary',
       component: AddPurchaseAssetSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
     },
     {
       path: '/purchase/detail/resource/:id',
       name: 'purchase-detailResource',
       component: DetailPurchaseResourceView,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Pembelian Resource', parent: '/purchase' },
       props: true,
     },
     {
       path: '/purchase/detail/asset/:id',
       name: 'purchase-detailAsset',
       component: DetailPurchaseAssetView,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Pembelian Aset', parent: '/purchase' },
       props: true,
     },
     {
       path: '/purchase/update-resource/:purchaseId',
       name: 'purchase-updateResource',
       component: UpdatePurchaseResource,
-      props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      props: true,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/resource/:id' }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'purchase-updateAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/asset/:id' }
     },
     {
       path: '/login',
@@ -141,25 +143,19 @@ const router = createRouter({
       path: '/resource/add',
       name: 'resource-add',
       component: () => import('@/views/AddResourceView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'Tambah Resource', parent: '/resource' }
     },
     {
       path: '/resource',
       name: 'resource',
       component:ListResource,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Resource' }
     },
     {
       path: '/resource/update/:id',
       name: 'resource-update',
       component:UpdateResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
-    },
-    {
-      path: '/resource/add',
-      name: 'resource-add',
-      component: () => import('@/views/AddResourceView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Resource', parent: '/resource' }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -170,23 +166,19 @@ const router = createRouter({
       path: '/assets',
       name: 'assets-list',
       component: ListAsset,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
     {
       path: '/asset/:platNomor',
       name: 'assets-detail',
       component: DetailAssetView,
-      meta: {
-        title: 'Detail Aset', requiresAuth: true
-      }
+      meta: { requiresAuth: true, breadcrumb: 'Detail Aset', parent: '/assets'}
     },
     {
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: {
-        title: 'Mengubah Aset', requiresAuth: true
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Aset', parent: '/asset/:platNomor'}
     },
     {
       path: '/coming-soon',

@@ -2,10 +2,10 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "@/stores/purchase";
-import VButton from "@/components/VButton.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
+import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // Router, Store, & Toast
 const router = useRouter();
@@ -76,6 +76,7 @@ onMounted(setTodayDate);
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
         <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
             <!-- Bagian Atas -->
