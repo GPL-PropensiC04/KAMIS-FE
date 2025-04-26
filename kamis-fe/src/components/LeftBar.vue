@@ -22,7 +22,7 @@
         <BaseIcon icon="fa-solid fa-bag-shopping" clickable />
         <span v-if="!isCollapsed" class="icon-label">Pembelian</span>
       </div>
-      <div :class="['icon-item', { active: isActive('assets') }]" @click="goTo('list-assets')">
+      <div :class="['icon-item', { active: isActive('assets') }]" @click="goTo('assets-list')">
         <BaseIcon icon="fa-solid fa-truck" clickable />
         <span v-if="!isCollapsed" class="icon-label">Asset</span>
       </div>

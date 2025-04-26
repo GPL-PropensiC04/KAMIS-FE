@@ -99,7 +99,7 @@ const router = createRouter({
     },
     {
       path: '/purchase/detail/asset/:id',
-      name: 'purchase-addAsset',
+      name: 'purchase-detailAsset',
       component: DetailPurchaseAssetView,
       props: true,
     },
