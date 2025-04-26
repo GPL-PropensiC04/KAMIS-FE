@@ -6,6 +6,8 @@ import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useAssetTempStore } from "@/stores/assetTemp";
 import type { AddAssetTemp } from "@/interfaces/assettemp.interface";
+import { API_URLS } from "@/config/api.config";
+import axios from "axios";
 
 // Router & Store
 const router = useRouter();
@@ -18,8 +20,22 @@ const purchaseNote = ref("");
 const fileObject = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
+const supplierName = ref<string>(""); 
+const fetchSupplierName = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/name/${purchaseStore.draftPurchase?.purchaseSupplier}`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierName.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
+
 // Create File object from base64 when component mounts
 onMounted(() => {
+    fetchSupplierName();
   // Get the base64 data from sessionStorage
   const base64Data = sessionStorage.getItem('tempFileData');
   
@@ -180,7 +196,7 @@ const handleCancel = () => {
             <div class="grid grid-cols-2 gap-4 border-b pb-2 mb-4">
                 <div>
                     <p class="font-lato font-bold">Supplier</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ purchaseStore.draftPurchase?.purchaseSupplier || "Tidak Ada" }}</p>
+                    <p class="text-[#1E3A5F] font-lato font-bold">{{ supplierName }}</p>
                 </div>
                 <div>
                     <p class="font-lato font-bold">Tipe Barang</p>

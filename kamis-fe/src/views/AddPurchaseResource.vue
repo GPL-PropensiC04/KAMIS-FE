@@ -26,6 +26,19 @@ const quantity = ref(1);
 const price = ref(0);
 const resourceList = ref(purchaseStore.draftPurchase?.items || []);
 
+const supplierName = ref<string>(""); 
+const fetchSupplierName = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/name/${supplier.value}`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierName.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
+
 // Fetch data resource dari API
 const fetchResources = async () => {
     try {
@@ -103,6 +116,7 @@ const totalPrice = computed(() => {
 
 // Pastikan data tetap ada setelah refresh
 onMounted(() => {
+    fetchSupplierName();
     fetchResources();
     const savedData = localStorage.getItem("draftPurchase");
     if (savedData) {
@@ -170,7 +184,7 @@ const goToSummary = () => {
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-black mb-1 font-lato font-bold text-lg">Supplier</label>
-                    <VLockedInput :value="supplier" />
+                    <VLockedInput :value="supplierName" />
                 </div>
                 <div>
                     <label class="block text-black mb-1 font-lato font-bold text-lg">Tipe Barang</label>

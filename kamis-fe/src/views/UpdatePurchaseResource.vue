@@ -13,6 +13,8 @@ import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
 import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
 import { API_URLS } from "@/config/api.config";
+import type { UUID } from "crypto";
+import VSpecialDropDown from "@/components/VSpecialDropDown.vue";
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -33,6 +35,23 @@ const selectedResource = ref("");
 const quantity = ref(1);
 const price = ref(0);
 const resourceList = ref<ResourceTempInterface[]>([]);
+
+const supplierOptions = ref<{ label: string; value: UUID }[]>([]);
+
+const fetchSuppliers = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierOptions.value = response.data.data.map((item: { id: UUID; nameSupplier: string; }) => ({
+            label: item.nameSupplier, // untuk ditampilkan
+            value: item.id // untuk disimpan
+        }));
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
 
 // **Format Tanggal (dd / MM / yyyy)**
 const formatDate = (dateString: string) => {
@@ -171,7 +190,7 @@ const handleUpdatePurchase = async () => {
     };
 
     await purchaseStore.updatePurchase(body, purchaseId);
-    router.push(`/purchase`);
+    router.push(`/purchase/detail/resource/${purchaseId}`);
 };
 
 // Fungsi untuk menambah jumlah
@@ -204,11 +223,12 @@ const validateQuantity = (index: number) => {
 onMounted(() => {
     fetchPurchaseDetail();
     fetchResources();
+    fetchSuppliers();
 });
 
 // Handle cancel
 const handleCancel = () => {
-    router.push("/purchase");
+    router.push(`/purchase/detail/resource/${purchaseId}`);
 };
 
 </script>
@@ -234,7 +254,7 @@ const handleCancel = () => {
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-black mb-1 font-lato font-bold text-lg">Supplier</label>
-                    <VDropDownInput v-model="selectedSupplier" :options="['Supplier A', 'Supplier B', 'Supplier C']" />
+                    <VSpecialDropDown v-model="selectedSupplier" :options="supplierOptions" />
                 </div>
                 <div>
                     <label class="block text-black mb-1 font-lato font-bold text-lg">Tipe Barang</label>

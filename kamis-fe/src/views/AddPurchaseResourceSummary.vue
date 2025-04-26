@@ -6,6 +6,8 @@ import VButton from "@/components/VButton.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
+import axios from "axios";
+import { API_URLS } from "@/config/api.config";
 
 // Router, Store, & Toast
 const router = useRouter();
@@ -20,6 +22,19 @@ const purchaseNote = ref("");
 
 // **Tanggal Pengajuan Otomatis**
 const submissionDate = ref("");
+
+const supplierName = ref<string>(""); 
+const fetchSupplierName = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/name/${purchaseStore.draftPurchase?.purchaseSupplier}`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierName.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
 
 // Fungsi untuk mengatur tanggal hari ini
 const setTodayDate = () => {
@@ -72,7 +87,10 @@ const handleCancel = () => {
 };
 
 // **Pastikan Tanggal Terisi Saat Komponen Dimuat**
-onMounted(setTodayDate);
+onMounted(() => {
+    setTodayDate();
+    fetchSupplierName();
+});
 </script>
 
 <template>
@@ -94,7 +112,7 @@ onMounted(setTodayDate);
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <p class="font-lato font-bold">Supplier</p>
-                    <p class="text-[#1E3A5F] font-lato font-bold">{{ supplier }}</p>
+                    <p class="text-[#1E3A5F] font-lato font-bold">{{ supplierName }}</p>
                 </div>
                 <div>
                     <p class="font-lato font-bold">Tipe Barang</p>

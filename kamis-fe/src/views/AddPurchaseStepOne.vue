@@ -6,14 +6,34 @@ import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
+import axios from "axios";
+import { API_URLS } from "@/config/api.config";
+import type { UUID } from "crypto";
+import VSpecialDropDown from "@/components/VSpecialDropDown.vue";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
 
 // Data form
-const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
 const selectedSupplier = ref(purchaseStore.draftPurchase?.purchaseSupplier || "");
 const selectedType = ref(purchaseStore.draftPurchase?.purchaseType ? "Resource" : "Aset");
+
+const supplierOptions = ref<{ label: string; value: UUID }[]>([]);
+
+const fetchSuppliers = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierOptions.value = response.data.data.map((item: { id: UUID; nameSupplier: string; }) => ({
+            label: item.nameSupplier, // untuk ditampilkan
+            value: item.id // untuk disimpan
+        }));
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
 
 // Simpan data ke Pinia & localStorage
 const saveDraft = () => {
@@ -29,7 +49,8 @@ const saveDraft = () => {
         purchaseSubmissionDate: "", // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
         purchaseUpdateDate: "", // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
         purchaseResource: [],
-        purchasePaymentDate: null
+        purchasePaymentDate: null,
+        purchaseLogs: []
     };
 
     
@@ -55,6 +76,8 @@ const handleNext = () => {
 
 // Ambil data dari Pinia saat komponen dimuat
 onMounted(() => {
+    fetchSuppliers();
+
     if (purchaseStore.draftPurchase) {
         selectedSupplier.value = purchaseStore.draftPurchase.purchaseSupplier;
         selectedType.value = purchaseStore.draftPurchase.purchaseType ? "Resource" : "Aset";
@@ -81,7 +104,7 @@ watch(selectedType, () => {
                     <label class="block mb-1 font-lato font-bold">
                         Supplier
                     </label>
-                    <VDropDownInput v-model="selectedSupplier" :options="supplierOptions" />
+                    <VSpecialDropDown v-model="selectedSupplier" :options="supplierOptions" />
                 </div>
 
                 <!-- Pilihan Tipe Barang -->
