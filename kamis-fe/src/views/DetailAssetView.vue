@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Notification -->
     <div 
@@ -117,9 +118,9 @@
         <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
           <h2 class="text-xl font-bold text-white">Riwayat Maintenance</h2>
           <VSuccessButton 
-            v-if="canEditAsset" 
-            label="Ajukan" 
-            @click="handleAddMaintenance" 
+            v-if="canEditAsset && aset.status === 'Tersedia'" 
+            label="Tambah" 
+            @click="showMaintenanceModal = true" 
           />
         </div>
         
@@ -129,20 +130,70 @@
               <tr>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Pengajuan</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
-                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Catatan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Deskripsi Pekerjaan</th>
+                <th v-if="canViewFinancialInfo" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Biaya</th>
+                <th v-if="canEditAsset" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="item in maintenanceHistory" :key="item.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalPengajuan) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalSelesai) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ item.catatan }}</td>
+              <tr v-for="item in sortedMaintenanceHistory" :key="item.id">
+                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalMulaiMaintenance) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ item.tanggalSelesaiMaintenance ? formatDate(item.tanggalSelesaiMaintenance) : '-' }}</td>
+                <td class="px-6 py-4">{{ item.deskripsiPekerjaan }}</td>
+                <td v-if="canViewFinancialInfo" class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(item.biaya) }}</td>
+                <td v-if="canEditAsset" class="px-6 py-4 whitespace-nowrap">
+                  <VSuccessButton
+                    v-if="item.tanggalSelesaiMaintenance === null"
+                    label="Selesai"
+                    @click="completeMaintenance(item.id)"
+                  />
+                </td>
               </tr>
               <tr v-if="maintenanceHistory.length === 0">
-                <td colspan="3" class="px-6 py-4 text-center text-gray-500">Tidak ada data maintenance</td>
+                <td :colspan="getColspanUpdated()" class="px-6 py-4 text-center text-gray-500">Tidak ada data maintenance</td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Add Maintenance Modal -->
+      <div v-if="showMaintenanceModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 w-full max-w-md">
+          <div class="bg-[#1E3A5F] p-4">
+            <h3 class="text-lg font-bold text-white">Tambah Maintenance</h3>
+          </div>
+          <div class="p-6">
+            <form @submit.prevent="submitMaintenance">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Deskripsi Pekerjaan <span class="text-red-500">*</span></label>
+                <textarea 
+                  v-model="newMaintenance.deskripsiPekerjaan" 
+                  rows="3" 
+                  class="w-full border border-gray-300 p-2 rounded"
+                  required
+                ></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Biaya <span class="text-red-500">*</span></label>
+                <input 
+                  type="number" 
+                  v-model="newMaintenance.biaya" 
+                  class="w-full border border-gray-300 p-2 rounded"
+                  required
+                  min="0"
+                  placeholder="Masukkan biaya maintenance"
+                />
+              </div>
+              
+              <p v-if="maintenanceError" class="text-red-500 text-sm mb-4">{{ maintenanceError }}</p>
+              
+              <div class="flex justify-end gap-2 mt-4">
+                <VCancelButton label="Batal" @click="showMaintenanceModal = false" />
+                <VSuccessButton label="Tambah" type="submit" />
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </template>
@@ -153,35 +204,46 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset.interface';
-import type { Maintenance } from '@/interfaces/maintenance';
 import { AsetService } from '@/stores/assetservices';
-import { MaintenanceService } from '@/stores/maintenanceservice';
-// import { byteArrayToImageUrl } from '@/utils/formatters';
-// import AssetImage from '@/components/AssetImage.vue';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
+import { useToast } from 'vue-toastification';
+
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
 const platNomor = route.params.platNomor as string;
 
 // State variables
 const aset = ref<AsetInterface>({} as AsetInterface);
-const maintenanceHistory = ref<Maintenance[]>([]);
+const maintenanceHistory = ref<any[]>([]);
 const isLoading = ref(true);
 const error = ref('');
 const assetImage = ref('');
 
-// Delete modal state
+// Modal states
 const showDeleteModal = ref(false);
+const showMaintenanceModal = ref(false);
+const maintenanceError = ref('');
+
+// New maintenance form
+const newMaintenance = ref({
+  platNomor: '',
+  deskripsiPekerjaan: '',
+  biaya: 0
+});
 
 // Notification state
 const showNotification = ref(false);
 const notificationMessage = ref('');
+
+// Maintenance loading state
+const maintenanceLoading = ref(false);
 
 // Function to show notification
 const showSuccessNotification = (message: string) => {
@@ -207,53 +269,6 @@ const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 };
 
-// Check if coming from edit page
-watch(() => route.query, (query) => {
-  if (query.edited === 'true') {
-    showSuccessNotification('Berhasil Mengubah Detail Aset');
-    
-    // Clean up query parameter
-    router.replace({ path: route.path });
-  }
-}, { immediate: true });
-
-// Fetch asset image from backend
-const fetchAssetImage = async (id: string) => {
-  try {
-    // Check if the id is valid before making the request
-    if (!id || id === 'undefined' || id === 'null') {
-      console.warn('Invalid asset ID for image fetch:', id);
-      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
-      return;
-    }
-
-    const response = await axios.get(`${API_URLS.ASSET}/asset/${id}/foto`, {
-      responseType: 'blob',
-      // Add timeout and validate status to handle errors better
-      timeout: 5000,
-      validateStatus: (status) => status >= 200 && status < 300,
-    });
-    
-    // Check if we received valid image data
-    if (response.data && response.data.size > 0) {
-      assetImage.value = URL.createObjectURL(response.data);
-    } else {
-      console.warn('Empty image data received');
-      assetImage.value = '/placeholder-image.jpg'; // Use placeholder
-    }
-  } catch (error) {
-    console.error("Error fetching asset image:", error);
-    // Set default image when fetching fails
-    assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
-  }
-};
-
-// Handle image loading errors
-const handleImageError = () => {
-  console.log('Image failed to load, using placeholder');
-  assetImage.value = '/placeholder-image.jpg'; // Path to your placeholder image
-};
-
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
@@ -266,6 +281,147 @@ const canEditAsset = computed(() => {
   // Only Staf Operasional can edit assets
   return userRole === 'Operasional' || userRole === 'Admin';
 });
+
+// Helper function for table colspan (updated to account for action column)
+const getColspanUpdated = () => {
+  let span = 3; // Default columns (Tanggal Pengajuan, Tanggal Selesai, Deskripsi)
+  if (canViewFinancialInfo.value) span++;
+  if (canEditAsset.value) span++; // Add column for actions
+  return span;
+};
+
+// Add this computed property after your other computed properties
+const sortedMaintenanceHistory = computed(() => {
+  // Make a copy of the array to avoid mutation issues
+  return [...maintenanceHistory.value].sort((a, b) => {
+    // Compare dates in descending order (newest first)
+    const dateA = new Date(a.tanggalMulaiMaintenance);
+    const dateB = new Date(b.tanggalMulaiMaintenance);
+    return dateB.getTime() - dateA.getTime();
+  });
+});
+
+// Fetch maintenance data
+const fetchMaintenanceHistory = async () => {
+  maintenanceLoading.value = true;
+  maintenanceError.value = '';
+  
+  try {
+    // Remove the duplicated 'api' segment in the URL
+    const maintenanceUrl = `${API_URLS.ASSET}/maintenance/${platNomor}`;
+    console.log(`Fetching maintenance for ${platNomor} from ${maintenanceUrl}`);
+    
+    const response = await axios.get(maintenanceUrl, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      }
+    });
+    
+    console.log('Maintenance API response:', response);
+    
+    if (response.data && response.data.data) {
+      maintenanceHistory.value = response.data.data;
+      console.log('Maintenance history loaded:', maintenanceHistory.value.length, 'records');
+    } else {
+      console.warn('No data property in API response');
+      maintenanceHistory.value = [];
+    }
+  } catch (err) {
+    console.error('Error loading maintenance data:', err);
+    
+    if (axios.isAxiosError(err)) {
+      const statusCode = err.response?.status;
+      const errorMsg = err.response?.data?.message || err.message;
+      
+      // More specific error message based on status code
+      if (statusCode === 401 || statusCode === 403) {
+        maintenanceError.value = 'Anda tidak memiliki akses untuk melihat data maintenance';
+      } else if (statusCode === 404) {
+        maintenanceError.value = 'Data maintenance tidak ditemukan';
+      } else {
+        maintenanceError.value = `Gagal memuat data: ${errorMsg}`;
+      }
+    } else {
+      maintenanceError.value = 'Gagal memuat data maintenance';
+    }
+    
+    maintenanceHistory.value = [];
+  } finally {
+    maintenanceLoading.value = false;
+  }
+};
+
+// Submit new maintenance
+const submitMaintenance = async () => {
+  maintenanceError.value = '';
+  
+  try {
+    newMaintenance.value.platNomor = platNomor;
+    
+    const response = await axios.post(`${API_URLS.ASSET}/maintenance`, newMaintenance.value, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      }
+    });
+    
+    if (response.data && response.data.status === 201) {
+      toast.success('Maintenance berhasil ditambah');
+      showMaintenanceModal.value = false;
+      
+      // Reset form
+      newMaintenance.value = {
+        platNomor: '',
+        deskripsiPekerjaan: '',
+        biaya: 0
+      };
+      
+      // Refresh data
+      await Promise.all([
+        loadData(),
+        fetchMaintenanceHistory()
+      ]);
+    }
+  } catch (err: any) {
+    console.error('Error submitting maintenance:', err);
+    
+    if (err.response && err.response.data && err.response.data.message) {
+      maintenanceError.value = err.response.data.message;
+    } else {
+      maintenanceError.value = 'Gagal menambah maintenance. Silakan coba lagi.';
+    }
+  }
+};
+
+// Complete maintenance
+const completeMaintenance = async (id: number) => {
+  try {
+    const response = await axios.patch(`${API_URLS.ASSET}/maintenance/${id}/complete`, {}, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      }
+    });
+    
+    if (response.data && response.data.status === 200) {
+      toast.success('Maintenance berhasil diselesaikan');
+      
+      // Refresh data
+      await Promise.all([
+        loadData(),
+        fetchMaintenanceHistory()
+      ]);
+    }
+  } catch (err: any) {
+    console.error('Error completing maintenance:', err);
+    
+    if (err.response && err.response.data && err.response.data.message) {
+      toast.error(err.response.data.message);
+    } else {
+      toast.error('Gagal menyelesaikan maintenance. Silakan coba lagi.');
+    }
+  }
+};
 
 // Load data from API
 const loadData = async () => {
@@ -285,71 +441,58 @@ const loadData = async () => {
     
     aset.value = response;
     
-    // Make sure we have a valid asset before fetching the image
+    // Fetch asset image
     if (aset.value && aset.value.platNomor) {
-      // Use the platNomor as the ID for image fetching
       await fetchAssetImage(aset.value.platNomor);
     } else {
-      console.warn('No valid asset data received');
       assetImage.value = '/placeholder-image.jpg';
     }
 
-    // Load maintenance history
-    try {
-      
-      const maintenanceData = await MaintenanceService.getMaintenanceByAsetId(platNomor);
-      maintenanceHistory.value = maintenanceData;
-    } catch (errMaintenance) {
-      console.error('Error loading maintenance data:', errMaintenance);
-      // Fallback to dummy data if error occurs
-      maintenanceHistory.value = [
-        { id: 1, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Penggantian Oli Mesin' },
-        { id: 2, assetId: platNomor, tanggalPengajuan: '2023-02-15', tanggalSelesai: '2023-02-20', catatan: 'Penggantian Filter Udara' },
-        { id: 3, assetId: platNomor, tanggalPengajuan: '2023-05-10', tanggalSelesai: '2023-05-18', catatan: 'Service Rutin 10.000 KM' },
-        { id: 4, assetId: platNomor, tanggalPengajuan: '2023-09-22', tanggalSelesai: '2023-09-30', catatan: 'Perbaikan Sistem Rem' }
-      ];
-    }
   } catch (err) {
     console.error('Error loading data:', err);
     
-    // Check if the error is due to asset not found (404)
-    // Assuming your API returns a specific error status for not found
     if (axios.isAxiosError(err) && err.response?.status === 404) {
-      // Redirect to NotFoundView if asset is not found
       router.replace('/not-found');
       return;
     }
     
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
     assetImage.value = '/placeholder-image.jpg';
-    
-    // Set dummy data for development
-    if (import.meta.env.MODE === 'development') {
-      aset.value = {
-        platNomor: platNomor,
-        nama: 'Truk Kuning', 
-        jenisAset: 'Truk',
-        status: 'Tersedia',
-        tanggalPerolehan: '2023-10-28',
-        nilaiPerolehan: 200000000,
-        deskripsi: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce in luctus, dictum sed turpis aliquam, molestie vestibulum turpis. Ut eget scelerisque sapien, et volutpat magna',
-        assetMaintenance: 'Rutin',
-        isDeleted: false
-      };
-
-      maintenanceHistory.value = [
-        { id: 1, assetId: platNomor, tanggalPengajuan: '2022-12-12', tanggalSelesai: '2022-12-28', catatan: 'Penggantian Oli Mesin' },
-        { id: 2, assetId: platNomor, tanggalPengajuan: '2023-02-15', tanggalSelesai: '2023-02-20', catatan: 'Penggantian Filter Udara' },
-        { id: 3, assetId: platNomor, tanggalPengajuan: '2023-05-10', tanggalSelesai: '2023-05-18', catatan: 'Service Rutin 10.000 KM' },
-        { id: 4, assetId: platNomor, tanggalPengajuan: '2023-09-22', tanggalSelesai: '2023-09-30', catatan: 'Perbaikan Sistem Rem' }
-      ];
-    }
   } finally {
     isLoading.value = false;
   }
 };
 
+// Fetch asset image from backend
+const fetchAssetImage = async (id: string) => {
+  try {
+    if (!id || id === 'undefined' || id === 'null') {
+      assetImage.value = '/placeholder-image.jpg';
+      return;
+    }
+
+    const response = await axios.get(`${API_URLS.ASSET}/asset/${id}/foto`, {
+      responseType: 'blob',
+      timeout: 5000,
+      validateStatus: (status) => status >= 200 && status < 300,
+    });
+    
+    if (response.data && response.data.size > 0) {
+      assetImage.value = URL.createObjectURL(response.data);
+    } else {
+      assetImage.value = '/placeholder-image.jpg';
+    }
+  } catch (error) {
+    console.error("Error fetching asset image:", error);
+    assetImage.value = '/placeholder-image.jpg';
+  }
+};
+
 // Event handlers
+const handleImageError = () => {
+  assetImage.value = '/placeholder-image.jpg';
+};
+
 const handleEditAset = () => {
   router.push(`/asset/edit/${platNomor}`);
 };
@@ -359,9 +502,7 @@ const confirmDelete = async () => {
     await AsetService.deleteAset(platNomor);
     showSuccessNotification('Aset berhasil dihapus');
     
-    // Tambahkan timeout sebelum navigasi untuk memastikan notifikasi terlihat
     setTimeout(() => {
-      // Navigasi ke halaman list asset dengan parameter deleted=true
       router.push({
         path: '/assets',
         query: { deleted: 'true', platNomor: platNomor }
@@ -375,18 +516,13 @@ const confirmDelete = async () => {
   }
 };
 
-const handleAddMaintenance = () => {
-  router.push('/coming-soon');   
-};
-
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadData();
+  await fetchMaintenanceHistory();
   
-  // Check if we've just navigated from edit page
+  // Check if coming from edit page
   if (route.query.edited === 'true') {
     showSuccessNotification('Berhasil Mengubah Detail Aset');
-    
-    // Clean up query parameter
     router.replace({ path: route.path });
   }
 });

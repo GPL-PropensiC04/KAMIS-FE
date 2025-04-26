@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div 
       v-if="showNotification" 
@@ -60,6 +61,7 @@ import type { AsetInterface } from '@/interfaces/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const assets = ref<AsetInterface[]>([]);
 const loading = ref(true);

@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center h-64">
@@ -235,6 +236,7 @@ import VSuccessButton from '@/components/VSuccessButton.vue'
 import VCancelButton from '@/components/VCancelButton.vue'
 import VLockedInput from '@/components/VLockedInput.vue'
 import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
 const router = useRouter()
