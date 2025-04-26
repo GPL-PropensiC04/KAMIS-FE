@@ -156,6 +156,7 @@ const goToPurchaseDetail = (purchaseId: string) => {
           <tbody>
             <template v-if="purchaseStore.purchases.length">
               <tr 
+                class="hover:bg-gray-50 hover:cursor-pointer"
                 v-for="purchase in purchaseStore.purchases" 
                 :key="purchase.id" 
                 @click="goToPurchaseDetail(purchase.purchaseId)"

@@ -43,7 +43,7 @@ const fetchSupplierName = async () => {
 // Fetch data resource dari API
 const fetchResources = async () => {
     try {
-        const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
+        const response = await axios.get(`${API_URLS.RESOURCE}/resource/find-by-supplier/${supplier.value}`, {
             headers: { "Content-Type": "application/json" }
         });
 
