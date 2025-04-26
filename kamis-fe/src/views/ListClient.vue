@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
@@ -53,6 +54,7 @@ import VButton from '@/components/VButton.vue';
 import type { ClientListResponseInterface } from '@/interfaces/client.interface';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const searchName = ref('');
 const clientStore = useClientStore();
