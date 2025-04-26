@@ -37,7 +37,7 @@ const router = createRouter({
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational"] }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
     },
     {
       path: '/client',
