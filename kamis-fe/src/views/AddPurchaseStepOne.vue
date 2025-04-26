@@ -39,7 +39,7 @@ const saveDraft = () => {
 // Fungsi untuk menangani tombol "Selanjutnya"
 const handleNext = () => {
     if (!selectedSupplier.value) {
-        useToast().error("Harap isi field supplier terlebih dahulu!");
+        useToast().error("Silakan pilih Supplier terlebih dahulu!");
         return;
     }
 

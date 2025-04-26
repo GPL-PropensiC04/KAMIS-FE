@@ -89,9 +89,9 @@ import { API_URLS } from '@/config/api.config';
 import VButton from '@/components/VButton.vue';
 import type { ClientDetailInterface } from '@/interfaces/client.interface';
 
-const route = useRoute();
-const router = useRouter();
-const clientId = route.params.id as string;
+  const route = useRoute();
+  const router = useRouter();
+  const clientId = route.params.id as string;
 
 const loading = ref(true);
 const error = ref('');
@@ -145,7 +145,7 @@ function getStatusText(status: number, type: boolean) {
   return "-";
 }
 
-onMounted(fetchClientDetail);
+  onMounted(fetchClientDetail);
 </script>
 
 <style scoped>
