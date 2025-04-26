@@ -10,8 +10,22 @@ export const useResourceStore = defineStore('resource', {
         resources: [] as ResourceInterface[],
         loading: false,
         error: null as null | string,
+        draftAddResource: (() => {
+            const savedData = localStorage.getItem("draftAddResource");
+            return savedData ? JSON.parse(savedData) : null;
+          })(),
     }),
     actions: {
+     
+        setDraftAddResource(data: ResourceInterface) {
+            this.draftAddResource = data;
+            localStorage.setItem("draftAddResource", JSON.stringify(data)); // Simpan ke localStorage
+        },
+        
+        clearDraftAddResource() {
+            this.draftAddResource = null;
+            localStorage.removeItem("draftAddResource"); // Hapus dari localStorage
+            },
         async fetchResources() {
             this.loading = true;
             this.error = null;
