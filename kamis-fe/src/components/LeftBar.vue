@@ -38,6 +38,10 @@
         <BaseIcon icon="fa-solid fa-user" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
       </div>
+      <div :class="['icon-item', { active: isActive('supplier') }]" @click="goTo('supplier-add')">
+        <BaseIcon icon="fa-solid fa-boxes-stacked" clickable />
+        <span v-if="!isCollapsed" class="icon-label">Supplier</span>
+      </div>
     </div>
 
     <!-- Bottom Icon -->
