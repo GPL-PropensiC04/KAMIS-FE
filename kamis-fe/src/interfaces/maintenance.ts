@@ -1,7 +1,16 @@
 export interface Maintenance {
-    id: number;
-    assetId: string; // Menggunakan platNomor
-    tanggalPengajuan: string;
-    tanggalSelesai: string;
-    catatan: string;
-  }
+  id: number;
+  platNomor: string;
+  tanggalMulaiMaintenance: string;
+  tanggalSelesaiMaintenance?: string;
+  deskripsiPekerjaan: string;
+  biaya: number;
+  status: string;
+  namaAset?: string;
+}
+
+export interface MaintenanceRequest {
+  platNomor: string;
+  deskripsiPekerjaan: string;
+  biaya: number;
+}
