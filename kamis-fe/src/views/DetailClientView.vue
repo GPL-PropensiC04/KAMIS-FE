@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
@@ -88,6 +89,7 @@ import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import VButton from '@/components/VButton.vue';
 import type { ClientDetailInterface } from '@/interfaces/client.interface';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
   const route = useRoute();
   const router = useRouter();

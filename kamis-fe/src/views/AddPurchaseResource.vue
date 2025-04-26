@@ -11,6 +11,7 @@ import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import { API_URLS } from '@/config/api.config';
+import Breadcrumb from '@/components/Breadcrumb.vue'
 // Router & Store
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -154,6 +155,7 @@ const goToSummary = () => {
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
         <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
             <!-- Tombol Back -->

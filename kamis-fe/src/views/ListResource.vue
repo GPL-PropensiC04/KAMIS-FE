@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import VSearchBar from "@/components/VSearchBar.vue";
 import VButton from "@/components/VButton.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
+import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // Store & Router
 const resourceStore = useResourceStore();
@@ -49,6 +50,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <h1 class="text-2xl font-bold mb-4">Daftar Resource</h1>

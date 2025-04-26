@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <!-- Main background with dark overlay using background blend mode -->
   <div class="min-h-screen flex items-center justify-center p-6 relative 
               bg-black bg-[url('@/assets/Background.jpg')] bg-cover bg-center bg-blend-darken">
@@ -113,6 +114,7 @@ import type { AddResourceRequestInterface } from '@/interfaces/resource.interfac
 import { useResourceStore } from '@/stores/resource';
 import VPriceInput from '@/components/VPriceInput.vue';
 import VNumberInput from '@/components/VNumberInput.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const router = useRouter();
 const resourceStore = useResourceStore();
