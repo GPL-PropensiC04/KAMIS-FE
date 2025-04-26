@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Notification -->
     <div 
@@ -164,6 +165,8 @@ import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
+import Breadcrumb from '@/components/Breadcrumb.vue';
+
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();

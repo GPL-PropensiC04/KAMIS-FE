@@ -6,6 +6,7 @@ import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -68,6 +69,7 @@ watch(selectedType, () => {
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
         <div class="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md">
             <!-- Tombol Back -->

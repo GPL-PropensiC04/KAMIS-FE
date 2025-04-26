@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
     <div class="min-h-screen bg-[#f5f5f5] flex items-center justify-center p-6">
       <!-- Main Content -->
       <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-3xl">
@@ -84,6 +85,7 @@
   import type { ResourceInterface } from '@/interfaces/resource.interface';
   import VLockedInput from '@/components/VLockedInput.vue';
   import VSuccessButton from '@/components/VSuccessButton.vue';
+  import Breadcrumb from '@/components/Breadcrumb.vue';
   
   const router = useRouter();
   const route = useRoute();

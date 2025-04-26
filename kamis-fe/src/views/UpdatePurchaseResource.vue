@@ -13,6 +13,8 @@ import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
 import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
 import { API_URLS } from "@/config/api.config";
+import Breadcrumb from "@/components/Breadcrumb.vue";
+
 // Router & Store
 const router = useRouter();
 const route = useRoute();
@@ -214,6 +216,7 @@ const handleCancel = () => {
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen flex justify-center items-center bg-[#E5EAF2]">
         <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
             

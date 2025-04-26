@@ -9,6 +9,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetTempStore } from '@/stores/assetTemp'
 import { useToast } from 'vue-toastification'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const assetName = ref('');
 const assetDescription = ref('');
@@ -79,7 +80,8 @@ const handleFileChange = (file: File) => {
 </script>
 
 <template>
-  <div class="p-6">
+  <Breadcrumb />
+  <div class="p-6 min-h-screen bg-[#E5EAF2]">
     <div class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
       <div class="grid grid-cols-2 gap-4">
 
