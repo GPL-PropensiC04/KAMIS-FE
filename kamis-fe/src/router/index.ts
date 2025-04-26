@@ -21,6 +21,8 @@ import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
 import EditAssetView from '@/views/EditAssetView.vue'
 import AddClientView from '@/views/AddClientView.vue'
 import UpdateClient from '@/views/UpdateClient.vue'
+import AddSupplierView from '@/views/AddSupplierView.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,6 +32,12 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+    },
+    {
+      path: '/supplier/add',
+      name: 'supplier-add',
+      component: AddSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
     },
     {
       path: '/client',

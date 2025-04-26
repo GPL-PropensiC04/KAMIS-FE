@@ -8,6 +8,8 @@ import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import type { AssetTempInterface } from "../interfaces/assettemp.interface";
 import { API_URLS } from "@/config/api.config";
+import type { UUID } from "crypto";
+import VSpecialDropDown from "@/components/VSpecialDropDown.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // Router & Store
@@ -27,8 +29,23 @@ const purchaseNote = ref(""); // Catatan yang bisa diubah
 const assetDetails = ref<AssetTempInterface>(); // Data aset
 const assetImage = ref(""); // URL gambar aset
 
-// Opsi dropdown supplier
-const supplierOptions = ["Supplier A", "Supplier B", "Supplier C"];
+
+const supplierOptions = ref<{ label: string; value: UUID }[]>([]);
+
+const fetchSuppliers = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierOptions.value = response.data.data.map((item: { id: UUID; nameSupplier: string; }) => ({
+            label: item.nameSupplier, // untuk ditampilkan
+            value: item.id // untuk disimpan
+        }));
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
 
 // Format tanggal (dd / MM / yyyy)
 const formatDate = (dateString: string) => {
@@ -107,16 +124,17 @@ const handleUpdatePurchase = async () => {
     };
 
     await purchaseStore.updatePurchase(body, purchaseId);
-    router.push("/purchase");
+    router.push(`/purchase/detail/asset/${purchaseId}`);
 };
 
 // Handle cancel
 const handleCancel = () => {
-    router.push("/purchase");
+    router.push(`/purchase/detail/asset/${purchaseId}`);
 };
 
 // Fetch data saat halaman dimuat
 onMounted(() => {
+    fetchSuppliers();
     fetchPurchaseDetail();
 });
 </script>
@@ -142,7 +160,7 @@ onMounted(() => {
             <div class="grid grid-cols-2 gap-4 border-b pb-2 mb-4">
                 <div>
                     <p class="font-lato font-bold">Supplier</p>
-                    <VDropDownInput v-model="selectedSupplier" :options="supplierOptions" class="w-full" />
+                    <VSpecialDropDown v-model="selectedSupplier" :options="supplierOptions" class="w-full" />
                 </div>
                 <div>
                     <p class="font-lato font-bold">Tipe Barang</p>

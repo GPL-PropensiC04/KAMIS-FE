@@ -68,7 +68,7 @@
           </div>
           <div>
             <p class="text-lg font-bold font-lato">Supplier</p>
-            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
+            <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ supplierName }}</p>
           </div>
           <div>
             <p class="text-lg font-bold font-lato">Tipe Barang</p>
@@ -283,6 +283,19 @@ const searchLog = ref('');
 const userRole = computed(() => authStore.userRole);
 const currentUsername = computed(() => authStore.currentUsername);
 
+const supplierName = ref<string>(""); 
+const fetchSupplierName = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/name/${purchase.value.purchaseSupplier}`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierName.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
+
 // Format date 
 const formatDate = (dateString: string): string => {
   if (!dateString) return '-';
@@ -447,6 +460,7 @@ const paginatedLogs = computed(() => {
 onMounted(() => {
   loadPurchaseData().then(() => {
     fetchAssetImage();
+    fetchSupplierName();
   });
 });
 
