@@ -88,7 +88,7 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import VButton from '@/components/VButton.vue';
-import type { ClientDetailInterface } from '@/interfaces/client.interface';
+import type { ClientDetailInterface } from '@/interfaces/profile/client.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
   const route = useRoute();

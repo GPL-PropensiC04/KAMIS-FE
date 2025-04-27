@@ -57,7 +57,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { AsetService } from '@/stores/assetservices';
-import type { AsetInterface } from '@/interfaces/asset.interface';
+import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';

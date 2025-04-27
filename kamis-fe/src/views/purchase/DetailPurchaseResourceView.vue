@@ -235,7 +235,7 @@ import VButton from '@/components/VButton.vue'
 import VSuccessButton from '@/components/VSuccessButton.vue'
 import VCancelButton from '@/components/VCancelButton.vue'
 import VLockedInput from '@/components/VLockedInput.vue'
-import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface'
+import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase/purchase.interface'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()

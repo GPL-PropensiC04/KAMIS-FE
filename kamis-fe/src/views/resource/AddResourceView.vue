@@ -1,5 +1,6 @@
 <template>
   <!-- Main background with dark overlay using background blend mode -->
+  <Breadcrumb />
   <div class="min-h-screen flex items-center justify-center p-6 relative 
               bg-[url('@/assets/Background.jpg')] bg-cover bg-center bg-blend-darken">
     <!-- Main Content (on top of the blended background) -->
@@ -119,7 +120,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import type { AddResourceRequestInterface } from '@/interfaces/resource.interface';
+import type { AddResourceRequestInterface } from '@/interfaces/resource/resource.interface';
 import { useResourceStore } from '@/stores/resource';
 import VPriceInput from '@/components/VPriceInput.vue';
 import VNumberInput from '@/components/VNumberInput.vue';

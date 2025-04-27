@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "../stores/purchase";
+import { usePurchaseStore } from "@/stores/purchase";
 import { useAuthStore } from "@/stores/auth";
-import VSearchBar from "../components/VSearchBar.vue";
-import VDateRangeFilter from "../components/VDateRangeFilter.vue";
-import VSortButton from "../components/VSortButton.vue";
-import VDropDownInput from "../components/VDropDownInput.vue";
+import VSearchBar from "@/components/VSearchBar.vue";
+import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
+import VSortButton from "@/components/VSortButton.vue";
+import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
 import Breadcrumb from '@/components/Breadcrumb.vue'

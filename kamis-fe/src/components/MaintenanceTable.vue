@@ -38,7 +38,7 @@
   </template>
   
   <script setup lang="ts">
-  import type { Maintenance } from '@/interfaces/maintenance';
+  import type { Maintenance } from '@/interfaces/asset/maintenance';
   import { formatDate } from '@/utils/formatters';
   
   defineProps<{

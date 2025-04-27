@@ -51,7 +51,7 @@ import { useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/client';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
-import type { ClientListResponseInterface } from '@/interfaces/client.interface';
+import type { ClientListResponseInterface } from '@/interfaces/profile/client.interface';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue'

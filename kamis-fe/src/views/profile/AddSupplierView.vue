@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useSupplierStore } from "@/stores/supplier.ts";
-import { useResourceStore } from "@/stores/resource.ts";
+import { useSupplierStore } from "@/stores/supplier";
+import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import { useRouter } from "vue-router";

@@ -1,7 +1,7 @@
 // stores/supplier.store.ts
 
 import { API_URLS } from "@/config/api.config";
-import type { AddSupplierRequestInterface, SupplierInterface } from "@/interfaces/supplier.interface";
+import type { AddSupplierRequestInterface, SupplierInterface } from "@/interfaces/profile/supplier.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
