@@ -33,7 +33,14 @@
             </td>
             <td class="px-6 py-4">{{ client.companyClient || '-' }}</td>
             <td v-if="isOperational || isDireksi" class="px-6 py-4">{{ client.projectCount ?? 0 }} Aktivitas</td>
-            <td v-if="isFinance || isDireksi" class="px-6 py-4">{{ client.totalProfit != null ? 'Rp' + client.totalProfit.toLocaleString('id-ID') : 'Rp0' }}</td>
+            <td v-if="isFinance || isDireksi" class="px-6 py-4" :class="{'text-green-600': (client.totalProfit ?? 0) > 0, 'text-red-600': (client.totalProfit ?? 0) < 0}">
+              <template v-if="client.totalProfit != null">
+                <span v-if="client.totalProfit > 0"> Rp{{ client.totalProfit.toLocaleString('id-ID') }}</span>
+                <span v-else-if="client.totalProfit < 0">Rp{{ Math.abs(client.totalProfit).toLocaleString('id-ID') }}</span>
+                <span v-else>Rp0</span>
+              </template>
+              <template v-else>Rp0</template>
+            </td>
           </tr>
           <tr v-if="clientStore.clientList.length === 0">
             <td :colspan="3 + (isOperational || isDireksi ? 1 : 0) + (isFinance || isDireksi ? 1 : 0)" class="text-center text-gray-500">
