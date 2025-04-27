@@ -1,26 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/HomeView.vue'
-import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
-import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
-import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
-import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
-import DetailAssetView from '@/views/DetailAssetView.vue'
-import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
-import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
-import ListPurchase from '@/views/ListPurchase.vue'
-import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
-import ListResource from '@/views/ListResource.vue'
-import UpdateResource from '@/views/UpdateResource.vue'
-import ListClient from '@/views/ListClient.vue'
-import DetailClientView from '@/views/DetailClientView.vue'
-// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
-import ListAsset from '@/views/ListAsset.vue'
-import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
-import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
-import EditAssetView from '@/views/EditAssetView.vue'
-import AddClientView from '@/views/AddClientView.vue'
-import UpdateClient from '@/views/UpdateClient.vue'
+import LoginView from '@/views/profile/LoginView.vue'
+import AddPurchaseStepOne from '@/views/purchase/AddPurchaseStepOne.vue'
+import AddPurchaseResource from '@/views/purchase/AddPurchaseResource.vue'
+import AddPurchaseResourceSummary from '@/views/purchase/AddPurchaseResourceSummary.vue'
+import AddPurchaseAssetSummary from '@/views/purchase/AddPurchaseAssetSummary.vue'
+import DetailAssetView from '@/views/asset/DetailAssetView.vue'
+import UpdatePurchaseResource from '@/views/purchase/UpdatePurchaseResource.vue'
+import UpdatePurchaseAsset from '@/views/purchase/UpdatePurchaseAsset.vue'
+import ListPurchase from '@/views/purchase/ListPurchase.vue'
+import AddPurchaseAsset from '@/views/purchase/AddPurchaseAsset.vue'
+import ListResource from '@/views/resource/ListResource.vue'
+import UpdateResource from '@/views/resource/UpdateResource.vue'
+import ListClient from '@/views/profile/ListClient.vue'
+import DetailClientView from '@/views/profile/DetailClientView.vue'
+import ListAsset from '@/views/asset/ListAsset.vue'
+import DetailPurchaseAssetView from '@/views/purchase/DetailPurchaseAssetView.vue'
+import DetailPurchaseResourceView from '@/views/purchase/DetailPurchaseResourceView.vue'
+import EditAssetView from '@/views/asset/EditAssetView.vue'
+import AddClientView from '@/views/profile/AddClientView.vue'
+import UpdateClient from '@/views/profile/UpdateClient.vue'
+import AddSupplierView from '@/views/profile/AddSupplierView.vue';
+import ListProject from '@/views/project/ListProject.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,98 +32,106 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+    },
+    {
+      path: '/supplier/add',
+      name: 'supplier-add',
+      component: AddSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
     },
     {
       path: '/client',
       name: 'client',
       component:ListClient,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Klien' }
     },
     {
       path: '/client/add',
       name: 'client-add',
       component:AddClientView,
-      meta: { requiresAuth: true, roles: ["Operational"] }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Klien', parent: '/client' }
     },
     {
       path: '/client/:id',
       name: 'client-detail',
       component:DetailClientView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
     },
     {
       path: '/client/update/:id',
       name: 'client-update',
       component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"] }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client' }
     },
     {
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
     },
     {
       path: '/purchase/add',
       name: 'purchase-add',
       component:AddPurchaseStepOne,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
     },
     {
       path: '/purchase/add/asset',
       name: 'purchase-addAsset',
       component:AddPurchaseAsset,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource',
       name: 'purchase-addResource',
       component: AddPurchaseResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'purchase-addResourceSummary',
       component: AddPurchaseResourceSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'purchase-addAssetSummary',
       component: AddPurchaseAssetSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
     },
     {
       path: '/purchase/detail/resource/:id',
       name: 'purchase-detailResource',
       component: DetailPurchaseResourceView,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Pembelian Resource', parent: '/purchase' },
       props: true,
     },
     {
       path: '/purchase/detail/asset/:id',
       name: 'purchase-detailAsset',
       component: DetailPurchaseAssetView,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Pembelian Aset', parent: '/purchase' },
       props: true,
     },
     {
       path: '/purchase/update-resource/:purchaseId',
       name: 'purchase-updateResource',
       component: UpdatePurchaseResource,
-      props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      props: true,
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/resource/:id' }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'purchase-updateAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/asset/:id' }
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue'),
+      component: LoginView,
       meta: { requiresAuth: false }
     },
     // {
@@ -132,26 +143,20 @@ const router = createRouter({
     {
       path: '/resource/add',
       name: 'resource-add',
-      component: () => import('@/views/AddResourceView.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('@/views/resource/AddResourceView.vue'),
+      meta: { requiresAuth: true, breadcrumb: 'Tambah Resource', parent: '/resource' }
     },
     {
       path: '/resource',
       name: 'resource',
       component:ListResource,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Resource' }
     },
     {
       path: '/resource/update/:id',
       name: 'resource-update',
       component:UpdateResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"] }
-    },
-    {
-      path: '/resource/add',
-      name: 'resource-add',
-      component: () => import('@/views/AddResourceView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Resource', parent: '/resource' }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -162,23 +167,25 @@ const router = createRouter({
       path: '/assets',
       name: 'assets-list',
       component: ListAsset,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
     {
       path: '/asset/:platNomor',
       name: 'assets-detail',
       component: DetailAssetView,
-      meta: {
-        title: 'Detail Aset', requiresAuth: true
-      }
+      meta: { requiresAuth: true, breadcrumb: 'Detail Aset', parent: '/assets'}
     },
     {
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: {
-        title: 'Mengubah Aset', requiresAuth: true
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Aset', parent: '/asset/:platNomor'}
+    },
+    {
+      path: '/project',
+      name: 'project',
+      component: ListProject,
+      meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
     },
     {
       path: '/coming-soon',
