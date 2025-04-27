@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
-import type { Maintenance, MaintenanceRequest } from '@/interfaces/maintenance';
+import type { Maintenance, MaintenanceRequest } from '@/interfaces/asset/maintenance';
 
 export const MaintenanceService = {
   /**
@@ -13,7 +13,7 @@ export const MaintenanceService = {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
-      
+
       if (response.data && response.data.data) {
         return response.data.data;
       }
@@ -35,7 +35,7 @@ export const MaintenanceService = {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
-      
+
       if (response.data && response.data.data) {
         return response.data.data;
       }
@@ -57,7 +57,7 @@ export const MaintenanceService = {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
-      
+
       if (response.data && response.data.data) {
         return response.data.data;
       }

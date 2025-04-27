@@ -1,6 +1,6 @@
-import type { AddResourceTempRequestInterface, ResourceTempInterface } from "./resourcetemp.interface";
+import type { AddResourceTempRequestInterface, ResourceTempInterface } from "../resourcetemp.interface";
 import type { AssetTempInterface } from "./assettemp.interface";
-import type { LogPurchaseInterface } from "./logproject.interface";
+import type { LogPurchaseInterface } from "../project/logproject.interface";
 
 export interface PurchaseInterface {
     id: string;
@@ -16,7 +16,7 @@ export interface PurchaseInterface {
     purchaseAsset?: AssetTempInterface | null;
     purchasePaymentDate?: string | null; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
     purchaseLogs: LogPurchaseInterface[];
-  }
+}
 
 export interface AddPurchaseRequestInterface {
     purchaseSupplier: string;
@@ -31,11 +31,10 @@ export interface UpdatePurchaseRequestInterface {
     purchaseResource?: ResourceTempInterface[]; // List resource (hanya untuk purchaseType = 1)
     purchaseNote?: string;                   // Catatan pembelian (opsional)
 }
-  
+
 export interface UpdatePurchaseStatusRequestInterface {
     purchaseNote: string;                   // Catatan pembelian 
     platNomor?: string;                      // Plat nomor kendaraan
 }
 
 
-  

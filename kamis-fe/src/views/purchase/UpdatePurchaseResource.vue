@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { usePurchaseStore } from "../stores/purchase";
+import { usePurchaseStore } from "@/stores/purchase";
 import axios from "axios";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VNumberInput from "../components/VNumberInput.vue";
@@ -11,7 +11,7 @@ import VButton from "../components/VButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import VCancelButton from "@/components/VCancelButton.vue";
 import { useToast } from "vue-toastification";
-import type { ResourceTempInterface } from "../interfaces/resourcetemp.interface";
+import type { ResourceTempInterface } from "@/interfaces/purchase/resourcetemp.interface";
 import { API_URLS } from "@/config/api.config";
 import type { UUID } from "crypto";
 import VSpecialDropDown from "@/components/VSpecialDropDown.vue";

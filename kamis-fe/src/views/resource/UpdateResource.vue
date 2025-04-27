@@ -82,7 +82,7 @@
   import { ref, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useResourceStore } from '@/stores/resource';
-  import type { ResourceInterface } from '@/interfaces/resource.interface';
+  import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
   import VLockedInput from '@/components/VLockedInput.vue';
   import VSuccessButton from '@/components/VSuccessButton.vue';
   import Breadcrumb from '@/components/Breadcrumb.vue';

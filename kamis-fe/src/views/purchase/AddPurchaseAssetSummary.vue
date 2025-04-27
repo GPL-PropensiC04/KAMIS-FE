@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "../stores/purchase";
+import { usePurchaseStore } from "@/stores/purchase";
 import VCancelButton from "../components/VCancelButton.vue";
 import VSuccessButton from "../components/VSuccessButton.vue";
 import { useAssetTempStore } from "@/stores/assetTemp";
-import type { AddAssetTemp } from "@/interfaces/assettemp.interface";
+import type { AddAssetTemp } from "@/interfaces/purchase/assettemp.interface";
 import { API_URLS } from "@/config/api.config";
 import axios from "axios";
 import Breadcrumb from "@/components/Breadcrumb.vue";

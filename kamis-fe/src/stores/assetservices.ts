@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS, API_URLS } from '@/config/api.config';
-import type { AsetInterface } from '@/interfaces/asset.interface';
+import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 
 interface ApiResponse<T> {
   status: number;
@@ -17,17 +17,17 @@ export class AsetService {
     const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_ALL}`);
     return response.data.data;
   }
-  
+
   /**
    * Fetch asset by platNomor
    */
   static async getAsetByPlatNomor(platNomor: string): Promise<AsetInterface> {
     const response = await axios.get(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_BY_PLATNOMOR(platNomor)}`);
-    
+
     // Cek apakah response menggunakan format baru (dengan field data)
     if (response.data && response.data.data) {
       const asetData = response.data.data;
-      
+
       // Jika menggunakan format baru dengan field data
       return {
         platNomor: asetData.platNomor,

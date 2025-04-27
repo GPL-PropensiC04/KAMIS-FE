@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "../stores/purchase";
+import { usePurchaseStore } from "@/stores/purchase";
 import axios from "axios";
 import VDropDownInput from "../components/VDropDownInput.vue";
 import VNumberInput from "../components/VNumberInput.vue";

@@ -145,7 +145,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { AsetInterface } from '@/interfaces/asset.interface';
+import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 import { AsetService } from '@/stores/assetservices';
 import { byteArrayToImageUrl } from '@/utils/formatters';
 import VLockedInput from '@/components/VLockedInput.vue';
