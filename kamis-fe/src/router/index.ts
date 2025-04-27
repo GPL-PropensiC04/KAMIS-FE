@@ -1,27 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/HomeView.vue'
-import AddPurchaseStepOne from '@/views/AddPurchaseStepOne.vue'
-import AddPurchaseResource from '@/views/AddPurchaseResource.vue'
-import AddPurchaseResourceSummary from '@/views/AddPurchaseResourceSummary.vue'
-import AddPurchaseAssetSummary from '@/views/AddPurchaseAssetSummary.vue'
-import DetailAssetView from '@/views/DetailAssetView.vue'
-import UpdatePurchaseResource from '@/views/UpdatePurchaseResource.vue'
-import UpdatePurchaseAsset from '@/views/UpdatePurchaseAsset.vue'
-import ListPurchase from '@/views/ListPurchase.vue'
-import AddPurchaseAsset from '@/views/AddPurchaseAsset.vue'
-import ListResource from '@/views/ListResource.vue'
-import UpdateResource from '@/views/UpdateResource.vue'
-import ListClient from '@/views/ListClient.vue'
-import DetailClientView from '@/views/DetailClientView.vue'
-// import AddPurchaseDetailsView from '@/views/AddPurchaseDetailsView.vue'
-import ListAsset from '@/views/ListAsset.vue'
-import DetailPurchaseAssetView from '@/views/DetailPurchaseAssetView.vue'
-import DetailPurchaseResourceView from '@/views/DetailPurchaseResourceView.vue'
-import EditAssetView from '@/views/EditAssetView.vue'
-import AddClientView from '@/views/AddClientView.vue'
-import UpdateClient from '@/views/UpdateClient.vue'
-import AddSupplierView from '@/views/AddSupplierView.vue';
+import LoginView from '@/views/profile/LoginView.vue'
+import AddPurchaseStepOne from '@/views/purchase/AddPurchaseStepOne.vue'
+import AddPurchaseResource from '@/views/purchase/AddPurchaseResource.vue'
+import AddPurchaseResourceSummary from '@/views/purchase/AddPurchaseResourceSummary.vue'
+import AddPurchaseAssetSummary from '@/views/purchase/AddPurchaseAssetSummary.vue'
+import DetailAssetView from '@/views/asset/DetailAssetView.vue'
+import UpdatePurchaseResource from '@/views/purchase/UpdatePurchaseResource.vue'
+import UpdatePurchaseAsset from '@/views/purchase/UpdatePurchaseAsset.vue'
+import ListPurchase from '@/views/purchase/ListPurchase.vue'
+import AddPurchaseAsset from '@/views/purchase/AddPurchaseAsset.vue'
+import ListResource from '@/views/resource/ListResource.vue'
+import UpdateResource from '@/views/resource/UpdateResource.vue'
+import ListClient from '@/views/profile/ListClient.vue'
+import DetailClientView from '@/views/profile/DetailClientView.vue'
+import ListAsset from '@/views/asset/ListAsset.vue'
+import DetailPurchaseAssetView from '@/views/purchase/DetailPurchaseAssetView.vue'
+import DetailPurchaseResourceView from '@/views/purchase/DetailPurchaseResourceView.vue'
+import EditAssetView from '@/views/asset/EditAssetView.vue'
+import AddClientView from '@/views/profile/AddClientView.vue'
+import UpdateClient from '@/views/profile/UpdateClient.vue'
+import AddSupplierView from '@/views/profile/AddSupplierView.vue';
+import ListProject from '@/views/project/ListProject.vue';
 
 
 const router = createRouter({
@@ -130,7 +131,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue'),
+      component: LoginView,
       meta: { requiresAuth: false }
     },
     // {
@@ -142,7 +143,7 @@ const router = createRouter({
     {
       path: '/resource/add',
       name: 'resource-add',
-      component: () => import('@/views/AddResourceView.vue'),
+      component: () => import('@/views/resource/AddResourceView.vue'),
       meta: { requiresAuth: true, breadcrumb: 'Tambah Resource', parent: '/resource' }
     },
     {
@@ -179,6 +180,12 @@ const router = createRouter({
       name: 'assets-edit',
       component: EditAssetView,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Aset', parent: '/asset/:platNomor'}
+    },
+    {
+      path: '/project',
+      name: 'project',
+      component: ListProject,
+      meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
     },
     {
       path: '/coming-soon',

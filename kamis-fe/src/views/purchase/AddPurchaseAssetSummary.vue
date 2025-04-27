@@ -2,8 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "@/stores/purchase";
-import VCancelButton from "../components/VCancelButton.vue";
-import VSuccessButton from "../components/VSuccessButton.vue";
+import VCancelButton from "@/components/VCancelButton.vue";
+import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useAssetTempStore } from "@/stores/assetTemp";
 import type { AddAssetTemp } from "@/interfaces/purchase/assettemp.interface";
 import { API_URLS } from "@/config/api.config";
