@@ -261,104 +261,107 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
 
       <!-- Table -->
       <div class="overflow-x-auto">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th class="text-center">ID Proyek</th>
-              <th class="text-center">Nama Proyek</th>
-              <th class="text-center">Tipe</th>
-              <th class="text-center">Status</th>
-              <th class="text-center">Tanggal Mulai</th>
-              <th class="text-center">Tanggal Selesai</th>
-              <th v-if="canViewFinancialInfo" class="text-center">Pemasukkan</th>
-              <th v-if="canViewFinancialInfo" class="text-center">Pengeluaran</th>
-              <th v-if="canViewFinancialInfo" class="text-center">Profit</th>
-              <th v-if="canEditProject" class="text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-if="projectStore.projects.length">
-              <tr 
-                class="hover:bg-gray-50 hover:cursor-pointer"
-                v-for="project in projectStore.projects" 
-                :key="project.id" 
-                @click="goToProjectDetails(project.id)"
-              >
-                <td class="text-center">{{ project.id }}</td>
-                <td class="text-center">{{ project.projectName }}</td>
-                <td class="text-center">{{ formatType(project.projectType) }}</td>
-                <td class="text-center">{{ formatStatus(project.projectStatus) }}</td>
-                <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
-                <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
-                <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
-                <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPengeluaran) }}</td>
-                <td v-if="canViewFinancialInfo" class="text-right font-bold">
-                  {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
-                </td>
-                <td v-if="canEditProject" class="text-center" @click.stop>
-                  <VSuccessButton
-                    label="Update"
-                    @click="goToUpdateProject(project.id)"
-                  />
-                </td>
-              </tr>
-            </template>
-
-            <!-- No Data Message -->
-            <template v-else>
+        <div v-if="projectStore.loading" class="text-center text-gray-500 mt-4">
+          Loading...
+        </div>
+        <template v-else>
+          <table class="custom-table">
+            <thead>
               <tr>
-                <td :colspan="canViewFinancialInfo ? (canEditProject ? 10 : 9) : (canEditProject ? 7 : 6)" class="py-14 text-center">
-                  <p class="text-gray-500 italic mb-1">
-                    <template v-if="searchQuery && dateRange.start && dateRange.end">
-                      Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
-                    </template>
-                    <template v-else-if="searchQuery && dateRange.start">
-                      Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal mulai {{ dateRange.start }}.
-                    </template>
-                    <template v-else-if="searchQuery && dateRange.end">
-                      Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal selesai {{ dateRange.end }}.
-                    </template>
-                    <template v-else-if="dateRange.start && dateRange.end">
-                      Tidak ada data proyek dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
-                    </template>
-                    <template v-else-if="dateRange.start">
-                      Tidak ada data proyek dengan tanggal mulai {{ dateRange.start }}.
-                    </template>
-                    <template v-else-if="dateRange.end">
-                      Tidak ada data proyek dengan tanggal selesai {{ dateRange.end }}.
-                    </template>
-                    <template v-else-if="searchQuery">
-                      Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}".
-                    </template>
-                    <template v-else-if="startNominal !== null && endNominal !== null">
-                      Tidak ada data proyek dengan pemasukkan antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
-                    </template>
-                    <template v-else-if="hasActiveFilters">
-                      Tidak ada data proyek yang sesuai dengan filter yang dipilih.
-                    </template>
-                    <template v-else-if="selectedType === 'All'">
-                      Tidak ada data proyek ditemukan.
-                    </template>
-                    <template v-else-if="selectedType === 'Penjualan'">
-                      Tidak ada data proyek penjualan ditemukan.
-                    </template>
-                    <template v-else>
-                      Tidak ada data proyek distribusi ditemukan.
-                    </template>
-                  </p>
-                </td>
+                <th class="text-center">ID Proyek</th>
+                <th class="text-center">Nama Proyek</th>
+                <th class="text-center">Tipe</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Tanggal Mulai</th>
+                <th class="text-center">Tanggal Selesai</th>
+                <th v-if="canViewFinancialInfo" class="text-center">Pemasukkan</th>
+                <th v-if="canViewFinancialInfo" class="text-center">Pengeluaran</th>
+                <th v-if="canViewFinancialInfo" class="text-center">Profit</th>
+                <th v-if="canEditProject" class="text-center">Action</th>
               </tr>
-            </template>
-          </tbody>
-        </table>
-        
-        <p v-if="projectStore.loading" class="text-center text-gray-500 mt-4">Loading...</p>
+            </thead>
+            <tbody>
+              <template v-if="projectStore.projects.length">
+                <tr 
+                  class="hover:bg-gray-50 hover:cursor-pointer"
+                  v-for="project in projectStore.projects" 
+                  :key="project.id" 
+                  @click="goToProjectDetails(project.id)"
+                >
+                  <td class="text-center">{{ project.id }}</td>
+                  <td class="text-center">{{ project.projectName }}</td>
+                  <td class="text-center">{{ formatType(project.projectType) }}</td>
+                  <td class="text-center">{{ formatStatus(project.projectStatus) }}</td>
+                  <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
+                  <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
+                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
+                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPengeluaran) }}</td>
+                  <td v-if="canViewFinancialInfo" class="text-right font-bold">
+                    {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
+                  </td>
+                  <td v-if="canEditProject" class="text-center" @click.stop>
+                    <VSuccessButton
+                      label="Update"
+                      @click="goToUpdateProject(project.id)"
+                    />
+                  </td>
+                </tr>
+              </template>
+
+              <!-- No Data Message -->
+              <template v-else>
+                <tr>
+                  <td :colspan="canViewFinancialInfo ? (canEditProject ? 10 : 9) : (canEditProject ? 7 : 6)" class="py-14 text-center">
+                    <p class="text-gray-500 italic mb-1">
+                      <template v-if="searchQuery && dateRange.start && dateRange.end">
+                        Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
+                      </template>
+                      <template v-else-if="searchQuery && dateRange.start">
+                        Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal mulai {{ dateRange.start }}.
+                      </template>
+                      <template v-else-if="searchQuery && dateRange.end">
+                        Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal selesai {{ dateRange.end }}.
+                      </template>
+                      <template v-else-if="dateRange.start && dateRange.end">
+                        Tidak ada data proyek dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
+                      </template>
+                      <template v-else-if="dateRange.start">
+                        Tidak ada data proyek dengan tanggal mulai {{ dateRange.start }}.
+                      </template>
+                      <template v-else-if="dateRange.end">
+                        Tidak ada data proyek dengan tanggal selesai {{ dateRange.end }}.
+                      </template>
+                      <template v-else-if="searchQuery">
+                        Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}".
+                      </template>
+                      <template v-else-if="startNominal !== null && endNominal !== null">
+                        Tidak ada data proyek dengan pemasukkan antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
+                      </template>
+                      <template v-else-if="hasActiveFilters">
+                        Tidak ada data proyek yang sesuai dengan filter yang dipilih.
+                      </template>
+                      <template v-else-if="selectedType === 'All'">
+                        Tidak ada data proyek ditemukan.
+                      </template>
+                      <template v-else-if="selectedType === 'Penjualan'">
+                        Tidak ada data proyek penjualan ditemukan.
+                      </template>
+                      <template v-else>
+                        Tidak ada data proyek distribusi ditemukan.
+                      </template>
+                    </p>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
       </div>
     </div>
   </div>
 
   <!-- Inline Modal for Project Type Selection -->
-  <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" @click="closeModal">
+  <div v-if="showModal" class="fixed inset-0 backdrop-blur-xs flex justify-center items-center z-50" @click="closeModal">
     <div class="bg-white rounded-lg shadow-lg max-w-md w-full overflow-hidden" @click.stop>
       <div class="border-b px-6 py-4 flex justify-between items-center">
         <h3 class="text-lg font-semibold text-[#1E3A5F]">Tipe Proyek</h3>
