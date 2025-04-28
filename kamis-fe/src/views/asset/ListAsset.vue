@@ -7,47 +7,51 @@
     >
       {{ notificationMessage }}
     </div>
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <h1 class="text-2xl font-bold mb-4">Daftar Aset</h1>
 
-      <div class="flex justify-between mb-4">
-        <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
+    <div class="max-w-6xl mx-auto bg-white p-4 rounded-lg shadow-md mb-4">
+      <div class="flex items-center">
+        <div class="w-full">
+          <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." class="w-full" />
+        </div>
       </div>
+    </div>
 
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+        <table class="w-full text-sm text-center text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
           <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
-              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('nama')">
+              <th scope="col" class="px-6 py-3 cursor-pointer text-center" @click="sortTable('nama')">
                 Nama Aset
                 <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
                 <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
               </th>
-              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sortTable('tanggalPerolehan')">
+              <th scope="col" class="px-6 py-3 cursor-pointer text-center" @click="sortTable('tanggalPerolehan')">
                 Tanggal Perolehan
                 <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
                 <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
               </th>
-              <th scope="col" class="px-6 py-3">{{ thirdColumnHeader }}</th>
-              <th scope="col" class="px-6 py-3">Action</th>
+              <th scope="col" class="px-6 py-3 text-center">{{ thirdColumnHeader }}</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="asset in sortedAssets" :key="asset.platNomor" class="bg-white border-b border-gray-200 hover:bg-gray-50 rounded-lg">
-              <td class="px-6 py-4">{{ asset.nama }}</td>
-              <td class="px-6 py-4">{{ formatDate(asset.tanggalPerolehan) }}</td>
-              <td class="px-6 py-4">{{ thirdColumnValue(asset) }}</td>
-              <td class="px-6 py-4">
-                <VSuccessButton
-                  label="Detail"
-                  @click="goToDetailAsset(asset.platNomor)"
-                />
+          <tbody v-if="sortedAssets.length > 0">
+            <tr v-for="asset in sortedAssets" 
+                :key="asset.platNomor" 
+                class="bg-white border-b border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
+                @click="goToDetailAsset(asset.platNomor)">
+              <td class="px-6 py-4 text-center">{{ asset.nama }}</td>
+              <td class="px-6 py-4 text-center">{{ formatDate(asset.tanggalPerolehan) }}</td>
+              <td class="px-6 py-4 text-center">{{ thirdColumnValue(asset) }}</td>
+            </tr>
+          </tbody>
+          <tbody v-else>
+            <tr>
+              <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                Data tidak ditemukan.
               </td>
             </tr>
           </tbody>
         </table>
-
-        <p v-if="sortedAssets.length === 0" class="text-center text-gray-500 mt-4">Data tidak ditemukan.</p>
       </div>
     </div>
   </div>
@@ -60,7 +64,6 @@ import { AsetService } from '@/stores/assetservices';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
-import VSuccessButton from '@/components/VSuccessButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const assets = ref<AsetInterface[]>([]);
@@ -162,7 +165,7 @@ const formatCurrency = (value: number) => {
 
 const thirdColumnHeader = computed(() => {
   if (canViewMaintenanceInfo.value) {
-    return 'Sisa Hari Maintenance';
+    return 'Terakhir Maintenance';
   } else if (canViewFinancialInfo.value) {
     return 'Nilai Perolehan';
   }
@@ -171,10 +174,14 @@ const thirdColumnHeader = computed(() => {
 
 const thirdColumnValue = (asset: AsetInterface) => {
   if (canViewMaintenanceInfo.value) {
-    return 'Coming soon';
+    if (!asset.lastMaintenance) {
+      return 'Belum Maintenance';
+    }
+    return formatDate(asset.lastMaintenance);
   } else if (canViewFinancialInfo.value) {
     return formatCurrency(asset.nilaiPerolehan);
   }
+  return '';
 };
 
 const goToDetailAsset = (platNomor: string) => {

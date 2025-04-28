@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Back Button -->
     <div class="mb-4 flex justify-between items-center">
@@ -6,16 +7,16 @@
         <span>←</span>
       </router-link>
       
-      <!-- Action buttons - only shown for Operasional role and distribution projects -->
-      <div v-if="canEditProject && projectData.projectType === true" class="flex gap-2">
-        <VCancelButton 
-          label="Batal"
-          @click="cancelProject" 
-        />
-        <VSuccessButton 
-          label="Update"
-          @click="updateProject"
-        />
+      <div class="flex gap-2">
+        <!-- Payment Status Button -->
+        <VSuccessButton v-if="canViewFinancialInfo && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" label="Bayar" @click="openPaymentModal"/>
+        <VCancelButton v-if="canViewFinancialInfo && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" label="Kembalikan" @click="openPaymentModal"/>
+        
+        <!-- Project Action Buttons -->
+        <template v-if="canEditProject && projectData.projectType === true">
+          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="cancelProject" />
+          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
+        </template>
       </div>
     </div>
 
@@ -336,16 +337,30 @@
       </div>
     </template>
   </div>
+  <VModal v-model="showPaymentModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Perubahan Status Pembayaran</h3>
+      <p class="mb-6 text-gray-600">{{ getPaymentModalMessage }}</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closePaymentModal" />
+        <VSuccessButton label="Ya" @click="updatePaymentStatus" />
+      </div>
+    </div>
+  </VModal>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useProjectStore } from '@/stores/project';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import { useAuthStore } from '@/stores/auth';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
+import VModal from '@/components/VModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -370,15 +385,57 @@ const resourceNames = {
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
-  // Only Direksi and Finance can see financial info
   return userRole === 'Direksi' || userRole === 'Finance';
 });
 
-// Check if user is Operasional
-const isOperasional = computed(() => {
-  const userRole = authStore.userRole;
-  return userRole === 'Operasional';
+const showPaymentModal = ref(false);
+const projectStore = useProjectStore();
+
+// Add these computed properties
+const showPaymentUpdateButton = computed(() => {
+  if (!projectData.value) return false;
+  
+  const paymentStatus = projectData.value.projectPaymentStatus;
+  const projectStatus = projectData.value.projectStatus;
+  
+  // Show "Lunasi" button if: payment status is 0 (unpaid) and project is not cancelled
+  if (paymentStatus === 0 && projectStatus !== 3) return true;
+  
+  // Show "Kembalikan" button if: payment status is 1 (paid) and project status is 3 (cancelled)
+  if (paymentStatus === 1 && projectStatus === 3) return true;
+  
+  return false;
 });
+
+
+const getPaymentModalMessage = computed(() => {
+  if (!projectData.value) return '';
+  
+  return projectData.value.projectPaymentStatus === 0 
+    ? 'Apakah Anda yakin ingin update status pembayaran ini?' 
+    : 'Apakah Anda yakin ingin mengembalikan pembayaran ini?';
+});
+
+const openPaymentModal = () => {
+  showPaymentModal.value = true;
+};
+
+const closePaymentModal = () => {
+  showPaymentModal.value = false;
+};
+
+const updatePaymentStatus = async () => {
+  try {
+    const newStatus = projectData.value.projectPaymentStatus === 0 ? 1 : 2;
+    await projectStore.updateProjectPayment(projectData.value.id, newStatus);
+    
+    // Refresh project data
+    await loadData();
+    closePaymentModal();
+  } catch (error) {
+    console.error('Failed to update payment status:', error);
+  }
+};
 
 // Check if user can edit project (Operasional or Admin)
 const canEditProject = computed(() => {
@@ -412,10 +469,9 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Diajukan';
-    case 1: return 'Diproses';
-    case 2: return 'Dalam Pengiriman';
-    case 3: return 'Selesai';
-    case 4: return 'Dibatalkan';
+    case 1: return 'Dalam Pengiriman';
+    case 2: return 'Selesai';
+    case 3: return 'Dibatalkan';
     default: return 'Unknown';
   }
 };
@@ -512,16 +568,35 @@ const fetchClientName = async (clientId: string) => {
 };
 
 // Action methods for buttons
-const cancelProject = () => {
-  // Implement cancel project functionality
-  console.log('Cancel project');
-  // You would typically show a confirmation modal and then call an API
+const cancelProject = async () => {
+  try {
+    await projectStore.updateProjectStatus(projectData.value.id, 3); // 3 is cancelled status
+    await loadData(); // Refresh data after cancellation
+  } catch (error) {
+    console.error('Failed to cancel project:', error);
+  }
 };
 
-const updateProject = () => {
-  // Implement update project functionality
-  console.log('Update project');
-  router.push(`/project/edit/${projectId}`);
+const updateProject = async () => {
+  try {
+    // Get current status
+    const currentStatus = projectData.value.projectStatus;
+    let newStatus;
+
+    // Sequential status update logic
+    if (currentStatus === 0) { // Diajukan -> Kirim
+      newStatus = 1;
+    } else if (currentStatus === 1) { // Kirim -> Selesai
+      newStatus = 2;
+    } else {
+      return;
+    }
+
+    await projectStore.updateProjectStatus(projectData.value.id, newStatus);
+    await loadData(); // Refresh data after update
+  } catch (error) {
+    console.error('Failed to update project status:', error);
+  }
 };
 
 const editDistributionInfo = () => {

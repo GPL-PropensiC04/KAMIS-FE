@@ -23,6 +23,13 @@ import AddClientView from '@/views/profile/AddClientView.vue'
 import UpdateClient from '@/views/profile/UpdateClient.vue'
 import AddSupplierView from '@/views/profile/AddSupplierView.vue';
 import ListProject from '@/views/project/ListProject.vue';
+import AddDistributionView from '@/views/project/AddDistributionView.vue';
+import AddSalesView from '@/views/project/AddSalesView.vue';
+import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
+import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
+import DetailProject from '@/views/project/DetailProjectView.vue';
+import ListSupplierView from '@/views/profile/ListSupplierView.vue';
+import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 
 
 const router = createRouter({
@@ -38,7 +45,27 @@ const router = createRouter({
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
+    },
+    {
+      path: '/supplier',
+      name: 'supplier',
+      component: ListSupplierView,
+      meta: { requiresAuth: true, breadcrumb: 'List Supplier' }
+    },    
+    {
+      path: '/supplier/detail/:id',
+      name: 'supplier-detail',
+      component: DetailSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      props: true
+    },
+    {
+      path: '/supplier/update/:id',
+      name: 'supplier-update',
+      component: () => import('@/views/profile/UpdateSupplierView.vue'),
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: '/supplier' },
+      props: true
     },
     {
       path: '/client',
@@ -188,12 +215,62 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
     },
     {
+      path: '/project/add/distribution',
+      name: 'add-distribution',
+      component: AddDistributionView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Distribusi', 
+        parent: '/project' 
+      }
+    },
+    {
+      path: '/project/add/distribution-summary',
+      name: 'distribution-summary',
+      component: DistributionSummaryView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Distribusi', 
+        parent: '/project/add/distribution'
+      }
+    },
+    {
+      path: '/project/add/sales',
+      name: 'add-sales',
+      component: AddSalesView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Penjualan', 
+        parent: '/project' 
+      }
+    },
+    {
+      path: '/project/add/sales-summary',
+      name: 'sales-summary',
+      component: SalesSummaryView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Penjualan', 
+        parent: '/project/add/sales'
+      }
+    },
+    {
       path: '/project/:id',
       name: 'DetailProject',
       component: () => import('@/views/project/DetailProjectView.vue'),
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/project/:id',
+      name: 'DetailProject',
+      component: DetailProject,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
     },
     {
       path: '/coming-soon',
