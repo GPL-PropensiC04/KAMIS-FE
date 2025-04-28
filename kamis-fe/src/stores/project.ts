@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { 
-    AddProjectRequestDTO, 
-    DistributionFormData,
-    SalesFormData,
-    AssetUsageDTO,
-    ResourceUsageDTO
-} from '@/interfaces/project/project.interface';
-import type { ProjectInterface, ListProjectResponseInterface } from '@/interfaces/project/project.interface';
+import type { ProjectInterface, ListProjectResponseInterface, UpdateProjectStatusInterface, UpdateProjectPaymentStatusInterface } from '@/interfaces/project/project.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import { API_URLS } from '@/config/api.config';
@@ -85,7 +78,7 @@ export const useProjectStore = defineStore('project', {
             this.loading = true;
             this.error = null;
             try {
-                const response = await axios.put<CommonResponseInterface<ProjectInterface>>(
+                const response = await axios.put<CommonResponseInterface<UpdateProjectStatusInterface>>(
                     `${API_URLS.PROJECT}/project/update-status/${id}`,
                     { projectStatus },
                     {
@@ -101,7 +94,7 @@ export const useProjectStore = defineStore('project', {
                     // Update project in state
                     const index = this.projects.findIndex(proj => proj.id === id);
                     if (index !== -1) {
-                        this.projects[index] = updated;
+                        this.projects[index] = { ...this.projects[index], ...updated };
                     }
                     useToast().success('Status proyek berhasil diperbarui!');
                     return updated;
@@ -118,119 +111,44 @@ export const useProjectStore = defineStore('project', {
                 this.loading = false;
             }
         },
-
-        async addDistributionProject(formData: DistributionFormData) {
+        async updateProjectPayment(id: string, projectPaymentStatus: number) {
             this.loading = true;
             this.error = null;
-
+            
             try {
-                // Map form data to request DTO
-                const assetUsage: AssetUsageDTO[] = formData.projectUseAsset.map(asset => {
-                    // Get the asset from form data
-                    return {
-                        platNomor: asset.platNomor,
-                        // Add any additional fields if they exist in the form data
-                        assetUseCost: 'assetUseCost' in asset ? asset.assetUseCost : 0,
-                        assetFuelCost: 'assetFuelCost' in asset ? asset.assetFuelCost : 0
-                    }
-                });
-
-                const requestData: AddProjectRequestDTO = {
-                    projectType: true, // Distribution project
-                    projectName: formData.projectName,
-                    projectClientId: formData.projectClientId,
-                    projectDeliveryAddress: formData.projectDeliveryAddress,
-                    projectPickupAddress: formData.projectPickupAddress,
-                    projectPHLCount: formData.projectPHLCount,
-                    projectPHLPay: formData.projectPHLPay,
-                    projectStartDate: formData.projectStartDate,
-                    projectEndDate: formData.projectEndDate,
-                    projectTotalPemasukkan: formData.projectTotalPemasukkan,
-                    projectTotalPengeluaran: formData.projectTotalPengeluaran,
-                    projectUseAsset: assetUsage
-                };
-
-                const response = await axios.post<CommonResponseInterface<ProjectInterface>>(
-                    `${API_URLS.PROJECT}/project/add`,
-                    requestData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                        }
-                    }
-                );
-
-                if (response.data.status === 200) {
-                    useToast().success('Proyek distribusi berhasil dibuat!');
-                    return response.data.data;
+              const response = await axios.put<CommonResponseInterface<UpdateProjectPaymentStatusInterface>>(
+                `${API_URLS.PROJECT}/project/update-payment/${id}`,
+                { projectPaymentStatus },
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                  }
                 }
-            } catch (error: unknown) {
-                const err = error as Error | { response?: { data?: { message?: string } } };
-                this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat proyek distribusi';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
-                    : 'Terjadi kesalahan saat membuat proyek distribusi';
-                useToast().error(errorMessage);
-                throw error;
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async addSalesProject(formData: SalesFormData) {
-            this.loading = true;
-            this.error = null;
-
-            try {
-                // Map form data to request DTO
-                const resourceUsage: ResourceUsageDTO[] = formData.projectUseResource.map(resource => {
-                    // Map to the required format
-                    return {
-                        resourceId: resource.resourceId,
-                        sellPrice: resource.sellPrice,
-                        resourceStockUsed: resource.resourceStockUsed
-                    }
-                });
-
-                const requestData: AddProjectRequestDTO = {
-                    projectType: false, // Sales project
-                    projectName: formData.projectName,
-                    projectClientId: formData.projectClientId,
-                    projectDeliveryAddress: formData.projectDeliveryAddress,
-                    projectStartDate: formData.projectStartDate,
-                    projectEndDate: formData.projectEndDate,
-                    projectTotalPemasukkan: formData.projectTotalPemasukkan,
-                    projectUseResource: resourceUsage
-                };
-
-                const response = await axios.post<CommonResponseInterface<ProjectInterface>>(
-                    `${API_URLS.PROJECT}/project/add`,
-                    requestData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                        }
-                    }
-                );
-
-                if (response.data.status === 200) {
-                    useToast().success('Proyek penjualan berhasil dibuat!');
-                    return response.data.data;
+              );
+          
+              if (response.data.status === 200) {
+                const updated = response.data.data;
+                // Update project in state if it exists
+                const index = this.projects.findIndex(proj => proj.id === id);
+                if (index !== -1) {
+                    this.projects[index] = { ...this.projects[index], ...updated };
                 }
+                useToast().success('Status pembayaran berhasil diperbarui!');
+                return updated;
+              }
             } catch (error: unknown) {
-                const err = error as Error | { response?: { data?: { message?: string } } };
-                this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat proyek penjualan';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
-                    : 'Terjadi kesalahan saat membuat proyek penjualan';
-                useToast().error(errorMessage);
-                throw error;
+              const err = error as Error | { response?: { data?: { message?: string } } };
+              this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat update status pembayaran';
+              const errorMessage = 'response' in err && err.response?.data?.message 
+                ? err.response.data.message 
+                : 'Terjadi kesalahan saat update status pembayaran';
+              useToast().error(errorMessage);
+              throw error;
             } finally {
-                this.loading = false;
+              this.loading = false;
             }
-        }
+          },
     },
     getters: {
         getProjectById: (state) => (id: string) => {

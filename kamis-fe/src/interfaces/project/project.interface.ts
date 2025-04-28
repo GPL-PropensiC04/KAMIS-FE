@@ -123,3 +123,13 @@ export interface SalesFormData {
     sellPrice: number
   }>;
 }
+
+export interface UpdateProjectStatusInterface {
+  idProject: string;
+  projectStatus: number;
+}
+
+export interface UpdateProjectPaymentStatusInterface {
+  idProject: string;
+  projectPaymentStatus: number;
+}
