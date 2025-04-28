@@ -5,6 +5,7 @@
       <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
         <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." />
         <VOptionInput v-model="typeClient" :options="['Semua', 'Perusahaan', 'Perorangan']"/>
+        <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal" :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
         <VButton v-if="isOperational" class="ml-auto" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
     </div>
@@ -15,8 +16,8 @@
             <th class="px-6 py-3 table-header">Nama Klien</th>
             <th class="px-6 py-3 table-header">Tipe Klien</th>
             <th class="px-6 py-3 table-header">Perusahaan</th>
-            <th v-if="isOperational" class="px-6 py-3 table-header">Jumlah Proyek</th>
-            <th v-if="isFinance" class="px-6 py-3 table-header">Total Profit</th>
+            <th v-if="isOperational || isDireksi" class="px-6 py-3 table-header">Jumlah Proyek</th>
+            <th v-if="isFinance || isDireksi" class="px-6 py-3 table-header">Total Profit</th>
           </tr>
         </thead>
         <tbody>
@@ -31,11 +32,18 @@
               {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Individu' : client.typeClient }}
             </td>
             <td class="px-6 py-4">{{ client.companyClient || '-' }}</td>
-            <td v-if="isOperational" class="px-6 py-4">{{ client.projectCount ?? 0 }} Aktivitas</td>
-            <td v-if="isFinance" class="px-6 py-4">{{ client.totalProfit != null ? 'Rp' + client.totalProfit.toLocaleString('id-ID') : 'Rp0' }}</td>
+            <td v-if="isOperational || isDireksi" class="px-6 py-4">{{ client.projectCount ?? 0 }} Aktivitas</td>
+            <td v-if="isFinance || isDireksi" class="px-6 py-4" :class="{'text-green-600': (client.totalProfit ?? 0) > 0, 'text-red-600': (client.totalProfit ?? 0) < 0}">
+              <template v-if="client.totalProfit != null">
+                <span v-if="client.totalProfit > 0"> Rp{{ client.totalProfit.toLocaleString('id-ID') }}</span>
+                <span v-else-if="client.totalProfit < 0">Rp{{ Math.abs(client.totalProfit).toLocaleString('id-ID') }}</span>
+                <span v-else>Rp0</span>
+              </template>
+              <template v-else>Rp0</template>
+            </td>
           </tr>
           <tr v-if="clientStore.clientList.length === 0">
-            <td :colspan="isOperational && isFinance ? 5 : isOperational || isFinance ? 4 : 3" class="text-center text-gray-500">
+            <td :colspan="3 + (isOperational || isDireksi ? 1 : 0) + (isFinance || isDireksi ? 1 : 0)" class="text-center text-gray-500">
               Data klien tidak ditemukan.
             </td>
           </tr>
@@ -55,6 +63,7 @@ import type { ClientListResponseInterface } from '@/interfaces/profile/client.in
 import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import VDropDownInput from '@/components/VDropDownInput.vue';
 
 const searchName = ref('');
 const clientStore = useClientStore();
@@ -62,16 +71,32 @@ const authStore = useAuthStore();
 const router = useRouter();
 const typeClient = ref('Semua');
 
+const nominalOptions = [
+  { label: "Semua Profit", min: null, max: null },
+  { label: "0 - 10 Juta", min: 0, max: 10_000_000 },
+  { label: "10 Juta - 100 Juta", min: 10_000_000, max: 100_000_000 },
+  { label: "100 Juta - 1 Miliar", min: 100_000_000, max: 1_000_000_000 },
+  { label: "1 Miliar ke atas", min: 1_000_000_000, max: null },
+];
+const selectedNominal = ref(nominalOptions[0].label);
+
 // Fungsi untuk filter client
 const fetchFilteredClients = async () => {
+  const selected = nominalOptions.find(opt => opt.label === selectedNominal.value);
   let type = undefined;
   if (typeClient.value === 'Perusahaan') type = true;
   else if (typeClient.value === 'Perorangan') type = false;
   await clientStore.viewAllClient({
     nameClient: searchName.value,
-    typeClient: type
+    typeClient: type,
+    minProfit: selected?.min,
+    maxProfit: selected?.max,
   });
 };
+
+watch(typeClient, fetchFilteredClients);
+
+watch(selectedNominal, fetchFilteredClients);
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -104,6 +129,7 @@ function goToDetailClient(client: ClientListResponseInterface) {
 
 const isFinance = computed(() => authStore.userRole === 'Finance');
 const isOperational = computed(() => authStore.userRole === 'Operasional');
+const isDireksi = computed(() => authStore.userRole === 'Direksi');
 
 onMounted(() => {
   clientStore.viewAllClient();
@@ -111,51 +137,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lato:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-  .custom-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden;
-    font-family: 'Lato', sans-serif;
-  }
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-  .custom-table thead {
-    background-color: #1E3A5F;
-    color: white;
-  }
+.custom-table thead {
+  background-color: #1E3A5F;
+  color: white;
+}
 
-  .custom-table th {
-    font-family: 'Lato', sans-serif;
-    font-size: 16px;
-    padding: 16px 0;
-    text-align: center;
-  }
-
-  .custom-table td {
-    font-family: 'Lato', sans-serif;
-    font-size: 18px;
-    background-color: #E5EAF2;
-    text-align: center;
-    padding: 16px 0;
-  }
-
-  .custom-table tr {
-    border-bottom: 2px solid #B0BED9;
-  }
-
-  .custom-table tbody tr {
-    background-color: #E5EAF2;
-    transition: background 0.2s;
-  }
-
-  .custom-table tbody tr:hover {
-    background-color: #d1d9e6;
-  }
-
-  .table-header {
-    font-family: 'Lato', sans-serif;
-    font-size: 16px;
-  }
+.custom-table th, .custom-table td {
+  padding: 12px 16px;
+  text-align: center;
+}
 </style>
