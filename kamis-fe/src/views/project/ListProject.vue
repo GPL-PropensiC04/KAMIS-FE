@@ -177,10 +177,11 @@ const goToAddProject = () => {
   showModal.value = true;
 };
 const proceedToAddProject = () => {
-  router.push({
-    path: "/project/add",
-    query: { type: tipeProyekOption.value }
-  });
+  if (tipeProyekOption.value === "Distribusi") {
+    router.push("/project/add/distribution");
+  } else {
+    router.push("/project/add/sales");
+  }
   showModal.value = false;
 };
 const closeModal = () => {

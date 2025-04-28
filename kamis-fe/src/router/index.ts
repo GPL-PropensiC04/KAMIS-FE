@@ -23,6 +23,8 @@ import AddClientView from '@/views/profile/AddClientView.vue'
 import UpdateClient from '@/views/profile/UpdateClient.vue'
 import AddSupplierView from '@/views/profile/AddSupplierView.vue';
 import ListProject from '@/views/project/ListProject.vue';
+import AddDistributionView from '@/views/project/AddDistributionView.vue';
+import AddSalesView from '@/views/project/AddSalesView.vue';
 
 
 const router = createRouter({
@@ -186,6 +188,28 @@ const router = createRouter({
       name: 'project',
       component: ListProject,
       meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
+    },
+    {
+      path: '/project/add/distribution',
+      name: 'add-distribution',
+      component: AddDistributionView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Distribusi', 
+        parent: '/project' 
+      }
+    },
+    {
+      path: '/project/add/sales',
+      name: 'add-sales',
+      component: AddSalesView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Penjualan', 
+        parent: '/project' 
+      }
     },
     {
       path: '/project/:id',
