@@ -8,18 +8,14 @@
       
       <!-- Action buttons - only shown for Operasional role and distribution projects -->
       <div v-if="canEditProject && projectData.projectType === true" class="flex gap-2">
-        <button 
-          class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-          @click="cancelProject"
-        >
-          Batal
-        </button>
-        <button 
-          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        <VCancelButton 
+          label="Batal"
+          @click="cancelProject" 
+        />
+        <VSuccessButton 
+          label="Update"
           @click="updateProject"
-        >
-          Update
-        </button>
+        />
       </div>
     </div>
 
@@ -45,13 +41,11 @@
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Distribusi - {{ projectData.id }}</h2>
             <!-- Edit button for Operasional role -->
-            <button 
-              v-if="canEditProject" 
-              class="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+            <VSuccessButton
+              v-if="canEditProject"
+              label="Ubah"
               @click="editDistributionInfo"
-            >
-              Ubah
-            </button>
+            />
           </div>
 
           <!-- Basic Info -->
@@ -100,13 +94,11 @@
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
             <!-- Edit button for Operasional role -->
-            <button 
-              v-if="canEditProject" 
-              class="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+            <VSuccessButton
+              v-if="canEditProject"
+              label="Ubah"
               @click="editAssets"
-            >
-              Ubah
-            </button>
+            />
           </div>
           
           <div class="overflow-x-auto">
@@ -352,6 +344,8 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import { useAuthStore } from '@/stores/auth';
+import VSuccessButton from '@/components/VSuccessButton.vue';
+import VCancelButton from '@/components/VCancelButton.vue';
 
 const route = useRoute();
 const router = useRouter();
