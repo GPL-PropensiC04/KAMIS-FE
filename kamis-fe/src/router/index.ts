@@ -188,6 +188,14 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
     },
     {
+      path: '/project/:id',
+      name: 'DetailProject',
+      component: () => import('@/views/project/DetailProjectView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/coming-soon',
       name: 'ComingSoon',
       component: () => import('@/views/ComingSoonView.vue')
