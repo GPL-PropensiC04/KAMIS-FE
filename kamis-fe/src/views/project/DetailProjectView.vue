@@ -393,6 +393,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
+
 // Format date with time
 const formatDateTime = (dateString: string): string => {
   if (!dateString) return '-';
