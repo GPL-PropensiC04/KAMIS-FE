@@ -10,6 +10,26 @@ export interface ProjectInterface {
   projectEndDate: string; // ISO date string
   projectTotalPemasukkan: number;
   projectTotalPengeluaran: number;
+  projectPHLCount?: number;
+  projectPHLPay?: number;
+  projectPickupAddress?: string;
+  projectDeliveryAddress?: string;
+  projectUseAsset?: Array<{
+    id: string;
+    platNomor: string;
+    type?: string;
+  }>;
+  projectUseResource?: Array<{
+    resourceId: string;
+    sellPrice: number;
+    resourceStockUsed: number;
+  }>;
+  projectLogs?: Array<{
+    actionDate: string;
+    user: string;
+    action: string;
+  }>;
+  data?: ProjectInterface; // For nested responses
 }
 
 export interface ProjectResponseInterface {
@@ -34,4 +54,6 @@ export interface FilterProjectInterface {
   clientProject?: string;
   tanggalMulai?: string;
   tanggalSelesai?: string;
+  startNominal?: number;
+  endNominal?: number;
 }

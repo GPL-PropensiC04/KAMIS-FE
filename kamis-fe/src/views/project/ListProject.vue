@@ -29,6 +29,10 @@ const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
 const selectedNominalLabel = ref("Seluruh Total Pemasukkan");
 
+// Modal state
+const showModal = ref(false);
+const tipeProyekOption = ref("Penjualan");
+
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
@@ -146,7 +150,7 @@ const formatStatus = (status: number) => {
 
 // Project type formatter
 const formatType = (type: boolean) => {
-  return type ? 'Pengiriman' : 'Penjualan';
+  return type ? 'distribusi' : 'Penjualan';
 };
 
 // Calculate profit
@@ -169,7 +173,19 @@ const hasActiveFilters = computed(() => {
 
 // Navigations
 const goToProjectDetails = (id: string) => router.push(`/project/${id}`);
-const goToAddProject = () => router.push("/project/add");
+const goToAddProject = () => {
+  showModal.value = true;
+};
+const proceedToAddProject = () => {
+  router.push({
+    path: "/project/add",
+    query: { type: tipeProyekOption.value }
+  });
+  showModal.value = false;
+};
+const closeModal = () => {
+  showModal.value = false;
+};
 const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
 </script>
 
@@ -233,10 +249,13 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
       <div class="flex justify-between items-center mb-4">
         <VOptionInput 
           v-model="selectedType" 
-          :options="['All', 'Penjualan', 'Pengiriman']" 
+          :options="['All', 'Penjualan', 'Distribusi']" 
           class="w-1/3" 
         />
+        <div class="flex gap-2">
+          <VButton v-if="hasActiveFilters" label="Reset Filter" @click="resetFilters" />
         <VButton v-if="canEditProject" label="Tambah Proyek" @click="goToAddProject" />
+        </div>
       </div>
 
       <!-- Table -->
@@ -323,7 +342,7 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
                       Tidak ada data proyek penjualan ditemukan.
                     </template>
                     <template v-else>
-                      Tidak ada data proyek pengiriman ditemukan.
+                      Tidak ada data proyek distribusi ditemukan.
                     </template>
                   </p>
                 </td>
@@ -333,6 +352,36 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
         </table>
         
         <p v-if="projectStore.loading" class="text-center text-gray-500 mt-4">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inline Modal for Project Type Selection -->
+  <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" @click="closeModal">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full overflow-hidden" @click.stop>
+      <div class="border-b px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-[#1E3A5F]">Tipe Proyek</h3>
+        <button class="text-gray-500 hover:text-gray-700 text-2xl" @click="closeModal">&times;</button>
+      </div>
+      
+      <div class="p-6">
+        <!-- Use VOptionInput for selection -->
+        <div class="mb-6">
+          <VOptionInput 
+            v-model="tipeProyekOption" 
+            :options="['Penjualan', 'Distribusi']" 
+          />
+        </div>
+        
+        <!-- Proceed Button -->
+        <div class="flex justify-center">
+          <button 
+            class="bg-[#2F855A] text-white px-8 py-3 rounded-md font-medium hover:bg-[#276749] transition-colors"
+            @click="proceedToAddProject"
+          >
+            Selanjutnya
+          </button>
+        </div>
       </div>
     </div>
   </div>
