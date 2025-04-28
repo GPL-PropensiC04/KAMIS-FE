@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { ResourceInterface, AddResourceRequestInterface, ResourceResponseInterface } from '@/interfaces/resource.interface';
+import type { ResourceInterface, AddResourceRequestInterface, ResourceResponseInterface } from '@/interfaces/resource/resource.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import router from '@/router';
@@ -10,8 +10,22 @@ export const useResourceStore = defineStore('resource', {
         resources: [] as ResourceInterface[],
         loading: false,
         error: null as null | string,
+        draftAddResource: (() => {
+            const savedData = localStorage.getItem("draftAddResource");
+            return savedData ? JSON.parse(savedData) : null;
+        })(),
     }),
     actions: {
+
+        setDraftAddResource(data: ResourceInterface) {
+            this.draftAddResource = data;
+            localStorage.setItem("draftAddResource", JSON.stringify(data)); // Simpan ke localStorage
+        },
+
+        clearDraftAddResource() {
+            this.draftAddResource = null;
+            localStorage.removeItem("draftAddResource"); // Hapus dari localStorage
+        },
         async fetchResources() {
             this.loading = true;
             this.error = null;
@@ -26,7 +40,7 @@ export const useResourceStore = defineStore('resource', {
                     }
                 );
                 this.resources = response.data.data;
-                
+
             } catch (error: any) {
                 this.error = error instanceof Error ? error.message : 'Failed to fetch resources';
                 useToast().error(error.response.data.message);
@@ -38,10 +52,10 @@ export const useResourceStore = defineStore('resource', {
         async addResource(body: AddResourceRequestInterface) {
             this.loading = true;
             this.error = null;
-          
+
             try {
                 const response = await axios.post<ResourceResponseInterface>(
-                    `${API_URLS.RESOURCE}/resource/add`, 
+                    `${API_URLS.RESOURCE}/resource/add`,
                     body,
                     {
                         headers: {
@@ -85,7 +99,7 @@ export const useResourceStore = defineStore('resource', {
                 this.loading = false;
             }
         },
-        
+
 
         async fetchResourceById(id: number) {
             this.loading = true;
@@ -108,7 +122,7 @@ export const useResourceStore = defineStore('resource', {
                 this.loading = false;
             }
         },
-        
+
         async updateResource(id: number, body: Partial<ResourceInterface>) {
             this.loading = true;
             this.error = null;
@@ -123,7 +137,7 @@ export const useResourceStore = defineStore('resource', {
                         }
                     }
                 );
-        
+
                 if (response.data.status === 200) {
                     const updated = response.data.data;
                     // Update resource di state
@@ -142,7 +156,7 @@ export const useResourceStore = defineStore('resource', {
                 this.loading = false;
             }
         },
-        
+
         async addResourceToDbById(id: number, stockUpdate: number) {
             this.loading = true;
             this.error = null;
@@ -156,7 +170,7 @@ export const useResourceStore = defineStore('resource', {
                         }
                     }
                 );
-        
+
                 if (response.data.status === 200) {
                     const updatedResource = response.data.data;
                     const index = this.resources.findIndex(res => res.id === id);
@@ -173,6 +187,6 @@ export const useResourceStore = defineStore('resource', {
             } finally {
                 this.loading = false;
             }
-        },        
+        },
     }
 });

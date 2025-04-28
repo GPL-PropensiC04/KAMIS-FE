@@ -96,7 +96,18 @@
         </div>
         <div>
           <p class="text-lg font-bold font-lato">Status Pembelian</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseStatus }}</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">
+            <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
+              Menunggu Persetujuan
+            </template>
+            <template v-else-if="(userRole === 'Finance' || userRole === 'Direksi') && (purchase.purchaseStatus === 'Diproses'
+              || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
+              Menunggu Konfirmasi Pembayaran
+            </template>
+            <template v-else>
+              {{ purchase.purchaseStatus }}
+            </template>
+          </p>
         </div>
       </div>
 
@@ -163,7 +174,7 @@
                       <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
                           <p>
                               <strong>User</strong> : 
-                              {{ log.user === currentUsername ? 'You (' + log.user + ')' : log.user }}
+                              {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
                           </p>
                           <p class="mt-1"><strong>Action</strong> :</p>
                           <p>{{ log.action }}</p>
@@ -235,7 +246,7 @@ import VButton from '@/components/VButton.vue'
 import VSuccessButton from '@/components/VSuccessButton.vue'
 import VCancelButton from '@/components/VCancelButton.vue'
 import VLockedInput from '@/components/VLockedInput.vue'
-import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase.interface'
+import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase/purchase.interface'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()

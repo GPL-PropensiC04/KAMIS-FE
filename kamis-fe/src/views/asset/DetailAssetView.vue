@@ -124,6 +124,7 @@
           />
         </div>
         
+        
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -147,6 +148,9 @@
                     label="Selesai"
                     @click="completeMaintenance(item.id)"
                   />
+                  <span v-else>
+                    {{ calculateMaintenanceDuration(item.tanggalMulaiMaintenance, item.tanggalSelesaiMaintenance) }} hari
+                  </span>
                 </td>
               </tr>
               <tr v-if="maintenanceHistory.length === 0">
@@ -203,7 +207,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { AsetInterface } from '@/interfaces/asset.interface';
+import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 import { AsetService } from '@/stores/assetservices';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
@@ -301,6 +305,19 @@ const sortedMaintenanceHistory = computed(() => {
     return dateB.getTime() - dateA.getTime();
   });
 });
+
+// Calculate maintenance duration in days
+const calculateMaintenanceDuration = (startDate: string, endDate: string): string | number => {
+  if (!startDate || !endDate) return 0;
+  
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const differenceInTime = end.getTime() - start.getTime();
+  const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+  
+  // Return "<1" if the duration is less than 1 day
+  return differenceInDays < 1 ? "<1" : differenceInDays;
+};
 
 // Fetch maintenance data
 const fetchMaintenanceHistory = async () => {

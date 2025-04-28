@@ -1,5 +1,5 @@
 import { API_URLS } from "@/config/api.config";
-import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface, UpdateClientInterface } from "@/interfaces/client.interface";
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface, UpdateClientInterface } from "@/interfaces/profile/client.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -9,8 +9,8 @@ import { useToast } from "vue-toastification";
 export const useClientStore = defineStore('client', {
     state: () => ({
         clients: [] as ClientInterface[],
-        clientList : [] as ClientListResponseInterface[],
-        clientDetail : null as ClientDetailInterface | null,
+        clientList: [] as ClientListResponseInterface[],
+        clientDetail: null as ClientDetailInterface | null,
         loading: false,
         error: null as null | string,
     }),
@@ -18,10 +18,10 @@ export const useClientStore = defineStore('client', {
         async addClient(body: AddClientRequestInterface) {
             this.loading = true;
             this.error = null;
-          
+
             try {
                 const response = await axios.post<CommonResponseInterface<ClientInterface>>(
-                    `${API_URLS.PROFILE}/client/add`, 
+                    `${API_URLS.PROFILE}/client/add`,
                     body,
                     {
                         headers: {
@@ -82,17 +82,17 @@ export const useClientStore = defineStore('client', {
             }
         },
 
-        async updateClient(body: UpdateClientInterface, id: string){
+        async updateClient(body: UpdateClientInterface, id: string) {
             this.loading = true;
             this.error = null;
-            
+
             try {
                 const response = await axios.put<CommonResponseInterface<ClientInterface>>(
                     `${API_URLS.PROFILE}/client/update/${id}`,
                     body,
                     {
-                        headers : {
-                            'Content-Type': 'application/json' 
+                        headers: {
+                            'Content-Type': 'application/json'
                         }
                     }
                 )
@@ -101,7 +101,7 @@ export const useClientStore = defineStore('client', {
                     useToast().success('Sukses mengedit klien!');
                     await router.push(`/client`)
                 };
-            } catch (err:unknown) {
+            } catch (err: unknown) {
                 this.error = `Gagal mengedit klien ${err instanceof Error ? err.message : `Unknown Error`}`;
                 useToast().error(this.error);
             } finally {

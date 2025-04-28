@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useSupplierStore } from "@/stores/supplier.ts";
-import { useResourceStore } from "@/stores/resource.ts";
+import { useSupplierStore } from "@/stores/supplier";
+import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import { useRouter } from "vue-router";
@@ -49,10 +49,6 @@ const handleSelectResource = (name: string) => {
 
 // Tambahkan barang ke tabel
 const addResource = () => {
-  if (selectedResourceId.value === null || selectedResourcePrice.value === null) {
-    toast.error("Pilih barang dan pastikan harga valid!");
-    return;
-  }
 
   const exists = resources.value.some((r) => r.id === selectedResourceId.value);
   if (exists) {

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { usePurchaseStore } from "../stores/purchase";
+import { usePurchaseStore } from "@/stores/purchase";
 import { useAuthStore } from "@/stores/auth";
-import VSearchBar from "../components/VSearchBar.vue";
-import VDateRangeFilter from "../components/VDateRangeFilter.vue";
-import VSortButton from "../components/VSortButton.vue";
-import VDropDownInput from "../components/VDropDownInput.vue";
+import VSearchBar from "@/components/VSearchBar.vue";
+import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
+import VSortButton from "@/components/VSortButton.vue";
+import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -24,6 +24,8 @@ const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
 const sortByDate = ref(null);
 const sortByNominal = ref(null);
+
+const userRole = computed(() => authStore.userRole)
 
 // **State untuk Filter Rentang Nominal**
 const startNominal = ref<number | null>(null);
@@ -156,13 +158,25 @@ const goToPurchaseDetail = (purchaseId: string) => {
           <tbody>
             <template v-if="purchaseStore.purchases.length">
               <tr 
+                class="hover:bg-gray-50 hover:cursor-pointer"
                 v-for="purchase in purchaseStore.purchases" 
                 :key="purchase.id" 
                 @click="goToPurchaseDetail(purchase.purchaseId)"
               >
                 <td class="text-center">{{ purchase.purchaseId }}</td>
                 <td class="text-center">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
-                <td class="text-center">{{ purchase.purchaseStatus }}</td>
+                <td class="text-center">
+                <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
+                  Menunggu Persetujuan
+                </template>
+                <template v-else-if="(userRole === 'Finance') && (purchase.purchaseStatus === 'Diproses'
+                  || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
+                  Menunggu Pembayaran
+                </template>
+                <template v-else>
+                  {{ purchase.purchaseStatus }}
+                </template>
+              </td>
                 <td class="text-center">{{ purchase.purchaseSupplier }}</td>
                 <td class="text-center">{{ purchase.purchaseType }}</td>
                 <td v-if="canViewFinancialInfo" class="text-right font-bold">
