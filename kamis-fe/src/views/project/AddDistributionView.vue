@@ -1,20 +1,11 @@
 <template>
+  <Breadcrumb/>
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Navigation header -->
     <div class="mb-4 flex justify-between items-center">
       <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
         <span>←</span>
       </router-link>
-      <h1 class="text-xl font-semibold text-[#1E3A5F]">OP - Mendaftarkan Distribusi</h1>
-    </div>
-
-    <!-- Breadcrumb navigation -->
-    <div class="flex items-center text-[#1E3A5F] mb-6">
-      <router-link to="/" class="hover:underline">Home</router-link>
-      <span class="mx-2">></span>
-      <router-link to="/project" class="hover:underline">Distribusi & Penjualan</router-link>
-      <span class="mx-2">></span>
-      <span class="font-semibold">Mendaftarkan Distribusi</span>
     </div>
 
     <!-- Main Form -->
@@ -296,13 +287,12 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
-import { useProjectStore } from '@/stores/project';
 import type { DistributionFormData } from '@/interfaces/project/project.interface';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 // Router & Toast
 const router = useRouter();
 const toast = useToast();
-const projectStore = useProjectStore();
 
 // Form data
 const formData = ref<DistributionFormData>({
@@ -400,7 +390,15 @@ const fetchAssets = async () => {
     });
     
     // Map the backend response to our Asset interface format
-    assets.value = response.data.data.map((asset: any) => ({
+    interface AssetResponse {
+      platNomor: string;
+      nama: string;
+      jenisAset: string;
+      status: string;
+      nilaiPerolehan: number;
+    }
+    
+    assets.value = response.data.data.map((asset: AssetResponse) => ({
       id: asset.platNomor, // Using platNomor as ID
       assetType: asset.jenisAset,
       assetName: asset.nama,
@@ -496,6 +494,11 @@ const updateFormData = () => {
     assetUseCost: asset.usageCost || 0,
     assetFuelCost: asset.fuelCost || 0
   }));
+  
+  // Store form data in localStorage for summary page
+  localStorage.setItem('distributionFormData', JSON.stringify(formData.value));
+  localStorage.setItem('distributionAssetList', JSON.stringify(assetList.value));
+  localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
 // Navigation
@@ -530,17 +533,11 @@ const submitForm = async () => {
   updateFormData();
   
   try {
-    // Use the project store to submit the data
-    await projectStore.addDistributionProject(formData.value);
-    
-    // Clear form data
-    localStorage.removeItem('distributionFormData');
-    
-    // Navigate back to project list
-    router.push('/project');
+    // Navigate to summary page instead of submitting directly
+    router.push('/project/add/distribution-summary');
   } catch (error) {
-    console.error('Error submitting distribution project:', error);
-    // Error handling is done in the store, no need to show another toast
+    console.error('Error navigating to summary page:', error);
+    toast.error('Terjadi kesalahan. Silahkan coba lagi.');
   }
 };
 

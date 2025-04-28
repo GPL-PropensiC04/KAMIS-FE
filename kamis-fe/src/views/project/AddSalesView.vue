@@ -1,21 +1,21 @@
 <template>
+  <Breadcrumb/>
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Navigation header -->
     <div class="mb-4 flex justify-between items-center">
       <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
         <span>←</span>
       </router-link>
-      <h1 class="text-xl font-semibold text-[#1E3A5F]">OP - Mendaftarkan Penjualan</h1>
     </div>
-
+    
     <!-- Breadcrumb navigation -->
-    <div class="flex items-center text-[#1E3A5F] mb-6">
+    <!-- <div class="flex items-center text-[#1E3A5F] mb-6">
       <router-link to="/" class="hover:underline">Home</router-link>
       <span class="mx-2">></span>
       <router-link to="/project" class="hover:underline">Distribusi & Penjualan</router-link>
       <span class="mx-2">></span>
       <span class="font-semibold">Mendaftarkan Penjualan</span>
-    </div>
+    </div> -->
 
     <!-- Main Form -->
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -236,12 +236,11 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
-import { useProjectStore } from '@/stores/project';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 // Router & Toast
 const router = useRouter();
 const toast = useToast();
-const projectStore = useProjectStore();
 
 // Form data
 const formData = ref({
@@ -440,6 +439,11 @@ const updateFormData = () => {
     resourceStockUsed: product.quantity,
     sellPrice: product.price
   }));
+  
+  // Store form data in localStorage for summary page
+  localStorage.setItem('salesFormData', JSON.stringify(formData.value));
+  localStorage.setItem('salesProductList', JSON.stringify(productList.value));
+  localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
 // Navigation
@@ -474,17 +478,11 @@ const submitForm = async () => {
   updateFormData();
   
   try {
-    // Use the project store to submit the data
-    await projectStore.addSalesProject(formData.value);
-    
-    // Clear form data
-    localStorage.removeItem('salesFormData');
-    
-    // Navigate back to project list
-    router.push('/project');
+    // Navigate to summary page instead of submitting directly
+    router.push('/project/add/sales-summary');
   } catch (error) {
-    console.error('Error submitting sales project:', error);
-    // Error handling is done in the store, no need to show another toast
+    console.error('Error navigating to summary page:', error);
+    toast.error('Terjadi kesalahan. Silahkan coba lagi.');
   }
 };
 
