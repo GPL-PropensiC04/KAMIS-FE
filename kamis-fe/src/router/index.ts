@@ -29,6 +29,7 @@ import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue
 import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
 import DetailProject from '@/views/project/DetailProjectView.vue';
 import ListSupplierView from '@/views/profile/ListSupplierView.vue';
+import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 
 
 const router = createRouter({
@@ -44,7 +45,7 @@ const router = createRouter({
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
     },
     {
       path: '/supplier',
@@ -52,6 +53,13 @@ const router = createRouter({
       component: ListSupplierView,
       meta: { requiresAuth: true, breadcrumb: 'List Supplier' }
     },    
+    {
+      path: '/supplier/detail/:id',
+      name: 'supplier-detail',
+      component: DetailSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      props: true
+    },
     {
       path: '/client',
       name: 'client',
