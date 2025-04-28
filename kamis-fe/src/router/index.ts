@@ -192,7 +192,7 @@ const router = createRouter({
     },
     {
       path: '/assets',
-      name: 'assets-list',
+      name: 'assets',
       component: ListAsset,
       meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
