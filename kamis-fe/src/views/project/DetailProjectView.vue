@@ -1,4 +1,5 @@
 <template>
+  <Breadcrumb />
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Back Button -->
     <div class="mb-4 flex justify-between items-center">
@@ -346,6 +347,7 @@ import { API_URLS } from '@/config/api.config';
 import { useAuthStore } from '@/stores/auth';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const route = useRoute();
 const router = useRouter();
