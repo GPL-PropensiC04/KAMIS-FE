@@ -26,4 +26,11 @@ export interface ResourceInterface {
     resourceName: string;
     resourcePrice: number;
   }
+
+export interface SupplierListResponseInterface {
+    id: string; // UUID, tetap string di frontend
+    nameSupplier: string;
+    companySupplier: string;
+    totalPurchases: number;
+  }
   
