@@ -25,6 +25,8 @@ import AddSupplierView from '@/views/profile/AddSupplierView.vue';
 import ListProject from '@/views/project/ListProject.vue';
 import AddDistributionView from '@/views/project/AddDistributionView.vue';
 import AddSalesView from '@/views/project/AddSalesView.vue';
+import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
+import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
 
 
 const router = createRouter({
@@ -201,6 +203,17 @@ const router = createRouter({
       }
     },
     {
+      path: '/project/add/distribution-summary',
+      name: 'distribution-summary',
+      component: DistributionSummaryView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Distribusi', 
+        parent: '/project/add/distribution'
+      }
+    },
+    {
       path: '/project/add/sales',
       name: 'add-sales',
       component: AddSalesView,
@@ -209,6 +222,17 @@ const router = createRouter({
         roles: ["Admin", "Operational"], 
         breadcrumb: 'Tambah Penjualan', 
         parent: '/project' 
+      }
+    },
+    {
+      path: '/project/add/sales-summary',
+      name: 'sales-summary',
+      component: SalesSummaryView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Penjualan', 
+        parent: '/project/add/sales'
       }
     },
     {
