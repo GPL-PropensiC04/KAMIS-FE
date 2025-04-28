@@ -151,48 +151,7 @@
               </p>
             </div>
           </div>
-        </div>
-
-        <!-- Log Distribusi -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Log Distribusi</h2>
-          </div>
-          
-          <div class="p-4">
-            <!-- Timeline Component -->
-            <div class="relative">
-              <!-- Timeline vertical line -->
-              <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-
-              <!-- Timeline items -->
-              <div v-for="(log, index) in projectData.projectLogs" :key="index" 
-                   class="relative pl-12 pb-8 flex flex-col">
-                <!-- Timeline dot -->
-                <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
-                
-                <!-- Timestamp -->
-                <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
-                
-                <!-- User info -->
-                <div class="mb-1 text-sm">
-                  <span class="font-medium">User:</span> {{ log.user }}
-                </div>
-                
-                <!-- Action -->
-                <div class="bg-gray-50 rounded-md p-3 text-sm">
-                  <span class="font-medium">Action:</span>
-                  <p>{{ log.action }}</p>
-                </div>
-
-                <!-- If it's the last item, display the timestamp on the right -->
-                <div v-if="index === projectData.projectLogs.length - 1" class="absolute right-0 top-0 text-xs text-gray-500">
-                  {{ formatDateTime(log.actionDate) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </div>        
       </div>
 
       <!-- Sales Details Section -->
@@ -292,48 +251,81 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Log Penjualan -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Log Penjualan</h2>
-          </div>
-          
-          <div class="p-4">
-            <!-- Timeline Component -->
-            <div class="relative">
-              <!-- Timeline vertical line -->
-              <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+      <!-- Log Distribusi -->
+      <div v-if="projectData.projectLogs.length" class="mt-10">
+            <h2 class="text-lg font-bold font-lato mb-2">Log Distribusi</h2>
+            <hr class="border-t-1 border-black mb-4" />
 
-              <!-- Timeline items -->
-              <div v-for="(log, index) in projectData.projectLogs" :key="index" 
-                   class="relative pl-12 pb-8 flex flex-col">
-                <!-- Timeline dot -->
-                <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
-                
-                <!-- Timestamp -->
-                <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
-                
-                <!-- User info -->
-                <div class="mb-1 text-sm">
-                  <span class="font-medium">User:</span> {{ log.user }}
-                </div>
-                
-                <!-- Action -->
-                <div class="bg-gray-50 rounded-md p-3 text-sm">
-                  <span class="font-medium">Action:</span>
-                  <p>{{ log.action }}</p>
-                </div>
+            <div class="flex flex-col space-y-6 relative">
+                <div 
+                    v-for="(log, index) in paginatedLogs" 
+                    :key="log.id" 
+                    class="relative flex items-start gap-3"
+                    :class="{
+                        'flex-row-reverse pr-6': log.user === currentUsername,
+                        'pl-6': log.user !== currentUsername
+                    }"
+                >
+                    <!-- Icon bulat -->
+                    <div class="w-3 h-3 bg-[#1E3A5F] rounded-full mt-1.5 flex-shrink-0"></div>
 
-                <!-- If it's the last or first item, display the timestamp on the right -->
-                <div v-if="index === 0 || index === projectData.projectLogs.length - 1" 
-                     class="absolute right-0 top-0 text-xs text-gray-500">
-                  {{ formatDateTime(log.actionDate) }}
+                    <!-- Isi log -->
+                    <div class="flex flex-col max-w-[80%]">
+                        <p class="text-[#1E3A5F] font-semibold text-sm mb-1"
+                        :class="{
+                        'text-right': log.user === currentUsername,
+                        'text-left': log.user !== currentUsername
+                        }">
+                            {{ formatTime(log.actionDate) }} - {{ formatDate(log.actionDate) }}
+                        </p>
+                        <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
+                            <p>
+                                <strong>User</strong> : 
+                                {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
+                            </p>
+                            <p class="mt-1"><strong>Action</strong> :</p>
+                            <p>{{ log.action }}</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-        </div>
+
+            <!-- Search + Pagination di bawah dan sejajar -->
+            <div class="flex flex-wrap justify-between items-center mt-6 gap-4">
+                <!-- Search Input -->
+                <input 
+                    v-model="searchLog" 
+                    placeholder="Cari log..." 
+                    class="w-full sm:w-[250px] px-3 py-1 border border-[#1E3A5F] rounded-md text-sm bg-[#F8FAFC]"
+                />
+
+                <!-- Pagination Controls -->
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="currentPage--"
+                        :disabled="currentPage === 1"
+                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                    >
+                        ‹
+                    </button>
+
+                    <span class="text-sm font-semibold text-[#1E3A5F]">
+                        Halaman {{ currentPage }} dari {{ totalPages }}
+                    </span>
+
+                    <button
+                        @click="currentPage++"
+                        :disabled="currentPage === totalPages"
+                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                    >
+                        ›
+                    </button>
+                </div>
+            </div>
+            <!-- END -->
+
       </div>
     </template>
   </div>
@@ -368,6 +360,54 @@ const resourceNames = {
   '3': 'Cakul',
   '4': 'Ml ayam'
 };
+
+/// 
+// Handle Log //
+///
+const userRole = computed(() => authStore.userRole)
+
+const searchLog = ref('');
+
+const currentUsername = computed(() => authStore.currentUsername);
+
+// Format Jam dari ISO (jam:menit)
+const formatTime = (iso: string): string => {
+    const date = new Date(iso);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+};
+
+// Urutkan log terbaru ke terlama
+const sortedLogs = computed(() => {
+    console.log(projectData.value.projectLogs)
+    return [...(projectData.value?.projectLogs || [])].sort((a, b) =>
+        new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
+    );
+});
+
+const logsPerPage = 3;
+const currentPage = ref(1);
+
+const filteredLogs = computed(() => {
+    const search = searchLog.value.toLowerCase();
+    return sortedLogs.value.filter(log =>
+        log.action.toLowerCase().includes(search) || 
+        log.user.toLowerCase().includes(search)
+    );
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredLogs.value.length / logsPerPage);
+});
+
+const paginatedLogs = computed(() => {
+    const start = (currentPage.value - 1) * logsPerPage;
+    return filteredLogs.value.slice(start, start + logsPerPage);
+});
+
+/// 
+// End //
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {

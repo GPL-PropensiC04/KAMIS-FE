@@ -163,7 +163,7 @@
                       <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
                           <p>
                               <strong>User</strong> : 
-                              {{ log.user === currentUsername ? 'You (' + log.user + ')' : log.user }}
+                              {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
                           </p>
                           <p class="mt-1"><strong>Action</strong> :</p>
                           <p>{{ log.action }}</p>
