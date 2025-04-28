@@ -1,10 +1,26 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Back Button -->
-    <div class="mb-4">
+    <div class="mb-4 flex justify-between items-center">
       <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
         <span>←</span>
       </router-link>
+      
+      <!-- Action buttons - only shown for Operasional role and distribution projects -->
+      <div v-if="canEditProject && projectData.projectType === true" class="flex gap-2">
+        <button 
+          class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          @click="cancelProject"
+        >
+          Batal
+        </button>
+        <button 
+          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          @click="updateProject"
+        >
+          Update
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
@@ -24,10 +40,18 @@
     <template v-else>
       <!-- Distribution Details Section -->
       <div v-if="projectData.projectType === true" class="space-y-6">
-        <!-- Header -->
+        <!-- Header with Edit button -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
+          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Distribusi - {{ projectData.id }}</h2>
+            <!-- Edit button for Operasional role -->
+            <button 
+              v-if="canEditProject" 
+              class="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+              @click="editDistributionInfo"
+            >
+              Ubah
+            </button>
           </div>
 
           <!-- Basic Info -->
@@ -71,10 +95,18 @@
           </div>
         </div>
 
-        <!-- Assets Used Table -->
+        <!-- Assets Used Table with Edit button -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
+          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
+            <!-- Edit button for Operasional role -->
+            <button 
+              v-if="canEditProject" 
+              class="px-4 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+              @click="editAssets"
+            >
+              Ubah
+            </button>
           </div>
           
           <div class="overflow-x-auto">
@@ -348,6 +380,18 @@ const canViewFinancialInfo = computed(() => {
   return userRole === 'Direksi' || userRole === 'Finance';
 });
 
+// Check if user is Operasional
+const isOperasional = computed(() => {
+  const userRole = authStore.userRole;
+  return userRole === 'Operasional';
+});
+
+// Check if user can edit project (Operasional or Admin)
+const canEditProject = computed(() => {
+  const userRole = authStore.userRole;
+  return userRole === 'Operasional' || userRole === 'Admin';
+});
+
 // Format date function
 const formatDate = (dateString: string): string => {
   if (!dateString) return '-';
@@ -470,6 +514,31 @@ const fetchClientName = async (clientId: string) => {
     console.error('Error fetching client name:', err);
     clientName.value = 'Unknown Client';
   }
+};
+
+// Action methods for buttons
+const cancelProject = () => {
+  // Implement cancel project functionality
+  console.log('Cancel project');
+  // You would typically show a confirmation modal and then call an API
+};
+
+const updateProject = () => {
+  // Implement update project functionality
+  console.log('Update project');
+  router.push(`/project/edit/${projectId}`);
+};
+
+const editDistributionInfo = () => {
+  // Implement edit distribution info functionality
+  console.log('Edit distribution info');
+  // This could open a modal or navigate to an edit page
+};
+
+const editAssets = () => {
+  // Implement edit assets functionality
+  console.log('Edit assets');
+  // This could open a modal or navigate to an assets edit page
 };
 
 onMounted(async () => {
