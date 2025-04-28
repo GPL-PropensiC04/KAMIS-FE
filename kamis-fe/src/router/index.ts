@@ -23,6 +23,7 @@ import AddClientView from '@/views/profile/AddClientView.vue'
 import UpdateClient from '@/views/profile/UpdateClient.vue'
 import AddSupplierView from '@/views/profile/AddSupplierView.vue';
 import ListProject from '@/views/project/ListProject.vue';
+import DetailProject from '@/views/project/DetailProjectView.vue';
 
 
 const router = createRouter({
@@ -190,10 +191,8 @@ const router = createRouter({
     {
       path: '/project/:id',
       name: 'DetailProject',
-      component: () => import('@/views/project/DetailProjectView.vue'),
-      meta: {
-        requiresAuth: true
-      }
+      component: DetailProject,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
     },
     {
       path: '/coming-soon',
