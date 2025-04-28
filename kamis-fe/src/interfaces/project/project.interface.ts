@@ -1,3 +1,5 @@
+import type { LogProjectInterface } from "./logproject.interface";
+
 export interface ProjectInterface {
   id: string;
   projectType: boolean; // Value false = Penjualan, Value true = Pengiriman
@@ -10,6 +12,7 @@ export interface ProjectInterface {
   projectEndDate: string; // ISO date string
   projectTotalPemasukkan: number;
   projectTotalPengeluaran: number;
+  projectLogs: LogProjectInterface[];
 }
 
 export interface ProjectResponseInterface {

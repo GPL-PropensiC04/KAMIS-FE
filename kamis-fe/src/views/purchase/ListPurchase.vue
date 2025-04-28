@@ -25,6 +25,8 @@ const selectedType = ref("All");
 const sortByDate = ref(null);
 const sortByNominal = ref(null);
 
+const userRole = computed(() => authStore.userRole)
+
 // **State untuk Filter Rentang Nominal**
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
@@ -163,7 +165,18 @@ const goToPurchaseDetail = (purchaseId: string) => {
               >
                 <td class="text-center">{{ purchase.purchaseId }}</td>
                 <td class="text-center">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
-                <td class="text-center">{{ purchase.purchaseStatus }}</td>
+                <td class="text-center">
+                <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
+                  Menunggu Persetujuan
+                </template>
+                <template v-else-if="(userRole === 'Finance') && (purchase.purchaseStatus === 'Diproses'
+                  || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
+                  Menunggu Pembayaran
+                </template>
+                <template v-else>
+                  {{ purchase.purchaseStatus }}
+                </template>
+              </td>
                 <td class="text-center">{{ purchase.purchaseSupplier }}</td>
                 <td class="text-center">{{ purchase.purchaseType }}</td>
                 <td v-if="canViewFinancialInfo" class="text-right font-bold">
