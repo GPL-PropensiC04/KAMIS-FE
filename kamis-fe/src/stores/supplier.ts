@@ -1,7 +1,7 @@
 // stores/supplier.store.ts
 
 import { API_URLS } from "@/config/api.config";
-import type { AddSupplierRequestInterface, SupplierInterface, SupplierListResponseInterface } from "@/interfaces/profile/supplier.interface";
+import type { AddSupplierRequestInterface, SupplierInterface, SupplierListResponseInterface, DetailSupplierInterface } from "@/interfaces/profile/supplier.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -11,6 +11,7 @@ import { useToast } from "vue-toastification";
 export const useSupplierStore = defineStore('supplier', {
   state: () => ({
     suppliers: [] as SupplierListResponseInterface[], // Untuk list supplier
+    supplierDetail: null as DetailSupplierInterface | null, // Supplier detail data
     loading: false,
     error: null as null | string,
   }),
@@ -62,6 +63,34 @@ export const useSupplierStore = defineStore('supplier', {
       } catch (error: any) {
         this.error = error instanceof Error ? error.message : 'Gagal mengambil data supplier';
         useToast().error(error.response?.data?.message || this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async getSupplierDetail(supplierId: string) {
+      this.loading = true;
+      this.error = null;
+      this.supplierDetail = null;
+
+      try {
+        const response = await axios.get<CommonResponseInterface<DetailSupplierInterface>>(
+          `${API_URLS.PROFILE}/supplier/detail/${supplierId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+        if (response.data.status === 200) {
+          this.supplierDetail = response.data.data;
+        } else {
+          useToast().error(response.data.message || 'Gagal mengambil detail supplier');
+        }
+      } catch (error: any) {
+        this.error = error instanceof Error ? error.message : 'Gagal mengambil detail supplier';
+        useToast().error(error.response?.data?.message || this.error);
+        throw error;
       } finally {
         this.loading = false;
       }
