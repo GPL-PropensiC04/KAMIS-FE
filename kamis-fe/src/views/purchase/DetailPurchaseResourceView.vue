@@ -96,7 +96,18 @@
         </div>
         <div>
           <p class="text-lg font-bold font-lato">Status Pembelian</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseStatus }}</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">
+            <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
+              Menunggu Persetujuan
+            </template>
+            <template v-else-if="(userRole === 'Finance' || userRole === 'Direksi') && (purchase.purchaseStatus === 'Diproses'
+              || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
+              Menunggu Konfirmasi Pembayaran
+            </template>
+            <template v-else>
+              {{ purchase.purchaseStatus }}
+            </template>
+          </p>
         </div>
       </div>
 
