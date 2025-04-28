@@ -27,6 +27,7 @@ import AddDistributionView from '@/views/project/AddDistributionView.vue';
 import AddSalesView from '@/views/project/AddSalesView.vue';
 import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
 import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
+import DetailProject from '@/views/project/DetailProjectView.vue';
 
 
 const router = createRouter({
@@ -242,6 +243,12 @@ const router = createRouter({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/project/:id',
+      name: 'DetailProject',
+      component: DetailProject,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
     },
     {
       path: '/coming-soon',

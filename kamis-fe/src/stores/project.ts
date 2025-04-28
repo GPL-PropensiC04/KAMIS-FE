@@ -1,14 +1,13 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import type { 
-    ProjectInterface, 
-    ListProjectResponseInterface, 
     AddProjectRequestDTO, 
     DistributionFormData,
     SalesFormData,
     AssetUsageDTO,
     ResourceUsageDTO
 } from '@/interfaces/project/project.interface';
+import type { ProjectInterface, ListProjectResponseInterface } from '@/interfaces/project/project.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import { API_URLS } from '@/config/api.config';

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS, API_URLS } from '@/config/api.config';
-import type { AsetInterface } from '@/interfaces/asset/asset.interface';
+import type { AsetInterface, AsetListInterface } from '@/interfaces/asset/asset.interface';
 
 interface ApiResponse<T> {
   status: number;
@@ -13,8 +13,8 @@ export class AsetService {
   /**
    * Fetch all assets
    */
-  static async viewAllAsset(): Promise<AsetInterface[]> {
-    const response = await axios.get<ApiResponse<AsetInterface[]>>(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_ALL}`);
+  static async viewAllAsset(): Promise<AsetListInterface[]> {
+    const response = await axios.get<ApiResponse<AsetListInterface[]>>(`${API_URLS.ASSET}${API_ENDPOINTS.ASET.GET_ALL}`);
     return response.data.data;
   }
 

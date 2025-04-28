@@ -1,3 +1,5 @@
+import type { LogProjectInterface } from "./logproject.interface";
+
 export interface ProjectInterface {
   id: string;
   projectType: boolean; // Value false = Penjualan, Value true = Pengiriman
@@ -24,12 +26,8 @@ export interface ProjectInterface {
     sellPrice: number;
     resourceStockUsed: number;
   }>;
-  projectLogs?: Array<{
-    actionDate: string;
-    user: string;
-    action: string;
-  }>;
   data?: ProjectInterface; // For nested responses
+  projectLogs: LogProjectInterface[];
 }
 
 export interface ProjectResponseInterface {

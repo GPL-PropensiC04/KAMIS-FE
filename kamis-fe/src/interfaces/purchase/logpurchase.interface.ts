@@ -1,4 +1,4 @@
-export interface LogProjectInterface {
+export interface LogPurchaseInterface {
     id: string; // UUID string
     user: string;
     action: string;
