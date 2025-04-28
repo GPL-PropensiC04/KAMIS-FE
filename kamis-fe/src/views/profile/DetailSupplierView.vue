@@ -145,7 +145,7 @@
   
   // Navigate to Edit
   const goToEditSupplier = () => {
-    router.push(`/supplier/edit/${supplierId}`);
+    router.push(`/supplier/update/${supplierId}`);
   };
   
   // Items (List Barang = assets + resources)

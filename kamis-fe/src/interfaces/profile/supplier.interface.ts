@@ -21,6 +21,15 @@ export interface AddSupplierRequestInterface {
     resourceIds?: number[]; // Optional, boleh kosong
   }
 
+  export interface UpdateSupplierRequestInterface {
+    id: string; // UUID string
+    addressSupplier: string;
+    noTelpSupplier: string;
+    emailSupplier: string;
+    nameSupplier: string;
+    resourceIds?: number[]; // Optional
+  }
+
 export interface ResourceInterface {
     id: number;
     resourceName: string;

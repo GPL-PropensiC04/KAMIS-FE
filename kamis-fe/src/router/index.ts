@@ -61,6 +61,13 @@ const router = createRouter({
       props: true
     },
     {
+      path: '/supplier/update/:id',
+      name: 'supplier-update',
+      component: () => import('@/views/profile/UpdateSupplierView.vue'),
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: '/supplier' },
+      props: true
+    },
+    {
       path: '/client',
       name: 'client',
       component:ListClient,
