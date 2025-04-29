@@ -49,10 +49,6 @@ const handleSelectResource = (name: string) => {
 
 // Tambahkan barang ke tabel
 const addResource = () => {
-  if (selectedResourceId.value === null || selectedResourcePrice.value === null) {
-    toast.error("Pilih barang dan pastikan harga valid!");
-    return;
-  }
 
   const exists = resources.value.some((r) => r.id === selectedResourceId.value);
   if (exists) {
