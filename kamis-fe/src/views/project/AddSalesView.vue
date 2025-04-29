@@ -3,27 +3,16 @@
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Navigation header -->
     <div class="mb-4 flex justify-between items-center">
-      <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
-        <span>←</span>
-      </router-link>
+      
     </div>
     
-    <!-- Breadcrumb navigation -->
-    <!-- <div class="flex items-center text-[#1E3A5F] mb-6">
-      <router-link to="/" class="hover:underline">Home</router-link>
-      <span class="mx-2">></span>
-      <router-link to="/project" class="hover:underline">Distribusi & Penjualan</router-link>
-      <span class="mx-2">></span>
-      <span class="font-semibold">Mendaftarkan Penjualan</span>
-    </div> -->
-
     <!-- Main Form -->
     <div class="bg-white rounded-lg shadow-md p-6">
       <!-- Form header with back button and next button -->
       <div class="flex justify-between mb-6">
-        <button @click="goBack" class="flex items-center text-[#1E3A5F]">
-          <span class="text-2xl">←</span>
-        </button>
+        <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
+          <span>←</span>
+        </router-link>
         <button 
           @click="submitForm" 
           class="bg-[#2D6A4F] hover:bg-[#216043] text-white px-4 py-2 rounded-md"
@@ -439,10 +428,6 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
-// Navigation
-const goBack = () => {
-  router.back();
-};
 
 // Form submission
 const submitForm = async () => {
