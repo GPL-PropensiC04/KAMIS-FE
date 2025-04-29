@@ -134,8 +134,8 @@
                 <!-- Totals row with border-top -->
                 <tr class="border-t-2 border-gray-300 font-medium">
                   <td class="px-6 py-3">Total</td>
-                  <td class="px-6 py-3 text-right text-green-600 ">{{ formatCurrency(projectData.projectTotalPemasukkan) }} </td>
-                  <td class="px-6 py-3 text-right text-red-600">{{ formatCurrency(getTotalProductCost()) }}</td>
+                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
+                  <td class="px-6 py-3 text-right">{{ formatCurrency(getTotalProductCost()) }}</td>
                 </tr>
                 
                 <!-- Profit/Loss row with special styling -->
@@ -155,86 +155,58 @@
         </div>
     </div>
       <!-- Log Penjualan -->
-      <div v-if="projectData.projectLogs.length" class="mt-10">
-            <h2 class="text-lg font-bold font-lato mb-2">Log Distribusi</h2>
-            <hr class="border-t-1 border-black mb-4" />
-
-            <div class="flex flex-col space-y-6 relative">
-                <div 
-                    v-for="(log, index) in paginatedLogs" 
-                    :key="log.id" 
-                    class="relative flex items-start gap-3"
-                    :class="{
-                        'flex-row-reverse pr-6': log.user === currentUsername,
-                        'pl-6': log.user !== currentUsername
-                    }"
-                >
-                    <!-- Icon bulat -->
-                    <div class="w-3 h-3 bg-[#1E3A5F] rounded-full mt-1.5 flex-shrink-0"></div>
-
-                    <!-- Isi log -->
-                    <div class="flex flex-col max-w-[80%]">
-                        <p class="text-[#1E3A5F] font-semibold text-sm mb-1"
-                        :class="{
-                        'text-right': log.user === currentUsername,
-                        'text-left': log.user !== currentUsername
-                        }">
-                            {{ formatTime(log.actionDate) }} - {{ formatDate(log.actionDate) }}
-                        </p>
-                        <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
-                            <p>
-                                <strong>User</strong> : 
-                                {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
-                            </p>
-                            <p class="mt-1"><strong>Action</strong> :</p>
-                            <p>{{ log.action }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search + Pagination di bawah dan sejajar -->
-            <div class="flex flex-wrap justify-between items-center mt-6 gap-4">
-                <!-- Search Input -->
-                <input 
-                    v-model="searchLog" 
-                    placeholder="Cari log..." 
-                    class="w-full sm:w-[250px] px-3 py-1 border border-[#1E3A5F] rounded-md text-sm bg-[#F8FAFC]"
-                />
-
-                <!-- Pagination Controls -->
-                <div class="flex items-center gap-2">
-                    <button
-                        @click="currentPage--"
-                        :disabled="currentPage === 1"
-                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
-                    >
-                        ‹
-                    </button>
-
-                    <span class="text-sm font-semibold text-[#1E3A5F]">
-                        Halaman {{ currentPage }} dari {{ totalPages }}
-                    </span>
-
-                    <button
-                        @click="currentPage++"
-                        :disabled="currentPage === totalPages"
-                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
-                    >
-                        ›
-                    </button>
-                </div>
-            </div>
-            <!-- END -->
-               </div>
-    </template>
-
+<div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
+  <div class="bg-[#1E3A5F] p-4">
+    <h2 class="text-xl font-bold text-white">Log Penjualan</h2>
+  </div>
+  
+  <div class="p-4">
+    <!-- Timeline Component -->
+    <div class="relative">
+      <!-- Timeline vertical line -->
+      <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+      <!-- Timeline items -->
+      <div v-for="(log, index) in projectData.projectLogs" :key="index" 
+           class="relative pl-12 pb-8 flex flex-col">
+        <!-- Timeline dot -->
+        <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
+        
+        <!-- Timestamp -->
+        <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
+        
+        <!-- User info -->
+        <div class="mb-1 text-sm">
+          <span class="font-medium">User:</span> {{ log.user }}
+        </div>
+        
+        <!-- Action -->
+        <div class="bg-gray-50 rounded-md p-3 text-sm">
+          <span class="font-medium">Action:</span>
+          <p>{{ log.action }}</p>
+        </div>
+        <!-- If it's the last or first item, display the timestamp on the right -->
+        <div v-if="index === 0 || index === projectData.projectLogs.length - 1" 
+             class="absolute right-0 top-0 text-xs text-gray-500">
+          {{ formatDateTime(log.actionDate) }}
+        </div>
       </div>
-      
-
-      
-      
+    </div>
+  </div>
+</div>
     </template>
+  </div>
+  <VModal v-model="showPaymentModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Perubahan Status Pembayaran</h3>
+      <p class="mb-6 text-gray-600">{{ getPaymentModalMessage }}</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closePaymentModal" />
+        <VSuccessButton label="Ya" @click="updatePaymentStatus" />
+      </div>
+    </div>
+  </VModal>
+</template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
@@ -260,42 +232,12 @@ const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
 
-// Add a reactive ref for resource names
-const resourceNames = ref<Record<string, string>>({});
-
-// Get resource name function using real API data
-const getResourceName = (resourceId: string): string => {
-  return resourceNames.value[resourceId] || `Resource ${resourceId}`;
-};
-
-// Add function to fetch resource names
-const fetchResourceNames = async () => {
-  if (!projectData.value || !projectData.value.projectUseResource) return;
-  
-  try {
-    // Process each resource in the project
-    for (const resource of projectData.value.projectUseResource) {
-      if (!resource.resourceId) continue;
-      
-      // Skip if we already have this resource name
-      if (resourceNames.value[resource.resourceId]) continue;
-      
-      // Fetch resource details from API
-      const response = await axios.get(`${API_URLS.RESOURCE}/resource/${resource.resourceId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
-      
-      if (response.data && response.data.status === 200 && response.data.data) {
-        resourceNames.value[resource.resourceId] = response.data.data.resourceName || 
-                                                  response.data.data.name || 
-                                                  `Resource ${resource.resourceId}`;
-      }
-    }
-  } catch (err) {
-    console.error('Error fetching resource names:', err);
-  }
+// Mock resource names for demo
+const resourceNames: { [key: string]: string } = {
+  '1': 'Besi Bridgestone',
+  '2': 'Paku',
+  '3': 'Cakul',
+  '4': 'Ml ayam'
 };
 
 // Role-based permission computed properties
@@ -390,6 +332,12 @@ const formatStatus = (status: number): string => {
   }
 };
 
+// Get resource name
+const getResourceName = (resourceId: string): string => {
+  // Add an index signature type to make TypeScript happy
+  return resourceNames[resourceId] || `Resource ${resourceId}`;
+};
+
 // Define ProjectResource interface
 interface ProjectResource {
   resourceId: string;
@@ -452,9 +400,6 @@ const loadData = async () => {
       if (projectData.value.projectClientId) {
         await fetchClientName(projectData.value.projectClientId);
       }
-
-      // Fetch resource names
-      await fetchResourceNames();
     } else {
       error.value = 'Gagal memuat data proyek';
     }
@@ -472,29 +417,11 @@ const loadData = async () => {
   }
 };
 
-// Update fetchClientName function
+// Fetch client name
 const fetchClientName = async (clientId: string) => {
-  if (!clientId) {
-    clientName.value = '-';
-    return;
-  }
-  
   try {
-    // Make a real API call to fetch client data
-    const response = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    if (response.data && response.data.status === 200 && response.data.data) {
-      // Extract the client name from the response data
-      clientName.value = response.data.data.nameClient || response.data.data.clientName || '';
-      console.log('Fetched client name:', clientName.value);
-    } else {
-      console.error('Client data not found or invalid format');
-      clientName.value = `Client ${clientId.substring(0, 8)}`;
-    }
+    // In a real implementation, you'd make an API call to get the client name
+    // For this demo, we'll just set a placeholder
   } catch (err) {
     console.error('Error fetching client name:', err);
     clientName.value = 'Unknown Client';
@@ -533,53 +460,6 @@ const updateProject = async () => {
   }
 };
 
-/// 
-// Handle Log //
-///
-const userRole = computed(() => authStore.userRole)
-
-const searchLog = ref('');
-
-const currentUsername = computed(() => authStore.currentUsername);
-
-// Format Jam dari ISO (jam:menit)
-const formatTime = (iso: string): string => {
-    const date = new Date(iso);
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-};
-
-// Urutkan log terbaru ke terlama
-const sortedLogs = computed(() => {
-    console.log(projectData.value.projectLogs)
-    return [...(projectData.value?.projectLogs || [])].sort((a, b) =>
-        new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
-    );
-});
-
-const logsPerPage = 3;
-const currentPage = ref(1);
-
-const filteredLogs = computed(() => {
-    const search = searchLog.value.toLowerCase();
-    return sortedLogs.value.filter(log =>
-        log.action.toLowerCase().includes(search) || 
-        log.user.toLowerCase().includes(search)
-    );
-});
-
-const totalPages = computed(() => {
-    return Math.ceil(filteredLogs.value.length / logsPerPage);
-});
-
-const paginatedLogs = computed(() => {
-    const start = (currentPage.value - 1) * logsPerPage;
-    return filteredLogs.value.slice(start, start + logsPerPage);
-});
-
-/// 
-// End //
 onMounted(async () => {
   await loadData();
 });
