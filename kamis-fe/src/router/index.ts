@@ -64,7 +64,7 @@ const router = createRouter({
       path: '/supplier/update/:id',
       name: 'supplier-update',
       component: () => import('@/views/profile/UpdateSupplierView.vue'),
-      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: '/supplier' },
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: '/supplier/detail/:id' },
       props: true
     },
     {
@@ -89,7 +89,7 @@ const router = createRouter({
       path: '/client/update/:id',
       name: 'client-update',
       component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client' }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client/:id' }
     },
     {
       path: '/purchase',
@@ -146,14 +146,14 @@ const router = createRouter({
       name: 'purchase-updateResource',
       component: UpdatePurchaseResource,
       props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/resource/:id' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Pembelian Resource', parent: '/purchase/detail/resource/:id' }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'purchase-updateAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/asset/:id' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Pembelian Aset', parent: '/purchase/detail/asset/:id' }
     },
     {
       path: '/login',
@@ -192,7 +192,7 @@ const router = createRouter({
     },
     {
       path: '/assets',
-      name: 'assets-list',
+      name: 'assets',
       component: ListAsset,
       meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
@@ -218,53 +218,25 @@ const router = createRouter({
       path: '/project/add/distribution',
       name: 'add-distribution',
       component: AddDistributionView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Tambah Distribusi', 
-        parent: '/project' 
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Distribusi', parent: '/project' }
     },
     {
       path: '/project/add/distribution-summary',
       name: 'distribution-summary',
       component: DistributionSummaryView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Konfirmasi Distribusi', 
-        parent: '/project/add/distribution'
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
     },
     {
       path: '/project/add/sales',
       name: 'add-sales',
       component: AddSalesView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Tambah Penjualan', 
-        parent: '/project' 
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Penjualan', parent: '/project' }
     },
     {
       path: '/project/add/sales-summary',
       name: 'sales-summary',
       component: SalesSummaryView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Konfirmasi Penjualan', 
-        parent: '/project/add/sales'
-      }
-    },
-    {
-      path: '/project/:id',
-      name: 'DetailProject',
-      component: () => import('@/views/project/DetailProjectView.vue'),
-      meta: {
-        requiresAuth: true
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Penjualan', parent: '/project/add/sales' }
     },
     {
       path: '/project/:id',
