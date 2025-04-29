@@ -28,7 +28,8 @@ import AddSalesView from '@/views/project/AddSalesView.vue';
 import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
 import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
 import DetailProject from '@/views/project/DetailProjectView.vue';
-
+import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue';
+import UpdateSalesView from '@/views/project/UpdateSalesView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -239,16 +240,30 @@ const router = createRouter({
     {
       path: '/project/:id',
       name: 'DetailProject',
-      component: () => import('@/views/project/DetailProjectView.vue'),
-      meta: {
-        requiresAuth: true
+      component: DetailProject,
+      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
+    },
+    {
+      path: '/project/update/distribution/:id',
+      name: 'update-distribution',
+      component: UpdateDistributionView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Finance", "Direksi"], 
+        breadcrumb: 'Edit Distribusi', 
+        parent: '/project/:id' 
       }
     },
     {
-      path: '/project/:id',
-      name: 'DetailProject',
-      component: DetailProject,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
+      path: '/project/update/sales/:id',
+      name: 'update-sales',
+      component: UpdateSalesView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Finance", "Direksi"], 
+        breadcrumb: 'Edit Penjualan', 
+        parent: '/project/:id' 
+      }
     },
     {
       path: '/coming-soon',

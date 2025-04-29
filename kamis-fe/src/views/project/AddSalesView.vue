@@ -339,7 +339,7 @@ const fetchProducts = async () => {
     interface ResourceResponse {
       id: string;
       resourceName: string;
-      resourceSellPrice?: number;
+      resourcePrice?: number;
       resourceStock?: number;
     }
     
@@ -347,8 +347,8 @@ const fetchProducts = async () => {
     availableProducts.value = response.data.data.map((resource: ResourceResponse) => ({
       id: resource.id,
       name: resource.resourceName,
-      price: resource.resourceSellPrice || 9000000, // Default if not available
-      stock: resource.resourceStock || 10 // Default if not available
+      price: resource.resourcePrice, 
+      stock: resource.resourceStock 
     }));
   } catch (error) {
     console.error('Error fetching products:', error);

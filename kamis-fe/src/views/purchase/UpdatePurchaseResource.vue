@@ -137,7 +137,8 @@ const updateDraftPurchase = () => {
         purchaseSubmissionDate: '', 
         purchaseUpdateDate: '',
         purchaseResource: resourceList.value,
-        purchaseAsset: null
+        purchaseAsset: null,
+        purchaseLogs: [] // Add empty logs array to fix type error
     };
     
     purchaseStore.setDraftPurchase(draftData);

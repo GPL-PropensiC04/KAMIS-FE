@@ -8,14 +8,15 @@
       </router-link>
       
       <!-- Action buttons - only shown for Operasional role and distribution projects -->
-      <div v-if="canEditProject && projectData.projectType === true" class="flex gap-2">
+      <div v-if="canEditProject" class="flex gap-2">
+        <VSuccessButton 
+          label="Edit Proyek"
+          @click="goToUpdateProject"
+        />
         <VCancelButton 
+          v-if="projectData.projectType === true"
           label="Batal"
           @click="cancelProject" 
-        />
-        <VSuccessButton 
-          label="Update"
-          @click="updateProject"
         />
       </div>
     </div>
@@ -560,10 +561,14 @@ const cancelProject = () => {
   // You would typically show a confirmation modal and then call an API
 };
 
-const updateProject = () => {
-  // Implement update project functionality
-  console.log('Update project');
-  router.push(`/project/edit/${projectId}`);
+const goToUpdateProject = () => {
+  if (projectData.value.projectType === true) {
+    // Distribution project
+    router.push(`/project/update/distribution/${projectData.value.id}`);
+  } else {
+    // Sales project
+    router.push(`/project/update/sales/${projectData.value.id}`);
+  }
 };
 
 const editDistributionInfo = () => {

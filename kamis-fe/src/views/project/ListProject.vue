@@ -143,7 +143,7 @@ const formatStatus = (status: number) => {
     case 0: return 'Direncanakan';
     case 1: return 'Dilaksanakan';
     case 2: return 'Selesai';
-    case 3: return 'Telah Dibayar';
+    case 3: return 'Batal';
     default: return 'Unknown';
   }
 };

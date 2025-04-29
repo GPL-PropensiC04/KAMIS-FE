@@ -16,16 +16,8 @@ export interface ProjectInterface {
   projectPHLPay?: number;
   projectPickupAddress?: string;
   projectDeliveryAddress?: string;
-  projectUseAsset?: Array<{
-    id: string;
-    platNomor: string;
-    type?: string;
-  }>;
-  projectUseResource?: Array<{
-    resourceId: string;
-    sellPrice: number;
-    resourceStockUsed: number;
-  }>;
+  projectUseAsset?: Array<AssetUsageDTO>;
+  projectUseResource?: Array<ResourceUsageDTO>;
   data?: ProjectInterface; // For nested responses
   projectLogs: LogProjectInterface[];
 }
@@ -62,6 +54,7 @@ export interface AssetUsageDTO {
   platNomor: string;
   assetUseCost?: number;
   assetFuelCost?: number;
+  tipeAset: string;
 }
 
 export interface ResourceUsageDTO {
@@ -100,12 +93,7 @@ export interface DistributionFormData {
   projectDeliveryAddress: string;
   projectTotalPemasukkan: number;
   projectTotalPengeluaran: number;
-  projectUseAsset: Array<{ 
-    id: string, 
-    platNomor: string,
-    assetUseCost?: number,
-    assetFuelCost?: number
-  }>;
+  projectUseAsset: Array<AssetUsageDTO>;
 }
 
 // Interface for sales project form
@@ -117,9 +105,24 @@ export interface SalesFormData {
   projectEndDate?: string;
   projectDeliveryAddress: string;
   projectTotalPemasukkan: number;
-  projectUseResource: Array<{ 
-    resourceId: string,
-    resourceStockUsed: number,
-    sellPrice: number
-  }>;
+  projectUseResource: Array<ResourceUsageDTO>;
+}
+
+// Interface for updating project forms
+export interface UpdateProjectFormData {
+  id: string;
+  projectName: string;
+  projectClientId: string;
+  projectType: boolean;
+  projectStatus: number; // 0: Direncanakan, 1: Dilaksanakan, 2: Selesai, 3: Telah Dibayar
+  projectStartDate: string;
+  projectEndDate?: string;
+  projectPHLCount?: number;
+  projectPHLPay?: number;
+  projectPickupAddress?: string;
+  projectDeliveryAddress: string;
+  projectTotalPemasukkan: number;
+  projectTotalPengeluaran?: number;
+  projectUseAsset?: Array<AssetUsageDTO>;
+  projectUseResource?: Array<ResourceUsageDTO>;
 }
