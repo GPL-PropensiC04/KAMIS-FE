@@ -27,7 +27,8 @@ import AddDistributionView from '@/views/project/AddDistributionView.vue';
 import AddSalesView from '@/views/project/AddSalesView.vue';
 import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
 import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
-import DetailProject from '@/views/project/DetailProjectView.vue';
+import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue';
+import UpdateSalesView from '@/views/project/UpdateSalesView.vue';
 import ListSupplierView from '@/views/profile/ListSupplierView.vue';
 import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 
@@ -268,6 +269,28 @@ const router = createRouter({
       component: () => import('@/views/project/ProjectDetailRedirect.vue'),
       meta: {
         requiresAuth: true
+      }
+    },
+    {
+      path: '/project/update/distribution/:id',
+      name: 'update-distribution',
+      component: UpdateDistributionView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Finance", "Direksi"], 
+        breadcrumb: 'Edit Distribusi', 
+        parent: '/project/:id' 
+      }
+    },
+    {
+      path: '/project/update/sales/:id',
+      name: 'update-sales',
+      component: UpdateSalesView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Finance", "Direksi"], 
+        breadcrumb: 'Edit Penjualan', 
+        parent: '/project/:id' 
       }
     },
     {

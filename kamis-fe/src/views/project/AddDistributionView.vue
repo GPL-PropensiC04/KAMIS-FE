@@ -287,7 +287,7 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
-import type { DistributionFormData } from '@/interfaces/project/project.interface';
+import type { DistributionFormData, AssetUsageDTO } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
 // Router & Toast
@@ -307,7 +307,7 @@ const formData = ref<DistributionFormData>({
   projectDeliveryAddress: '',
   projectTotalPemasukkan: 0,
   projectTotalPengeluaran: 0,
-  projectUseAsset: [] as Array<{ id: string, platNomor: string }>
+  projectUseAsset: [] as Array<AssetUsageDTO>
 });
 
 // Client data
@@ -392,15 +392,15 @@ const fetchAssets = async () => {
     // Map the backend response to our Asset interface format
     interface AssetResponse {
       platNomor: string;
+      tipeAset: string;
       nama: string;
-      jenisAset: string;
       status: string;
       nilaiPerolehan: number;
     }
     
     assets.value = response.data.data.map((asset: AssetResponse) => ({
       id: asset.platNomor, // Using platNomor as ID
-      assetType: asset.jenisAset,
+      assetType: asset.tipeAset,
       assetName: asset.nama,
       assetUsageCost: 0, // Default value as it's not provided by API
       platNomor: asset.platNomor
@@ -492,7 +492,8 @@ const updateFormData = () => {
     id: asset.id,
     platNomor: asset.platNomor || asset.name,
     assetUseCost: asset.usageCost || 0,
-    assetFuelCost: asset.fuelCost || 0
+    assetFuelCost: asset.fuelCost || 0,
+    tipeAset: asset.type
   }));
   
   // Store form data in localStorage for summary page

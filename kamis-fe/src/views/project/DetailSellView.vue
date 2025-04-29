@@ -14,7 +14,7 @@
         
         <!-- Project Action Buttons for Sales -->
         <template v-if="canEditProject">
-          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="cancelProject" />
+          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
           <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
         </template>
       </div>
@@ -39,8 +39,14 @@
       <div class="space-y-6">
         <!-- Header -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
+          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
+            <!-- Edit button for Operasional role -->
+            <VSuccessButton
+              v-if="canEditProject && projectData.projectStatus < 2"
+              label="Ubah"
+              @click="editSalesInfo"
+            />
           </div>
 
           <!-- Basic Info -->
@@ -68,6 +74,10 @@
             <div>
               <p class="text-gray-600 text-sm">Tanggal Selesai</p>
               <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
+            </div>
+            <div>
+              <p class="text-gray-600 text-sm">Status Pembayaran</p>
+              <p class="font-semibold">{{ formatPaymentStatus(projectData.projectPaymentStatus) }}</p>
             </div>
           </div>
         </div>
@@ -235,13 +245,41 @@
             <!-- END -->
                </div>
     </template>
-
       </div>
+      <VModal v-model="showPaymentModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Perubahan Status Pembayaran</h3>
+      <p class="mb-6 text-gray-600">{{ getPaymentModalMessage }}</p>
       
-
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closePaymentModal" />
+        <VSuccessButton label="Ya" @click="updatePaymentStatus" />
+      </div>
+    </div>
+  </VModal>
+  <VModal v-model="showStatusModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Update Status</h3>
+      <p class="mb-6 text-gray-600">{{ getStatusModalMessage }}</p>
       
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeStatusModal" />
+        <VSuccessButton label="Ya" @click="confirmStatusUpdate" />
+      </div>
+    </div>
+  </VModal>
+  <VModal v-model="showCancelModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Pembatalan Proyek</h3>
+      <p class="mb-6 text-gray-600">Apakah Anda yakin ingin membatalkan proyek ini?</p>
       
-    </template>
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeCancelModal" />
+        <VSuccessButton label="Ya" @click="confirmCancelProject" />
+      </div>
+    </div>
+  </VModal> 
+  </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
@@ -266,6 +304,27 @@ const projectData = ref<any>({});
 const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
+const showStatusModal = ref(false);
+const showCancelModal = ref(false);
+const newStatusToUpdate = ref<number | null>(null);
+
+// Add these methods
+const openCancelModal = () => {
+  showCancelModal.value = true;
+};
+
+const closeCancelModal = () => {
+  showCancelModal.value = false;
+};
+
+const confirmCancelProject = async () => {
+  await cancelProject();
+};
+
+const getStatusModalMessage = computed(() => {
+  const nextStatus = formatStatus(newStatusToUpdate.value || 0);
+  return `Apakah Anda yakin ingin mengubah status proyek menjadi "${nextStatus}"?`;
+});
 
 // Add a reactive ref for resource names
 const resourceNames = ref<Record<string, string>>({});
@@ -378,6 +437,23 @@ const closePaymentModal = () => {
   showPaymentModal.value = false;
 };
 
+const closeStatusModal = () => {
+  showStatusModal.value = false;
+  newStatusToUpdate.value = null;
+};
+
+const confirmStatusUpdate = async () => {
+  try {
+    if (newStatusToUpdate.value === null) return;
+    
+    await projectStore.updateProjectStatus(projectData.value.id, newStatusToUpdate.value);
+    await loadData(); // Refresh data after update
+    closeStatusModal();
+  } catch (error) {
+    console.error('Failed to update project status:', error);
+  }
+};
+
 const updatePaymentStatus = async () => {
   try {
     const newStatus = projectData.value.projectPaymentStatus === 0 ? 1 : 2;
@@ -425,6 +501,15 @@ const formatStatus = (status: number): string => {
     case 1: return 'Dalam Pengiriman';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
+    default: return 'Unknown';
+  }
+};
+
+const formatPaymentStatus = (paymentStatus: number): string => {
+  switch (paymentStatus) {
+    case 0: return 'Belum bayar';
+    case 1: return 'Sudah bayar';
+    case 2: return 'Dikembalikan';
     default: return 'Unknown';
   }
 };
@@ -568,6 +653,7 @@ const cancelProject = async () => {
   try {
     await projectStore.updateProjectStatus(projectData.value.id, 3); // 3 is cancelled status
     await loadData(); // Refresh data after cancellation
+    closeCancelModal();
   } catch (error) {
     console.error('Failed to cancel project:', error);
   }
@@ -577,19 +663,16 @@ const updateProject = async () => {
   try {
     // Get current status
     const currentStatus = projectData.value.projectStatus;
-    let newStatus;
 
     // Sequential status update logic
     if (currentStatus === 0) { // Diajukan -> Kirim
-      newStatus = 1;
+      newStatusToUpdate.value = 1;
     } else if (currentStatus === 1) { // Kirim -> Selesai
-      newStatus = 2;
+      newStatusToUpdate.value = 2;
     } else {
       return;
     }
-
-    await projectStore.updateProjectStatus(projectData.value.id, newStatus);
-    await loadData(); // Refresh data after update
+    showStatusModal.value = true;
   } catch (error) {
     console.error('Failed to update project status:', error);
   }
@@ -645,4 +728,9 @@ const paginatedLogs = computed(() => {
 onMounted(async () => {
   await loadData();
 });
+
+const editSalesInfo = () => {
+  // Navigate to the update sales view
+  router.push(`/project/update/sales/${projectData.value.id}`);
+};
 </script>
