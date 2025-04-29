@@ -133,7 +133,7 @@
             <!-- Only show table header when there is maintenance data -->
             <thead v-if="maintenanceHistory.length > 0" class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Pengajuan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Dibuat</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Deskripsi Pekerjaan</th>
                 <th v-if="canViewFinancialInfo" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Biaya</th>
