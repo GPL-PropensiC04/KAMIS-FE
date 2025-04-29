@@ -236,13 +236,39 @@ const router = createRouter({
       path: '/project/add/sales-summary',
       name: 'sales-summary',
       component: SalesSummaryView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Penjualan', parent: '/project/add/sales' }
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Penjualan', 
+        parent: '/project/add/sales'
+      }
     },
+    // Distribution detail route
+    {
+      path: '/project/distribution/:id',
+      name: 'DetailDistribution',
+      component: () => import('@/views/project/DetailDistributionView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    // Sales detail route
+    {
+      path: '/project/sale/:id',
+      name: 'DetailSale',
+      component: () => import('@/views/project/DetailSellView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    // Keep this route for backward compatibility, it'll redirect based on project type
     {
       path: '/project/:id',
       name: 'DetailProject',
-      component: DetailProject,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
+      component: () => import('@/views/project/ProjectDetailRedirect.vue'),
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/coming-soon',
