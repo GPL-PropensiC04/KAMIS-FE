@@ -353,14 +353,7 @@ const fetchProducts = async () => {
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
-    
-    // Dummy data for testing
-    availableProducts.value = [
-      { id: '1', name: 'Ini Cangklu', price: 9000000, stock: 10 },
-      { id: '2', name: 'Ini Karuyu', price: 9000000, stock: 15 },
-      { id: '3', name: 'Ini Sekpo', price: 9000000, stock: 20 },
-      { id: '4', name: 'Ini gergaji', price: 9000000, stock: 8 }
-    ];
+
   }
 };
 

@@ -39,8 +39,14 @@
       <div class="space-y-6">
         <!-- Header -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
+          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
+            <!-- Edit button for Operasional role -->
+            <VSuccessButton
+              v-if="canEditProject && projectData.projectStatus < 2"
+              label="Ubah"
+              @click="editSalesInfo"
+            />
           </div>
 
           <!-- Basic Info -->
@@ -722,4 +728,9 @@ const paginatedLogs = computed(() => {
 onMounted(async () => {
   await loadData();
 });
+
+const editSalesInfo = () => {
+  // Navigate to the update sales view
+  router.push(`/project/update/sales/${projectData.value.id}`);
+};
 </script>
