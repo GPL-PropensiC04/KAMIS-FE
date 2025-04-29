@@ -163,7 +163,7 @@
     </div>
       <!-- Log Penjualan -->
       <div v-if="projectData.projectLogs.length" class="mt-10">
-            <h2 class="text-lg font-bold font-lato mb-2">Log Distribusi</h2>
+            <h2 class="text-lg font-bold font-lato mb-2">Log Penjualan</h2>
             <hr class="border-t-1 border-black mb-4" />
 
             <div class="flex flex-col space-y-6 relative">
