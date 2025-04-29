@@ -126,3 +126,13 @@ export interface UpdateProjectFormData {
   projectUseAsset?: Array<AssetUsageDTO>;
   projectUseResource?: Array<ResourceUsageDTO>;
 }
+
+export interface UpdateProjectStatusInterface {
+  idProject: string;
+  projectStatus: number;
+}
+
+export interface UpdateProjectPaymentStatusInterface {
+  idProject: string;
+  projectPaymentStatus: number;
+}

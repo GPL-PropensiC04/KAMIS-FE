@@ -27,9 +27,11 @@ import AddDistributionView from '@/views/project/AddDistributionView.vue';
 import AddSalesView from '@/views/project/AddSalesView.vue';
 import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
 import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
-import DetailProject from '@/views/project/DetailProjectView.vue';
 import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue';
 import UpdateSalesView from '@/views/project/UpdateSalesView.vue';
+import ListSupplierView from '@/views/profile/ListSupplierView.vue';
+import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,7 +46,27 @@ const router = createRouter({
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
+    },
+    {
+      path: '/supplier',
+      name: 'supplier',
+      component: ListSupplierView,
+      meta: { requiresAuth: true, breadcrumb: 'List Supplier' }
+    },    
+    {
+      path: '/supplier/detail/:id',
+      name: 'supplier-detail',
+      component: DetailSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      props: true
+    },
+    {
+      path: '/supplier/update/:id',
+      name: 'supplier-update',
+      component: () => import('@/views/profile/UpdateSupplierView.vue'),
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: '/supplier/detail/:id' },
+      props: true
     },
     {
       path: '/client',
@@ -68,7 +90,7 @@ const router = createRouter({
       path: '/client/update/:id',
       name: 'client-update',
       component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client' }
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client/:id' }
     },
     {
       path: '/purchase',
@@ -125,14 +147,14 @@ const router = createRouter({
       name: 'purchase-updateResource',
       component: UpdatePurchaseResource,
       props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/resource/:id' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Pembelian Resource', parent: '/purchase/detail/resource/:id' }
     },
     {
       path: '/purchase/update-asset/:purchaseId',
       name: 'purchase-updateAsset',
       component: UpdatePurchaseAsset,
       props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/asset/:id' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Pembelian Aset', parent: '/purchase/detail/asset/:id' }
     },
     {
       path: '/login',
@@ -171,7 +193,7 @@ const router = createRouter({
     },
     {
       path: '/assets',
-      name: 'assets-list',
+      name: 'assets',
       component: ListAsset,
       meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
@@ -197,34 +219,19 @@ const router = createRouter({
       path: '/project/add/distribution',
       name: 'add-distribution',
       component: AddDistributionView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Tambah Distribusi', 
-        parent: '/project' 
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Distribusi', parent: '/project' }
     },
     {
       path: '/project/add/distribution-summary',
       name: 'distribution-summary',
       component: DistributionSummaryView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Konfirmasi Distribusi', 
-        parent: '/project/add/distribution'
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
     },
     {
       path: '/project/add/sales',
       name: 'add-sales',
       component: AddSalesView,
-      meta: { 
-        requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
-        breadcrumb: 'Tambah Penjualan', 
-        parent: '/project' 
-      }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Penjualan', parent: '/project' }
     },
     {
       path: '/project/add/sales-summary',
@@ -237,11 +244,32 @@ const router = createRouter({
         parent: '/project/add/sales'
       }
     },
+    // Distribution detail route
+    {
+      path: '/project/distribution/:id',
+      name: 'DetailDistribution',
+      component: () => import('@/views/project/DetailDistributionView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    // Sales detail route
+    {
+      path: '/project/sale/:id',
+      name: 'DetailSale',
+      component: () => import('@/views/project/DetailSellView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    // Keep this route for backward compatibility, it'll redirect based on project type
     {
       path: '/project/:id',
       name: 'DetailProject',
-      component: DetailProject,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
+      component: () => import('@/views/project/ProjectDetailRedirect.vue'),
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/project/update/distribution/:id',

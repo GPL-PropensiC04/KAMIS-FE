@@ -7,7 +7,9 @@ import type {
     AssetUsageDTO,
     ResourceUsageDTO,
     ProjectInterface,
-    ListProjectResponseInterface
+    ListProjectResponseInterface,
+    UpdateProjectStatusInterface,
+    UpdateProjectPaymentStatusInterface
 } from '@/interfaces/project/project.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
@@ -94,7 +96,7 @@ export const useProjectStore = defineStore('project', {
             this.loading = true;
             this.error = null;
             try {
-                const response = await axios.put<CommonResponseInterface<ProjectInterface>>(
+                const response = await axios.put<CommonResponseInterface<UpdateProjectStatusInterface>>(
                     `${API_URLS.PROJECT}/project/update-status/${id}`,
                     { projectStatus },
                     {
@@ -110,7 +112,7 @@ export const useProjectStore = defineStore('project', {
                     // Update project in state
                     const index = this.projects.findIndex(proj => proj.id === id);
                     if (index !== -1) {
-                        this.projects[index] = updated;
+                        this.projects[index] = { ...this.projects[index], ...updated };
                     }
                     useToast().success('Status proyek berhasil diperbarui!');
                     return updated;
@@ -239,7 +241,46 @@ export const useProjectStore = defineStore('project', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+        
+        async updateProjectPayment(id: string, projectPaymentStatus: number) {
+            this.loading = true;
+            this.error = null;
+            
+            try {
+              const response = await axios.put<CommonResponseInterface<UpdateProjectPaymentStatusInterface>>(
+                `${API_URLS.PROJECT}/project/update-payment/${id}`,
+                { projectPaymentStatus },
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                  }
+                }
+              );
+          
+              if (response.data.status === 200) {
+                const updated = response.data.data;
+                // Update project in state if it exists
+                const index = this.projects.findIndex(proj => proj.id === id);
+                if (index !== -1) {
+                    this.projects[index] = { ...this.projects[index], ...updated };
+                }
+                useToast().success('Status pembayaran berhasil diperbarui!');
+                return updated;
+              }
+            } catch (error: unknown) {
+              const err = error as Error | { response?: { data?: { message?: string } } };
+              this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat update status pembayaran';
+              const errorMessage = 'response' in err && err.response?.data?.message 
+                ? err.response.data.message 
+                : 'Terjadi kesalahan saat update status pembayaran';
+              useToast().error(errorMessage);
+              throw error;
+            } finally {
+              this.loading = false;
+            }
+          },
     },
     getters: {
         getProjectById: (state) => (id: string) => {
