@@ -412,9 +412,9 @@ const totalAssetFuelCost = computed(() => {
 });
 
 // Calculate total vehicle costs (usage + fuel)
-const totalVehicleCosts = computed(() => {
-  return totalAssetUseCost.value + totalAssetFuelCost.value;
-});
+// const totalVehicleCosts = computed(() => {
+//   return totalAssetUseCost.value + totalAssetFuelCost.value;
+// });
 
 const openPaymentModal = () => {
   showPaymentModal.value = true;
@@ -451,12 +451,12 @@ const formatDate = (dateString: string): string => {
 };
 
 // Format date with time
-const formatDateTime = (dateString: string): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-         ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
+// const formatDateTime = (dateString: string): string => {
+//   if (!dateString) return '-';
+//   const date = new Date(dateString);
+//   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
+//          ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+// };
 
 // Format currency function
 const formatCurrency = (value: number): string => {
@@ -667,15 +667,13 @@ const confirmStatusUpdate = async () => {
 };
 
 const editDistributionInfo = () => {
-  // Implement edit distribution info functionality
-  console.log('Edit distribution info');
-  // This could open a modal or navigate to an edit page
+  // Navigate to the update distribution view
+  router.push(`/project/update/distribution/${projectData.value.id}`);
 };
 
 const editAssets = () => {
-  // Implement edit assets functionality
-  console.log('Edit assets');
-  // This could open a modal or navigate to an assets edit page
+  // Navigate to the update distribution view (same page since assets are edited there too)
+  router.push(`/project/update/distribution/${projectData.value.id}`);
 };
 
 /// 

@@ -151,13 +151,23 @@ const formatCurrency = (value: number) => {
 };
 
 // Status formatter
-const formatStatus = (status: number) => {
-  switch (status) {
-    case 0: return 'Direncanakan';
-    case 1: return 'Dilaksanakan';
-    case 2: return 'Selesai';
-    case 3: return 'Telah Dibayar';
-    default: return 'Unknown';
+const formatStatus = (status: number, projectType: boolean) => {
+  if (projectType) {
+    switch (status) {
+      case 0: return 'Diajukan';
+      case 1: return 'Dalam Pengiriman';
+      case 2: return 'Selesai';
+      case 3: return 'Dibatalkan';
+      default: return 'Unknown';
+    }
+  } else {
+    switch (status) {
+      case 0: return 'Diajukan';
+      case 1: return 'Sedang Dikerjakan';
+      case 2: return 'Selesai';
+      case 3: return 'Dibatalkan';
+      default: return 'Unknown';
+    }
   }
 };
 
@@ -310,7 +320,7 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
                   <td class="text-center">{{ project.id }}</td>
                   <td class="text-center">{{ project.projectName }}</td>
                   <td class="text-center">{{ formatType(project.projectType) }}</td>
-                  <td class="text-center">{{ formatStatus(project.projectStatus) }}</td>
+                  <td class="text-center">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
                   <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
                   <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
                   <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
