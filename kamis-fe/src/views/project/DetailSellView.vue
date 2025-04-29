@@ -15,7 +15,7 @@
         <!-- Project Action Buttons for Sales -->
         <template v-if="canEditProject">
           <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
+          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update Status" @click="updateProject"/>
         </template>
       </div>
     </div>
@@ -178,7 +178,7 @@
 
             <div class="flex flex-col space-y-6 relative">
                 <div 
-                    v-for="(log, index) in paginatedLogs" 
+                    v-for="(log) in paginatedLogs" 
                     :key="log.id" 
                     class="relative flex items-start gap-3"
                     :class="{
@@ -480,14 +480,6 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-// Format date with time
-const formatDateTime = (dateString: string): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-         ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
-
 // Format currency function
 const formatCurrency = (value: number): string => {
   if (value === undefined || value === null) return 'Rp 0';
@@ -531,10 +523,6 @@ const getTotalProductCost = (): number => {
   }, 0);
 };
 
-// Calculate net profit
-const getNetProfit = (): number => {
-  return projectData.value.projectTotalPemasukkan || 0;
-};
 
 // Calculate total profit
 const getProfit = (): number => {
@@ -557,7 +545,7 @@ const loadData = async () => {
       
       // Check if any resources are missing names
       const missingNames = projectData.value.projectUseResource.filter(
-        (r: any) => !resourceNames.value[r.resourceId]
+        (r: ProjectResource) => !resourceNames.value[r.resourceId]
       );
       
       if (missingNames.length > 0 && retryCount < maxRetries) {
