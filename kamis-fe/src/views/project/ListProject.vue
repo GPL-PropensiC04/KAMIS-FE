@@ -12,6 +12,19 @@ import VButton from "@/components/VButton.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 
+// Add this interface above your component's setup function
+interface Project {
+  id: string;
+  projectId?: string; // Using optional in case both exist
+  projectName: string;
+  projectType: boolean;
+  projectStatus: number;
+  projectStartDate?: string;
+  projectEndDate?: string;
+  projectTotalPemasukkan?: number;
+  projectTotalPengeluaran?: number;
+}
+
 // Store & Router
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
@@ -172,7 +185,13 @@ const hasActiveFilters = computed(() => {
 });
 
 // Navigations
-const goToProjectDetails = (id: string) => router.push(`/project/${id}`);
+const goToProjectDetails = (project: Project) => {
+  if (project.projectType === true) {
+    router.push(`/project/distribution/${project.id}`);
+  } else {
+    router.push(`/project/sale/${project.id}`);
+  }
+};
 const goToAddProject = () => {
   showModal.value = true;
 };
@@ -286,7 +305,7 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
                   class="hover:bg-gray-50 hover:cursor-pointer"
                   v-for="project in projectStore.projects" 
                   :key="project.id" 
-                  @click="goToProjectDetails(project.id)"
+                  @click="goToProjectDetails(project)"
                 >
                   <td class="text-center">{{ project.id }}</td>
                   <td class="text-center">{{ project.projectName }}</td>
