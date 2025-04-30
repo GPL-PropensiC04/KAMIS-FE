@@ -299,8 +299,8 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
-const project = ref<unknown>({});
-const projectData = ref<unknown>({});
+const project = ref<any>({});
+const projectData = ref<any>({});
 const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
