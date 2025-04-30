@@ -141,7 +141,7 @@ const formatCurrency = (value: number) => {
 const formatStatus = (status: number, projectType: boolean) => {
   if (projectType) {
     switch (status) {
-      case 0: return 'Diajukan';
+      case 0: return 'Direncanakan';
       case 1: return 'Dalam Pengiriman';
       case 2: return 'Selesai';
       case 3: return 'Dibatalkan';
@@ -149,7 +149,7 @@ const formatStatus = (status: number, projectType: boolean) => {
     }
   } else {
     switch (status) {
-      case 0: return 'Diajukan';
+      case 0: return 'Direncanakan';
       case 1: return 'Sedang Dikerjakan';
       case 2: return 'Selesai';
       case 3: return 'Dibatalkan';
@@ -306,9 +306,18 @@ const closeModal = () => {
                   <td class="text-center">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
                   <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
                   <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPengeluaran) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right font-bold">
+                  <td v-if="canViewFinancialInfo" class="text-right text-green-600">
+                    {{ formatCurrency(project.projectTotalPemasukkan) }}
+                  </td>
+                  <td v-if="canViewFinancialInfo" class="text-right text-red-600">
+                    {{ formatCurrency(project.projectTotalPengeluaran) }}
+                  </td>
+                  <td v-if="canViewFinancialInfo" 
+                      :class="{
+                        'text-right font-bold': true,
+                        'text-green-600': (project.projectTotalPemasukkan - project.projectTotalPengeluaran) >= 0,
+                        'text-red-600': (project.projectTotalPemasukkan - project.projectTotalPengeluaran) < 0
+                      }">
                     {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
                   </td>
                 </tr>
