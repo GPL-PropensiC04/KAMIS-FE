@@ -80,8 +80,8 @@
           <!-- Tanggal Aktivitas -->
           <div>
             <label class="block text-gray-700 mb-2 font-medium">Tanggal Aktivitas</label>
-            <div class="flex space-x-2">
-              <div class="w-1/2">
+            
+              <div class="w-full">
                 <div class="relative">
                   <input 
                     v-model="formData.projectStartDate"
@@ -93,19 +93,7 @@
                   </div>
                 </div>
               </div>
-              <div class="w-1/2">
-                <div class="relative">
-                  <input 
-                    v-model="formData.projectEndDate"
-                    type="date" 
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-5 h-5 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M10 14a4 4 0 100-8 4 4 0 000 8zm0 1A5 5 0 1110 5a5 5 0 010 10z"></path></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -142,7 +130,7 @@
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
               >
                 <option value="" disabled>Pilih Jumlah</option>
-                <option v-for="num in 10" :key="num" :value="num">{{ num }}</option>
+                <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg class="w-4 h-4 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3"></path></svg>
@@ -451,6 +439,13 @@ const submitForm = async () => {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
+  formData.value.projectEndDate = formData.value.projectStartDate;
+  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
+    console.log(formData.value.projectEndDate, formData.value.projectStartDate);
+    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
+    return;
+  }
+
   
   // Update form data before submitting
   updateFormData();

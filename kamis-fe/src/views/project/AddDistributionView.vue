@@ -489,7 +489,7 @@ const updateFormData = () => {
   formData.value.projectUseAsset = assetList.value.map(asset => ({
     id: asset.id,
     platNomor: asset.platNomor || asset.name,
-    assetUseCost: asset.usageCost || 0,
+    assetUseCost: asset.shippingCost || 0,
     assetFuelCost: asset.fuelCost || 0,
     tipeAset: asset.type
   }));
