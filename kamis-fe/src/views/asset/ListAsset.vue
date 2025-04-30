@@ -132,8 +132,8 @@ const fetchAssets = async () => {
       tanggalPerolehan: item.tanggalPerolehan ?? '',
       deskripsi: item.deskripsi ?? '',
       assetMaintenance: item.assetMaintenance ?? '',
-      supplierId: item.supplierId ?? '', // Ensure supplierId exists
-      lastMaintenance: item.lastMaintenance ?? '', // Ensure lastMaintenance exists
+      supplierId: item.supplierId ?? '', 
+      lastMaintenance: item.lastMaintenance ?? '',
     }));
   } catch (err) {
     console.error('Error fetching assets:', err);
