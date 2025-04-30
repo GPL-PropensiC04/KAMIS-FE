@@ -16,8 +16,9 @@
       </router-link>
     </div>
 
-    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
-      <p>Memuat data...</p>
+    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 flex flex-col items-center justify-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F] mb-4"></div>
+      <p class="text-[#1E3A5F] font-medium">Memuat data aset...</p>
     </div>
 
     <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
@@ -38,7 +39,9 @@
           alt="Gambar Aset" 
           class="rounded-md shadow-md w-full max-w-md h-auto object-cover"
           @error="handleImageError"
+          @load="imageLoading = false"
         />
+        <div v-if="imageLoading" class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F]"></div>
       </div>
 
       <!-- Asset Info Card -->
@@ -124,38 +127,51 @@
           />
         </div>
         
-        
+        <!-- Maintenance History Table -->
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <!-- Only show table header when there is maintenance data -->
+            <thead v-if="maintenanceHistory.length > 0" class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Pengajuan</th>
+                <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Dibuat</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Tanggal Selesai</th>
                 <th class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Deskripsi Pekerjaan</th>
                 <th v-if="canViewFinancialInfo" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Biaya</th>
-                <th v-if="canEditAsset" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider">Aksi</th>
+                <th v-if="canEditAsset" class="px-6 py-3 text-left text-sm font-xl text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="item in sortedMaintenanceHistory" :key="item.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalMulaiMaintenance) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ item.tanggalSelesaiMaintenance ? formatDate(item.tanggalSelesaiMaintenance) : '-' }}</td>
-                <td class="px-6 py-4">{{ item.deskripsiPekerjaan }}</td>
-                <td v-if="canViewFinancialInfo" class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(item.biaya) }}</td>
-                <td v-if="canEditAsset" class="px-6 py-4 whitespace-nowrap">
-                  <VSuccessButton
-                    v-if="item.tanggalSelesaiMaintenance === null"
-                    label="Selesai"
-                    @click="completeMaintenance(item.id)"
-                  />
-                  <span v-else>
-                    {{ calculateMaintenanceDuration(item.tanggalMulaiMaintenance, item.tanggalSelesaiMaintenance) }} hari
-                  </span>
+              <!-- Show loading state when maintenance is loading -->
+              <tr v-if="maintenanceLoading">
+                <td colspan="5" class="px-6 py-8 text-center">
+                  <div class="flex flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F] mb-2"></div>
+                    <p class="text-gray-500">Memuat data maintenance...</p>
+                  </div>
                 </td>
               </tr>
-              <tr v-if="maintenanceHistory.length === 0">
-                <td :colspan="getColspanUpdated()" class="px-6 py-4 text-center text-gray-500">Tidak ada data maintenance</td>
-              </tr>
+              <!-- Show maintenance data when loaded -->
+              <template v-else>
+                <tr v-for="item in sortedMaintenanceHistory" :key="item.id">
+                  <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(item.tanggalMulaiMaintenance) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ item.tanggalSelesaiMaintenance ? formatDate(item.tanggalSelesaiMaintenance) : '-' }}</td>
+                  <td class="px-6 py-4">{{ item.deskripsiPekerjaan }}</td>
+                  <td v-if="canViewFinancialInfo" class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(item.biaya) }}</td>
+                  <td v-if="canEditAsset" class="px-6 py-4 whitespace-nowrap">
+                    <VSuccessButton
+                      v-if="item.tanggalSelesaiMaintenance === null"
+                      label="Selesai"
+                      @click="completeMaintenance(item.id)"
+                    />
+                    <span v-else>
+                      {{ calculateMaintenanceDuration(item.tanggalMulaiMaintenance, item.tanggalSelesaiMaintenance) }} hari
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="maintenanceHistory.length === 0">
+                  <td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data maintenance</td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
@@ -230,6 +246,7 @@ const maintenanceHistory = ref<any[]>([]);
 const isLoading = ref(true);
 const error = ref('');
 const assetImage = ref('');
+const imageLoading = ref(true);
 
 // Modal states
 const showDeleteModal = ref(false);
@@ -372,6 +389,7 @@ const fetchMaintenanceHistory = async () => {
 // Submit new maintenance
 const submitMaintenance = async () => {
   maintenanceError.value = '';
+  const loadingToastId = toast.info('Menambah maintenance...', { timeout: false });
   
   try {
     newMaintenance.value.platNomor = platNomor;
@@ -384,6 +402,7 @@ const submitMaintenance = async () => {
     });
     
     if (response.data && response.data.status === 201) {
+      toast.dismiss(loadingToastId);
       toast.success('Maintenance berhasil ditambah');
       showMaintenanceModal.value = false;
       
@@ -401,6 +420,7 @@ const submitMaintenance = async () => {
       ]);
     }
   } catch (err: any) {
+    toast.dismiss(loadingToastId);
     console.error('Error submitting maintenance:', err);
     
     if (err.response && err.response.data && err.response.data.message) {
@@ -413,6 +433,8 @@ const submitMaintenance = async () => {
 
 // Complete maintenance
 const completeMaintenance = async (id: number) => {
+  const loadingToastId = toast.info('Menyelesaikan maintenance...', { timeout: false });
+  
   try {
     const response = await axios.patch(`${API_URLS.ASSET}/maintenance/${id}/complete`, {}, {
       headers: {
@@ -422,6 +444,7 @@ const completeMaintenance = async (id: number) => {
     });
     
     if (response.data && response.data.status === 200) {
+      toast.dismiss(loadingToastId);
       toast.success('Maintenance berhasil diselesaikan');
       
       // Refresh data
@@ -431,6 +454,7 @@ const completeMaintenance = async (id: number) => {
       ]);
     }
   } catch (err: any) {
+    toast.dismiss(loadingToastId);
     console.error('Error completing maintenance:', err);
     
     if (err.response && err.response.data && err.response.data.message) {
@@ -483,6 +507,8 @@ const loadData = async () => {
 
 // Fetch asset image from backend
 const fetchAssetImage = async (id: string) => {
+  imageLoading.value = true;
+  
   try {
     if (!id || id === 'undefined' || id === 'null') {
       assetImage.value = '/placeholder-image.jpg';
@@ -503,6 +529,11 @@ const fetchAssetImage = async (id: string) => {
   } catch (error) {
     console.error("Error fetching asset image:", error);
     assetImage.value = '/placeholder-image.jpg';
+  } finally {
+    // Set to false in case the image load event doesn't fire
+    setTimeout(() => {
+      imageLoading.value = false;
+    }, 300);
   }
 };
 
