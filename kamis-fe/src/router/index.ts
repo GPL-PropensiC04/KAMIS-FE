@@ -228,58 +228,72 @@ const router = createRouter({
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Aset', parent: (route: RouteLocationNormalized) => ({ name: 'assets-detail', params: { platNomor: route.params.platNomor }}) }
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], 
+        breadcrumb: 'Edit Aset', parent: (route: RouteLocationNormalized) => ({ name: 'assets-detail', params: { platNomor: route.params.platNomor }}) }
     },
     {
       path: '/project',
       name: 'project',
       component: ListProject,
-      meta: { requiresAuth: true, breadcrumb: 'List Distribusi dan Penjualan' }
+      meta: { requiresAuth: true, 
+        breadcrumb: 'List Distribusi dan Penjualan' }
     },
     {
       path: '/project/add/distribution',
       name: 'add-distribution',
       component: AddDistributionView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Distribusi', parent: '/project' }
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Distribusi', parent: '/project' }
     },
     {
       path: '/project/add/distribution-summary',
       name: 'distribution-summary',
       component: DistributionSummaryView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"],
+        breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
     },
     {
       path: '/project/add/sales',
       name: 'add-sales',
       component: AddSalesView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Penjualan', parent: '/project' }
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Penjualan', parent: '/project' }
     },
     {
       path: '/project/add/sales-summary',
       name: 'sales-summary',
       component: SalesSummaryView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Konfirmasi Penjualan', parent: '/project/add/sales' }
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Penjualan', parent: '/project/add/sales' }
     },
     {
       path: '/project/distribution/:id',
       name: 'project-detailDistribution',
       component: DetailDistributionView,
       props: true,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Distribusi', parent: '/project' }
+      meta: { requiresAuth: true, 
+        breadcrumb: 'Detail Distribusi', parent: '/project' }
     },
     {
       path: '/project/sale/:id',
       name: 'project-detailSale',
       component: DetailSellView,
       props: true,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Penjualan', parent: '/project' }
+      meta: { requiresAuth: true, 
+        breadcrumb: 'Detail Penjualan', parent: '/project' }
     },
     {
       path: '/project/update/distribution/:id',
       name: 'update-distribution',
       component: UpdateDistributionView,
       props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Finance", "Direksi"], breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Finance"], 
+        breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
     },
     {
       path: '/project/update/sales/:id',
@@ -288,7 +302,7 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Finance", "Direksi"], 
+        roles: ["Admin", "Finance"], 
         breadcrumb: 'Edit Penjualan', 
         parent: (route: RouteLocationNormalized) => ({ name: 'project-detailSale', params: { id: route.params.id } }) 
       }
