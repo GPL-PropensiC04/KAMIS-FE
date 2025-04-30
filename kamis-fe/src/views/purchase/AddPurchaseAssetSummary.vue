@@ -129,11 +129,6 @@ const handleSubmit = async () => {
                 throw new Error("Invalid base64 image format");
             }
         }
-        
-        console.log("Sending asset data:", {
-            ...assetData,
-            foto: assetData.foto ? `File: ${assetData.foto.name} (${Math.round(assetData.foto.size / 1024)} KB)` : 'No image'
-        });
 
         // Use the store method instead of direct API call
         await assetTempStore.addAssetTemp(assetData);
