@@ -12,7 +12,7 @@ import 'vue-toastification/dist/index.css'
 // === Font Awesome Setup ===
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked } from '@fortawesome/free-solid-svg-icons'
 
 
 // import $ from 'jquery';
@@ -20,7 +20,7 @@ import { faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket,
 // window.jQuery = $;
 
 // Tambahkan ikon ke library
-library.add(faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety)
+library.add(faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked)
 
 // ===========================
 

@@ -56,7 +56,7 @@
   </template>
   
   <script setup lang="ts">
-  import type { AsetInterface } from '@/interfaces/asset.interface';
+  import type { AsetInterface } from '@/interfaces/asset/asset.interface';
   import { formatCurrency, formatDate } from '@/utils/formatters';
   import { StatusColorMap } from '@/config/status.config';
 
