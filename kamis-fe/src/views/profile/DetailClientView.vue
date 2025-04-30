@@ -72,7 +72,9 @@
               </td>
             </tr>
             <tr v-if="!client.projects || client.projects.length === 0">
-              <td :colspan="isFinance ? 4 : 2" class="text-center text-gray-500">Belum ada proyek terkait.</td>
+              <td :colspan="isFinance ? 5 : 3" class="text-center text-gray-500 py-4">
+                Belum ada proyek terkait.
+              </td>
             </tr>
           </tbody>
         </table>

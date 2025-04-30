@@ -23,8 +23,17 @@ import AddClientView from '@/views/profile/AddClientView.vue'
 import UpdateClient from '@/views/profile/UpdateClient.vue'
 import AddSupplierView from '@/views/profile/AddSupplierView.vue';
 import ListProject from '@/views/project/ListProject.vue';
-import DetailProject from '@/views/project/DetailProjectView.vue';
-
+import AddDistributionView from '@/views/project/AddDistributionView.vue';
+import AddSalesView from '@/views/project/AddSalesView.vue';
+import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
+import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
+import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue';
+import UpdateSalesView from '@/views/project/UpdateSalesView.vue';
+import ListSupplierView from '@/views/profile/ListSupplierView.vue';
+import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
+import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
+import DetailSellView from '@/views/project/DetailSellView.vue'
+import type { RouteLocationNormalized } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,34 +45,68 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
     {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+      meta: { requiresAuth: false }
+    },
+    {
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Supplier' }
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
+    },
+    {
+      path: '/supplier',
+      name: 'supplier',
+      component: ListSupplierView,
+      meta: { requiresAuth: true, breadcrumb: 'List Supplier' }
+    },    
+    {
+      path: '/supplier/detail/:id',
+      name: 'supplier-detail',
+      component: DetailSupplierView,
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      props: true
+    },
+    {
+      path: '/supplier/update/:id',
+      name: 'supplier-update',
+      component: () => import('@/views/profile/UpdateSupplierView.vue'),
+      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: (route: RouteLocationNormalized) => ({ name: 'supplier-detail', params: { id: route.params.id } }) },
+      props: true
     },
     {
       path: '/client',
       name: 'client',
-      component:ListClient,
+      component: ListClient,
       meta: { requiresAuth: true, breadcrumb: 'List Klien' }
     },
     {
       path: '/client/add',
       name: 'client-add',
-      component:AddClientView,
+      component: AddClientView,
       meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Klien', parent: '/client' }
+    },
+    {
+      path: '/client/update/:id',
+      name: 'client-update', 
+      component: UpdateClient,
+      props: true,
+      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: (route: RouteLocationNormalized) => ({ name: 'client-detail', params: { id: route.params.id } }) }
     },
     {
       path: '/client/:id',
       name: 'client-detail',
-      component:DetailClientView,
+      component: DetailClientView,
+      props: true,
       meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
     },
     {
       path: '/client/update/:id',
-      name: 'client-update',
+      name: 'update-client',
       component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: '/client' }
+      meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {
       path: '/purchase',
@@ -102,6 +145,30 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
     },
     {
+      path: '/purchase/update-resource/:purchaseId',
+      name: 'purchase-updateResource',
+      component: UpdatePurchaseResource,
+      props: true,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Edit Pembelian Resource', 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailResource', params: { id: route.params.id } }) 
+      }
+    },
+    {
+      path: '/purchase/update-asset/:purchaseId',
+      name: 'purchase-updateAsset',
+      component: UpdatePurchaseAsset,
+      props: true,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Edit Pembelian Aset', 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.id } }) 
+      }
+    },
+    {
       path: '/purchase/detail/resource/:id',
       name: 'purchase-detailResource',
       component: DetailPurchaseResourceView,
@@ -114,26 +181,6 @@ const router = createRouter({
       component: DetailPurchaseAssetView,
       meta: { requiresAuth: true, breadcrumb: 'Detail Pembelian Aset', parent: '/purchase' },
       props: true,
-    },
-    {
-      path: '/purchase/update-resource/:purchaseId',
-      name: 'purchase-updateResource',
-      component: UpdatePurchaseResource,
-      props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/resource/:id' }
-    },
-    {
-      path: '/purchase/update-asset/:purchaseId',
-      name: 'purchase-updateAsset',
-      component: UpdatePurchaseAsset,
-      props: true, // Kirim ID dari URL sebagai prop
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Update Pembelian Resource', parent: '/purchase/detail/asset/:id' }
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
-      meta: { requiresAuth: false }
     },
     // {
     //   path: '/dashboard',
@@ -157,6 +204,7 @@ const router = createRouter({
       path: '/resource/update/:id',
       name: 'resource-update',
       component:UpdateResource,
+      props: true,
       meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Resource', parent: '/resource' }
     },
     {
@@ -166,7 +214,7 @@ const router = createRouter({
     },
     {
       path: '/assets',
-      name: 'assets-list',
+      name: 'assets',
       component: ListAsset,
       meta: { requiresAuth: true, breadcrumb: 'List Aset' }
     },
@@ -180,19 +228,84 @@ const router = createRouter({
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Aset', parent: '/asset/:platNomor'}
+      meta: { requiresAuth: true, roles: ["Admin", "Operational"], 
+        breadcrumb: 'Edit Aset', parent: (route: RouteLocationNormalized) => ({ name: 'assets-detail', params: { platNomor: route.params.platNomor }}) }
     },
     {
       path: '/project',
       name: 'project',
       component: ListProject,
-      meta: { requiresAuth: true, breadcrumb: 'List Proyek' }
+      meta: { requiresAuth: true, 
+        breadcrumb: 'List Distribusi dan Penjualan' }
     },
     {
-      path: '/project/:id',
-      name: 'DetailProject',
-      component: DetailProject,
-      meta: { requiresAuth: true, breadcrumb: 'Detail Proyek', parent: '/project' }
+      path: '/project/add/distribution',
+      name: 'add-distribution',
+      component: AddDistributionView,
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Distribusi', parent: '/project' }
+    },
+    {
+      path: '/project/add/distribution-summary',
+      name: 'distribution-summary',
+      component: DistributionSummaryView,
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"],
+        breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
+    },
+    {
+      path: '/project/add/sales',
+      name: 'add-sales',
+      component: AddSalesView,
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Tambah Penjualan', parent: '/project' }
+    },
+    {
+      path: '/project/add/sales-summary',
+      name: 'sales-summary',
+      component: SalesSummaryView,
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Operational"], 
+        breadcrumb: 'Konfirmasi Penjualan', parent: '/project/add/sales' }
+    },
+    {
+      path: '/project/distribution/:id',
+      name: 'project-detailDistribution',
+      component: DetailDistributionView,
+      props: true,
+      meta: { requiresAuth: true, 
+        breadcrumb: 'Detail Distribusi', parent: '/project' }
+    },
+    {
+      path: '/project/sale/:id',
+      name: 'project-detailSale',
+      component: DetailSellView,
+      props: true,
+      meta: { requiresAuth: true, 
+        breadcrumb: 'Detail Penjualan', parent: '/project' }
+    },
+    {
+      path: '/project/update/distribution/:id',
+      name: 'update-distribution',
+      component: UpdateDistributionView,
+      props: true,
+      meta: { requiresAuth: true, 
+        roles: ["Admin", "Finance"], 
+        breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
+    },
+    {
+      path: '/project/update/sales/:id',
+      name: 'update-sales',
+      component: UpdateSalesView,
+      props: true,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin", "Finance"], 
+        breadcrumb: 'Edit Penjualan', 
+        parent: (route: RouteLocationNormalized) => ({ name: 'project-detailSale', params: { id: route.params.id } }) 
+      }
     },
     {
       path: '/coming-soon',

@@ -61,7 +61,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { AsetService } from '@/stores/assetservices';
-import type { AsetInterface } from '@/interfaces/asset/asset.interface';
+import type { AsetInterface, AsetListInterface } from '@/interfaces/asset/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
@@ -120,7 +120,12 @@ onMounted(async () => {
 const fetchAssets = async () => {
   try {
     const data = await AsetService.viewAllAsset();
-    assets.value = data;
+    assets.value = data.map((item: any) => ({
+      ...item,
+      tanggalPerolehan: item.tanggalPerolehan ?? '',
+      deskripsi: item.deskripsi ?? '',
+      assetMaintenance: item.assetMaintenance ?? '',
+    }));
   } catch (err) {
     console.error('Error fetching assets:', err);
   } finally {
@@ -172,7 +177,8 @@ const thirdColumnHeader = computed(() => {
   return '';
 });
 
-const thirdColumnValue = (asset: AsetInterface) => {
+
+const thirdColumnValue = (asset: AsetListInterface) => {
   if (canViewMaintenanceInfo.value) {
     if (!asset.lastMaintenance) {
       return 'Belum Maintenance';
