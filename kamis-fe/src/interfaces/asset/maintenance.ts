@@ -7,6 +7,9 @@ export interface Maintenance {
   biaya: number;
   status: string;
   namaAset?: string;
+  tanggalPengajuan?: string;
+  tanggalSelesai?: string;
+  catatan?: string;
 }
 
 export interface MaintenanceRequest {
