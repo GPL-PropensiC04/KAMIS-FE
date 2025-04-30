@@ -39,9 +39,11 @@ const isValidEmail = (email: string) => {
   return regex.test(email);
 };
 
+const isNotBlank = (val: string) => val.trim().length > 0;
+
 // Submit Handler
 const handleSubmit = async () => {
-  if (!nameClient.value || !noTelpClient.value || !emailClient.value || !addressClient.value) {
+  if (!isNotBlank(nameClient.value) || !isNotBlank(noTelpClient.value) || !isNotBlank(emailClient.value) || !isNotBlank(addressClient.value)) {
     toast.error("Harap isi semua field dengan benar!");
     return;
   }
@@ -64,6 +66,7 @@ const handleSubmit = async () => {
   };
 
   await clientStore.updateClient(body, id);
+  router.push({ name: 'client-detail', params: { id } }); // <-- redirect ke detail client
 };
 </script>
 
