@@ -28,14 +28,24 @@
         
         <div>
           <label for="password" class="block text-base font-medium text-gray-700 mb-2">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            required 
-            placeholder="Enter your password"
-            class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-          />
+          <div class="relative">
+            <input 
+              :type="showPassword ? 'text' : 'password'" 
+              id="password" 
+              v-model="password" 
+              required 
+              placeholder="Enter your password"
+              class="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+            />
+            <button 
+              type="button" 
+              @click="togglePasswordVisibility" 
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600"
+            >
+              <font-awesome-icon v-if="showPassword" icon="fa-solid fa-eye-slash" />
+              <font-awesome-icon v-else icon="fa-solid fa-eye" />
+            </button>
+          </div>
         </div>
         
         <VButton
@@ -61,11 +71,16 @@ const router = useRouter();
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 
 const handleLogin = async () => {
   const success = await authStore.login({ email: email.value, password: password.value });
   if (success) {
     router.push('/');
   }
+};
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
 };
 </script>
