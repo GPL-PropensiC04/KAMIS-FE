@@ -29,7 +29,7 @@
           >
             <td class="px-6 py-4">{{ client.nameClient }}</td>
             <td class="px-6 py-4">
-              {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Individu' : client.typeClient }}
+              {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Perorangan' : client.typeClient }}
             </td>
             <td class="px-6 py-4">{{ client.companyClient || '-' }}</td>
             <td v-if="isOperational || isDireksi" class="px-6 py-4">{{ client.projectCount ?? 0 }} Aktivitas</td>
