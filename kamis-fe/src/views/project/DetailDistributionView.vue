@@ -15,7 +15,7 @@
         <!-- Project Action Buttons -->
         <template v-if="canEditProject">
           <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
+          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update Status" @click="updateProject"/>
         </template>
       </div>
     </div>
@@ -94,12 +94,6 @@
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
-            <!-- Edit button for Operasional role -->
-            <VSuccessButton
-              v-if="canEditProject"
-              label="Ubah"
-              @click="editAssets"
-            />
           </div>
           
           <div class="overflow-x-auto">
@@ -205,7 +199,7 @@
 
             <div class="flex flex-col space-y-6 relative">
                 <div 
-                    v-for="(log, index) in paginatedLogs" 
+                    v-for="(log) in paginatedLogs" 
                     :key="log.id" 
                     class="relative flex items-start gap-3"
                     :class="{
@@ -341,8 +335,8 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
-const project = ref<any>({});
-const projectData = ref<any>({});
+const project = ref<unknown>({});
+const projectData = ref<unknown>({});
 const isLoading = ref(true);
 const error = ref('');
 const clientName = ref<string>('');
@@ -454,7 +448,7 @@ const updatePaymentStatus = async () => {
 // Check if user can edit project (Operasional or Admin)
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Admin';
+  return userRole === 'Finance' || userRole === 'Admin';
 });
 
 // Format date function
@@ -464,13 +458,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-// Format date with time
-// const formatDateTime = (dateString: string): string => {
-//   if (!dateString) return '-';
-//   const date = new Date(dateString);
-//   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-//          ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-// };
+
 
 // Format currency function
 const formatCurrency = (value: number): string => {
@@ -685,10 +673,6 @@ const editDistributionInfo = () => {
   router.push(`/project/update/distribution/${projectData.value.id}`);
 };
 
-const editAssets = () => {
-  // Navigate to the update distribution view (same page since assets are edited there too)
-  router.push(`/project/update/distribution/${projectData.value.id}`);
-};
 
 /// 
 // Handle Log //

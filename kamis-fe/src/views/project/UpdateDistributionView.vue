@@ -322,16 +322,12 @@ const updateFormData = () => {
   formData.value.projectUseAsset = assetList.value.map(asset => ({
     id: asset.id,
     platNomor: asset.platNomor || '',
-    assetUseCost: asset.usageCost,
+    assetUseCost: asset.shippingCost,
     assetFuelCost: asset.fuelCost,
     tipeAset: asset.type
   }));
 };
 
-// Navigation
-const goBack = () => {
-  router.back();
-};
 
 // Form submission
 const submitForm = async () => {
@@ -357,6 +353,11 @@ const submitForm = async () => {
     toast.error('Minimal satu aset harus ditambahkan');
     return;
   }
+
+  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
+    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
+    return;
+  }
   
   // Update form data before submitting
   updateFormData();
@@ -375,7 +376,7 @@ const submitForm = async () => {
     
     toast.success('Proyek berhasil diperbarui');
     // Redirect to project detail page
-    router.push(`/project/${formData.value.id}`);
+    router.push(`/project/distribution/${formData.value.id}`);
   } catch (error) {
     console.error('Error updating project:', error);
     toast.error('Gagal memperbarui proyek');
@@ -421,18 +422,15 @@ onMounted(async () => {
     <div class="min-h-screen bg-gray-100 p-6">
       <!-- Navigation header -->
       <div class="mb-4 flex justify-between items-center">
-        <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
-          <span>←</span>
-        </router-link>
       </div>
       
       <!-- Main Form -->
       <div class="bg-white rounded-lg shadow-md p-6" v-if="formData">
         <!-- Form header with back button and update button -->
         <div class="flex justify-between mb-6">
-          <button @click="goBack" class="flex items-center text-[#1E3A5F]">
-            <span class="text-2xl">←</span>
-          </button>
+          <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
+          <span>←</span>
+        </router-link>
           <button 
             @click="submitForm" 
             class="bg-[#2D6A4F] hover:bg-[#216043] text-white px-4 py-2 rounded-md"
@@ -465,6 +463,7 @@ onMounted(async () => {
                 v-model="formData.projectName"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus > 0 }"
                 placeholder="Masukkan nama aktivitas"
                 :disabled="formData.projectStatus > 0"
               />
@@ -477,6 +476,7 @@ onMounted(async () => {
                 <select 
                   v-model="formData.projectClientId"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus > 0 }"
                   :disabled="formData.projectStatus > 0"
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
@@ -497,6 +497,7 @@ onMounted(async () => {
                 v-model="formData.projectPickupAddress"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
                 placeholder="Masukkan alamat pengambilan"
                 :disabled="formData.projectStatus >= 1"
               />
@@ -511,7 +512,6 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-20 p-2 border border-gray-300 rounded mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  :disabled="formData.projectStatus >= 1"
                 />
                 <span class="mr-3">Orang x upah sebesar Rp</span>
                 <input 
@@ -519,7 +519,6 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-32 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  :disabled="formData.projectStatus >= 1"
                 />
               </div>
             </div>
@@ -545,6 +544,7 @@ onMounted(async () => {
                       v-model="formData.projectStartDate"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
                       :disabled="formData.projectStatus >= 1"
                     />
                   </div>
@@ -555,6 +555,7 @@ onMounted(async () => {
                       v-model="formData.projectEndDate"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
                       :disabled="formData.projectStatus >= 2"
                     />
                   </div>
@@ -569,6 +570,7 @@ onMounted(async () => {
                 v-model="formData.projectDeliveryAddress"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
                 placeholder="Masukkan alamat pengiriman"
                 :disabled="formData.projectStatus >= 1"
               />
@@ -582,27 +584,17 @@ onMounted(async () => {
                 type="number" 
                 min="0"
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
                 placeholder="Rp 0"
                 :disabled="formData.projectStatus >= 1"
               />
             </div>
   
-            <div>
-              <label class="block text-gray-700 mb-2 font-medium">Total Pengeluaran</label>
-              <input 
-                v-model.number="formData.projectTotalPengeluaran"
-                type="number" 
-                min="0"
-                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Rp 0"
-                :disabled="formData.projectStatus >= 1"
-              />
-            </div>
           </div>
         </div>
   
         <!-- Assets Section -->
-        <div class="mt-8" v-if="formData.projectStatus < 1">
+        <div class="mt-8">
           <h2 class="text-xl font-semibold text-[#1E3A5F] mb-4">Aset yang digunakan</h2>
           
           <!-- Asset selection form -->
@@ -680,7 +672,7 @@ onMounted(async () => {
                   <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
                   <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
                   <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
-                  <th class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
+                  <th v-if="formData.projectStatus < 1" class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -688,7 +680,7 @@ onMounted(async () => {
                   <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
                   <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
-                  <td class="px-6 py-4 text-center whitespace-nowrap">
+                  <td v-if="formData.projectStatus < 1" class="px-6 py-4 text-center whitespace-nowrap">
                     <button 
                       @click="removeAsset(index)"
                       class="text-red-600 hover:text-red-800"
@@ -715,44 +707,7 @@ onMounted(async () => {
             </table>
           </div>
         </div>
-  
-        <!-- Assets Section (Read-only) -->
-        <div class="mt-8" v-if="formData.projectStatus >= 1">
-          <h2 class="text-xl font-semibold text-[#1E3A5F] mb-4">Aset yang digunakan</h2>
-          
-          <!-- Assets table (read-only) -->
-          <div class="overflow-x-auto bg-white shadow rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-[#1E3A5F] text-white">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
-                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
-                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
-                </tr>
-                <tr v-if="assetList.length === 0">
-                  <td colspan="3" class="px-6 py-4 text-center text-gray-500">
-                    Tidak ada aset yang digunakan
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot class="bg-gray-50">
-                <tr>
-                  <td colspan="2" class="px-6 py-3 text-right font-medium">Total Biaya Aset:</td>
-                  <td class="px-6 py-3 text-right font-bold">{{ formatCurrency(totalAssetCost) }}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-  
-        <!-- Summary -->
+     <!-- Summary -->
         <div class="mt-6 bg-gray-50 rounded-lg p-4">
           <div class="flex justify-between">
             <div class="text-lg font-bold">Total Pengeluaran</div>

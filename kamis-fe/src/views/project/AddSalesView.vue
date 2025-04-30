@@ -3,27 +3,16 @@
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Navigation header -->
     <div class="mb-4 flex justify-between items-center">
-      <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
-        <span>←</span>
-      </router-link>
+      
     </div>
     
-    <!-- Breadcrumb navigation -->
-    <!-- <div class="flex items-center text-[#1E3A5F] mb-6">
-      <router-link to="/" class="hover:underline">Home</router-link>
-      <span class="mx-2">></span>
-      <router-link to="/project" class="hover:underline">Distribusi & Penjualan</router-link>
-      <span class="mx-2">></span>
-      <span class="font-semibold">Mendaftarkan Penjualan</span>
-    </div> -->
-
     <!-- Main Form -->
     <div class="bg-white rounded-lg shadow-md p-6">
       <!-- Form header with back button and next button -->
       <div class="flex justify-between mb-6">
-        <button @click="goBack" class="flex items-center text-[#1E3A5F]">
-          <span class="text-2xl">←</span>
-        </button>
+        <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
+          <span>←</span>
+        </router-link>
         <button 
           @click="submitForm" 
           class="bg-[#2D6A4F] hover:bg-[#216043] text-white px-4 py-2 rounded-md"
@@ -91,8 +80,8 @@
           <!-- Tanggal Aktivitas -->
           <div>
             <label class="block text-gray-700 mb-2 font-medium">Tanggal Aktivitas</label>
-            <div class="flex space-x-2">
-              <div class="w-1/2">
+            
+              <div class="w-full">
                 <div class="relative">
                   <input 
                     v-model="formData.projectStartDate"
@@ -104,19 +93,7 @@
                   </div>
                 </div>
               </div>
-              <div class="w-1/2">
-                <div class="relative">
-                  <input 
-                    v-model="formData.projectEndDate"
-                    type="date" 
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-5 h-5 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M10 14a4 4 0 100-8 4 4 0 000 8zm0 1A5 5 0 1110 5a5 5 0 010 10z"></path></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -153,7 +130,7 @@
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
               >
                 <option value="" disabled>Pilih Jumlah</option>
-                <option v-for="num in 10" :key="num" :value="num">{{ num }}</option>
+                <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg class="w-4 h-4 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3"></path></svg>
@@ -439,10 +416,6 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
-// Navigation
-const goBack = () => {
-  router.back();
-};
 
 // Form submission
 const submitForm = async () => {
@@ -466,6 +439,13 @@ const submitForm = async () => {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
+  formData.value.projectEndDate = formData.value.projectStartDate;
+  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
+    console.log(formData.value.projectEndDate, formData.value.projectStartDate);
+    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
+    return;
+  }
+
   
   // Update form data before submitting
   updateFormData();
