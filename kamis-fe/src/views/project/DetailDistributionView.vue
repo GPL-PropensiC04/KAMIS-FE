@@ -7,21 +7,39 @@
         <span>←</span>
       </router-link>
       
-      <div class="flex gap-2">
-        <!-- Payment Status Button -->
-        <VSuccessButton v-if="canViewFinancialInfo && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" label="Bayar" @click="openPaymentModal"/>
-        <VCancelButton v-if="canViewFinancialInfo && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" label="Kembalikan" @click="openPaymentModal"/>
+      <!-- Only show buttons when data is fully loaded -->
+      <div v-if="!isLoading && !error" class="flex gap-2">
+        <!-- Payment Status Button (only for Finance) -->
+        <VSuccessButton 
+          v-if="(canEditFinancial || userRole === 'Direksi') && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
+          label="Bayar" 
+          @click="openPaymentModal"
+        />
+        <VCancelButton 
+          v-if="(canEditFinancial || userRole === 'Direksi') && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
+          label="Kembalikan" 
+          @click="openPaymentModal"
+        />
         
-        <!-- Project Action Buttons -->
+        <!-- Project Action Buttons (only for Operasional and Admin) -->
         <template v-if="canEditProject">
-          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
+          <VCancelButton 
+            v-if="projectData.projectStatus < 2" 
+            label="Batal" 
+            @click="openCancelModal" 
+          />
+          <VSuccessButton 
+            v-if="projectData.projectStatus < 2" 
+            label="Update Status" 
+            @click="updateProject"
+          />
         </template>
       </div>
     </div>
 
-    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
-      <p>Memuat data...</p>
+    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 flex flex-col items-center justify-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F] mb-4"></div>
+      <p class="text-[#1E3A5F] font-medium">Memuat data proyek...</p>
     </div>
 
     <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
@@ -41,49 +59,59 @@
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Distribusi - {{ projectData.id }}</h2>
-            <!-- Edit button for Operasional role -->
+            <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditProject"
+              v-if="canEditFinancial && projectData.projectStatus !== 2"
               label="Ubah"
               @click="editDistributionInfo"
             />
           </div>
 
           <!-- Basic Info -->
-          <div class="grid grid-cols-3 gap-4 p-4">
-            <div>
-              <p class="text-gray-600 text-sm">Nama Proyek</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div class="break-words">
+              <p class="text-gray-600 text-sm">Nama Kegiatan</p>
               <p class="font-semibold">{{ projectData.projectName }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName}}</p>
+              <p class="font-semibold">
+                <template v-if="clientLoading">
+                  <div class="flex items-center">
+                    <div class="animate-spin h-3 w-3 border-b-2 border-[#1E3A5F] mr-2 rounded-full"></div>
+                    <span class="text-gray-500">Memuat...</span>
+                  </div>
+                </template>
+                <template v-else>
+                  {{ clientName }}
+                </template>
+              </p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Mulai</p>
               <p class="font-semibold">{{ formatDate(projectData.projectStartDate) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Jumlah PHL</p>
               <p class="font-semibold">{{ projectData.projectPHLCount }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status</p>
               <p class="font-semibold">{{ formatStatus(projectData.projectStatus) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Selesai</p>
               <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Alamat Pengambilan</p>
               <p class="font-semibold">{{ projectData.projectPickupAddress }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
               <p class="font-semibold">{{ projectData.projectDeliveryAddress }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status Pembayaran</p>
               <p class="font-semibold">{{ formatPaymentStatus(projectData.projectPaymentStatus) }}</p>
             </div>
@@ -94,12 +122,6 @@
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
-            <!-- Edit button for Operasional role -->
-            <VSuccessButton
-              v-if="canEditProject"
-              label="Ubah"
-              @click="editAssets"
-            />
           </div>
           
           <div class="overflow-x-auto">
@@ -199,13 +221,17 @@
 
 
       <!-- Log Distribusi -->
-      <div v-if="projectData.projectLogs.length" class="mt-10">
+      <div v-if="logsLoading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+      </div>
+
+      <div v-else-if="projectData.projectLogs && projectData.projectLogs.length" class="mt-10">
             <h2 class="text-lg font-bold font-lato mb-2">Log Distribusi</h2>
             <hr class="border-t-1 border-black mb-4" />
 
             <div class="flex flex-col space-y-6 relative">
                 <div 
-                    v-for="(log, index) in paginatedLogs" 
+                    v-for="(log) in paginatedLogs" 
                     :key="log.id" 
                     class="relative flex items-start gap-3"
                     :class="{
@@ -272,7 +298,19 @@
             <!-- END -->
         </div> 
       </div>
+
+
+
+
+
+      
     </template>
+
+
+
+
+
+    
   </div>
   <VModal v-model="showPaymentModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
@@ -284,6 +322,8 @@
         <VSuccessButton label="Ya" @click="updatePaymentStatus" />
       </div>
     </div>
+
+
   </VModal>
   <VModal v-model="showStatusModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
@@ -327,16 +367,55 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
+interface ProjectData {
+  id: string;
+  projectName: string;
+  projectClientId: string;
+  projectStartDate: string;
+  projectEndDate: string | null;
+  projectPickupAddress: string;
+  projectDeliveryAddress: string;
+  projectStatus: number;
+  projectPaymentStatus: number;
+  projectPHLCount: number;
+  projectPHLPay: number;
+  projectTotalPemasukkan: number;
+  projectTotalPengeluaran: number;
+  projectType: boolean;
+  projectUseAsset: ProjectAsset[];
+  projectLogs: ProjectLog[];
+}
+
+interface ProjectLog {
+  id: string;
+  user: string;
+  action: string;
+  actionDate: string;
+}
+
 const project = ref<any>({});
-const projectData = ref<any>({});
+const projectData = ref<ProjectData>({} as ProjectData);
 const isLoading = ref(true);
 const error = ref('');
 const clientName = ref<string>('');
+const logsLoading = ref(false);
+const clientLoading = ref(true);
+const resourcesLoading = ref(false); // For DetailSellView only
+const assetsLoading = ref(false); // For DetailDistributionView only
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
   return userRole === 'Direksi' || userRole === 'Finance';
+});
+
+const canEditProject = computed(() => {
+  const userRole = authStore.userRole;
+  return userRole === 'Operasional' || userRole === 'Admin';
+});
+
+const canEditFinancial = computed(() => {
+  return authStore.userRole === 'Finance';
 });
 
 const showPaymentModal = ref(false);
@@ -412,9 +491,9 @@ const totalAssetFuelCost = computed(() => {
 });
 
 // Calculate total vehicle costs (usage + fuel)
-const totalVehicleCosts = computed(() => {
-  return totalAssetUseCost.value + totalAssetFuelCost.value;
-});
+// const totalVehicleCosts = computed(() => {
+//   return totalAssetUseCost.value + totalAssetFuelCost.value;
+// });
 
 const openPaymentModal = () => {
   showPaymentModal.value = true;
@@ -437,12 +516,6 @@ const updatePaymentStatus = async () => {
   }
 };
 
-// Check if user can edit project (Operasional or Admin)
-const canEditProject = computed(() => {
-  const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Admin';
-});
-
 // Format date function
 const formatDate = (dateString: string): string => {
   if (!dateString) return '-';
@@ -450,13 +523,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-// Format date with time
-const formatDateTime = (dateString: string): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-         ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
+
 
 // Format currency function
 const formatCurrency = (value: number): string => {
@@ -467,7 +534,7 @@ const formatCurrency = (value: number): string => {
 // Format status function
 const formatStatus = (status: number): string => {
   switch (status) {
-    case 0: return 'Diajukan';
+    case 0: return 'Direncanakan';
     case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
@@ -488,8 +555,11 @@ const formatPaymentStatus = (paymentStatus: number): string => {
 const fetchClientName = async (clientId: string) => {
   if (!clientId) {
     clientName.value = '-';
+    clientLoading.value = false;
     return;
   }
+  
+  clientLoading.value = true;
   
   try {
     // Make a real API call to fetch client data
@@ -510,6 +580,8 @@ const fetchClientName = async (clientId: string) => {
   } catch (err) {
     console.error('Error fetching client name:', err);
     clientName.value = 'Unknown Client';
+  } finally {
+    clientLoading.value = false;
   }
 };
 
@@ -519,6 +591,8 @@ const assetTypes = ref<Record<string, string>>({});
 // Updated fetchAssetTypes function
 const fetchAssetTypes = async () => {
   if (!projectData.value || !projectData.value.projectUseAsset) return;
+  
+  assetsLoading.value = true;
   
   try {
     for (const asset of projectData.value.projectUseAsset) {
@@ -564,6 +638,8 @@ const fetchAssetTypes = async () => {
   } catch (err) {
     console.error('Error fetching asset types:', err);
     // In case of error, don't set any default values
+  } finally {
+    assetsLoading.value = false;
   }
 };
 
@@ -571,6 +647,7 @@ const fetchAssetTypes = async () => {
 const loadData = async () => {
   isLoading.value = true;
   error.value = '';
+  logsLoading.value = true;
 
   try {
     // Fetch project data
@@ -605,6 +682,8 @@ const loadData = async () => {
     } else {
       error.value = 'Gagal memuat data proyek';
     }
+    
+    logsLoading.value = false;
   } catch (err) {
     console.error('Error loading project data:', err);
     
@@ -614,6 +693,7 @@ const loadData = async () => {
     }
     
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
+    logsLoading.value = false;
   } finally {
     isLoading.value = false;
   }
@@ -636,7 +716,7 @@ const updateProject = async () => {
     const currentStatus = projectData.value.projectStatus;
 
     // Sequential status update logic
-    if (currentStatus === 0) { // Diajukan -> Kirim
+    if (currentStatus === 0) { // Direncanakan -> Kirim
       newStatusToUpdate.value = 1;
     } else if (currentStatus === 1) { // Kirim -> Selesai
       newStatusToUpdate.value = 2;
@@ -667,16 +747,10 @@ const confirmStatusUpdate = async () => {
 };
 
 const editDistributionInfo = () => {
-  // Implement edit distribution info functionality
-  console.log('Edit distribution info');
-  // This could open a modal or navigate to an edit page
+  // Navigate to the update distribution view
+  router.push(`/project/update/distribution/${projectData.value.id}`);
 };
 
-const editAssets = () => {
-  // Implement edit assets functionality
-  console.log('Edit assets');
-  // This could open a modal or navigate to an assets edit page
-};
 
 /// 
 // Handle Log //
