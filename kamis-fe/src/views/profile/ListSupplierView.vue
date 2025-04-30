@@ -23,7 +23,7 @@
             v-for="supplier in sortedSuppliers"
             :key="supplier.id"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-            @click="isOperationalOrAdmin && goToDetailSupplier(supplier.id)"
+            @click="goToDetailSupplier(supplier.id)"
           >
             <td class="px-6 py-4">{{ supplier.companySupplier }}</td>
             <td class="px-6 py-4">{{ supplier.nameSupplier }}</td>

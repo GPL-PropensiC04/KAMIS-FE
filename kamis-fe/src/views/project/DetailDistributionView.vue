@@ -14,8 +14,8 @@
         
         <!-- Project Action Buttons -->
         <template v-if="canEditProject">
-          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="cancelProject" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
+          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
+          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update Status" @click="updateProject"/>
         </template>
       </div>
     </div>
@@ -83,9 +83,9 @@
               <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
               <p class="font-semibold">{{ projectData.projectDeliveryAddress }}</p>
             </div>
-            <div v-if="projectData.projectUseAsset && projectData.projectUseAsset.length">
-              <p class="text-gray-600 text-sm">Aset yang digunakan</p>
-              <p class="font-semibold">{{ projectData.projectUseAsset.length }} aset</p>
+            <div>
+              <p class="text-gray-600 text-sm">Status Pembayaran</p>
+              <p class="font-semibold">{{ formatPaymentStatus(projectData.projectPaymentStatus) }}</p>
             </div>
           </div>
         </div>
@@ -94,12 +94,6 @@
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
-            <!-- Edit button for Operasional role -->
-            <VSuccessButton
-              v-if="canEditProject"
-              label="Ubah"
-              @click="editAssets"
-            />
           </div>
           
           <div class="overflow-x-auto">
@@ -115,7 +109,14 @@
                 <tr v-for="(asset, index) in projectData.projectUseAsset" :key="index">
                   <td class="px-6 py-4">{{ index + 1 }}</td>
                   <td class="px-6 py-4">{{ asset.platNomor }}</td>
-                  <td class="px-6 py-4">Truk</td> <!-- We might need to fetch this from an asset service -->
+                  <td class="px-6 py-4">
+                    <template v-if="assetTypes[asset.platNomor]">
+                      {{ assetTypes[asset.platNomor] }}
+                    </template>
+                    <template v-else>
+                      <span class="text-gray-400">Loading...</span>
+                    </template>
+                  </td>
                 </tr>
                 <tr v-if="!projectData.projectUseAsset || projectData.projectUseAsset.length === 0">
                   <td colspan="3" class="px-6 py-4 text-center">Tidak ada data aset yang digunakan</td>
@@ -170,8 +171,8 @@
                 <!-- Totals row with border-top -->
                 <tr class="border-t-2 border-gray-300 font-medium">
                   <td class="px-6 py-3">Total</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPengeluaran) }}</td>
+                  <td class="px-6 py-3 text-right text-green-600">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
+                  <td class="px-6 py-3 text-right text-red-600">{{ formatCurrency(projectData.projectTotalPengeluaran) }}</td>
                 </tr>
                 
                 <!-- Profit/Loss row with special styling -->
@@ -190,46 +191,80 @@
           </div>
         </div>
 
-        <!-- Log Distribusi -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Log Distribusi</h2>
-          </div>
-          
-          <div class="p-4">
-            <!-- Timeline Component -->
-            <div class="relative">
-              <!-- Timeline vertical line -->
-              <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
-              <!-- Timeline items -->
-              <div v-for="(log, index) in projectData.projectLogs" :key="index" 
-                   class="relative pl-12 pb-8 flex flex-col">
-                <!-- Timeline dot -->
-                <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
-                
-                <!-- Timestamp -->
-                <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
-                
-                <!-- User info -->
-                <div class="mb-1 text-sm">
-                  <span class="font-medium">User:</span> {{ log.user }}
-                </div>
-                
-                <!-- Action -->
-                <div class="bg-gray-50 rounded-md p-3 text-sm">
-                  <span class="font-medium">Action:</span>
-                  <p>{{ log.action }}</p>
-                </div>
+      <!-- Log Distribusi -->
+      <div v-if="projectData.projectLogs.length" class="mt-10">
+            <h2 class="text-lg font-bold font-lato mb-2">Log Distribusi</h2>
+            <hr class="border-t-1 border-black mb-4" />
 
-                <!-- If it's the last item, display the timestamp on the right -->
-                <div v-if="index === projectData.projectLogs.length - 1" class="absolute right-0 top-0 text-xs text-gray-500">
-                  {{ formatDateTime(log.actionDate) }}
+            <div class="flex flex-col space-y-6 relative">
+                <div 
+                    v-for="(log) in paginatedLogs" 
+                    :key="log.id" 
+                    class="relative flex items-start gap-3"
+                    :class="{
+                        'flex-row-reverse pr-6': log.user === currentUsername,
+                        'pl-6': log.user !== currentUsername
+                    }"
+                >
+                    <!-- Icon bulat -->
+                    <div class="w-3 h-3 bg-[#1E3A5F] rounded-full mt-1.5 flex-shrink-0"></div>
+
+                    <!-- Isi log -->
+                    <div class="flex flex-col max-w-[80%]">
+                        <p class="text-[#1E3A5F] font-semibold text-sm mb-1"
+                        :class="{
+                        'text-right': log.user === currentUsername,
+                        'text-left': log.user !== currentUsername
+                        }">
+                            {{ formatTime(log.actionDate) }} - {{ formatDate(log.actionDate) }}
+                        </p>
+                        <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
+                            <p>
+                                <strong>User</strong> : 
+                                {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
+                            </p>
+                            <p class="mt-1"><strong>Action</strong> :</p>
+                            <p>{{ log.action }}</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-        </div>
+
+            <!-- Search + Pagination di bawah dan sejajar -->
+            <div class="flex flex-wrap justify-between items-center mt-6 gap-4">
+                <!-- Search Input -->
+                <input 
+                    v-model="searchLog" 
+                    placeholder="Cari log..." 
+                    class="w-full sm:w-[250px] px-3 py-1 border border-[#1E3A5F] rounded-md text-sm bg-[#F8FAFC]"
+                />
+
+                <!-- Pagination Controls -->
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="currentPage--"
+                        :disabled="currentPage === 1"
+                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                    >
+                        ‹
+                    </button>
+
+                    <span class="text-sm font-semibold text-[#1E3A5F]">
+                        Halaman {{ currentPage }} dari {{ totalPages }}
+                    </span>
+
+                    <button
+                        @click="currentPage++"
+                        :disabled="currentPage === totalPages"
+                        class="px-3 py-1 rounded bg-[#1E3A5F] text-white disabled:opacity-50"
+                    >
+                        ›
+                    </button>
+                </div>
+            </div>
+            <!-- END -->
+        </div> 
       </div>
     </template>
   </div>
@@ -241,6 +276,28 @@
       <div class="flex justify-end gap-2">
         <VCancelButton label="Tidak" @click="closePaymentModal" />
         <VSuccessButton label="Ya" @click="updatePaymentStatus" />
+      </div>
+    </div>
+  </VModal>
+  <VModal v-model="showStatusModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Update Status</h3>
+      <p class="mb-6 text-gray-600">{{ getStatusModalMessage }}</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeStatusModal" />
+        <VSuccessButton label="Ya" @click="confirmStatusUpdate" />
+      </div>
+    </div>
+  </VModal>
+  <VModal v-model="showCancelModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Pembatalan Proyek</h3>
+      <p class="mb-6 text-gray-600">Apakah Anda yakin ingin membatalkan proyek ini?</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeCancelModal" />
+        <VSuccessButton label="Ya" @click="confirmCancelProject" />
       </div>
     </div>
   </VModal>
@@ -264,7 +321,7 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
-const project = ref<any>({});
+const project = ref<Unk>({});
 const projectData = ref<any>({});
 const isLoading = ref(true);
 const error = ref('');
@@ -277,7 +334,28 @@ const canViewFinancialInfo = computed(() => {
 });
 
 const showPaymentModal = ref(false);
+const showStatusModal = ref(false);
+const showCancelModal = ref(false);
+const newStatusToUpdate = ref<number | null>(null);
 const projectStore = useProjectStore();
+
+// Add these methods
+const openCancelModal = () => {
+  showCancelModal.value = true;
+};
+
+const closeCancelModal = () => {
+  showCancelModal.value = false;
+};
+
+const confirmCancelProject = async () => {
+  await cancelProject();
+};
+
+const getStatusModalMessage = computed(() => {
+  const nextStatus = formatStatus(newStatusToUpdate.value || 0);
+  return `Apakah Anda yakin ingin mengubah status proyek menjadi "${nextStatus}"?`;
+});
 
 // Add these computed properties
 const showPaymentUpdateButton = computed(() => {
@@ -328,9 +406,9 @@ const totalAssetFuelCost = computed(() => {
 });
 
 // Calculate total vehicle costs (usage + fuel)
-const totalVehicleCosts = computed(() => {
-  return totalAssetUseCost.value + totalAssetFuelCost.value;
-});
+// const totalVehicleCosts = computed(() => {
+//   return totalAssetUseCost.value + totalAssetFuelCost.value;
+// });
 
 const openPaymentModal = () => {
   showPaymentModal.value = true;
@@ -366,13 +444,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-// Format date with time
-const formatDateTime = (dateString: string): string => {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-         ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
+
 
 // Format currency function
 const formatCurrency = (value: number): string => {
@@ -384,27 +456,102 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Diajukan';
-    case 1: return 'Dalam Pengiriman';
+    case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
   }
 };
 
-// Add this function to fetch client name
+const formatPaymentStatus = (paymentStatus: number): string => {
+  switch (paymentStatus) {
+    case 0: return 'Belum bayar';
+    case 1: return 'Sudah bayar';
+    case 2: return 'Dikembalikan';
+    default: return 'Unknown';
+  }
+};
+
+// Update fetchClientName function to use real API data
 const fetchClientName = async (clientId: string) => {
+  if (!clientId) {
+    clientName.value = '-';
+    return;
+  }
+  
   try {
-    // In a real implementation, you'd make an API call to get the client name
-    // For example:
-    // const response = await axios.get(`${API_URLS.CLIENT}/client/${clientId}`);
-    // clientName.value = response.data.data.clientName;
+    // Make a real API call to fetch client data
+    const response = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      }
+    });
     
-    // For now, we'll just set a placeholder based on the ID
-    // Replace this with your actual API call when available
-    clientName.value = `Client ${clientId.substring(0, 8)}`;
+    if (response.data && response.data.status === 200 && response.data.data) {
+      // Extract the client name from the response data
+      clientName.value = response.data.data.nameClient || response.data.data.clientName || '';
+      console.log('Fetched client name:', clientName.value);
+    } else {
+      console.error('Client data not found or invalid format');
+      clientName.value = `Client ${clientId.substring(0, 8)}`;
+    }
   } catch (err) {
     console.error('Error fetching client name:', err);
     clientName.value = 'Unknown Client';
+  }
+};
+
+// Add this new ref to store asset types
+const assetTypes = ref<Record<string, string>>({});
+
+// Updated fetchAssetTypes function
+const fetchAssetTypes = async () => {
+  if (!projectData.value || !projectData.value.projectUseAsset) return;
+  
+  try {
+    for (const asset of projectData.value.projectUseAsset) {
+      if (!asset.platNomor) continue;
+      
+      // Skip if we already have this asset type
+      if (assetTypes.value[asset.platNomor]) continue;
+      
+      console.log(`Fetching asset type for plate number: ${asset.platNomor}`);
+      
+      // Fetch asset details from API
+      const response = await axios.get(`${API_URLS.ASSET}/asset/${asset.platNomor}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      console.log(`Response for ${asset.platNomor}:`, response.data);
+      
+      if (response.data && response.data.status === 200 && response.data.data) {
+        // Extract the jenisAset field from the response
+        const assetData = response.data.data;
+        
+        if (assetData.jenisAset) {
+          assetTypes.value[asset.platNomor] = assetData.jenisAset;
+          console.log(`Found jenisAset: ${assetData.jenisAset} for ${asset.platNomor}`);
+        } else if (assetData.assetType) {
+          assetTypes.value[asset.platNomor] = assetData.assetType;
+          console.log(`Using assetType fallback: ${assetData.assetType} for ${asset.platNomor}`);
+        } else if (assetData.type) {
+          assetTypes.value[asset.platNomor] = assetData.type;
+          console.log(`Using type fallback: ${assetData.type} for ${asset.platNomor}`);
+        } else {
+          // Only if all possible fields are missing
+          assetTypes.value[asset.platNomor] = '-';
+          console.log(`No type information found for ${asset.platNomor}`);
+        }
+      } else {
+        console.error(`Failed to get asset data for ${asset.platNomor}:`, response.data);
+        assetTypes.value[asset.platNomor] = 'Error';
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching asset types:', err);
+    // In case of error, don't set any default values
   }
 };
 
@@ -421,9 +568,6 @@ const loadData = async () => {
       }
     });
     
-    console.log('API URL:', `${API_URLS.PROJECT}/project/${projectId}`);
-    console.log('Response:', response?.data);
-    
     if (response.data && response.data.status === 200) {
       project.value = response.data.data;
       // Extract the nested data object
@@ -438,6 +582,11 @@ const loadData = async () => {
       // Fetch client name if clientId is available
       if (projectData.value.projectClientId) {
         await fetchClientName(projectData.value.projectClientId);
+      }
+      
+      // Fetch asset types if assets are available
+      if (projectData.value.projectUseAsset && projectData.value.projectUseAsset.length > 0) {
+        await fetchAssetTypes();
       }
       
       console.log('Project data loaded:', projectData.value);
@@ -458,11 +607,12 @@ const loadData = async () => {
   }
 };
 
-// Action methods for buttons
+// Update cancelProject method
 const cancelProject = async () => {
   try {
     await projectStore.updateProjectStatus(projectData.value.id, 3); // 3 is cancelled status
     await loadData(); // Refresh data after cancellation
+    closeCancelModal();
   } catch (error) {
     console.error('Failed to cancel project:', error);
   }
@@ -472,35 +622,91 @@ const updateProject = async () => {
   try {
     // Get current status
     const currentStatus = projectData.value.projectStatus;
-    let newStatus;
 
     // Sequential status update logic
     if (currentStatus === 0) { // Diajukan -> Kirim
-      newStatus = 1;
+      newStatusToUpdate.value = 1;
     } else if (currentStatus === 1) { // Kirim -> Selesai
-      newStatus = 2;
+      newStatusToUpdate.value = 2;
     } else {
       return;
     }
+    showStatusModal.value = true;
+  } catch (error) {
+    console.error('Failed to update project status:', error);
+  }
+};
 
-    await projectStore.updateProjectStatus(projectData.value.id, newStatus);
+const closeStatusModal = () => {
+  showStatusModal.value = false;
+  newStatusToUpdate.value = null;
+};
+
+const confirmStatusUpdate = async () => {
+  try {
+    if (newStatusToUpdate.value === null) return;
+    
+    await projectStore.updateProjectStatus(projectData.value.id, newStatusToUpdate.value);
     await loadData(); // Refresh data after update
+    closeStatusModal();
   } catch (error) {
     console.error('Failed to update project status:', error);
   }
 };
 
 const editDistributionInfo = () => {
-  // Implement edit distribution info functionality
-  console.log('Edit distribution info');
-  // This could open a modal or navigate to an edit page
+  // Navigate to the update distribution view
+  router.push(`/project/update/distribution/${projectData.value.id}`);
 };
 
-const editAssets = () => {
-  // Implement edit assets functionality
-  console.log('Edit assets');
-  // This could open a modal or navigate to an assets edit page
+
+/// 
+// Handle Log //
+///
+const userRole = computed(() => authStore.userRole)
+
+const searchLog = ref('');
+
+const currentUsername = computed(() => authStore.currentUsername);
+
+// Format Jam dari ISO (jam:menit)
+const formatTime = (iso: string): string => {
+    const date = new Date(iso);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
 };
+
+// Urutkan log terbaru ke terlama
+const sortedLogs = computed(() => {
+    console.log(projectData.value.projectLogs)
+    return [...(projectData.value?.projectLogs || [])].sort((a, b) =>
+        new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
+    );
+});
+
+const logsPerPage = 3;
+const currentPage = ref(1);
+
+const filteredLogs = computed(() => {
+    const search = searchLog.value.toLowerCase();
+    return sortedLogs.value.filter(log =>
+        log.action.toLowerCase().includes(search) || 
+        log.user.toLowerCase().includes(search)
+    );
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredLogs.value.length / logsPerPage);
+});
+
+const paginatedLogs = computed(() => {
+    const start = (currentPage.value - 1) * logsPerPage;
+    return filteredLogs.value.slice(start, start + logsPerPage);
+});
+
+/// 
+// End //
 
 onMounted(async () => {
   await loadData();

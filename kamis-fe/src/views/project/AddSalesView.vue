@@ -3,27 +3,16 @@
   <div class="min-h-screen bg-gray-100 p-6">
     <!-- Navigation header -->
     <div class="mb-4 flex justify-between items-center">
-      <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
-        <span>←</span>
-      </router-link>
+      
     </div>
     
-    <!-- Breadcrumb navigation -->
-    <!-- <div class="flex items-center text-[#1E3A5F] mb-6">
-      <router-link to="/" class="hover:underline">Home</router-link>
-      <span class="mx-2">></span>
-      <router-link to="/project" class="hover:underline">Distribusi & Penjualan</router-link>
-      <span class="mx-2">></span>
-      <span class="font-semibold">Mendaftarkan Penjualan</span>
-    </div> -->
-
     <!-- Main Form -->
     <div class="bg-white rounded-lg shadow-md p-6">
       <!-- Form header with back button and next button -->
       <div class="flex justify-between mb-6">
-        <button @click="goBack" class="flex items-center text-[#1E3A5F]">
-          <span class="text-2xl">←</span>
-        </button>
+        <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
+          <span>←</span>
+        </router-link>
         <button 
           @click="submitForm" 
           class="bg-[#2D6A4F] hover:bg-[#216043] text-white px-4 py-2 rounded-md"
@@ -339,7 +328,7 @@ const fetchProducts = async () => {
     interface ResourceResponse {
       id: string;
       resourceName: string;
-      resourceSellPrice?: number;
+      resourcePrice?: number;
       resourceStock?: number;
     }
     
@@ -347,20 +336,13 @@ const fetchProducts = async () => {
     availableProducts.value = response.data.data.map((resource: ResourceResponse) => ({
       id: resource.id,
       name: resource.resourceName,
-      price: resource.resourceSellPrice || 9000000, // Default if not available
-      stock: resource.resourceStock || 10 // Default if not available
+      price: resource.resourcePrice, 
+      stock: resource.resourceStock 
     }));
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
-    
-    // Dummy data for testing
-    availableProducts.value = [
-      { id: '1', name: 'Ini Cangklu', price: 9000000, stock: 10 },
-      { id: '2', name: 'Ini Karuyu', price: 9000000, stock: 15 },
-      { id: '3', name: 'Ini Sekpo', price: 9000000, stock: 20 },
-      { id: '4', name: 'Ini gergaji', price: 9000000, stock: 8 }
-    ];
+
   }
 };
 
@@ -446,10 +428,6 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
-// Navigation
-const goBack = () => {
-  router.back();
-};
 
 // Form submission
 const submitForm = async () => {

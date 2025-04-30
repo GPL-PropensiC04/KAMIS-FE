@@ -1,4 +1,4 @@
-import type { AddResourceTempRequestInterface, ResourceTempInterface } from "../resourcetemp.interface";
+import type { AddResourceTempRequestInterface, ResourceTempInterface } from "./resourcetemp.interface";
 import type { AssetTempInterface } from "./assettemp.interface";
 import type { LogPurchaseInterface } from "./logpurchase.interface";
 
