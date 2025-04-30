@@ -20,4 +20,5 @@ export interface AsetListInterface {
   nilaiPerolehan: number;
   supplierId: string; // UUID will be represented as string in TypeScript
   lastMaintenance: string;
+  tanggalPerolehan: string;
 }

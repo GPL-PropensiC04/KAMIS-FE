@@ -41,7 +41,7 @@ const resourceOptions = computed(() => {
 const handleSelectResource = (name: string) => {
   const selected = resourceStore.resources.find((r) => r.resourceName === name);
   if (selected) {
-    selectedResourceId.value = selected.id;
+    selectedResourceId.value = selected.id ?? null;
     selectedResourcePrice.value = selected.resourcePrice;
     selectedResourceName.value = selected.resourceName;
   }
@@ -56,11 +56,15 @@ const addResource = () => {
     return;
   }
 
-  resources.value.push({
-    id: selectedResourceId.value,
-    resourceName: selectedResourceName.value,
-    resourcePrice: selectedResourcePrice.value,
-  });
+  if (selectedResourceId.value !== null) {
+    resources.value.push({
+      id: selectedResourceId.value,
+      resourceName: selectedResourceName.value,
+      resourcePrice: selectedResourcePrice.value ?? 0,
+    });
+  } else {
+    toast.error("Pilih barang yang valid sebelum menambahkannya!");
+  }
 
   selectedResourceName.value = "";
   selectedResourcePrice.value = null;
