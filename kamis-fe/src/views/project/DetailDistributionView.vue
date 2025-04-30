@@ -50,40 +50,40 @@
           </div>
 
           <!-- Basic Info -->
-          <div class="grid grid-cols-3 gap-4 p-4">
-            <div>
-              <p class="text-gray-600 text-sm">Nama Proyek</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div class="break-words">
+              <p class="text-gray-600 text-sm">Nama Kegiatan</p>
               <p class="font-semibold">{{ projectData.projectName }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName}}</p>
+              <p class="font-semibold">{{ clientName }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Mulai</p>
               <p class="font-semibold">{{ formatDate(projectData.projectStartDate) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Jumlah PHL</p>
               <p class="font-semibold">{{ projectData.projectPHLCount }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status</p>
               <p class="font-semibold">{{ formatStatus(projectData.projectStatus) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Selesai</p>
               <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Alamat Pengambilan</p>
               <p class="font-semibold">{{ projectData.projectPickupAddress }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
               <p class="font-semibold">{{ projectData.projectDeliveryAddress }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status Pembayaran</p>
               <p class="font-semibold">{{ formatPaymentStatus(projectData.projectPaymentStatus) }}</p>
             </div>
@@ -266,7 +266,19 @@
             <!-- END -->
         </div> 
       </div>
+
+
+
+
+
+      
     </template>
+
+
+
+
+
+    
   </div>
   <VModal v-model="showPaymentModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
@@ -278,6 +290,8 @@
         <VSuccessButton label="Ya" @click="updatePaymentStatus" />
       </div>
     </div>
+
+
   </VModal>
   <VModal v-model="showStatusModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
