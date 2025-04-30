@@ -1,0 +1,21 @@
+services:
+  frontend:
+    container_name: frontend-kamis
+    image: gcr.io/propensi-451504/frontend:latest
+    ports:
+      - '80:5173'
+    restart: 'always'
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://api.sikamis.com
+    networks:
+      - frontend-network
+
+networks:
+  kamis-network:
+    external: true
+    driver: bridge
+    name: kamis-network 
+  frontend-network:
+    driver: bridge
+

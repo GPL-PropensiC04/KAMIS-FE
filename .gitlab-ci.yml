@@ -1,0 +1,99 @@
+.setup-ssh:
+  before_script:
+    - 'which ssh-agent || ( apk add --no-cache openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+stages:
+  - build
+  - publish
+  - deploy
+  - clean
+
+variables:
+  GCP_PROJECT_ID: "propensi-451504"
+  IMAGE_REPO: "gcr.io/$GCP_PROJECT_ID"
+  IMAGE_DOCKER_DIND: docker:27.3.1-alpine3.20
+  IMAGE_NODE: node:18-alpine
+  # Default API URLs if not set in GitLab CI/CD variables
+  API_URL: ${API_URL}
+
+
+# Build job for Vue.js frontend
+build-frontend:
+  image: node:18-alpine  
+  stage: build
+  script:
+    - echo "Building Vue.js frontend..."
+    - cd kamis-fe
+    - npm install --progress=false
+    # Copy the appropriate .env file based on deployment target
+    - if [ "$CI_COMMIT_REF_NAME" = "main" ] || [ "$CI_COMMIT_REF_NAME" = "gcp-deploy" ]; then
+        echo "Using production environment";
+        cp .env.production .env;
+      else
+        echo "Using development environment";
+        cp .env .env.local;
+      fi
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist
+  only:
+    - gcp-deploy
+
+# Publish job for Vue.js frontend
+publish-frontend:
+  image: $IMAGE_DOCKER_DIND
+  stage: publish
+  tags:
+    - apap
+  dependencies:
+    - build-frontend
+  script:
+    - echo "Building Docker image for Vue.js frontend..."
+    - echo "Checking GCLOUD_SERVICE_KEY"
+    - echo $GCLOUD_SERVICE_KEY | base64 -d | docker login -u _json_key --password-stdin https://gcr.io || true
+    - docker build -t $IMAGE_REPO/frontend:latest -f Dockerfile .
+    - echo "Pushing Docker image to Google Container Registry..."
+    - docker push $IMAGE_REPO/frontend:latest
+  only:
+    - gcp-deploy
+
+# Deploy job for all services
+deploy-services:
+  stage: deploy
+  tags:
+    - apap
+  dependencies:
+    - publish-frontend
+    # (Include other services as dependencies...)
+  extends: .setup-ssh
+  script:
+    - echo "Deploying services to GCP VM..."
+    - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "mkdir -p ~/frontend/"
+    # Replace API URLs in docker-compose file with GitLab variables
+    - sed -i "s|VITE_API_URL=.*|VITE_API_URL=$API_URL|g" docker-compose-deploy.yml
+    - rsync -rahv $CI_PROJECT_DIR/docker-compose-deploy.yml "$DEPLOY_USERNAME@$DEPLOY_SERVER:~/frontend/"
+    - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "
+        cd ~/frontend/ &&
+        docker compose -f docker-compose-deploy.yml pull &&
+        docker compose -f docker-compose-deploy.yml up -d --remove-orphans"
+  only:
+    - gcp-deploy
+
+cleaning:
+  stage: clean
+  tags:
+    - apap
+  dependencies:
+    - deploy-services
+  extends: .setup-ssh
+  script:
+    - echo "Cleaning up unused Docker resources..."
+    - ssh "$DEPLOY_USERNAME@$DEPLOY_SERVER" "docker system prune -af"
+  only:
+    - gcp-deploy

@@ -1,0 +1,130 @@
+// stores/supplier.store.ts
+
+import { API_URLS } from "@/config/api.config";
+import type { AddSupplierRequestInterface, SupplierInterface, SupplierListResponseInterface, DetailSupplierInterface, UpdateSupplierRequestInterface } from "@/interfaces/profile/supplier.interface";
+import type { CommonResponseInterface } from "@/interfaces/common.interface";
+import router from "@/router";
+import axios from "axios";
+import { defineStore } from "pinia";
+import { useToast } from "vue-toastification";
+
+export const useSupplierStore = defineStore('supplier', {
+  state: () => ({
+    suppliers: [] as SupplierListResponseInterface[], // Untuk list supplier
+    supplierDetail: null as DetailSupplierInterface | null, // Supplier detail data
+    loading: false,
+    error: null as null | string,
+  }),
+  actions: {
+    async addSupplier(body: AddSupplierRequestInterface) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.post<CommonResponseInterface<SupplierInterface>>(
+          `${API_URLS.PROFILE}/supplier/add`,
+          body,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+
+        if (response.data.status === 200) {
+          useToast().success('Supplier berhasil ditambahkan!');
+          await router.push('/supplier');
+        }
+      } catch (error: any) {
+        this.error = error instanceof Error ? error.message : 'Terjadi kesalahan saat menambahkan supplier';
+        useToast().error(error.response?.data?.message || this.error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async viewAllSuppliers(filters: { nameSupplier?: string; companySupplier?: string } = {}) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get<CommonResponseInterface<SupplierListResponseInterface[]>>(
+          `${API_URLS.PROFILE}/supplier/all`,
+          {
+            params: filters,
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+        this.suppliers = response.data.data;
+      } catch (error: any) {
+        this.error = error instanceof Error ? error.message : 'Gagal mengambil data supplier';
+        useToast().error(error.response?.data?.message || this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async getSupplierDetail(supplierId: string) {
+      this.loading = true;
+      this.error = null;
+      this.supplierDetail = null;
+
+      try {
+        const response = await axios.get<CommonResponseInterface<DetailSupplierInterface>>(
+          `${API_URLS.PROFILE}/supplier/detail/${supplierId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+        if (response.data.status === 200) {
+          this.supplierDetail = response.data.data;
+        } else {
+          useToast().error(response.data.message || 'Gagal mengambil detail supplier');
+        }
+      } catch (error: any) {
+        this.error = error instanceof Error ? error.message : 'Gagal mengambil detail supplier';
+        useToast().error(error.response?.data?.message || this.error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updateSupplier(body: UpdateSupplierRequestInterface) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.put<CommonResponseInterface<SupplierInterface>>(
+          `${API_URLS.PROFILE}/supplier/update`,
+          body,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+
+        if (response.data.status === 200) {
+          useToast().success('Supplier berhasil diperbarui!');
+          await router.push('/supplier');
+        } else {
+          useToast().error(response.data.message || 'Gagal memperbarui supplier');
+        }
+      } catch (error: any) {
+        this.error = error instanceof Error ? error.message : 'Gagal memperbarui supplier';
+        useToast().error(error.response?.data?.message || this.error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+  }
+});
