@@ -34,21 +34,36 @@
   defineOptions({ name: 'AppBreadcrumb' })
   import { useRoute, useRouter } from 'vue-router'
   import { computed } from 'vue'
-  import type { RouteRecordNormalized } from 'vue-router'
 
   const route = useRoute()
   const router = useRouter()
 
   const breadcrumbs = computed(() => {
-    const crumbs: RouteRecordNormalized[] = []
+    const crumbs: any[] = []
     let current = route.matched[route.matched.length - 1]
+    const visited = new Set<string>()
+    let params = { ...route.params } // ambil params aktif
     while (current) {
       if (current.meta && current.meta.breadcrumb) {
-        crumbs.unshift(current)
+        // Simpan name dan params untuk router-link dinamis
+        crumbs.unshift({
+          ...current,
+          name: current.name,
+          params: { ...params }
+        })
       }
       if (current.meta && current.meta.parent) {
-        const parentMatched = router.resolve(current.meta.parent).matched.at(-1)
-        if (parentMatched) {
+        const parentMeta = typeof current.meta.parent === 'function'
+          ? current.meta.parent({ ...route, params })
+          : current.meta.parent;
+        const resolved = router.resolve(parentMeta)
+        const parentMatched = resolved.matched.at(-1)
+        if (parentMatched && !visited.has(parentMatched.path)) {
+          visited.add(parentMatched.path)
+          // update params jika parentMeta object
+          if (typeof parentMeta === 'object' && parentMeta.params) {
+            params = { ...parentMeta.params }
+          }
           current = parentMatched
         } else {
           break
@@ -70,8 +85,15 @@
     ]
   })
 
-  function getRoutePath(route: RouteRecordNormalized | { path: string }) {
-    return route.path
+  function getRoutePath(route: any) {
+    if (route.name && route.params && Object.keys(route.params).length > 0) {
+      return { name: route.name, params: route.params }
+    }
+    if (route.path) {
+      return route.path
+    }
+    // fallback
+    return '/'
   }
 </script>
 
