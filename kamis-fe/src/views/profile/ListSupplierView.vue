@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSupplierStore } from '@/stores/supplier.ts';
+import { useSupplierStore } from '@/stores/supplier';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VSearchBar from '@/components/VSearchBar.vue';
