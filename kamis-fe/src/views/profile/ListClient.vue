@@ -2,11 +2,18 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
-      <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-        <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." />
-        <VOptionInput v-model="typeClient" :options="['Semua', 'Perusahaan', 'Perorangan']"/>
-        <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal" :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
-        <VButton v-if="isOperational" class="ml-auto" label="+ Tambah Klien" @click="goToAddClient"/>
+      <div class="flex justify-between items-center gap-2">
+        <div class="flex items-center gap-3 flex-nowrap w-full">
+          <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." class="flex-1" />
+          <VOptionInput v-model="typeClient" :options="['All', 'Perusahaan', 'Perorangan']"/>
+          <VDropDownInput
+            v-if="isFinance || isDireksi"
+            v-model="selectedNominal"
+            :options="nominalOptions.map(opt => opt.label)"
+            class="w-48"
+          />
+        </div>
+        <VButton v-if="isOperational" class="ml-4 whitespace-nowrap" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
     </div>
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
@@ -29,7 +36,7 @@
           >
             <td class="px-6 py-4">{{ client.nameClient }}</td>
             <td class="px-6 py-4">
-              {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Individu' : client.typeClient }}
+              {{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Perorangan' : client.typeClient }}
             </td>
             <td class="px-6 py-4">{{ client.companyClient || '-' }}</td>
             <td v-if="isOperational || isDireksi" class="px-6 py-4">{{ client.projectCount ?? 0 }} Aktivitas</td>
@@ -69,7 +76,7 @@ const searchName = ref('');
 const clientStore = useClientStore();
 const authStore = useAuthStore();
 const router = useRouter();
-const typeClient = ref('Semua');
+const typeClient = ref('All');
 
 const nominalOptions = [
   { label: "Semua Profit", min: null, max: null },
