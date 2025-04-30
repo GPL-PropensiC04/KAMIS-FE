@@ -299,8 +299,8 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
-const project = ref<any>({});
-const projectData = ref<any>({});
+const project = ref<unknown>({});
+const projectData = ref<unknown>({});
 const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
@@ -470,7 +470,7 @@ const updatePaymentStatus = async () => {
 // Check if user can edit project (Operasional or Admin)
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Admin';
+  return userRole === 'Finance' || userRole === 'Admin';
 });
 
 // Format date function
