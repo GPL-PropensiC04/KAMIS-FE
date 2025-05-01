@@ -4,6 +4,7 @@ import { useSupplierStore } from "@/stores/supplier";
 import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
+import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
 import Breadcrumb from "@/components/Breadcrumb.vue";
@@ -116,8 +117,12 @@ const handleSubmit = async () => {
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <!-- Tombol Back -->
-      <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
+      <!-- Header dengan Tombol Back dan Submit -->
+      <div class="flex justify-between items-center mb-6">
+        <button @click="router.back()" class="text-xl font-bold">&larr;</button>
+        <VSuccessButton label="Tambah Supplier" @click="handleSubmit" />
+      </div>
+
 
       <h1 class="text-2xl font-bold mb-6">Menambahkan Supplier</h1>
 
@@ -213,10 +218,6 @@ const handleSubmit = async () => {
         </table>
       </div>
 
-      <!-- Tombol Submit -->
-      <div class="text-center">
-        <VButton label="Tambah Supplier" @click="handleSubmit" />
-      </div>
     </div>
   </div>
 </template>
