@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useSupplierStore } from "@/stores/supplier.ts";
-import { useResourceStore } from "@/stores/resource.ts";
+import { useSupplierStore } from "@/stores/supplier";
+import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
@@ -56,7 +56,7 @@ const resourceOptions = computed(() => resourceStore.resources.map(res => res.re
 function handleSelectResource(name: string) {
   const selected = resourceStore.resources.find(r => r.resourceName === name);
   if (selected) {
-    selectedResourceId.value = selected.id;
+    selectedResourceId.value = selected.id ?? null;
     selectedResourcePrice.value = selected.resourcePrice;
     selectedResourceName.value = selected.resourceName;
   } else {

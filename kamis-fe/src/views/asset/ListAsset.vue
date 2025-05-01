@@ -34,7 +34,14 @@
               <th scope="col" class="px-6 py-3 text-center">{{ thirdColumnHeader }}</th>
             </tr>
           </thead>
-          <tbody v-if="sortedAssets.length > 0">
+          <tbody v-if="loading">
+            <tr>
+              <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                Loading...
+              </td>
+            </tr>
+          </tbody>
+          <tbody v-else-if="sortedAssets.length > 0">
             <tr v-for="asset in sortedAssets" 
                 :key="asset.platNomor" 
                 class="bg-white border-b border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
@@ -61,12 +68,12 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { AsetService } from '@/stores/assetservices';
-import type { AsetInterface } from '@/interfaces/asset/asset.interface';
+import type { AsetListInterface } from '@/interfaces/asset/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
-const assets = ref<AsetInterface[]>([]);
+const assets = ref<AsetListInterface[]>([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const authStore = useAuthStore();
@@ -120,7 +127,14 @@ onMounted(async () => {
 const fetchAssets = async () => {
   try {
     const data = await AsetService.viewAllAsset();
-    assets.value = data;
+    assets.value = data.map((item: any) => ({
+      ...item,
+      tanggalPerolehan: item.tanggalPerolehan ?? '',
+      deskripsi: item.deskripsi ?? '',
+      assetMaintenance: item.assetMaintenance ?? '',
+      supplierId: item.supplierId ?? '', 
+      lastMaintenance: item.lastMaintenance ?? '',
+    }));
   } catch (err) {
     console.error('Error fetching assets:', err);
   } finally {
@@ -172,7 +186,8 @@ const thirdColumnHeader = computed(() => {
   return '';
 });
 
-const thirdColumnValue = (asset: AsetInterface) => {
+
+const thirdColumnValue = (asset: AsetListInterface) => {
   if (canViewMaintenanceInfo.value) {
     if (!asset.lastMaintenance) {
       return 'Belum Maintenance';
