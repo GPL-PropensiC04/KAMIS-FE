@@ -24,4 +24,5 @@ export interface ResourceResponseInterface {
 export interface UpdateResourceRequestInterface {
   resourcePrice: number;
   resourceDescription: string;
+  resourceStock: number;
 }
