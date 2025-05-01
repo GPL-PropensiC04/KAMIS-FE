@@ -5,6 +5,7 @@ import { useSupplierStore } from "@/stores/supplier";
 import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
+import VSuccessButton from "@/components/VSuccessButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 import { useToast } from "vue-toastification";
 import type { UpdateSupplierRequestInterface } from "@/interfaces/profile/supplier.interface";
@@ -132,11 +133,10 @@ async function handleUpdate() {
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <!-- Tombol Kembali -->
-      <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
-
-      <div class="flex justify-end mb-4">
-        <VButton label="Update" @click="handleUpdate" />
+      <!-- Header: Tombol Kembali & Update -->
+      <div class="flex justify-between items-center mb-6">
+        <button @click="router.back()" class="text-xl font-bold">&larr;</button>
+        <VSuccessButton label="Update" @click="handleUpdate" />
       </div>
 
       <!-- Form Input -->
