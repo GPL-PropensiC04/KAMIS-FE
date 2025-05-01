@@ -61,7 +61,7 @@
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
             <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditFinancial && projectData.projectStatus !== 2"
+              v-if="canEditProject && projectData.projectStatus !== 2"
               label="Ubah"
               @click="editSalesInfo"
             />
@@ -460,7 +460,7 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Admin';
+  return userRole === 'Operasional' || userRole === 'Direksi';
 });
 
 const canEditFinancial = computed(() => {
