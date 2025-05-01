@@ -6,6 +6,7 @@
     import { useRouter } from "vue-router";
     import { useToast } from "vue-toastification";
     import Breadcrumb from '@/components/Breadcrumb.vue'
+    import VSuccessButton from "@/components/VSuccessButton.vue";
 
     const router = useRouter();
     const clientStore = useClientStore();
@@ -75,8 +76,16 @@
     <Breadcrumb />
     <div class="min-h-screen bg-[#E5EAF2] p-6">
         <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-            <!-- Tombol Back -->
-            <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
+
+            <div class="flex justify-between items-center mb-4">
+                <!-- Tombol Back -->
+                <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
+
+                <!-- Tombol Submit -->
+                <div class="text-center">
+                    <VSuccessButton label="Tambah" @click="handleSubmit" />
+                </div>
+            </div> 
 
             <!-- Form Input -->
             <div class="grid grid-cols-2 gap-4 mb-4">
@@ -134,11 +143,6 @@
                     rows="4"
                     class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#E5EAF2]"
                 ></textarea>
-            </div>
-
-            <!-- Tombol Submit -->
-            <div class="text-center">
-                <VButton label="Tambah" @click="handleSubmit" />
             </div>
         </div>
     </div>
