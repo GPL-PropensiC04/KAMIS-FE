@@ -82,7 +82,7 @@ const handleSubmit = async () => {
 
         <!-- Tombol Submit -->
         <div class="text-center">
-          <VSuccessButton label="Simpan Perubahan" @click="handleSubmit" />
+          <VSuccessButton label="Update" @click="handleSubmit" />
         </div>
       </div>
 
