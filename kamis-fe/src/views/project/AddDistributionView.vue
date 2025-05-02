@@ -105,7 +105,7 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      :value="formatDisplayDate(formData.projectStartDate)"
+                      :value="formData.projectStartDate"
                       @input="handleStartDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -115,7 +115,7 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      :value="formatDisplayDate(formData.projectEndDate)"
+                      :value="formData.projectEndDate"
                       @input="handleEndDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -594,28 +594,19 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
-// Format date for display (DD/MM/YYYY)
-const formatDisplayDate = (dateString: string | undefined): string => {
-  if (!dateString) return '';
-  const parts = dateString.split('T')[0].split('-');
-  if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+// Custom date input handlers
+const handleStartDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectStartDate = target.value;
   }
-  return dateString;
 };
 
-// Format date for API (YYYY-MM-DD)
-const formatApiDate = (dateString: string | undefined): string => {
-  if (!dateString) return '';
-  // If it's already in YYYY-MM-DD format, return as is
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    return dateString;
+const handleEndDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectEndDate = target.value;
   }
-  // If it has a time component, extract just the date
-  if (dateString.includes('T')) {
-    return dateString.split('T')[0];
-  }
-  return dateString;
 };
 
 // Form submission
@@ -641,61 +632,15 @@ const submitForm = async () => {
     return;
   }
   
-  // Create a safe copy to work with
-  const apiData = { ...formData.value };
-  
-  // Ensure dates are sent in the correct format (YYYY-MM-DD) without any time component
-  if (apiData.projectStartDate) {
-    apiData.projectStartDate = formatApiDate(apiData.projectStartDate);
-  }
-  
-  if (apiData.projectEndDate) {
-    apiData.projectEndDate = formatApiDate(apiData.projectEndDate);
-  }
-  
-  // Validate date range (start date must be before or equal to end date)
-  if (apiData.projectEndDate && apiData.projectStartDate && apiData.projectEndDate < apiData.projectStartDate) {
-    toast.error('Tanggal akhir harus setelah tanggal mulai');
-    return;
-  }
-  
-  // Set project type
-  apiData.projectType = true; // true = distribution
-  
-  // Set project use asset
-  apiData.projectUseAsset = assetList.value.map(asset => ({
-    platNomor: asset.id,
-    tipeAset: asset.type || '',
-    assetUseCost: asset.usageCost || 0,
-    assetFuelCost: asset.fuelCost || 0
-  }));
-  
-  // Calculate total costs
-  apiData.projectTotalPemasukkan = apiData.projectTotalPemasukkan || 0;
-  apiData.projectTotalPengeluaran = totalExpenses.value;
+  // Update form data before submitting
+  updateFormData();
   
   try {
-    const response = await axios.post(
-      `${API_URLS.PROJECT}/project/add`,
-      apiData,
-      {
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      }
-    );
-    
-    if (response.data && response.data.data) {
-      toast.success('Proyek berhasil ditambahkan');
-      // Redirect to project detail page
-      router.push(`/project/distribution/${response.data.data.id}`);
-    } else {
-      toast.error('Gagal menambahkan proyek: respons tidak valid');
-    }
+    // Navigate to summary page instead of submitting directly
+    router.push('/project/add/distribution-summary');
   } catch (error) {
-    console.error('Error adding project:', error);
-    toast.error('Gagal menambahkan proyek');
+    console.error('Error navigating to summary page:', error);
+    toast.error('Terjadi kesalahan. Silahkan coba lagi.');
   }
 };
 
@@ -736,23 +681,4 @@ onMounted(() => {
     }
   }
 });
-
-// Custom date input handlers
-const handleStartDateInput = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target) {
-    formData.value.projectStartDate = target.value;
-    // Reset availability flag when date changes
-    availabilityChecked.value = false;
-  }
-};
-
-const handleEndDateInput = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target) {
-    formData.value.projectEndDate = target.value;
-    // Reset availability flag when date changes
-    availabilityChecked.value = false;
-  }
-};
 </script> 

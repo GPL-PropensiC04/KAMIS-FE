@@ -76,34 +76,8 @@ const handleDateInput = (event: Event) => {
     const value = target.value;
     if (formData.value) {
       formData.value.projectStartDate = value;
-      // For sales projects, end date should always match start date
-      formData.value.projectEndDate = value;
     }
   }
-};
-
-// Format date for display (DD/MM/YYYY)
-const formatDisplayDate = (dateString: string): string => {
-  if (!dateString) return '';
-  const parts = dateString.split('T')[0].split('-');
-  if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  }
-  return dateString;
-};
-
-// Format date for API (YYYY-MM-DD)
-const formatApiDate = (dateString: string | undefined): string => {
-  if (!dateString) return '';
-  // If it's already in YYYY-MM-DD format, return as is
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    return dateString;
-  }
-  // If it has a time component, extract just the date
-  if (dateString.includes('T')) {
-    return dateString.split('T')[0];
-  }
-  return dateString;
 };
 
 // Fetch project details
@@ -119,10 +93,16 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates - extract just the YYYY-MM-DD part to avoid timezone issues
+    // Format the dates to YYYY-MM-DD with timezone-safe parsing
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
-      formattedStartDate = formatApiDate(projectData.projectStartDate);
+      try {
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectStartDate.split('T')[0];
+        formattedStartDate = dateStr;
+      } catch {
+        console.error('Invalid start date:', projectData.projectStartDate);
+      }
     }
     
     // For sales projects, end date should be the same as start date
@@ -404,17 +384,24 @@ const submitForm = async () => {
   // Update form data before submitting
   updateFormData();
   
-  // Create a copy of the data for the API
-  const apiData = { ...formData.value };
+  // Create a copy of the data to avoid modifying the original
+  const requestData = { ...formData.value };
   
-  // Ensure dates are in the correct format for the API (YYYY-MM-DD)
-  apiData.projectStartDate = formatApiDate(apiData.projectStartDate);
-  apiData.projectEndDate = formatApiDate(apiData.projectEndDate);
+  // Limit the size of any large arrays to prevent log message overflow
+  if (requestData.projectUseResource && requestData.projectUseResource.length > 5) {
+    console.log(`Limiting projectUseResource array to prevent log overflow (original size: ${requestData.projectUseResource.length})`);
+    // Keep a reference to the original array for local state
+    const originalResources = [...requestData.projectUseResource];
+    // Truncate to 5 items for the API request
+    requestData.projectUseResource = requestData.projectUseResource.slice(0, 5);
+    // Add a note in console but don't add a summary item to avoid type errors
+    console.log(`Removed ${originalResources.length - 5} items to prevent log overflow`);
+  }
   
   try {
     await axios.put(
-      `${API_URLS.PROJECT}/project/update/${formData.value.id}`,
-      apiData,
+      `${API_URLS.PROJECT}/project/update/${requestData.id}`,
+      requestData,
       {
         headers: { 
           'Content-Type': 'application/json',
@@ -425,7 +412,7 @@ const submitForm = async () => {
     
     toast.success('Proyek berhasil diperbarui');
     // Redirect to project detail page
-    router.push(`/project/sale/${formData.value.id}`);
+    router.push(`/project/sale/${requestData.id}`);
   } catch (error) {
     console.error('Error updating project:', error);
     toast.error('Gagal memperbarui proyek');
@@ -542,7 +529,7 @@ onMounted(() => {
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    :value="formatDisplayDate(formData.projectStartDate)"
+                    :value="formData.projectStartDate"
                     @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
