@@ -531,13 +531,6 @@ interface ProjectResource {
   resourceStockUsed: number;
 }
 
-// Calculate total profit
-const getProfit = (): number => {
-  const revenue = projectData.value.projectTotalPemasukkan || 0;
-  // Since cost is now 0, profit equals revenue
-  return revenue;
-};
-
 // Load data from API
 const loadData = async () => {
   isLoading.value = true;
