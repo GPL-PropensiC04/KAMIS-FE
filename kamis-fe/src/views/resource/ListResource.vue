@@ -52,14 +52,13 @@ onMounted(() => {
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <h1 class="text-2xl font-bold mb-4">Daftar Resource</h1>
-
-      <div class="flex justify-between mb-4">
+    <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+      <div class="flex justify-between items-center gap-2">
         <VSearchBar v-model="searchName" placeholder="Cari Nama Resource..." />
         <VButton v-if="showAddButton" label="Tambah Resource" @click="goToAddResource" />
       </div>
-
+    </div>
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
             <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
