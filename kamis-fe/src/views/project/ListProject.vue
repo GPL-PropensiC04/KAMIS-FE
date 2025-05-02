@@ -153,7 +153,7 @@ const formatCurrency = (value: number) => {
 // Status formatter
 const formatStatus = (status: number, projectType: boolean) => {
   if (projectType) {
-    switch (status) {
+    switch (status) { // Distribusi
       case 0: return 'Direncanakan';
       case 1: return 'Dalam Pengiriman';
       case 2: return 'Selesai';
@@ -161,7 +161,7 @@ const formatStatus = (status: number, projectType: boolean) => {
       default: return 'Unknown';
     }
   } else {
-    switch (status) {
+    switch (status) { // Penjualan
       case 0: return 'Direncanakan';
       case 1: return 'Sedang Dikerjakan';
       case 2: return 'Selesai';

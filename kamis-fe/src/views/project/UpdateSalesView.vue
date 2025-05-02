@@ -49,10 +49,10 @@ const selectedQuantity = ref<number | null>(null);
 const selectedPrice = ref(0);
 
 // Helper functions
-const getStatusText = (status: number): string => {
+const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Dilaksanakan';
+    case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
@@ -447,7 +447,7 @@ onMounted(() => {
           'bg-purple-100 text-purple-800': formData.projectStatus === 3
         }">
           <div class="p-3 font-semibold text-center rounded">
-            Status: {{ getStatusText(formData.projectStatus) }}
+            Status: {{ formatStatus(formData.projectStatus) }}
           </div>
         </div>
   

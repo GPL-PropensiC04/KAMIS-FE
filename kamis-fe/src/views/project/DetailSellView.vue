@@ -133,7 +133,7 @@
                   <td v-if="canViewFinancialInfo" class="px-6 py-4 text-right">{{ formatCurrency(resource.sellPrice * resource.resourceStockUsed) }}</td>
                 </tr>
                 <tr v-if="canViewFinancialInfo">
-                  <td class="px-6 py-3">Total Pemasukkan Penjualan</td>
+                  <td class="px-6 py-3">Total Pemasukkan</td>
                   <td class="px-6 py-3 text-right"></td>
                   <td class="px-6 py-3 text-right"></td>
                   <td class="px-6 py-3 text-right"></td>
@@ -508,7 +508,7 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Dalam Pengiriman';
+    case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';

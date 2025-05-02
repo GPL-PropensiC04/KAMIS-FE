@@ -542,7 +542,7 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Sedang Dikerjakan';
+    case 1: return 'Dalam Pengiriman';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
