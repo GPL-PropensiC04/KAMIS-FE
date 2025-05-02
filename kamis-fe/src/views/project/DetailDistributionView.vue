@@ -12,12 +12,12 @@
         <!-- Payment Status Button (only for Finance) -->
         <VSuccessButton 
           v-if="(canEditFinancial) && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
-          label="Bayar" 
+          label="Konfirmasi Pembayaran" 
           @click="openPaymentModal"
         />
         <VCancelButton 
           v-if="(canEditFinancial) && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
-          label="Kembalikan" 
+          label="Konfirmasi Pengembalian" 
           @click="openPaymentModal"
         />
         
@@ -298,19 +298,7 @@
             <!-- END -->
         </div> 
       </div>
-
-
-
-
-
-      
     </template>
-
-
-
-
-
-    
   </div>
   <VModal v-model="showPaymentModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
@@ -322,8 +310,28 @@
         <VSuccessButton label="Ya" @click="updatePaymentStatus" />
       </div>
     </div>
-
-
+  </VModal>
+  <VModal v-model="showStatusModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Update Status</h3>
+      <p class="mb-6 text-gray-600">{{ getStatusModalMessage }}</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeStatusModal" />
+        <VSuccessButton label="Ya" @click="confirmStatusUpdate" />
+      </div>
+    </div>
+  </VModal>
+  <VModal v-model="showCancelModal">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Konfirmasi Pembatalan Proyek</h3>
+      <p class="mb-6 text-gray-600">Apakah Anda yakin ingin membatalkan proyek ini?</p>
+      
+      <div class="flex justify-end gap-2">
+        <VCancelButton label="Tidak" @click="closeCancelModal" />
+        <VSuccessButton label="Ya" @click="confirmCancelProject" />
+      </div>
+    </div>
   </VModal>
   <VModal v-model="showStatusModal">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">

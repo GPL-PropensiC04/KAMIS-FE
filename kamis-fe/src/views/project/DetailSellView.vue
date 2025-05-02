@@ -11,13 +11,13 @@
       <div v-if="!isLoading && !error" class="flex gap-2">
         <!-- Payment Status Button (only for Finance) -->
         <VSuccessButton 
-          v-if="(canEditFinancial || userRole === 'Direksi') && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
-          label="Bayar" 
+          v-if="(canEditFinancial) && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
+          label="Konfirmasi Pembayaran" 
           @click="openPaymentModal"
         />
         <VCancelButton 
-          v-if="(canEditFinancial || userRole === 'Direksi') && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
-          label="Kembalikan" 
+          v-if="(canEditFinancial) && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
+          label="Konfirmasi Pengembalian" 
           @click="openPaymentModal"
         />
         
@@ -458,11 +458,11 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Direksi';
+  return userRole === 'Operasional';
 });
 
 const canEditFinancial = computed(() => {
-  return authStore.userRole === 'Finance';
+  return authStore.userRole === 'Finance' || authStore.userRole === 'Direksi';
 });
 
 const showPaymentModal = ref(false);
