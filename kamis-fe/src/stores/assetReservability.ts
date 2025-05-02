@@ -57,7 +57,7 @@ export const useAssetStore = defineStore('asset', {
     async checkAssetAvailability(request: AssetAvailabilityRequest): Promise<Record<string, boolean>> {
       try {
         const response = await axios.post<AssetAvailabilityResponse>(
-          `${API_URLS.ASSET}/api/asset-reservations/check-availability`,
+          `${API_URLS.ASSET}/asset/reservations/check-availability`,
           request,
           {
             headers: {
