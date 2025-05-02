@@ -469,7 +469,7 @@ onMounted(() => {
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus > 0 }"
                 placeholder="Masukkan nama aktivitas"
-                :disabled="formData.projectStatus > 0"
+                :disabled="formData.projectStatus >= 0"
               />
             </div>
   
@@ -480,8 +480,8 @@ onMounted(() => {
                 <select 
                   v-model="formData.projectClientId"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus > 0 }"
-                  :disabled="formData.projectStatus > 0"
+                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 0 }"
+                  :disabled="formData.projectStatus >= 0"
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">
