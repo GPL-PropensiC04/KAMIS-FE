@@ -113,6 +113,8 @@
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">No</th>
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">Nama</th>
                   <th class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Jumlah</th>
+                  <th v-if="canViewFinancialInfo" class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Harga Jual</th>
+                  <th v-if="canViewFinancialInfo" class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Total</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -127,67 +129,26 @@
                     </template>
                   </td>
                   <td class="px-6 py-4 text-right">{{ resource.resourceStockUsed }}</td>
+                  <td v-if="canViewFinancialInfo" class="px-6 py-4 text-right">{{ formatCurrency(resource.sellPrice) }}</td>
+                  <td v-if="canViewFinancialInfo" class="px-6 py-4 text-right">{{ formatCurrency(resource.sellPrice * resource.resourceStockUsed) }}</td>
+                </tr>
+                <tr v-if="canViewFinancialInfo">
+                  <td class="px-6 py-3">Total Pemasukkan Penjualan</td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
                 </tr>
                 <tr v-if="!projectData.projectUseResource || projectData.projectUseResource.length === 0">
-                  <td colspan="3" class="px-6 py-4 text-center">Tidak ada data barang yang terjual</td>
+                  <td colspan="5" class="px-6 py-4 text-center">Tidak ada data barang yang terjual</td>
                 </tr>
+                
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Financial Information -->
-        <div v-if="canViewFinancialInfo" class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Informasi Keuangan</h2>
-          </div>
-          
-          <div class="p-4">
-            <table class="min-w-full border-collapse">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">Nama Akun</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium text-gray-600">Pemasukkan</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium text-gray-600">Pengeluaran</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <!-- Income items -->
-                <tr>
-                  <td class="px-6 py-3">Total Pemasukkan Penjualan</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
-                  <td class="px-6 py-3 text-right">-</td>
-                </tr>
-                
-                <!-- Expense items -->
-                <tr>
-                  <td class="px-6 py-3">Harga Modal Barang</td>
-                  <td class="px-6 py-3 text-right">-</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(getTotalProductCost()) }}</td>
-                </tr>
-                
-                <!-- Totals row with border-top -->
-                <tr class="border-t-2 border-gray-300 font-medium">
-                  <td class="px-6 py-3">Total</td>
-                  <td class="px-6 py-3 text-right text-green-600 ">{{ formatCurrency(projectData.projectTotalPemasukkan) }} </td>
-                  <td class="px-6 py-3 text-right text-red-600">{{ formatCurrency(getTotalProductCost()) }}</td>
-                </tr>
-                
-                <!-- Profit/Loss row with special styling -->
-                <tr class="bg-gray-50">
-                  <td class="px-6 py-3 font-medium">Total Profit</td>
-                  <td colspan="2" :class="{
-                    'px-6 py-3 text-right font-bold': true,
-                    'text-red-600': getProfit() < 0,
-                    'text-green-600': getProfit() > 0
-                  }">
-                    {{ formatCurrency(getProfit()) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+
     </div>
       <!-- Log Penjualan -->
       <div v-if="logsLoading" class="flex justify-center py-8">
@@ -570,22 +531,11 @@ interface ProjectResource {
   resourceStockUsed: number;
 }
 
-// Calculate total product cost
-const getTotalProductCost = (): number => {
-  if (!projectData.value.projectUseResource) return 0;
-  
-  // Use ProjectResource interface in reduce function
-  return projectData.value.projectUseResource.reduce((total: number, resource: ProjectResource) => {
-    return total + (resource.sellPrice * resource.resourceStockUsed * 0.8);
-  }, 0);
-};
-
-
 // Calculate total profit
 const getProfit = (): number => {
   const revenue = projectData.value.projectTotalPemasukkan || 0;
-  const cost = getTotalProductCost();
-  return revenue - cost;
+  // Since cost is now 0, profit equals revenue
+  return revenue;
 };
 
 // Load data from API
