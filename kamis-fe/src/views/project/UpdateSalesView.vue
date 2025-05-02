@@ -381,6 +381,20 @@ const submitForm = async () => {
   // Ensure end date is the same as start date for sales projects
   formData.value.projectEndDate = formData.value.projectStartDate;
 
+  // Adjust dates to avoid timezone issues
+  if (formData.value.projectStartDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectStartDate.includes('T')) {
+      formData.value.projectStartDate = `${formData.value.projectStartDate}T12:00:00`;
+    }
+  }
+  if (formData.value.projectEndDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectEndDate.includes('T')) {
+      formData.value.projectEndDate = `${formData.value.projectEndDate}T12:00:00`;
+    }
+  }
+
   // Update form data before submitting
   updateFormData();
   
