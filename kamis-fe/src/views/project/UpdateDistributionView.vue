@@ -69,7 +69,7 @@ const getStatusText = (status: number): string => {
     case 0: return 'Direncanakan';
     case 1: return 'Dilaksanakan';
     case 2: return 'Selesai';
-    case 3: return 'Telah Dibayar';
+    case 3: return 'Dibatalkan';
     default: return 'Unknown';
   }
 };
@@ -521,7 +521,7 @@ onMounted(async () => {
                 v-model="formData.projectName"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus > 0 }"
+                :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 0 }"
                 placeholder="Masukkan nama aktivitas"
                 :disabled="formData.projectStatus >= 0"
               />
@@ -534,7 +534,8 @@ onMounted(async () => {
                 <select 
                   v-model="formData.projectClientId"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus > 0 }"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 0 }"
+
                   :disabled="formData.projectStatus >= 0"
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
