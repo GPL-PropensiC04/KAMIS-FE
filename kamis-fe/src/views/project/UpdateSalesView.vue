@@ -83,31 +83,20 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates to YYYY-MM-DD with safe date parsing
+    // Format the dates to YYYY-MM-DD with timezone-safe parsing
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
       try {
-        const startDate = new Date(projectData.projectStartDate);
-        if (!isNaN(startDate.getTime())) { // Check if date is valid
-          formattedStartDate = startDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectStartDate.split('T')[0];
+        formattedStartDate = dateStr;
       } catch {
         console.error('Invalid start date:', projectData.projectStartDate);
       }
     }
     
-    let formattedEndDate = '';
-    if (projectData.projectEndDate) {
-      try {
-        const endDate = new Date(projectData.projectEndDate);
-        if (!isNaN(endDate.getTime())) { // Check if date is valid
-          formattedEndDate = endDate.toISOString().split('T')[0];
-        }
-      } catch {
-        console.error('Invalid end date:', projectData.projectEndDate);
-      }
-    }
-    
+    // For sales projects, end date should be the same as start date
+    const formattedEndDate = formattedStartDate;
     
     formData.value = {
       id: projectData.id,
@@ -132,6 +121,14 @@ const fetchProjectDetails = async () => {
     router.push('/project');
   }
 };
+
+// Watch for changes to start date and update end date accordingly
+watch(() => formData.value?.projectStartDate, (newStartDate) => {
+  if (formData.value && newStartDate) {
+    // For sales projects, always keep end date matching start date
+    formData.value.projectEndDate = newStartDate;
+  }
+});
 
 // Fetch clients
 const fetchClients = async () => {
@@ -371,10 +368,8 @@ const submitForm = async () => {
     return;
   }
   
-  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
-    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
-    return;
-  }
+  // Ensure end date is the same as start date for sales projects
+  formData.value.projectEndDate = formData.value.projectStartDate;
 
   // Update form data before submitting
   updateFormData();
