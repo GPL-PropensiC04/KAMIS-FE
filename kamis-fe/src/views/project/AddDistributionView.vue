@@ -379,6 +379,8 @@ const assetStore = useAssetStore();
 const availableAssets = ref<Asset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
+// Add a flag to track if availability check has run
+const availabilityChecked = ref(false);
 
 // Computed values
 const totalAssetCost = computed(() => {
@@ -443,6 +445,9 @@ const checkAvailableAssets = async () => {
     return;
   }
 
+  // If already checking or has been checked with the same dates, don't run again
+  if (loadingAssets.value || availabilityChecked.value) return;
+
   try {
     loadingAssets.value = true;
     
@@ -482,6 +487,7 @@ const checkAvailableAssets = async () => {
     assetTypes.value = Array.from(types) as string[];
     
     datesSelected.value = true;
+    availabilityChecked.value = true;
     loadingAssets.value = false;
     
     // If no assets available
@@ -631,6 +637,8 @@ watch(
   [() => formData.value.projectStartDate, () => formData.value.projectEndDate],
   async ([newStartDate, newEndDate]) => {
     if (newStartDate && newEndDate) {
+      // Reset availability check flag when dates change
+      availabilityChecked.value = false;
       await checkAvailableAssets();
     }
   }

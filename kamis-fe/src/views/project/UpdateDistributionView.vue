@@ -62,6 +62,8 @@ const shippingCost = ref(0);
 const availableAssets = ref<Asset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
+// Add a flag to track if availability check has run
+const availabilityChecked = ref(false);
 
 // Helper functions
 const getStatusText = (status: number): string => {
@@ -106,14 +108,13 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates to YYYY-MM-DD with safe date parsing
+    // Format the dates to YYYY-MM-DD with timezone-safe parsing
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
       try {
-        const startDate = new Date(projectData.projectStartDate);
-        if (!isNaN(startDate.getTime())) { // Check if date is valid
-          formattedStartDate = startDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectStartDate.split('T')[0];
+        formattedStartDate = dateStr;
       } catch {
         console.error('Invalid start date:', projectData.projectStartDate);
       }
@@ -122,10 +123,9 @@ const fetchProjectDetails = async () => {
     let formattedEndDate = '';
     if (projectData.projectEndDate) {
       try {
-        const endDate = new Date(projectData.projectEndDate);
-        if (!isNaN(endDate.getTime())) { // Check if date is valid
-          formattedEndDate = endDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectEndDate.split('T')[0];
+        formattedEndDate = dateStr;
       } catch {
         console.error('Invalid end date:', projectData.projectEndDate);
       }
@@ -249,6 +249,9 @@ const checkAvailableAssets = async () => {
     return;
   }
 
+  // If already checking or has been checked, don't run again
+  if (loadingAssets.value || availabilityChecked.value) return;
+
   try {
     loadingAssets.value = true;
     
@@ -288,6 +291,7 @@ const checkAvailableAssets = async () => {
     assetTypes.value = Array.from(types) as string[];
     
     datesSelected.value = true;
+    availabilityChecked.value = true;
     loadingAssets.value = false;
     
     // If no assets available
@@ -450,6 +454,8 @@ watch(
   [() => formData.value?.projectStartDate, () => formData.value?.projectEndDate],
   async ([newStartDate, newEndDate]) => {
     if (newStartDate && newEndDate) {
+      // Reset the check flag when dates change
+      availabilityChecked.value = false;
       await checkAvailableAssets();
     }
   }
@@ -467,10 +473,8 @@ onMounted(async () => {
     availableAssets.value = [...assets.value]; // Start with all assets
     datesSelected.value = true;
     
-    // Check availability for additional assets if dates are set
-    if (assets.value.length > 0) {
-      await checkAvailableAssets();
-    }
+    // We don't need to call checkAvailableAssets here - the watcher will handle it
+    // This prevents the double check
   }
 });
 </script> 
@@ -570,6 +574,8 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-20 p-2 border border-gray-300 rounded mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                  :disabled="formData.projectStatus >= 2"
                 />
                 <span class="mr-3">Orang x upah sebesar Rp</span>
                 <input 
@@ -577,6 +583,8 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-32 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                  :disabled="formData.projectStatus >= 2"
                 />
               </div>
             </div>
@@ -603,6 +611,8 @@ onMounted(async () => {
                         v-model="formData.projectStartDate"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
+                        :disabled="formData.projectStatus >= 1"
                       />
                     </div>
                   </div>
@@ -612,6 +622,8 @@ onMounted(async () => {
                         v-model="formData.projectEndDate"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                        :disabled="formData.projectStatus >= 2"
                       />
                     </div>
                   </div>
