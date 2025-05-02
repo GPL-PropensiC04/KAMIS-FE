@@ -4,8 +4,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useClientStore } from "@/stores/client";
 import VButton from "@/components/VButton.vue";
 import { useToast } from "vue-toastification";
-import Breadcrumb from "@/components/Breadcrumb.vue";
-import VSuccessButton from "@/components/VSuccessButton.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -40,11 +38,9 @@ const isValidEmail = (email: string) => {
   return regex.test(email);
 };
 
-const isNotBlank = (val: string) => val.trim().length > 0;
-
 // Submit Handler
 const handleSubmit = async () => {
-  if (!isNotBlank(nameClient.value) || !isNotBlank(noTelpClient.value) || !isNotBlank(emailClient.value) || !isNotBlank(addressClient.value)) {
+  if (!nameClient.value || !noTelpClient.value || !emailClient.value || !addressClient.value) {
     toast.error("Harap isi semua field dengan benar!");
     return;
   }
@@ -67,24 +63,14 @@ const handleSubmit = async () => {
   };
 
   await clientStore.updateClient(body, id);
-  router.push({ name: 'client-detail', params: { id } }); // <-- redirect ke detail client
 };
 </script>
 
 <template>
-  <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-
-      <div class="flex justify-between items-center mb-4">
-        <!-- Tombol Back -->
-        <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
-
-        <!-- Tombol Submit -->
-        <div class="text-center">
-          <VSuccessButton label="Update" @click="handleSubmit" />
-        </div>
-      </div>
+      <!-- Tombol Back -->
+      <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
 
       <!-- Form Input -->
       <div class="grid grid-cols-2 gap-4 mb-4">
@@ -142,6 +128,11 @@ const handleSubmit = async () => {
           rows="4"
           class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#E5EAF2]"
         ></textarea>
+      </div>
+
+      <!-- Tombol Submit -->
+      <div class="text-center">
+        <VButton label="Simpan Perubahan" @click="handleSubmit" />
       </div>
     </div>
   </div>

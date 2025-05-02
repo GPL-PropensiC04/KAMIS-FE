@@ -9,7 +9,6 @@ import VSortButton from "@/components/VSortButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
-import VSuccessButton from "@/components/VSuccessButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 
 // Add this interface above your component's setup function
@@ -69,18 +68,6 @@ const nominalOptions = [
 // Clear search function
 const clearSearch = () => {
   searchQuery.value = "";
-};
-
-// Reset all filters
-const resetFilters = () => {
-  searchQuery.value = "";
-  dateRange.value = { start: "", end: "" };
-  selectedType.value = "All";
-  sortByDate.value = null;
-  sortByNominal.value = null;
-  startNominal.value = null;
-  endNominal.value = null;
-  selectedNominalLabel.value = "Seluruh Total Pemasukkan";
 };
 
 // Fetch projects from API
@@ -151,19 +138,29 @@ const formatCurrency = (value: number) => {
 };
 
 // Status formatter
-const formatStatus = (status: number) => {
-  switch (status) {
-    case 0: return 'Direncanakan';
-    case 1: return 'Dilaksanakan';
-    case 2: return 'Selesai';
-    case 3: return 'Telah Dibayar';
-    default: return 'Unknown';
+const formatStatus = (status: number, projectType: boolean) => {
+  if (projectType) {
+    switch (status) {
+      case 0: return 'Direncanakan';
+      case 1: return 'Dalam Pengiriman';
+      case 2: return 'Selesai';
+      case 3: return 'Dibatalkan';
+      default: return 'Unknown';
+    }
+  } else {
+    switch (status) {
+      case 0: return 'Direncanakan';
+      case 1: return 'Sedang Dikerjakan';
+      case 2: return 'Selesai';
+      case 3: return 'Dibatalkan';
+      default: return 'Unknown';
+    }
   }
 };
 
 // Project type formatter
 const formatType = (type: boolean) => {
-  return type ? 'distribusi' : 'Penjualan';
+  return type ? 'Distribusi' : 'Penjualan';
 };
 
 // Calculate profit
@@ -206,7 +203,6 @@ const proceedToAddProject = () => {
 const closeModal = () => {
   showModal.value = false;
 };
-const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
 </script>
 
 <template>
@@ -256,7 +252,6 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
             >
               <span class="text-xl">×</span>
             </button>
-            <p class="text-xs text-gray-500 mt-1">Cari berdasarkan ID atau nama proyek</p>
           </div>
           <VDateRangeFilter v-model="dateRange" class="w-full" />
           <VSortButton v-model:sortOrder="sortByDate" />
@@ -273,7 +268,6 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
           class="w-1/3" 
         />
         <div class="flex gap-2">
-          <VButton v-if="hasActiveFilters" label="Reset Filter" @click="resetFilters" />
         <VButton v-if="canEditProject" label="Tambah Proyek" @click="goToAddProject" />
         </div>
       </div>
@@ -296,7 +290,6 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
                 <th v-if="canViewFinancialInfo" class="text-center">Pemasukkan</th>
                 <th v-if="canViewFinancialInfo" class="text-center">Pengeluaran</th>
                 <th v-if="canViewFinancialInfo" class="text-center">Profit</th>
-                <th v-if="canEditProject" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -310,19 +303,22 @@ const goToUpdateProject = (id: string) => router.push(`/project/update/${id}`);
                   <td class="text-center">{{ project.id }}</td>
                   <td class="text-center">{{ project.projectName }}</td>
                   <td class="text-center">{{ formatType(project.projectType) }}</td>
-                  <td class="text-center">{{ formatStatus(project.projectStatus) }}</td>
+                  <td class="text-center">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
                   <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
                   <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPengeluaran) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right font-bold">
-                    {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
+                  <td v-if="canViewFinancialInfo" class="text-right text-green-600">
+                    {{ formatCurrency(project.projectTotalPemasukkan) }}
                   </td>
-                  <td v-if="canEditProject" class="text-center" @click.stop>
-                    <VSuccessButton
-                      label="Update"
-                      @click="goToUpdateProject(project.id)"
-                    />
+                  <td v-if="canViewFinancialInfo" class="text-right text-red-600">
+                    {{ formatCurrency(project.projectTotalPengeluaran) }}
+                  </td>
+                  <td v-if="canViewFinancialInfo" 
+                      :class="{
+                        'text-right font-bold': true,
+                        'text-green-600': (project.projectTotalPemasukkan - project.projectTotalPengeluaran) >= 0,
+                        'text-red-600': (project.projectTotalPemasukkan - project.projectTotalPengeluaran) < 0
+                      }">
+                    {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
                   </td>
                 </tr>
               </template>

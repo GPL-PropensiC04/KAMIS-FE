@@ -23,7 +23,7 @@
             v-for="supplier in sortedSuppliers"
             :key="supplier.id"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-            @click="isOperationalOrAdmin && goToDetailSupplier(supplier.id)"
+            @click="goToDetailSupplier(supplier.id)"
           >
             <td class="px-6 py-4">{{ supplier.companySupplier }}</td>
             <td class="px-6 py-4">{{ supplier.nameSupplier }}</td>
@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSupplierStore } from '@/stores/supplier.ts';
+import { useSupplierStore } from '@/stores/supplier';
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import VSearchBar from '@/components/VSearchBar.vue';

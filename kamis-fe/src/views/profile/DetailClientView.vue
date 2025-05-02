@@ -56,7 +56,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="project in client.projects" :key="project.id">
+            <tr v-for="project in client.projects" :key="project.id" class="cursor-pointer hover:bg-gray-100 transition" @click="goToProjectDetail(project)">
               <td class="px-6 py-4">{{ project.projectName }}</td>
               <td class="px-6 py-4">
                 {{ project.projectType === true ? 'Distribusi' : project.projectType === false ? 'Penjualan' : project.projectType }}
@@ -72,7 +72,9 @@
               </td>
             </tr>
             <tr v-if="!client.projects || client.projects.length === 0">
-              <td :colspan="isFinance ? 4 : 2" class="text-center text-gray-500">Belum ada proyek terkait.</td>
+              <td :colspan="isFinance ? 5 : 3" class="text-center text-gray-500 py-4">
+                Belum ada proyek terkait.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -147,6 +149,14 @@ function getStatusText(status: number, type: boolean) {
   return "-";
 }
 
+function goToProjectDetail(project: any) {
+  if (project.projectType === true) {
+    router.push(`/project/distribution/${project.id}`);
+  } else {
+    router.push(`/project/sale/${project.id}`);
+  }
+}
+
   onMounted(fetchClientDetail);
 </script>
 
@@ -179,13 +189,12 @@ function getStatusText(status: number, type: boolean) {
   gap: 32px;
 }
 .client-info-label {
-  font-weight: 600;
+  font-weight: bold;
   color: #1E3A5F;
   margin-bottom: 2px;
 }
 .client-info-value {
-  color: #1E3A5F;
-  font-weight: 500;
+  color: #000000;
   font-size: 1.05rem;
   word-break: break-word;
 }
@@ -207,5 +216,6 @@ function getStatusText(status: number, type: boolean) {
 }
 .custom-table th, .custom-table td {
   padding: 12px 16px;
+  text-align: center;
 }
 </style>
