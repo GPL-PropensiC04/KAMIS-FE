@@ -442,8 +442,18 @@ const submitForm = async () => {
   }
 };
 
-// Watch for asset type changes
+// Update our watch section to automatically check asset availability
 watch(selectedAssetType, updateAssetNames);
+
+// Watch for date changes to automatically check asset availability
+watch(
+  [() => formData.value?.projectStartDate, () => formData.value?.projectEndDate],
+  async ([newStartDate, newEndDate]) => {
+    if (newStartDate && newEndDate) {
+      await checkAvailableAssets();
+    }
+  }
+);
 
 // Load data on component mount
 onMounted(async () => {
@@ -606,19 +616,6 @@ onMounted(async () => {
                     </div>
                   </div>
                 </div>
-                <button 
-                  @click="checkAvailableAssets"
-                  class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded flex items-center justify-center"
-                  :disabled="!formData.projectStartDate || !formData.projectEndDate || loadingAssets"
-                >
-                  <span v-if="loadingAssets" class="mr-2">
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                  </span>
-                  {{ loadingAssets ? 'Checking...' : 'Check Asset Availability' }}
-                </button>
               </div>
             </div>
   
@@ -668,7 +665,7 @@ onMounted(async () => {
                   @change="updateAssetNames"
                   :disabled="!datesSelected"
                 >
-                  <option value="" disabled>{{ datesSelected ? 'Pilih Jenis' : 'Check availability first' }}</option>
+                  <option value="" disabled>{{ datesSelected ? 'Pilih Jenis' : 'Memeriksa Ketersediaan Aset Terlebih Dahulu' }}</option>
                   <option v-for="type in assetTypes" :key="type" :value="type">{{ type }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -686,7 +683,7 @@ onMounted(async () => {
                   :class="{ 'bg-gray-200': !datesSelected || !selectedAssetType }"
                   :disabled="!datesSelected || !selectedAssetType"
                 >
-                  <option value="" disabled>{{ !datesSelected ? 'Check availability first' : !selectedAssetType ? 'Select type first' : 'Pilih Nama' }}</option>
+                  <option value="" disabled>{{ !datesSelected ? 'Memeriksa Ketersediaan Aset Terlebih Dahulu' : !selectedAssetType ? 'Pilih Jenis Aset Terlebih Dahulu' : 'Pilih Nama' }}</option>
                   <option v-for="name in assetNames" :key="name" :value="name">{{ name }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -739,47 +736,61 @@ onMounted(async () => {
             Tidak ada aset yang tersedia untuk periode waktu yang dipilih. Silakan pilih tanggal lain.
           </div>
   
-          <!-- Assets table -->
-          <div class="overflow-x-auto bg-white shadow rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-[#1E3A5F] text-white">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
-                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
-                  <th v-if="formData.projectStatus < 1" class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
-                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
-                  <td v-if="formData.projectStatus < 1" class="px-6 py-4 text-center whitespace-nowrap">
-                    <button 
-                      @click="removeAsset(index)"
-                      class="text-red-600 hover:text-red-800"
-                    >
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr v-if="assetList.length === 0">
-                  <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                    Belum ada aset yang ditambahkan
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot class="bg-gray-50">
-                <tr>
-                  <td colspan="2" class="px-6 py-3 text-right font-medium">Total Biaya Aset:</td>
-                  <td class="px-6 py-3 text-right font-bold">{{ formatCurrency(totalAssetCost) }}</td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+          <!-- Assets table with loading overlay -->
+          <div class="relative">
+            <!-- Loading overlay -->
+            <div v-if="loadingAssets" class="absolute inset-0 bg-white bg-opacity-70 z-10 flex items-center justify-center rounded-lg backdrop-filter backdrop-blur-sm">
+              <div class="flex flex-col items-center p-4 bg-white bg-opacity-90 rounded-lg shadow-lg">
+                <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span class="text-blue-700 font-medium">Memeriksa ketersediaan aset...</span>
+              </div>
+            </div>
+  
+            <!-- Assets table -->
+            <div class="overflow-x-auto bg-white shadow rounded-lg">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[#1E3A5F] text-white">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
+                    <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
+                    <th v-if="formData.projectStatus < 1" class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
+                    <td v-if="formData.projectStatus < 1" class="px-6 py-4 text-center whitespace-nowrap">
+                      <button 
+                        @click="removeAsset(index)"
+                        class="text-red-600 hover:text-red-800"
+                      >
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="assetList.length === 0">
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                      Belum ada aset yang ditambahkan
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot class="bg-gray-50">
+                  <tr>
+                    <td colspan="2" class="px-6 py-3 text-right font-medium">Total Biaya Aset:</td>
+                    <td class="px-6 py-3 text-right font-bold">{{ formatCurrency(totalAssetCost) }}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </div>
      <!-- Summary -->

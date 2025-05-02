@@ -393,14 +393,13 @@ interface ProjectLog {
   actionDate: string;
 }
 
-const project = ref<any>({});
+const project = ref<ProjectData>({} as ProjectData);
 const projectData = ref<ProjectData>({} as ProjectData);
 const isLoading = ref(true);
 const error = ref('');
 const clientName = ref<string>('');
 const logsLoading = ref(false);
 const clientLoading = ref(true);
-const resourcesLoading = ref(false); // For DetailSellView only
 const assetsLoading = ref(false); // For DetailDistributionView only
 
 // Role-based permission computed properties
