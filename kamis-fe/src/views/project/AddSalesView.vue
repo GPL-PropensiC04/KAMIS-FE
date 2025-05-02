@@ -84,7 +84,7 @@
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    :value="formData.projectStartDate"
+                    :value="formatDisplayDate(formData.projectStartDate)"
                     @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -417,6 +417,40 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
+// Format date for display (DD/MM/YYYY)
+const formatDisplayDate = (dateString: string | undefined): string => {
+  if (!dateString) return '';
+  const parts = dateString.split('T')[0].split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateString;
+};
+
+// Format date for API (YYYY-MM-DD)
+const formatApiDate = (dateString: string | undefined): string => {
+  if (!dateString) return '';
+  // If it's already in YYYY-MM-DD format, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  // If it has a time component, extract just the date
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+  return dateString;
+};
+
+// Custom date input handler
+const handleDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    const value = target.value;
+    formData.value.projectStartDate = value;
+    // For sales projects, end date should always match start date
+    formData.value.projectEndDate = value;
+  }
+};
 
 // Form submission
 const submitForm = async () => {
@@ -440,23 +474,49 @@ const submitForm = async () => {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
-  formData.value.projectEndDate = formData.value.projectStartDate;
-  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
-    console.log(formData.value.projectEndDate, formData.value.projectStartDate);
-    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
-    return;
-  }
-
   
-  // Update form data before submitting
-  updateFormData();
+  // Ensure end date is same as start date for sales projects
+  formData.value.projectEndDate = formData.value.projectStartDate;
+  
+  // Create a safe copy to work with
+  const apiData = { ...formData.value };
+  
+  // Ensure dates are sent in the correct format for the API
+  apiData.projectStartDate = formatApiDate(apiData.projectStartDate);
+  apiData.projectEndDate = formatApiDate(apiData.projectEndDate);
+  
+  // Set project type
+  apiData.projectType = false; // false = sales
+  
+  // Set project use resource
+  apiData.projectUseResource = productList.value.map(product => ({
+    resourceId: product.id,
+    resourceStockUsed: product.quantity,
+    sellPrice: product.price
+  }));
   
   try {
-    // Navigate to summary page instead of submitting directly
-    router.push('/project/add/sales-summary');
+    const response = await axios.post(
+      `${API_URLS.PROJECT}/project/add`,
+      apiData,
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      }
+    );
+    
+    if (response.data && response.data.data) {
+      toast.success('Proyek berhasil ditambahkan');
+      // Redirect to project detail page
+      router.push(`/project/sale/${response.data.data.id}`);
+    } else {
+      toast.error('Gagal menambahkan proyek: respons tidak valid');
+    }
   } catch (error) {
-    console.error('Error navigating to summary page:', error);
-    toast.error('Terjadi kesalahan. Silahkan coba lagi.');
+    console.error('Error adding project:', error);
+    toast.error('Gagal menambahkan proyek');
   }
 };
 
@@ -482,12 +542,4 @@ onMounted(() => {
     }
   }
 });
-
-// Custom date input handler
-const handleDateInput = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target) {
-    formData.value.projectStartDate = target.value;
-  }
-};
 </script> 

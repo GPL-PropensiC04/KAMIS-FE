@@ -95,6 +95,30 @@ const totalExpenses = computed(() => {
   return totalAssetCost.value + totalPhlCost.value;
 });
 
+// Format date for display (DD/MM/YYYY)
+const formatDisplayDate = (dateString: string | undefined): string => {
+  if (!dateString) return '';
+  const parts = dateString.split('T')[0].split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateString;
+};
+
+// Format date for API (YYYY-MM-DD)
+const formatApiDate = (dateString: string | undefined): string => {
+  if (!dateString) return '';
+  // If it's already in YYYY-MM-DD format, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  // If it has a time component, extract just the date
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+  return dateString;
+};
+
 // Fetch project details
 const fetchProjectDetails = async () => {
   isLoading.value = true;
@@ -108,27 +132,15 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates to YYYY-MM-DD with timezone-safe parsing
+    // Format the dates to avoid timezone issues
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
-      try {
-        // Extract just the date part to avoid timezone issues
-        const dateStr = projectData.projectStartDate.split('T')[0];
-        formattedStartDate = dateStr;
-      } catch {
-        console.error('Invalid start date:', projectData.projectStartDate);
-      }
+      formattedStartDate = formatApiDate(projectData.projectStartDate);
     }
     
     let formattedEndDate = '';
     if (projectData.projectEndDate) {
-      try {
-        // Extract just the date part to avoid timezone issues
-        const dateStr = projectData.projectEndDate.split('T')[0];
-        formattedEndDate = dateStr;
-      } catch {
-        console.error('Invalid end date:', projectData.projectEndDate);
-      }
+      formattedEndDate = formatApiDate(projectData.projectEndDate);
     }
     
     formData.value = {
@@ -391,7 +403,6 @@ const updateFormData = () => {
   }));
 };
 
-
 // Form submission
 const submitForm = async () => {
   if (!formData.value) return;
@@ -425,10 +436,17 @@ const submitForm = async () => {
   // Update form data before submitting
   updateFormData();
   
+  // Create a copy of the data for the API
+  const apiData = { ...formData.value };
+  
+  // Ensure dates are in the correct format for the API (YYYY-MM-DD)
+  apiData.projectStartDate = formatApiDate(apiData.projectStartDate);
+  apiData.projectEndDate = formatApiDate(apiData.projectEndDate);
+  
   try {
     await axios.put(
       `${API_URLS.PROJECT}/project/update/${formData.value.id}`,
-      formData.value,
+      apiData,
       {
         headers: { 
           'Content-Type': 'application/json',
@@ -481,15 +499,19 @@ onMounted(async () => {
 // Add new methods for handling date input
 const handleStartDateInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target) {
-    formData.value!.projectStartDate = target.value;
+  if (target && formData.value) {
+    formData.value.projectStartDate = target.value;
+    // Reset availability flag when date changes
+    availabilityChecked.value = false;
   }
 };
 
 const handleEndDateInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target) {
-    formData.value!.projectEndDate = target.value;
+  if (target && formData.value) {
+    formData.value.projectEndDate = target.value;
+    // Reset availability flag when date changes
+    availabilityChecked.value = false;
   }
 };
 </script> 
@@ -623,7 +645,7 @@ const handleEndDateInput = (event: Event) => {
                   <div class="w-1/2">
                     <div class="relative">
                       <input 
-                        :value="formData.projectStartDate"
+                        :value="formatDisplayDate(formData.projectStartDate)"
                         @input="handleStartDateInput($event)"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -635,7 +657,7 @@ const handleEndDateInput = (event: Event) => {
                   <div class="w-1/2">
                     <div class="relative">
                       <input 
-                        :value="formData.projectEndDate"
+                        :value="formatDisplayDate(formData.projectEndDate)"
                         @input="handleEndDateInput($event)"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
