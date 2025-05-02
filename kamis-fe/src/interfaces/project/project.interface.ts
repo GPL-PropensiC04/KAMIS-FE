@@ -12,6 +12,7 @@ export interface ProjectInterface {
   projectEndDate: string; // ISO date string
   projectTotalPemasukkan: number;
   projectTotalPengeluaran: number;
+  projectProfit?: number;
   projectPHLCount?: number;
   projectPHLPay?: number;
   projectPickupAddress?: string;
@@ -20,6 +21,7 @@ export interface ProjectInterface {
   projectUseResource?: Array<ResourceUsageDTO>;
   data?: ProjectInterface; // For nested responses
   projectLogs: LogProjectInterface[];
+
 }
 
 export interface ProjectResponseInterface {

@@ -401,7 +401,7 @@ interface ProjectLog {
   actionDate: string;
 }
 
-const project = ref<any>({});
+const project = ref<ProjectData>({} as ProjectData);
 const projectData = ref<ProjectData>({} as ProjectData);
 const isLoading = ref(true);
 const error = ref('');
