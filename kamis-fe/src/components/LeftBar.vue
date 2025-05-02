@@ -1,5 +1,5 @@
 <template>
-  <div :class="['leftbar', { collapsed: isCollapsed }]">
+  <div :class="['leftbar', { collapsed: isCollapsed }]" @click="handleSidebarClick">
     <!-- Logo KAM -->
     <div class="logo-container">
       <img :src="logoImage" alt="Logo KAM" :class="['logo', { collapsed: isCollapsed }]" />
@@ -35,7 +35,7 @@
         <span v-if="!isCollapsed" class="icon-label">Distribusi & Penjualan</span>
       </div>
       <div :class="['icon-item', { active: isActive('client') }]" @click="goTo('client')">
-        <BaseIcon icon="fa-solid fa-user" clickable />
+        <BaseIcon icon="fa-solid fa-users" clickable />
         <span v-if="!isCollapsed" class="icon-label">Klien</span>
       </div>
       <div :class="['icon-item', { active: isActive('supplier') }]" @click="goTo('supplier')">
@@ -44,15 +44,20 @@
       </div>
     </div>
 
-    <!-- Bottom Icon -->
     <div class="bottom-icon">
+      <!-- User Info Section -->
+      <div v-if="userInfo" class="user-info mb-2">
+        <div class="user-avatar">
+          <BaseIcon icon="fa-solid fa-circle-user" />
+        </div>
+        <div class="user-meta" v-if="!isCollapsed">
+          <div class="user-name">{{ userInfo.username }}</div>
+          <div class="user-role">{{ userInfo.role }}</div>
+        </div>
+      </div>
       <div class="icon-item" @click="logout">
         <BaseIcon icon="fa-solid fa-right-from-bracket" clickable />
         <span v-if="!isCollapsed" class="icon-label">Logout</span>
-      </div>
-      <div class="icon-item" @click="toggleSidebar">
-        <BaseIcon icon="fa-solid fa-bars" clickable />
-        <span v-if="!isCollapsed" class="icon-label">Menu</span>
       </div>
     </div>
   </div>
@@ -61,16 +66,29 @@
 <script setup lang="ts">
 import BaseIcon from './BaseIcon.vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import logoImage from '@/assets/LogoKAM.jpg'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 const isCollapsed = ref(false)
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+
+const handleSidebarClick = (event: MouseEvent) => {
+  // Cek jika klik berasal dari elemen dengan class 'icon-item' atau turunannya
+  let target = event.target as HTMLElement | null
+  while (target && target !== event.currentTarget) {
+    if (target.classList && target.classList.contains('icon-item')) {
+      return // Jangan expand/collapse jika klik di icon-item
+    }
+    target = target.parentElement
+  }
+  toggleSidebar()
 }
 
 const goTo = (routeName: string) => {
@@ -86,6 +104,14 @@ const logout = () => {
 const isActive = (routeName: string) => {
   return route.name && route.name.toString().includes(routeName);
 };
+
+const userInfo = computed(() => {
+  if (!authStore.user) return null
+  return {
+    username: authStore.user.username || authStore.user.email || '-',
+    role: authStore.userRole || '-'
+  }
+})
 </script>
 
 <style scoped>
@@ -108,10 +134,18 @@ const isActive = (routeName: string) => {
   align-items: center;
 }
 
-.top-icons, .bottom-icon {
+.top-icons {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.bottom-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: auto;
+  padding-bottom: 10px;
 }
 
 .leftbar.collapsed .top-icons,
@@ -180,14 +214,6 @@ const isActive = (routeName: string) => {
   margin: 0;            /* Hapus margin untuk collapsed */
 }
 
-.icon-item:hover {
-  background-color: #fff;
-}
-
-.icon-item.active {
-  background-color: #fff; /* Highlight color for active item */
-}
-
 .icon-label {
   font-size: 14px;
   color: #ffffff;
@@ -206,7 +232,7 @@ const isActive = (routeName: string) => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 10px;
+  padding: 5px 18px;
   margin-bottom: 20px;
 }
 
@@ -263,5 +289,55 @@ const isActive = (routeName: string) => {
 
 .toggle-button:hover {
   background-color: #dfe6e9;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 10px 8px;
+  margin: 0 10px;
+  box-sizing: border-box;
+  min-height: 48px;
+  transition: background 0.2s;
+}
+
+.leftbar.collapsed .user-info {
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  margin: 0;
+  min-height: 40px;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #fff;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-name {
+  font-size: 13px;
+  color: #fff;
+  font-weight: bold;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #cbd5e1;
+  font-style: italic;
+  line-height: 1.1;
 }
 </style>
