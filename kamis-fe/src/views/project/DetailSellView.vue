@@ -343,7 +343,7 @@ interface ProjectLog {
   actionDate: string;
 }
 
-const project = ref<any>({});
+const project = ref<ProjectData>({} as ProjectData);
 const projectData = ref<ProjectData>({} as ProjectData);
 const clientName = ref<string>('');
 const isLoading = ref(true);
@@ -355,7 +355,6 @@ const newStatusToUpdate = ref<number | null>(null);
 // Add these state variables
 const clientLoading = ref(true);
 const resourcesLoading = ref(false); // For DetailSellView only
-
 // Add this state variable
 const logsLoading = ref(false);
 

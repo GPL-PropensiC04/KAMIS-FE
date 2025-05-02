@@ -138,9 +138,7 @@ const totalProductCost = computed(() => {
 });
 
 const estimatedProfit = computed(() => {
-  // Assuming profit is calculated as 20% of the total product cost
-  const cost = totalProductCost.value * 0.8; // Cost is 80% of sales price
-  return formData.value.projectTotalPemasukkan - cost;
+  return formData.value.projectTotalPemasukkan;
 });
 
 // Format currency
