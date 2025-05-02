@@ -105,7 +105,8 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      v-model="formData.projectStartDate"
+                      :value="formData.projectStartDate"
+                      @input="handleStartDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -114,7 +115,8 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      v-model="formData.projectEndDate"
+                      :value="formData.projectEndDate"
+                      @input="handleEndDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -666,4 +668,20 @@ onMounted(() => {
     }
   }
 });
+
+// Add a new method to handle date input
+const handleStartDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectStartDate = target.value;
+  }
+};
+
+// Add a new method to handle date input
+const handleEndDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectEndDate = target.value;
+  }
+};
 </script> 

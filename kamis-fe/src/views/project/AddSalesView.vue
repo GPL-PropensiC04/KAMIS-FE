@@ -84,7 +84,8 @@
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    v-model="formData.projectStartDate"
+                    :value="formData.projectStartDate"
+                    @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -481,4 +482,12 @@ onMounted(() => {
     }
   }
 });
+
+// Custom date input handler
+const handleDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectStartDate = target.value;
+  }
+};
 </script> 

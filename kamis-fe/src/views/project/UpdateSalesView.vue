@@ -414,6 +414,17 @@ onMounted(() => {
   fetchClients();
   fetchProjectDetails();
 });
+
+// Custom date input handler
+const handleDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    const value = target.value;
+    if (formData.value) {
+      formData.value.projectStartDate = value;
+    }
+  }
+};
 </script> 
 
 <template>
@@ -519,7 +530,8 @@ onMounted(() => {
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    v-model="formData.projectStartDate"
+                    :value="formData.projectStartDate"
+                    @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 1 }"
