@@ -61,7 +61,7 @@
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
             <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditProject && projectData.projectStatus !== 2"
+              v-if="canEditProject && projectData.projectStatus >= 2"
               label="Ubah"
               @click="editSalesInfo"
             />
@@ -103,7 +103,7 @@
         <!-- Products Sold Table -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Barang Yang Terjual</h2>
+            <h2 class="text-xl font-bold text-white">Rekap Penjualan</h2>
           </div>
           
           <div class="overflow-x-auto">
