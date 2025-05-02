@@ -7,6 +7,7 @@ import { API_URLS } from '@/config/api.config';
 import type { UpdateProjectFormData, ProjectInterface } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useProjectStore } from '@/stores/project';
+import { useAssetStore } from '@/stores/assetReservability';
 
 // Router & Toast
 const router = useRouter();
@@ -14,6 +15,7 @@ const route = useRoute();
 const toast = useToast();
 const projectId = route.params.id as string;
 const projectStore = useProjectStore();
+const assetStore = useAssetStore();
 
 // Form data
 const formData = ref<UpdateProjectFormData | null>(null);
@@ -55,6 +57,11 @@ const selectedAssetName = ref('');
 const assetNames = ref<string[]>([]);
 const fuelCost = ref(0);
 const shippingCost = ref(0);
+
+// Add a new state variable to track available assets
+const availableAssets = ref<Asset[]>([]);
+const datesSelected = ref(false);
+const loadingAssets = ref(false);
 
 // Helper functions
 const getStatusText = (status: number): string => {
@@ -214,27 +221,15 @@ const loadAssetData = async () => {
 // Fetch assets from API
 const fetchAssets = async () => {
   try {
-    const response = await axios.get(`${API_URLS.ASSET}/asset/all`, {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
+    // Use the asset store instead of direct API call
+    const fetchedAssets = await assetStore.fetchAssets();
     
-    // Map the backend response to our Asset interface format
-    interface AssetResponse {
-      platNomor: string;
-      nama: string;
-      tipeAset: string;
-      status: string;
-      nilaiPerolehan: number;
-    }
-    
-    assets.value = response.data.data.map((asset: AssetResponse) => ({
-      id: asset.platNomor, // Using platNomor as ID
+    // Map the fetched assets to our Asset interface format
+    assets.value = fetchedAssets.map(asset => ({
+      id: asset.platNomor,
       assetType: asset.tipeAset,
       assetName: asset.nama,
-      assetUsageCost: 0, // Default value as it's not provided by API
+      assetUsageCost: 0,
       platNomor: asset.platNomor
     }));
     
@@ -247,7 +242,69 @@ const fetchAssets = async () => {
   }
 };
 
-// Update asset names when asset type changes
+// Add a new function to check asset availability
+const checkAvailableAssets = async () => {
+  if (!formData.value?.projectStartDate || !formData.value?.projectEndDate) {
+    toast.error('Tanggal mulai dan selesai proyek harus diisi terlebih dahulu');
+    return;
+  }
+
+  try {
+    loadingAssets.value = true;
+    
+    // Fetch all assets first if not already fetched
+    if (assets.value.length === 0) {
+      await fetchAssets();
+    }
+    
+    const startDate = new Date(formData.value.projectStartDate);
+    const endDate = new Date(formData.value.projectEndDate);
+    
+    // Validate date range
+    if (endDate < startDate) {
+      toast.error('Tanggal akhir harus setelah tanggal mulai');
+      loadingAssets.value = false;
+      return;
+    }
+    
+    // Get all asset plat nomors
+    const platNomors = assets.value.map(asset => asset.platNomor as string);
+    
+    // Check availability
+    const availability = await assetStore.checkAssetAvailability({
+      platNomors,
+      startDate,
+      endDate,
+      excludeProjectId: formData.value.id // Exclude this project's own reservations
+    });
+    
+    // Filter assets to only include available ones
+    availableAssets.value = assets.value.filter(asset => 
+      asset.platNomor && availability[asset.platNomor]
+    );
+    
+    // Extract unique asset types from available assets
+    const types = new Set(availableAssets.value.map(asset => asset.assetType));
+    assetTypes.value = Array.from(types) as string[];
+    
+    datesSelected.value = true;
+    loadingAssets.value = false;
+    
+    // If no assets available
+    if (availableAssets.value.length === 0) {
+      toast.warning('Tidak ada aset yang tersedia untuk periode waktu yang dipilih');
+    } else {
+      toast.success(`${availableAssets.value.length} aset tersedia untuk periode waktu yang dipilih`);
+    }
+    
+  } catch (error) {
+    console.error('Error checking asset availability:', error);
+    toast.error('Gagal memeriksa ketersediaan aset');
+    loadingAssets.value = false;
+  }
+};
+
+// Replace updateAssetNames with a version that filters from available assets
 const updateAssetNames = () => {
   if (!selectedAssetType.value) {
     assetNames.value = [];
@@ -255,7 +312,7 @@ const updateAssetNames = () => {
     return;
   }
   
-  const filteredAssets = assets.value.filter(asset => 
+  const filteredAssets = availableAssets.value.filter(asset => 
     asset.assetType === selectedAssetType.value &&
     !assetList.value.some(a => a.id === asset.id)
   );
@@ -264,14 +321,14 @@ const updateAssetNames = () => {
   selectedAssetName.value = '';
 };
 
-// Add asset to project
+// Modify the addAsset function to skip availability check since we're already filtering
 const addAsset = () => {
   if (!selectedAssetType.value || !selectedAssetName.value) {
     toast.error('Pilih tipe dan nama aset terlebih dahulu');
     return;
   }
   
-  const selectedAsset = assets.value.find(
+  const selectedAsset = availableAssets.value.find(
     asset => asset.assetType === selectedAssetType.value && 
     asset.assetName === selectedAssetName.value
   );
@@ -306,6 +363,8 @@ const addAsset = () => {
   
   // Update form data
   updateFormData();
+  
+  toast.success(`Aset ${selectedAsset.assetName} berhasil ditambahkan`);
 };
 
 // Remove asset from list
@@ -388,31 +447,20 @@ watch(selectedAssetType, updateAssetNames);
 
 // Load data on component mount
 onMounted(async () => {
-  try {
-    if (!projectId) return;
-
-    // Show loading animation
-    isLoading.value = true;
-
-    // Get data to update
-    const response = await axios.get(
-      `${API_URLS.PROJECT}/project/${projectId}`
-    );
-    formData.value = response.data;
-
-    // Fetch all assets for dropdown
-    await fetchAssets();
+  await fetchProjectDetails();
+  await fetchAssets();
+  await fetchClients();
+  
+  // If project has dates, set datesSelected to true
+  if (formData.value?.projectStartDate && formData.value?.projectEndDate) {
+    // Set availableAssets to include both currently selected assets and available ones
+    availableAssets.value = [...assets.value]; // Start with all assets
+    datesSelected.value = true;
     
-    // Load project's asset data into the table
-    await loadAssetData();
-    
-    await fetchClients();
-    await fetchProjectDetails();
-    isLoading.value = false;
-  } catch (error) {
-    console.error('Error fetching project data:', error);
-    toast.error('Gagal memuat data proyek');
-    isLoading.value = false;
+    // Check availability for additional assets if dates are set
+    if (assets.value.length > 0) {
+      await checkAvailableAssets();
+    }
   }
 });
 </script> 
@@ -537,29 +585,40 @@ onMounted(async () => {
             <!-- Tanggal Aktivitas -->
             <div>
               <label class="block text-gray-700 mb-2 font-medium">Tanggal Aktivitas</label>
-              <div class="flex space-x-2">
-                <div class="w-1/2">
-                  <div class="relative">
-                    <input 
-                      v-model="formData.projectStartDate"
-                      type="date" 
-                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
-                      :disabled="formData.projectStatus >= 1"
-                    />
+              <div class="flex flex-col space-y-4">
+                <div class="flex space-x-2">
+                  <div class="w-1/2">
+                    <div class="relative">
+                      <input 
+                        v-model="formData.projectStartDate"
+                        type="date" 
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div class="w-1/2">
+                    <div class="relative">
+                      <input 
+                        v-model="formData.projectEndDate"
+                        type="date" 
+                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div class="w-1/2">
-                  <div class="relative">
-                    <input 
-                      v-model="formData.projectEndDate"
-                      type="date" 
-                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
-                      :disabled="formData.projectStatus >= 2"
-                    />
-                  </div>
-                </div>
+                <button 
+                  @click="checkAvailableAssets"
+                  class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded flex items-center justify-center"
+                  :disabled="!formData.projectStartDate || !formData.projectEndDate || loadingAssets"
+                >
+                  <span v-if="loadingAssets" class="mr-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </span>
+                  {{ loadingAssets ? 'Checking...' : 'Check Asset Availability' }}
+                </button>
               </div>
             </div>
   
@@ -605,9 +664,11 @@ onMounted(async () => {
                 <select 
                   v-model="selectedAssetType"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                  :class="{ 'bg-gray-200': !datesSelected }"
                   @change="updateAssetNames"
+                  :disabled="!datesSelected"
                 >
-                  <option value="" disabled>Pilih Jenis</option>
+                  <option value="" disabled>{{ datesSelected ? 'Pilih Jenis' : 'Check availability first' }}</option>
                   <option v-for="type in assetTypes" :key="type" :value="type">{{ type }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -622,8 +683,10 @@ onMounted(async () => {
                 <select 
                   v-model="selectedAssetName"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                  :class="{ 'bg-gray-200': !datesSelected || !selectedAssetType }"
+                  :disabled="!datesSelected || !selectedAssetType"
                 >
-                  <option value="" disabled>Pilih Nama</option>
+                  <option value="" disabled>{{ !datesSelected ? 'Check availability first' : !selectedAssetType ? 'Select type first' : 'Pilih Nama' }}</option>
                   <option v-for="name in assetNames" :key="name" :value="name">{{ name }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -639,7 +702,9 @@ onMounted(async () => {
                 type="number"
                 min="0"
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                :class="{ 'bg-gray-200': !datesSelected || !selectedAssetName }"
                 placeholder="Rp 0,00"
+                :disabled="!datesSelected || !selectedAssetName"
               />
             </div>
             
@@ -650,7 +715,9 @@ onMounted(async () => {
                 type="number"
                 min="0"
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                :class="{ 'bg-gray-200': !datesSelected || !selectedAssetName }"
                 placeholder="Rp 0,00"
+                :disabled="!datesSelected || !selectedAssetName"
               />
             </div>
             
@@ -658,10 +725,18 @@ onMounted(async () => {
               <button 
                 @click="addAsset"
                 class="w-full bg-[#1E3A5F] hover:bg-[#152c49] text-white p-2 rounded"
+                :disabled="!datesSelected || !selectedAssetName"
+                :class="{ 'opacity-50 cursor-not-allowed': !datesSelected || !selectedAssetName }"
               >
                 Tambah
               </button>
             </div>
+          </div>
+  
+          <!-- Add an information banner when no assets are available -->
+          <div v-if="datesSelected && availableAssets.length === 0" 
+               class="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-lg">
+            Tidak ada aset yang tersedia untuk periode waktu yang dipilih. Silakan pilih tanggal lain.
           </div>
   
           <!-- Assets table -->
