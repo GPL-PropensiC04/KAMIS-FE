@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useSupplierStore } from "@/stores/supplier.ts";
-import { useResourceStore } from "@/stores/resource.ts";
+import { useSupplierStore } from "@/stores/supplier";
+import { useResourceStore } from "@/stores/resource";
 import VButton from "@/components/VButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
+import VSuccessButton from "@/components/VSuccessButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 import { useToast } from "vue-toastification";
 import type { UpdateSupplierRequestInterface } from "@/interfaces/profile/supplier.interface";
@@ -56,7 +57,7 @@ const resourceOptions = computed(() => resourceStore.resources.map(res => res.re
 function handleSelectResource(name: string) {
   const selected = resourceStore.resources.find(r => r.resourceName === name);
   if (selected) {
-    selectedResourceId.value = selected.id;
+    selectedResourceId.value = selected.id ?? null;
     selectedResourcePrice.value = selected.resourcePrice;
     selectedResourceName.value = selected.resourceName;
   } else {
@@ -132,11 +133,10 @@ async function handleUpdate() {
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <!-- Tombol Kembali -->
-      <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
-
-      <div class="flex justify-end mb-4">
-        <VButton label="Update" @click="handleUpdate" />
+      <!-- Header: Tombol Kembali & Update -->
+      <div class="flex justify-between items-center mb-6">
+        <button @click="router.back()" class="text-xl font-bold">&larr;</button>
+        <VSuccessButton label="Update" @click="handleUpdate" />
       </div>
 
       <!-- Form Input -->

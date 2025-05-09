@@ -11,6 +11,7 @@ import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 
+
 // Add this interface above your component's setup function
 interface Project {
   id: string;
@@ -22,6 +23,7 @@ interface Project {
   projectEndDate?: string;
   projectTotalPemasukkan?: number;
   projectTotalPengeluaran?: number;
+  projectProfit?: number;
 }
 
 // Store & Router
@@ -39,7 +41,7 @@ const sortByNominal = ref(null);
 // State for price range filter
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
-const selectedNominalLabel = ref("Seluruh Total Pemasukkan");
+const selectedNominalLabel = ref("Seluruh Profit");
 
 // Modal state
 const showModal = ref(false);
@@ -58,7 +60,7 @@ const canEditProject = computed(() => {
 
 // Price range options
 const nominalOptions = [
-  { label: "Seluruh Total Pemasukkan", start: null, end: null },
+  { label: "Seluruh Profit", start: null, end: null },
   { label: "0 - 1 Juta", start: 0, end: 1000000 },
   { label: "1 Juta - 10 Juta", start: 1000000, end: 10000000 },
   { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
@@ -76,6 +78,7 @@ const fetchProjects = async () => {
     idProject: searchQuery.value || null,
     namaProject: searchQuery.value || null,
     tipeProject: selectedType.value === "All" ? null : (selectedType.value === "Penjualan" ? "false" : "true"),
+    // The API uses startNominal/endNominal parameters for filtering by profit
     startNominal: startNominal.value,
     endNominal: endNominal.value,
   };
@@ -122,7 +125,17 @@ const updateNominalFilter = (selectedLabel: string) => {
 watch([searchQuery, dateRange, selectedType, sortByDate, sortByNominal, startNominal, endNominal], fetchProjects);
 
 // Initial data fetch
-onMounted(fetchProjects);
+onMounted(async () => {
+  await fetchProjects();
+  // Log projects with profit for debugging
+  console.log("Fetched projects with profit:", projectStore.projects.map(p => ({
+    id: p.id,
+    name: p.projectName,
+    pemasukkan: p.projectTotalPemasukkan,
+    pengeluaran: p.projectTotalPengeluaran,
+    profit: p.projectProfit
+  })));
+});
 
 // Format date
 const formatDate = (dateString: string) => {
@@ -133,7 +146,7 @@ const formatDate = (dateString: string) => {
 
 // Rupiah formatter
 const formatCurrency = (value: number) => {
-  if (!value && value !== 0) return '-';
+  if (!value && value !== 0) return 'Rp 0,00';
   return `Rp ${value.toLocaleString("id-ID")},00`;
 };
 
@@ -141,7 +154,7 @@ const formatCurrency = (value: number) => {
 const formatStatus = (status: number, projectType: boolean) => {
   if (projectType) {
     switch (status) {
-      case 0: return 'Diajukan';
+      case 0: return 'Direncanakan';
       case 1: return 'Dalam Pengiriman';
       case 2: return 'Selesai';
       case 3: return 'Dibatalkan';
@@ -149,7 +162,7 @@ const formatStatus = (status: number, projectType: boolean) => {
     }
   } else {
     switch (status) {
-      case 0: return 'Diajukan';
+      case 0: return 'Direncanakan';
       case 1: return 'Sedang Dikerjakan';
       case 2: return 'Selesai';
       case 3: return 'Dibatalkan';
@@ -161,12 +174,6 @@ const formatStatus = (status: number, projectType: boolean) => {
 // Project type formatter
 const formatType = (type: boolean) => {
   return type ? 'Distribusi' : 'Penjualan';
-};
-
-// Calculate profit
-const calculateProfit = (pemasukkan: number, pengeluaran: number) => {
-  if (!pemasukkan && !pengeluaran) return '-';
-  return formatCurrency(pemasukkan - pengeluaran);
 };
 
 // Check if any filters are active
@@ -233,8 +240,9 @@ const closeModal = () => {
             v-model="selectedNominalLabel"
             @update:modelValue="updateNominalFilter"
             class="w-full"
+            placeholder="Filter berdasarkan profit"
           />
-          <VSortButton v-model:sortOrder="sortByNominal" />
+          <VSortButton v-model:sortOrder="sortByNominal" label="Profit" />
         </div>
       </template>
       <template v-else>
@@ -306,10 +314,19 @@ const closeModal = () => {
                   <td class="text-center">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
                   <td class="text-center">{{ formatDate(project.projectStartDate) }}</td>
                   <td class="text-center">{{ formatDate(project.projectEndDate) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPemasukkan) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right">{{ formatCurrency(project.projectTotalPengeluaran) }}</td>
-                  <td v-if="canViewFinancialInfo" class="text-right font-bold">
-                    {{ calculateProfit(project.projectTotalPemasukkan, project.projectTotalPengeluaran) }}
+                  <td v-if="canViewFinancialInfo" class="text-right text-green-600">
+                    {{ formatCurrency(project.projectTotalPemasukkan) }}
+                  </td>
+                  <td v-if="canViewFinancialInfo" class="text-right text-red-600">
+                    {{ formatCurrency(project.projectTotalPengeluaran) }}
+                  </td>
+                  <td v-if="canViewFinancialInfo" 
+                      :class="{
+                        'text-right font-bold': true,
+                        'text-green-600': (project.projectProfit ?? 0) >= 0,
+                        'text-red-600': (project.projectProfit ?? 0) < 0
+                      }">
+                    {{ project.projectProfit !== undefined ? formatCurrency(project.projectProfit) : '-' }}
                   </td>
                 </tr>
               </template>
@@ -341,7 +358,7 @@ const closeModal = () => {
                         Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}".
                       </template>
                       <template v-else-if="startNominal !== null && endNominal !== null">
-                        Tidak ada data proyek dengan pemasukkan antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
+                        Tidak ada data proyek dengan profit antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
                       </template>
                       <template v-else-if="hasActiveFilters">
                         Tidak ada data proyek yang sesuai dengan filter yang dipilih.

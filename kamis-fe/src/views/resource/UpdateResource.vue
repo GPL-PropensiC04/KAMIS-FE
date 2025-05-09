@@ -48,7 +48,14 @@
               <label for="resourceStock" class="block text-sm font-medium text-gray-700 mb-1">
                 Stok Saat Ini
               </label>
-              <VLockedInput :value="resourceStock.toString()" />
+              <input
+                id="resourceStock"
+                v-model.number="resourceStock"
+                type="number"
+                min="0"
+                required
+                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
+              />
             </div>
           </div>
   
@@ -114,6 +121,7 @@
     const body: Partial<ResourceInterface> = {
       resourcePrice: resourcePrice.value,
       resourceDescription: resourceDescription.value,
+      resourceStock: resourceStock.value,
     };
   
     try {

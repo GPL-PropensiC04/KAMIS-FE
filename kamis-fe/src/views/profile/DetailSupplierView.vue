@@ -4,7 +4,7 @@
       <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <button @click="router.back()" class="mb-4 text-xl font-bold">&larr;</button>
         <div class="flex justify-end items-center mb-4">
-          <VButton v-if="isOperationalOrAdmin" label="Edit" @click="goToEditSupplier" />
+          <VButton v-if="isOperationalOrAdmin" label="Update" @click="goToEditSupplier" />
         </div>
   
         <div v-if="loading" class="text-center py-4">Memuat data supplier...</div>
@@ -105,7 +105,7 @@
   <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
-  import { useSupplierStore } from '@/stores/supplier.ts';
+  import { useSupplierStore } from '@/stores/supplier';
   import { useAuthStore } from '@/stores/auth';
   import VButton from '@/components/VButton.vue';
   import Breadcrumb from '@/components/Breadcrumb.vue';

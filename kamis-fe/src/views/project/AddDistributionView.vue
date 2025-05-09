@@ -100,28 +100,24 @@
           <!-- Tanggal Aktivitas -->
           <div>
             <label class="block text-gray-700 mb-2 font-medium">Tanggal Aktivitas</label>
-            <div class="flex space-x-2">
-              <div class="w-1/2">
-                <div class="relative">
-                  <input 
-                    v-model="formData.projectStartDate"
-                    type="date" 
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-5 h-5 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M10 14a4 4 0 100-8 4 4 0 000 8zm0 1A5 5 0 1110 5a5 5 0 010 10z"></path></svg>
+            <div class="flex flex-col space-y-4">
+              <div class="flex space-x-2">
+                <div class="w-1/2">
+                  <div class="relative">
+                    <input 
+                      v-model="formData.projectStartDate"
+                      type="date" 
+                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
-              </div>
-              <div class="w-1/2">
-                <div class="relative">
-                  <input 
-                    v-model="formData.projectEndDate"
-                    type="date" 
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-5 h-5 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M10 14a4 4 0 100-8 4 4 0 000 8zm0 1A5 5 0 1110 5a5 5 0 010 10z"></path></svg>
+                <div class="w-1/2">
+                  <div class="relative">
+                    <input 
+                      v-model="formData.projectEndDate"
+                      type="date" 
+                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -165,9 +161,11 @@
               <select 
                 v-model="selectedAssetType"
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                :class="{ 'bg-gray-200': !datesSelected }"
                 @change="updateAssetNames"
+                :disabled="!datesSelected"
               >
-                <option value="" disabled>Pilih Jenis</option>
+                <option value="" disabled>{{ datesSelected ? 'Pilih Jenis Aset' : 'Pilih Tanggal Aktivitas Terlebih Dahulu' }}</option>
                 <option v-for="type in assetTypes" :key="type" :value="type">{{ type }}</option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -182,8 +180,10 @@
               <select 
                 v-model="selectedAssetName"
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                :class="{ 'bg-gray-200': !datesSelected || !selectedAssetType }"
+                :disabled="!datesSelected || !selectedAssetType"
               >
-                <option value="" disabled>Pilih Nama</option>
+                <option value="" disabled>{{ !datesSelected ? 'Pilih Tanggal Aktivitas Terlebih Dahulu' : !selectedAssetType ? 'Pilih Jenis Aset Terlebih Dahulu' : 'Pilih Nama' }}</option>
                 <option v-for="name in assetNames" :key="name" :value="name">{{ name }}</option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -199,7 +199,9 @@
               type="number"
               min="0"
               class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              :class="{ 'bg-gray-200': !datesSelected || !selectedAssetName }"
               placeholder="Rp 0,00"
+              :disabled="!datesSelected || !selectedAssetName"
             />
           </div>
           
@@ -210,7 +212,9 @@
               type="number"
               min="0"
               class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              :class="{ 'bg-gray-200': !datesSelected || !selectedAssetName }"
               placeholder="Rp 0,00"
+              :disabled="!datesSelected || !selectedAssetName"
             />
           </div>
           
@@ -218,53 +222,75 @@
             <button 
               @click="addAsset"
               class="w-full bg-[#1E3A5F] hover:bg-[#152c49] text-white p-2 rounded"
+              :disabled="!datesSelected || !selectedAssetName"
+              :class="{ 'opacity-50 cursor-not-allowed': !datesSelected || !selectedAssetName }"
             >
               Tambah
             </button>
           </div>
         </div>
 
-        <!-- Assets table -->
-        <div class="overflow-x-auto bg-white shadow rounded-lg">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-[#1E3A5F] text-white">
-              <tr>
-                <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
-                <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
-                <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
-                <th class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
-                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
-                <td class="px-6 py-4 text-center whitespace-nowrap">
-                  <button 
-                    @click="removeAsset(index)"
-                    class="text-red-600 hover:text-red-800"
-                  >
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-              <tr v-if="assetList.length === 0">
-                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                  Belum ada aset yang ditambahkan
-                </td>
-              </tr>
-            </tbody>
-            <tfoot class="bg-gray-50">
-              <tr>
-                <td colspan="2" class="px-6 py-3 text-right font-medium">Total Biaya Aset:</td>
-                <td class="px-6 py-3 text-right font-bold">{{ formatCurrency(totalAssetCost) }}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+        <!-- Add an information banner when no assets are available -->
+        <div v-if="datesSelected && availableAssets.length === 0" 
+             class="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-lg">
+          Tidak ada aset yang tersedia untuk periode waktu yang dipilih. Silakan pilih tanggal lain.
+        </div>
+
+        <!-- Assets table with loading overlay -->
+        <div class="relative">
+          <!-- Loading overlay -->
+          <div v-if="loadingAssets" class="absolute inset-0 bg-white bg-opacity-70 z-10 flex items-center justify-center rounded-lg backdrop-filter backdrop-blur-sm">
+            <div class="flex flex-col items-center p-4 bg-white bg-opacity-90 rounded-lg shadow-lg">
+              <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span class="text-blue-700 font-medium">Memeriksa ketersediaan aset...</span>
+            </div>
+          </div>
+          
+          <!-- Assets table -->
+          <div class="overflow-x-auto bg-white shadow rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-[#1E3A5F] text-white">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Jenis Aset</th>
+                  <th class="px-6 py-3 text-left text-sm font-medium uppercase">Nama Aset</th>
+                  <th class="px-6 py-3 text-right text-sm font-medium uppercase">Biaya Pakai</th>
+                  <th class="px-6 py-3 text-center text-sm font-medium uppercase">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
+                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
+                  <td class="px-6 py-4 text-center whitespace-nowrap">
+                    <button 
+                      @click="removeAsset(index)"
+                      class="text-red-600 hover:text-red-800"
+                    >
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="assetList.length === 0">
+                  <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                    Belum ada aset yang ditambahkan
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot class="bg-gray-50">
+                <tr>
+                  <td colspan="2" class="px-6 py-3 text-right font-medium">Total Biaya Aset:</td>
+                  <td class="px-6 py-3 text-right font-bold">{{ formatCurrency(totalAssetCost) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
 
         <!-- Summary -->
@@ -287,6 +313,7 @@ import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import type { DistributionFormData, AssetUsageDTO } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
+import { useAssetStore } from '@/stores/assetReservability';
 
 // Router & Toast
 const router = useRouter();
@@ -345,6 +372,14 @@ const assetNames = ref<string[]>([]);
 const fuelCost = ref(0);
 const shippingCost = ref(0);
 
+// Store
+const assetStore = useAssetStore();
+
+// Add a new state variable to track available assets
+const availableAssets = ref<Asset[]>([]);
+const datesSelected = ref(false);
+const loadingAssets = ref(false);
+
 // Computed values
 const totalAssetCost = computed(() => {
   return assetList.value.reduce((sum, asset) => sum + asset.totalCost, 0);
@@ -380,27 +415,15 @@ const fetchClients = async () => {
 // Fetch assets from API
 const fetchAssets = async () => {
   try {
-    const response = await axios.get(`${API_URLS.ASSET}/asset/all`, {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
+    // Use the asset store instead of direct API call
+    const fetchedAssets = await assetStore.fetchAssets();
     
-    // Map the backend response to our Asset interface format
-    interface AssetResponse {
-      platNomor: string;
-      tipeAset: string;
-      nama: string;
-      status: string;
-      nilaiPerolehan: number;
-    }
-    
-    assets.value = response.data.data.map((asset: AssetResponse) => ({
-      id: asset.platNomor, // Using platNomor as ID
+    // Map the fetched assets to our Asset interface format
+    assets.value = fetchedAssets.map(asset => ({
+      id: asset.platNomor,
       assetType: asset.tipeAset,
       assetName: asset.nama,
-      assetUsageCost: 0, // Default value as it's not provided by API
+      assetUsageCost: 0,
       platNomor: asset.platNomor
     }));
     
@@ -413,14 +436,76 @@ const fetchAssets = async () => {
   }
 };
 
-// Update asset names when asset type changes
+// Add a new function to check asset availability
+const checkAvailableAssets = async () => {
+  if (!formData.value.projectStartDate || !formData.value.projectEndDate) {
+    toast.error('Tanggal mulai dan selesai proyek harus diisi terlebih dahulu');
+    return;
+  }
+
+  try {
+    loadingAssets.value = true;
+    
+    // Fetch all assets first if not already fetched
+    if (assets.value.length === 0) {
+      await fetchAssets();
+    }
+    
+    const startDate = new Date(formData.value.projectStartDate);
+    const endDate = new Date(formData.value.projectEndDate);
+    
+    // Validate date range
+    if (endDate < startDate) {
+      toast.error('Tanggal akhir harus setelah tanggal mulai');
+      loadingAssets.value = false;
+      return;
+    }
+    
+    // Get all asset plat nomors
+    const platNomors = assets.value.map(asset => asset.platNomor as string);
+    
+    // Check availability
+    const availability = await assetStore.checkAssetAvailability({
+      platNomors,
+      startDate,
+      endDate,
+      excludeProjectId: undefined // No project ID for new projects
+    });
+    
+    // Filter assets to only include available ones
+    availableAssets.value = assets.value.filter(asset => 
+      asset.platNomor && availability[asset.platNomor]
+    );
+    
+    // Extract unique asset types from available assets
+    const types = new Set(availableAssets.value.map(asset => asset.assetType));
+    assetTypes.value = Array.from(types) as string[];
+    
+    datesSelected.value = true;
+    loadingAssets.value = false;
+    
+    // If no assets available
+    if (availableAssets.value.length === 0) {
+      toast.warning('Tidak ada aset yang tersedia untuk periode waktu yang dipilih');
+    } else {
+      toast.success(`${availableAssets.value.length} aset tersedia untuk periode waktu yang dipilih`);
+    }
+    
+  } catch (error) {
+    console.error('Error checking asset availability:', error);
+    toast.error('Gagal memeriksa ketersediaan aset');
+    loadingAssets.value = false;
+  }
+};
+
+// Replace updateAssetNames with a version that filters from available assets
 const updateAssetNames = () => {
   if (!selectedAssetType.value) {
     assetNames.value = [];
     return;
   }
   
-  const filteredAssets = assets.value.filter(asset => 
+  const filteredAssets = availableAssets.value.filter(asset => 
     asset.assetType === selectedAssetType.value &&
     !assetList.value.some(a => a.id === asset.id)
   );
@@ -433,14 +518,14 @@ const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 };
 
-// Add asset to project
+// Modify the addAsset function to skip availability check since we're already filtering
 const addAsset = () => {
   if (!selectedAssetType.value || !selectedAssetName.value) {
     toast.error('Pilih tipe dan nama aset terlebih dahulu');
     return;
   }
   
-  const selectedAsset = assets.value.find(
+  const selectedAsset = availableAssets.value.find(
     asset => asset.assetType === selectedAssetType.value && 
     asset.assetName === selectedAssetName.value
   );
@@ -475,6 +560,8 @@ const addAsset = () => {
   
   // Update form data
   updateFormData();
+  
+  toast.success(`Aset ${selectedAsset.assetName} berhasil ditambahkan`);
 };
 
 // Remove asset from list
@@ -489,7 +576,7 @@ const updateFormData = () => {
   formData.value.projectUseAsset = assetList.value.map(asset => ({
     id: asset.id,
     platNomor: asset.platNomor || asset.name,
-    assetUseCost: asset.usageCost || 0,
+    assetUseCost: asset.shippingCost || 0,
     assetFuelCost: asset.fuelCost || 0,
     tipeAset: asset.type
   }));
@@ -538,6 +625,16 @@ const submitForm = async () => {
 
 // Watch for asset type changes
 watch(selectedAssetType, updateAssetNames);
+
+// Watch for date changes to automatically check asset availability
+watch(
+  [() => formData.value.projectStartDate, () => formData.value.projectEndDate],
+  async ([newStartDate, newEndDate]) => {
+    if (newStartDate && newEndDate) {
+      await checkAvailableAssets();
+    }
+  }
+);
 
 // Load data on component mount
 onMounted(() => {

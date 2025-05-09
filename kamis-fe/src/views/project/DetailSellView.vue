@@ -7,21 +7,39 @@
         <span>←</span>
       </router-link>
       
-      <div class="flex gap-2">
-        <!-- Payment Status Button -->
-        <VSuccessButton v-if="canViewFinancialInfo && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" label="Bayar" @click="openPaymentModal"/>
-        <VCancelButton v-if="canViewFinancialInfo && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" label="Kembalikan" @click="openPaymentModal"/>
+      <!-- Only show buttons when data is fully loaded -->
+      <div v-if="!isLoading && !error" class="flex gap-2">
+        <!-- Payment Status Button (only for Finance) -->
+        <VSuccessButton 
+          v-if="(canEditFinancial) && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
+          label="Konfirmasi Pembayaran" 
+          @click="openPaymentModal"
+        />
+        <VCancelButton 
+          v-if="(canEditFinancial) && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
+          label="Konfirmasi Pengembalian" 
+          @click="openPaymentModal"
+        />
         
-        <!-- Project Action Buttons for Sales -->
+        <!-- Project Action Buttons (only for Operasional and Admin) -->
         <template v-if="canEditProject">
-          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="openCancelModal" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update Status" @click="updateProject"/>
+          <VCancelButton 
+            v-if="projectData.projectStatus < 2" 
+            label="Batal" 
+            @click="openCancelModal" 
+          />
+          <VSuccessButton 
+            v-if="projectData.projectStatus < 2" 
+            label="Update Status" 
+            @click="updateProject"
+          />
         </template>
       </div>
     </div>
 
-    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
-      <p>Memuat data...</p>
+    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 flex flex-col items-center justify-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F] mb-4"></div>
+      <p class="text-[#1E3A5F] font-medium">Memuat data proyek...</p>
     </div>
 
     <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
@@ -41,41 +59,41 @@
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
-            <!-- Edit button for Operasional role -->
+            <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditProject && projectData.projectStatus < 2"
+              v-if="canEditProject && projectData.projectStatus !== 2"
               label="Ubah"
               @click="editSalesInfo"
             />
           </div>
 
           <!-- Basic Info -->
-          <div class="grid grid-cols-3 gap-4 p-4">
-            <div>
-              <p class="text-gray-600 text-sm">Nama Atribusi</p>
-              <p class="font-semibold">{{ projectData.projectName  }}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div class="break-words">
+              <p class="text-gray-600 text-sm">Nama Kegiatan</p>
+              <p class="font-semibold">{{ projectData.projectName }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName  }}</p>
+              <p class="font-semibold">{{ clientName }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Mulai</p>
               <p class="font-semibold">{{ formatDate(projectData.projectStartDate) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
-              <p class="font-semibold">{{ projectData.projectDeliveryAddress  }}</p>
+              <p class="font-semibold">{{ projectData.projectDeliveryAddress }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status</p>
               <p class="font-semibold">{{ formatStatus(projectData.projectStatus) }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Selesai</p>
               <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
             </div>
-            <div>
+            <div class="break-words">
               <p class="text-gray-600 text-sm">Status Pembayaran</p>
               <p class="font-semibold">{{ formatPaymentStatus(projectData.projectPaymentStatus) }}</p>
             </div>
@@ -172,7 +190,11 @@
         </div>
     </div>
       <!-- Log Penjualan -->
-      <div v-if="projectData.projectLogs.length" class="mt-10">
+      <div v-if="logsLoading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+      </div>
+
+      <div v-else-if="projectData.projectLogs && projectData.projectLogs.length" class="mt-10">
             <h2 class="text-lg font-bold font-lato mb-2">Log Penjualan</h2>
             <hr class="border-t-1 border-black mb-4" />
 
@@ -299,14 +321,42 @@ const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
 // State variables
-const project = ref<any>({});
-const projectData = ref<any>({});
+interface ProjectData {
+  id: string;
+  projectName: string;
+  projectClientId: string;
+  projectStartDate: string;
+  projectEndDate?: string;
+  projectDeliveryAddress: string;
+  projectStatus: number;
+  projectPaymentStatus: number;
+  projectTotalPemasukkan: number;
+  projectType: boolean;
+  projectUseResource: ProjectResource[];
+  projectLogs: ProjectLog[];
+}
+
+interface ProjectLog {
+  id: string;
+  user: string;
+  action: string;
+  actionDate: string;
+}
+
+const project = ref<ProjectData>({} as ProjectData);
+const projectData = ref<ProjectData>({} as ProjectData);
 const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
 const showStatusModal = ref(false);
 const showCancelModal = ref(false);
 const newStatusToUpdate = ref<number | null>(null);
+
+// Add these state variables
+const clientLoading = ref(true);
+const resourcesLoading = ref(false); // For DetailSellView only
+// Add this state variable
+const logsLoading = ref(false);
 
 // Add these methods
 const openCancelModal = () => {
@@ -335,6 +385,8 @@ const fetchResourceNames = async () => {
     console.log("No resources to fetch names for");
     return;
   }
+  
+  resourcesLoading.value = true;
   
   try {
     for (const resource of projectData.value.projectUseResource) {
@@ -393,6 +445,8 @@ const fetchResourceNames = async () => {
     }
   } catch (err) {
     console.error('Error in overall fetchResourceNames process:', err);
+  } finally {
+    resourcesLoading.value = false;
   }
 };
 
@@ -400,6 +454,15 @@ const fetchResourceNames = async () => {
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
   return userRole === 'Direksi' || userRole === 'Finance';
+});
+
+const canEditProject = computed(() => {
+  const userRole = authStore.userRole;
+  return userRole === 'Operasional';
+});
+
+const canEditFinancial = computed(() => {
+  return authStore.userRole === 'Finance' || authStore.userRole === 'Direksi';
 });
 
 const showPaymentModal = ref(false);
@@ -467,12 +530,6 @@ const updatePaymentStatus = async () => {
   }
 };
 
-// Check if user can edit project (Operasional or Admin)
-const canEditProject = computed(() => {
-  const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Admin';
-});
-
 // Format date function
 const formatDate = (dateString: string): string => {
   if (!dateString) return '-';
@@ -489,7 +546,7 @@ const formatCurrency = (value: number): string => {
 // Format status function
 const formatStatus = (status: number): string => {
   switch (status) {
-    case 0: return 'Diajukan';
+    case 0: return 'Direncanakan';
     case 1: return 'Dalam Pengiriman';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
@@ -535,6 +592,7 @@ const getProfit = (): number => {
 const loadData = async () => {
   isLoading.value = true;
   error.value = '';
+  logsLoading.value = true;
 
   let retryCount = 0;
   const maxRetries = 2;
@@ -604,6 +662,7 @@ const loadData = async () => {
     error.value = 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
   } finally {
     isLoading.value = false;
+    logsLoading.value = false;
   }
 };
 
@@ -611,8 +670,11 @@ const loadData = async () => {
 const fetchClientName = async (clientId: string) => {
   if (!clientId) {
     clientName.value = '-';
+    clientLoading.value = false;
     return;
   }
+  
+  clientLoading.value = true;
   
   try {
     // Make a real API call to fetch client data
@@ -633,6 +695,8 @@ const fetchClientName = async (clientId: string) => {
   } catch (err) {
     console.error('Error fetching client name:', err);
     clientName.value = 'Unknown Client';
+  } finally {
+    clientLoading.value = false;
   }
 };
 

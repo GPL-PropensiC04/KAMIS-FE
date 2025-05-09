@@ -54,7 +54,7 @@ const getStatusText = (status: number): string => {
     case 0: return 'Direncanakan';
     case 1: return 'Dilaksanakan';
     case 2: return 'Selesai';
-    case 3: return 'Telah Dibayar';
+    case 3: return 'Dibatalkan';
     default: return 'Unknown';
   }
 };
@@ -316,9 +316,22 @@ const addProduct = () => {
 
 // Remove product from cart
 const removeProduct = (index: number) => {
+  // Get the product before removing it
+  const removedProduct = productList.value[index];
+  
+  // Remove the product from the list
   productList.value.splice(index, 1);
+  
+  // Update the UI to reflect the stock change for that resource
+  const availableProductIndex = availableProducts.value.findIndex(p => p.id === removedProduct.id);
+  if (availableProductIndex !== -1) {
+    // Add the quantity back to the available stock
+    availableProducts.value[availableProductIndex].stock += removedProduct.quantity;
+  }
+  
   updateFormData();
 };
+
 
 // Update form data with current lists
 const updateFormData = () => {
@@ -358,6 +371,11 @@ const submitForm = async () => {
     return;
   }
   
+  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
+    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
+    return;
+  }
+
   // Update form data before submitting
   updateFormData();
   
@@ -389,7 +407,7 @@ const submitForm = async () => {
     
     toast.success('Proyek berhasil diperbarui');
     // Redirect to project detail page
-    router.push(`/project/${requestData.id}`);
+    router.push(`/project/sale/${requestData.id}`);
   } catch (error) {
     console.error('Error updating project:', error);
     toast.error('Gagal memperbarui proyek');
@@ -449,8 +467,9 @@ onMounted(() => {
                 v-model="formData.projectName"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 0 }"
                 placeholder="Masukkan nama aktivitas"
-                :disabled="formData.projectStatus > 0"
+                :disabled="formData.projectStatus >= 0"
               />
             </div>
   
@@ -461,7 +480,8 @@ onMounted(() => {
                 <select 
                   v-model="formData.projectClientId"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                  :disabled="formData.projectStatus > 0"
+                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 0 }"
+                  :disabled="formData.projectStatus >= 0"
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">
@@ -481,6 +501,7 @@ onMounted(() => {
                 v-model="formData.projectDeliveryAddress"
                 type="text" 
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 1 }"
                 placeholder="Masukkan alamat pengiriman"
                 :disabled="formData.projectStatus >= 1"
               />
@@ -500,26 +521,15 @@ onMounted(() => {
             <!-- Tanggal Aktivitas -->
             <div>
               <label class="block text-gray-700 mb-2 font-medium">Tanggal Aktivitas</label>
-              <div class="flex space-x-2">
-                <div class="w-1/2">
-                  <div class="relative">
-                    <input 
-                      v-model="formData.projectStartDate"
-                      type="date" 
-                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      :disabled="formData.projectStatus >= 1"
-                    />
-                  </div>
-                </div>
-                <div class="w-1/2">
-                  <div class="relative">
-                    <input 
-                      v-model="formData.projectEndDate"
-                      type="date" 
-                      class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      :disabled="formData.projectStatus >= 2"
-                    />
-                  </div>
+              <div class="w-full">
+                <div class="relative">
+                  <input 
+                    v-model="formData.projectStartDate"
+                    type="date" 
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 1 }"
+                    :disabled="formData.projectStatus >= 1"
+                  />
                 </div>
               </div>
             </div>
@@ -531,7 +541,7 @@ onMounted(() => {
                 v-model.number="formData.projectTotalPemasukkan"
                 type="number" 
                 min="0"
-                class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700"
                 placeholder="Rp 0"
                 :disabled="formData.projectStatus >= 1 || formData.projectStatus === 0"
                 readonly
@@ -552,6 +562,8 @@ onMounted(() => {
                 <select 
                   v-model="selectedProduct"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !availableProducts.length }"
+                  :disabled="!availableProducts.length"
                 >
                   <option value="" disabled>Pilih Barang</option>
                   <option v-for="product in availableProducts" :key="product.id" :value="product.id">
@@ -570,9 +582,11 @@ onMounted(() => {
                 <select 
                   v-model="selectedQuantity"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
+                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.stock || 0) === 0 }"
+                  :disabled="!selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.stock || 0) === 0"
                 >
                   <option value="" disabled>Pilih Jumlah</option>
-                  <option v-for="num in 10" :key="num" :value="num">{{ num }}</option>
+                  <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3"></path></svg>
@@ -586,7 +600,7 @@ onMounted(() => {
                 v-model.number="selectedPrice"
                 type="number"
                 min="0"
-                class="w-full p-2 bg-gray-200 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                class="w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700"
                 readonly
               />
             </div>
@@ -595,6 +609,8 @@ onMounted(() => {
               <button 
                 @click="addProduct"
                 class="w-full bg-[#1E3A5F] hover:bg-[#152c49] text-white p-2 rounded"
+                :class="{ 'opacity-50 cursor-not-allowed': !selectedProduct || !selectedQuantity || selectedPrice <= 0 }"
+                :disabled="!selectedProduct || !selectedQuantity || selectedPrice <= 0"
               >
                 Tambah
               </button>
