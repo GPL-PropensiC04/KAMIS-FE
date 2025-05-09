@@ -18,6 +18,7 @@ const nameClient = ref("");
 const noTelpClient = ref("");
 const emailClient = ref("");
 const addressClient = ref("");
+const typeClient = ref<boolean>(false);
 
 // Fetch client data on mount
 onMounted(async () => {
@@ -27,6 +28,8 @@ onMounted(async () => {
     noTelpClient.value = detail.noTelpClient;
     emailClient.value = detail.emailClient;
     addressClient.value = detail.addressClient;
+    typeClient.value = detail.typeClient;
+
   } else {
     toast.error("Gagal mengambil data klien!");
     router.back();
@@ -63,6 +66,7 @@ const handleSubmit = async () => {
     noTelpClient: noTelpClient.value,
     emailClient: emailClient.value,
     addressClient: addressClient.value,
+    typeClient: typeClient.value,
   };
 
   await clientStore.updateClient(body, id);
@@ -126,7 +130,7 @@ const handleSubmit = async () => {
         <div>
           <label class="block font-semibold mb-1 text-gray-400">Tipe Klien</label>
           <input 
-            :value="clientStore.clientDetail?.typeClient === 'true' ? 'Perusahaan' : 'Perorangan'" 
+            :value="typeClient ? 'Perusahaan' : 'Perorangan'"
             disabled
             class="w-full p-2 border border-[#1E3A5F] rounded-md bg-gray-200 cursor-not-allowed" 
           />
