@@ -56,3 +56,12 @@ export interface UpdateClientInterface{
   emailClient: string;
   addressClient: string
 }
+
+export interface PageResponseInterface<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
