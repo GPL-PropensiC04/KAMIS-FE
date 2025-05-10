@@ -103,12 +103,6 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
     },
     {
-      path: '/client/update/:id',
-      name: 'update-client',
-      component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"] }
-    },
-    {
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
