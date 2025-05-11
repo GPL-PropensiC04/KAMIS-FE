@@ -17,8 +17,8 @@
       </div>
     </div>
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div v-if="clientStore.loading" class="flex justify-center items-center py-10">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div v-if="clientStore.loading" class="flex justify-center items-center py-14">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
@@ -59,17 +59,6 @@
           </tr>
         </tbody>
       </table>
-      
-      <!-- Pagination Component -->
-      <VPagination
-        v-if="clientStore.clientList.length > 0"
-        :current-page="clientStore.pagination.currentPage"
-        :page-size="clientStore.pagination.pageSize"
-        :total-items="clientStore.pagination.totalElements"
-        :total-pages="clientStore.pagination.totalPages"
-        :is-last-page="clientStore.pagination.isLastPage"
-        @page-change="onPageChange"
-      />
     </div>
   </div>
 </template>
@@ -85,7 +74,6 @@ import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import VDropDownInput from '@/components/VDropDownInput.vue';
-import VPagination from '@/components/VPagination.vue';
 
 const searchName = ref('');
 const clientStore = useClientStore();
@@ -114,38 +102,12 @@ const fetchFilteredClients = async () => {
     typeClient: type,
     minProfit: selected?.min,
     maxProfit: selected?.max,
-  }, clientStore.pagination.currentPage, clientStore.pagination.pageSize);
-};
-
-// Fungsi untuk pergantian halaman
-const onPageChange = async (page: number) => {
-  const selected = nominalOptions.find(opt => opt.label === selectedNominal.value);
-  let type = undefined;
-  if (typeClient.value === 'Perusahaan') type = true;
-  else if (typeClient.value === 'Perorangan') type = false;
-  
-  await clientStore.viewAllClient({
-    nameClient: searchName.value,
-    typeClient: type,
-    minProfit: selected?.min,
-    maxProfit: selected?.max,
-  }, page, clientStore.pagination.pageSize);
+  });
 };
 
 watch(typeClient, fetchFilteredClients);
 
 watch(selectedNominal, fetchFilteredClients);
-
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-
-watch(searchName, () => {
-  if (debounceTimeout) clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(() => {
-    // Reset ke halaman pertama saat melakukan pencarian
-    clientStore.pagination.currentPage = 0;
-    fetchFilteredClients();
-  }, 400);
-});
 
 function goToAddClient() {
   router.push('/client/add');
@@ -162,9 +124,7 @@ const isOperational = computed(() => authStore.userRole === 'Operasional');
 const isDireksi = computed(() => authStore.userRole === 'Direksi');
 
 onMounted(() => {
-  // Mulai dengan halaman pertama saat komponen dimount
-  clientStore.pagination.currentPage = 0;
-  fetchFilteredClients();
+  clientStore.viewAllClient();
 });
 </script>
 
