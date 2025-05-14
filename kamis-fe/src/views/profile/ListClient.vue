@@ -6,12 +6,8 @@
         <div class="flex items-center gap-3 flex-nowrap w-full">
           <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." class="flex-1" />
           <VOptionInput v-model="typeClient" :options="['All', 'Perusahaan', 'Perorangan']"/>
-          <VDropDownInput
-            v-if="isFinance || isDireksi"
-            v-model="selectedNominal"
-            :options="nominalOptions.map(opt => opt.label)"
-            class="w-48"
-          />
+          <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal"
+            :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
         </div>
         <VButton v-if="isOperational" class="ml-4 whitespace-nowrap" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
@@ -26,7 +22,7 @@
             <th class="px-6 py-4 table-header text-base">Nama Klien</th>
             <th class="px-6 py-4 table-header text-base">Tipe Klien</th>
             <th class="px-6 py-4 table-header text-base">Perusahaan</th>
-            <th v-if="isOperational || isDireksi" class="px-6 py-4 table-header text-base">Jumlah Proyek</th>
+            <th v-if="isOperational || isDireksi" class="px-6 py-4 table-header text-base">Jumlah Aktivitas</th>
             <th v-if="isFinance || isDireksi" class="px-6 py-4 table-header text-base">Total Profit</th>
           </tr>
         </thead>
@@ -156,7 +152,15 @@ onMounted(() => {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.custom-table tbody tr:hover {
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
   background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
 }
 </style>

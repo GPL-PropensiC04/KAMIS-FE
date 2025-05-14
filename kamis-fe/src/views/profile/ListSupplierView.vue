@@ -146,8 +146,16 @@ const goToDetailSupplier = (supplierId: string) => {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.custom-table tbody tr:hover {
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
   background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
 }
 
 .table-header:hover {
