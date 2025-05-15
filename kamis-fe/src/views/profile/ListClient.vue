@@ -6,19 +6,15 @@
         <div class="flex items-center gap-3 flex-nowrap w-full">
           <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." class="flex-1" />
           <VOptionInput v-model="typeClient" :options="['All', 'Perusahaan', 'Perorangan']"/>
-          <VDropDownInput
-            v-if="isFinance || isDireksi"
-            v-model="selectedNominal"
-            :options="nominalOptions.map(opt => opt.label)"
-            class="w-48"
-          />
+          <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal"
+            :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
         </div>
         <VButton v-if="isOperational" class="ml-4 whitespace-nowrap" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
     </div>
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div v-if="clientStore.loading" class="flex justify-center items-center py-10">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div v-if="clientStore.loading" class="flex justify-center items-center py-14">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
@@ -26,7 +22,7 @@
             <th class="px-6 py-4 table-header text-base">Nama Klien</th>
             <th class="px-6 py-4 table-header text-base">Tipe Klien</th>
             <th class="px-6 py-4 table-header text-base">Perusahaan</th>
-            <th v-if="isOperational || isDireksi" class="px-6 py-4 table-header text-base">Jumlah Proyek</th>
+            <th v-if="isOperational || isDireksi" class="px-6 py-4 table-header text-base">Jumlah Aktivitas</th>
             <th v-if="isFinance || isDireksi" class="px-6 py-4 table-header text-base">Total Profit</th>
           </tr>
         </thead>
@@ -108,44 +104,10 @@ const fetchFilteredClients = async () => {
   let type = undefined;
   if (typeClient.value === 'Perusahaan') type = true;
   else if (typeClient.value === 'Perorangan') type = false;
-  
-  await clientStore.viewAllClient({
-    nameClient: searchName.value,
-    typeClient: type,
-    minProfit: selected?.min,
-    maxProfit: selected?.max,
-  }, clientStore.pagination.currentPage, clientStore.pagination.pageSize);
-};
-
-// Fungsi untuk pergantian halaman
-const onPageChange = async (page: number) => {
-  const selected = nominalOptions.find(opt => opt.label === selectedNominal.value);
-  let type = undefined;
-  if (typeClient.value === 'Perusahaan') type = true;
-  else if (typeClient.value === 'Perorangan') type = false;
-  
-  await clientStore.viewAllClient({
-    nameClient: searchName.value,
-    typeClient: type,
-    minProfit: selected?.min,
-    maxProfit: selected?.max,
-  }, page, clientStore.pagination.pageSize);
-};
 
 watch(typeClient, fetchFilteredClients);
 
 watch(selectedNominal, fetchFilteredClients);
-
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-
-watch(searchName, () => {
-  if (debounceTimeout) clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(() => {
-    // Reset ke halaman pertama saat melakukan pencarian
-    clientStore.pagination.currentPage = 0;
-    fetchFilteredClients();
-  }, 400);
-});
 
 function goToAddClient() {
   router.push('/client/add');
@@ -196,7 +158,15 @@ onMounted(() => {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.custom-table tbody tr:hover {
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
   background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
 }
 </style>
