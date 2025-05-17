@@ -55,17 +55,6 @@
           </tr>
         </tbody>
       </table>
-      
-      <!-- Pagination Component -->
-      <VPagination
-        v-if="clientStore.clientList.length > 0"
-        :current-page="clientStore.pagination.currentPage"
-        :page-size="clientStore.pagination.pageSize"
-        :total-items="clientStore.pagination.totalElements"
-        :total-pages="clientStore.pagination.totalPages"
-        :is-last-page="clientStore.pagination.isLastPage"
-        @page-change="onPageChange"
-      />
     </div>
   </div>
 </template>
@@ -81,7 +70,6 @@ import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import VDropDownInput from '@/components/VDropDownInput.vue';
-import VPagination from '@/components/VPagination.vue';
 
 const searchName = ref('');
 const clientStore = useClientStore();
@@ -104,6 +92,9 @@ const fetchFilteredClients = async () => {
   let type = undefined;
   if (typeClient.value === 'Perusahaan') type = true;
   else if (typeClient.value === 'Perorangan') type = false;
+  // You may want to call your store's fetch/filter method here, e.g.:
+  // await clientStore.fetchClients({ name: searchName.value, type, minProfit: selected?.min, maxProfit: selected?.max });
+};
 
 watch(typeClient, fetchFilteredClients);
 
