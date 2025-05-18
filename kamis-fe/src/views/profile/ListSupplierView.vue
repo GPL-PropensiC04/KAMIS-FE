@@ -156,6 +156,7 @@ const goToDetailSupplier = (supplierId: string) => {
 
 .custom-table tbody tr:hover {
   background-color: #f3f4f6;
+}
 
 .table-header:hover {
   background-color: #32486B;

@@ -21,7 +21,7 @@ export interface ProjectInterface {
   projectUseResource?: Array<ResourceUsageDTO>;
   data?: ProjectInterface; // For nested responses
   projectLogs: LogProjectInterface[];
-
+  projectPaymentDate?: string; // ISO date string
 }
 
 export interface ProjectResponseInterface {
