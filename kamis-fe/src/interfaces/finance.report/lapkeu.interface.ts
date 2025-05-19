@@ -13,3 +13,8 @@ export interface LapkeuSummaryResponseDTO {
   totalPengeluaran: number;
   totalProfit: number;
 }
+
+export interface ChartPengeluaranResponseDTO {
+  activityType: string;         // "Pembelian", "Distribusi", "Maintenance", etc.
+  totalPengeluaran: number;
+}
