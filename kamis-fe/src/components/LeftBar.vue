@@ -14,7 +14,7 @@
         <BaseIcon icon="fa-solid fa-chart-simple" clickable />
         <span v-if="!isCollapsed" class="icon-label">Dashboard</span>
       </div>
-      <div v-if = "isFinance || isDireksi" :class="['icon-item', { active: isActive('laporan') }]" @click="goTo('laporan')">
+      <div v-if = "isFinance || isDireksi" :class="['icon-item', { active: isActive('finance') }]" @click="goTo('finance-report')">
         <BaseIcon icon="fa-solid fa-file" clickable />
         <span v-if="!isCollapsed" class="icon-label">Laporan</span>
       </div>
