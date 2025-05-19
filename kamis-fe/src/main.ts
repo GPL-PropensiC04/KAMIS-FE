@@ -13,12 +13,12 @@ import 'vue-toastification/dist/index.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faCircleUser, faUsers, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faMoneyBill,
-    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear } from '@fortawesome/free-solid-svg-icons'
+    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear, faChartLine } from '@fortawesome/free-solid-svg-icons'
 
 
 // Tambahkan ikon ke library
 library.add(faCircleUser, faUsers, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple,
-    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear, faMoneyBill)
+    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear, faMoneyBill, faChartLine)
 
 // ===========================
 

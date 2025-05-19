@@ -18,3 +18,9 @@ export interface ChartPengeluaranResponseDTO {
   activityType: string;         // "Pembelian", "Distribusi", "Maintenance", etc.
   totalPengeluaran: number;
 }
+
+export interface IncomeExpenseLineResponseDTO {
+  period: string;
+  totalPemasukan: number;
+  totalPengeluaran: number;
+}
