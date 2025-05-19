@@ -1,5 +1,5 @@
 import { API_URLS } from "@/config/api.config";
-import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface, UpdateClientInterface, PageResponseInterface } from "@/interfaces/profile/client.interface";
+import type { AddClientRequestInterface, ClientInterface, ClientListResponseInterface, ClientDetailInterface, UpdateClientInterface } from "@/interfaces/profile/client.interface";
 import type { CommonResponseInterface } from "@/interfaces/common.interface";
 import router from "@/router";
 import axios from "axios";
@@ -13,13 +13,6 @@ export const useClientStore = defineStore('client', {
         clientDetail: null as ClientDetailInterface | null,
         loading: false,
         error: null as null | string,
-        pagination: {
-            currentPage: 0,
-            pageSize: 10,
-            totalPages: 0,
-            totalElements: 0,
-            isLastPage: false
-        }
     }),
     actions: {
         async addClient(body: AddClientRequestInterface) {
@@ -52,33 +45,16 @@ export const useClientStore = defineStore('client', {
             }
         },
 
-        async viewAllClient(filters = {}, page = 0, size = 10) {
+        async viewAllClient(filters = {}) {
             this.loading = true;
             this.error = null;
 
             try {
-                const response = await axios.get<CommonResponseInterface<PageResponseInterface<ClientListResponseInterface>>>(
+                const response = await axios.get<CommonResponseInterface<ClientListResponseInterface[]>>(
                     `${API_URLS.PROFILE}/client/all`,
-                    { 
-                        params: { 
-                            ...filters,
-                            page,
-                            size
-                        } 
-                    }
+                    { params: filters }
                 );
-                
-                // Update client list with paginated data
-                this.clientList = response.data.data.content;
-                
-                // Update pagination state
-                this.pagination = {
-                    currentPage: response.data.data.pageNumber,
-                    pageSize: response.data.data.pageSize,
-                    totalPages: response.data.data.totalPages,
-                    totalElements: response.data.data.totalElements,
-                    isLastPage: response.data.data.last
-                };
+                this.clientList = response.data.data;
             } catch (err: unknown) {
                 this.error = `Gagal mengambil data client ${err instanceof Error ? err.message : "Unknown error"}`;
                 useToast().error(this.error);
