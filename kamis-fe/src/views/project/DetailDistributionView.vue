@@ -61,7 +61,7 @@
             <h2 class="text-xl font-bold text-white">Informasi Distribusi - {{ projectData.id }}</h2>
             <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditProject && projectData.projectStatus !== 2"
+              v-if="canEditProject && projectData.projectStatus <= 2"
               label="Ubah"
               @click="editDistributionInfo"
             />
@@ -76,15 +76,7 @@
             <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
               <p class="font-semibold">
-                <template v-if="clientLoading">
-                  <div class="flex items-center">
-                    <div class="animate-spin h-3 w-3 border-b-2 border-[#1E3A5F] mr-2 rounded-full"></div>
-                    <span class="text-gray-500">Memuat...</span>
-                  </div>
-                </template>
-                <template v-else>
-                  {{ clientName }}
-                </template>
+                {{ projectData.projectClientName || 'Unknown Client' }}
               </p>
             </div>
             <div class="break-words">
@@ -379,6 +371,7 @@ interface ProjectData {
   id: string;
   projectName: string;
   projectClientId: string;
+  projectClientName: string;
   projectStartDate: string;
   projectEndDate: string | null;
   projectPickupAddress: string;
@@ -542,7 +535,7 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Sedang Dikerjakan';
+    case 1: return 'Dalam Pengiriman';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
@@ -555,40 +548,6 @@ const formatPaymentStatus = (paymentStatus: number): string => {
     case 1: return 'Sudah bayar';
     case 2: return 'Dikembalikan';
     default: return 'Unknown';
-  }
-};
-
-// Update fetchClientName function to use real API data
-const fetchClientName = async (clientId: string) => {
-  if (!clientId) {
-    clientName.value = '-';
-    clientLoading.value = false;
-    return;
-  }
-  
-  clientLoading.value = true;
-  
-  try {
-    // Make a real API call to fetch client data
-    const response = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    if (response.data && response.data.status === 200 && response.data.data) {
-      // Extract the client name from the response data
-      clientName.value = response.data.data.nameClient || response.data.data.clientName || '';
-      console.log('Fetched client name:', clientName.value);
-    } else {
-      console.error('Client data not found or invalid format');
-      clientName.value = `Client ${clientId.substring(0, 8)}`;
-    }
-  } catch (err) {
-    console.error('Error fetching client name:', err);
-    clientName.value = 'Unknown Client';
-  } finally {
-    clientLoading.value = false;
   }
 };
 
@@ -675,11 +634,7 @@ const loadData = async () => {
         return;
       }
       
-      // Fetch client name if clientId is available
-      if (projectData.value.projectClientId) {
-        await fetchClientName(projectData.value.projectClientId);
-      }
-      
+
       // Fetch asset types if assets are available
       if (projectData.value.projectUseAsset && projectData.value.projectUseAsset.length > 0) {
         await fetchAssetTypes();

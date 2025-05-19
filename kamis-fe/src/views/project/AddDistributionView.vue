@@ -105,7 +105,8 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      v-model="formData.projectStartDate"
+                      :value="formData.projectStartDate"
+                      @input="handleStartDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -114,7 +115,8 @@
                 <div class="w-1/2">
                   <div class="relative">
                     <input 
-                      v-model="formData.projectEndDate"
+                      :value="formData.projectEndDate"
+                      @input="handleEndDateInput($event)"
                       type="date" 
                       class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -379,6 +381,8 @@ const assetStore = useAssetStore();
 const availableAssets = ref<Asset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
+// Add a flag to track if availability check has run
+const availabilityChecked = ref(false);
 
 // Computed values
 const totalAssetCost = computed(() => {
@@ -443,6 +447,9 @@ const checkAvailableAssets = async () => {
     return;
   }
 
+  // If already checking or has been checked with the same dates, don't run again
+  if (loadingAssets.value || availabilityChecked.value) return;
+
   try {
     loadingAssets.value = true;
     
@@ -482,6 +489,7 @@ const checkAvailableAssets = async () => {
     assetTypes.value = Array.from(types) as string[];
     
     datesSelected.value = true;
+    availabilityChecked.value = true;
     loadingAssets.value = false;
     
     // If no assets available
@@ -574,11 +582,10 @@ const removeAsset = (index: number) => {
 const updateFormData = () => {
   formData.value.projectTotalPengeluaran = totalExpenses.value;
   formData.value.projectUseAsset = assetList.value.map(asset => ({
-    id: asset.id,
-    platNomor: asset.platNomor || asset.name,
-    assetUseCost: asset.shippingCost || 0,
-    assetFuelCost: asset.fuelCost || 0,
-    tipeAset: asset.type
+    platNomor: asset.id,
+    tipeAset: asset.type || '',
+    assetUseCost: asset.usageCost || 0,
+    assetFuelCost: asset.fuelCost || 0
   }));
   
   // Store form data in localStorage for summary page
@@ -587,6 +594,20 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
+// Custom date input handlers
+const handleStartDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectStartDate = target.value;
+  }
+};
+
+const handleEndDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectEndDate = target.value;
+  }
+};
 
 // Form submission
 const submitForm = async () => {
@@ -611,6 +632,20 @@ const submitForm = async () => {
     return;
   }
   
+  // Adjust dates to avoid timezone issues
+  if (formData.value.projectStartDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectStartDate.includes('T')) {
+      formData.value.projectStartDate = `${formData.value.projectStartDate}T12:00:00`;
+    }
+  }
+  if (formData.value.projectEndDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectEndDate.includes('T')) {
+      formData.value.projectEndDate = `${formData.value.projectEndDate}T12:00:00`;
+    }
+  }
+  
   // Update form data before submitting
   updateFormData();
   
@@ -631,6 +666,8 @@ watch(
   [() => formData.value.projectStartDate, () => formData.value.projectEndDate],
   async ([newStartDate, newEndDate]) => {
     if (newStartDate && newEndDate) {
+      // Reset availability check flag when dates change
+      availabilityChecked.value = false;
       await checkAvailableAssets();
     }
   }
