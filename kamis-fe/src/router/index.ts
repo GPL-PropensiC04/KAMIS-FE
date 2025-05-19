@@ -33,6 +33,7 @@ import ListSupplierView from '@/views/profile/ListSupplierView.vue';
 import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
+import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
 import type { RouteLocationNormalized } from 'vue-router'
 
 const router = createRouter({
@@ -49,6 +50,12 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/finance-report',
+      name: 'finance-report',
+      component: LaporanKeuangan,
+      meta: { requiresAuth: true, breadcrumb: 'Laporan Keuangan' }
     },
     {
       path: '/supplier/add',
@@ -101,12 +108,6 @@ const router = createRouter({
       component: DetailClientView,
       props: true,
       meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
-    },
-    {
-      path: '/client/update/:id',
-      name: 'update-client',
-      component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"] }
     },
     {
       path: '/purchase',

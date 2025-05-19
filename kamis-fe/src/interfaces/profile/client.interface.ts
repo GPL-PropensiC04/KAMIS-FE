@@ -3,7 +3,7 @@ export interface ClientInterface {
   nameClient: string;
   noTelpClient: string;
   emailClient: string;
-  typeClient: string;
+  typeClient: boolean;
   companyClient: string;
   addressClient: string;
   createdDate: string; // ISO string format (YYYY-MM-DDTHH:MM:SSZ)
@@ -42,7 +42,7 @@ export interface ClientDetailInterface {
   nameClient: string;
   noTelpClient: string;
   emailClient: string;
-  typeClient: string;
+  typeClient: boolean;
   companyClient: string;
   addressClient: string;
   createdDate: string;
@@ -55,4 +55,13 @@ export interface UpdateClientInterface{
   noTelpClient: string;
   emailClient: string;
   addressClient: string
+}
+
+export interface PageResponseInterface<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }

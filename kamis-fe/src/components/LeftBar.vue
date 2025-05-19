@@ -10,11 +10,11 @@
     </div>
     <!-- Top Icons -->
     <div class="top-icons">
-      <div :class="['icon-item', { active: isActive('dashboard') }]" @click="goTo('dashboard')">
+      <div v-if = "!isAdmin" :class="['icon-item', { active: isActive('dashboard') }]" @click="goTo('dashboard')">
         <BaseIcon icon="fa-solid fa-chart-simple" clickable />
         <span v-if="!isCollapsed" class="icon-label">Dashboard</span>
       </div>
-      <div :class="['icon-item', { active: isActive('laporan') }]" @click="goTo('laporan')">
+      <div v-if = "isFinance || isDireksi" :class="['icon-item', { active: isActive('finance') }]" @click="goTo('finance-report')">
         <BaseIcon icon="fa-solid fa-file" clickable />
         <span v-if="!isCollapsed" class="icon-label">Laporan</span>
       </div>
@@ -41,6 +41,10 @@
       <div :class="['icon-item', { active: isActive('supplier') }]" @click="goTo('supplier')">
         <BaseIcon icon="fa-solid fa-boxes-stacked" clickable />
         <span v-if="!isCollapsed" class="icon-label">Supplier</span>
+      </div>
+      <div v-if = "isAdmin" :class="['icon-item', { active: isActive('account') }]" @click="goTo('account')">
+        <BaseIcon icon="fa-solid fa-gear" clickable />
+        <span v-if="!isCollapsed" class="icon-label">Manajemen Akun</span>
       </div>
     </div>
 
@@ -104,6 +108,18 @@ const logout = () => {
 const isActive = (routeName: string) => {
   return route.name && route.name.toString().includes(routeName);
 };
+
+const isAdmin = computed(() => {
+  return authStore.userRole === 'Admin';
+});
+
+const isFinance = computed(() => {
+  return authStore.userRole === 'Finance';
+});
+
+const isDireksi = computed(() => {
+  return authStore.userRole === 'Direksi';
+});
 
 const userInfo = computed(() => {
   if (!authStore.user) return null
