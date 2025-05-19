@@ -41,7 +41,7 @@ const chartOptions: ChartOptions<'line'> = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'top',
+      position: 'bottom',
       labels: {
         boxWidth: 12
       }

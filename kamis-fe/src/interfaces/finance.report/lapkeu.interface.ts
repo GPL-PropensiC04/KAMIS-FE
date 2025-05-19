@@ -24,3 +24,10 @@ export interface IncomeExpenseLineResponseDTO {
   totalPemasukan: number;
   totalPengeluaran: number;
 }
+
+export interface ActivityComparisonResponseDTO {
+  period: string;
+  pembelianCount: number;
+  penjualanCount: number;
+  distribusiCount: number;
+}
