@@ -131,6 +131,23 @@ const formatPeriodLabel = (label: string): string => {
 
   return label;
 };
+import { computed } from 'vue';
+
+const chartTitle = computed(() => {
+  switch (props.range) {
+    case 'THIS_MONTH':
+      return 'Trend Pemasukan dan Pengeluaran per Minggu';
+    case 'THIS_QUARTER':
+      return 'Trend Pemasukan dan Pengeluaran per Bulan';
+    case 'THIS_YEAR':
+      return periodType.value === 'Quarterly'
+        ? 'Trend Pemasukan dan Pengeluaran per Kuartal'
+        : 'Trend Pemasukan dan Pengeluaran per Bulan';
+    default:
+      return 'Trend Pemasukan dan Pengeluaran';
+  }
+});
+
 
 watch(periodType, fetchChartData);
 watch(
@@ -156,7 +173,7 @@ onMounted(fetchChartData);
             class="text-[24px] mr-2"
             style="color: #1E3A5F;"
         />
-        <h2 class="text-lg font-bold text-left">Total Pemasukan Distribusi dan Penjualan per Bulan</h2>
+        <h2 class="text-lg font-bold text-left">{{ chartTitle }}</h2>
       </div>
 
       <!-- Tampilkan toggle HANYA jika range THIS_YEAR -->
