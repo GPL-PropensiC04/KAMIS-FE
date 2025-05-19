@@ -13,3 +13,21 @@ export interface LapkeuSummaryResponseDTO {
   totalPengeluaran: number;
   totalProfit: number;
 }
+
+export interface ChartPengeluaranResponseDTO {
+  activityType: string;         // "Pembelian", "Distribusi", "Maintenance", etc.
+  totalPengeluaran: number;
+}
+
+export interface IncomeExpenseLineResponseDTO {
+  period: string;
+  totalPemasukan: number;
+  totalPengeluaran: number;
+}
+
+export interface ActivityComparisonResponseDTO {
+  period: string;
+  pembelianCount: number;
+  penjualanCount: number;
+  distribusiCount: number;
+}

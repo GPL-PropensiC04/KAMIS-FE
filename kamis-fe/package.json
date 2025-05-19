@@ -21,6 +21,7 @@
     "autoprefixer": "^10.4.20",
     "axios": "^1.8.4",
     "chart.js": "^4.4.9",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "datatables.net": "^2.2.2",
     "datatables.net-dt": "^2.2.2",
     "date-fns": "^4.1.0",
