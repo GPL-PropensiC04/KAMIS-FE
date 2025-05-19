@@ -33,8 +33,8 @@
         }}
       </div>
       <div class="flex justify-end gap-2 mb-4">
-        <button @click="downloadCSV" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          Download CSV
+        <button @click="downloadXLSX" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          Download Excel
         </button>
         <button @click="downloadPDF" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
           Download PDF
@@ -125,6 +125,7 @@ import VDateRangeFilter from '@/components/VDateRangeFilter.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const lapkeuStore = useFinanceReportStore();
 
@@ -150,25 +151,19 @@ onMounted(fetchData);
 
 watch([dateRange, activityType], fetchData, { deep: true });
 
-const downloadCSV = () => {
+const downloadXLSX = () => {
   const headers = ['Tanggal', 'Jenis Aktivitas', 'Deskripsi', 'Pemasukan', 'Pengeluaran'];
-  const rows = lapkeuStore.lapkeuList.map(item => [
+  const data = lapkeuStore.lapkeuList.map(item => [
     formatDisplayDate(item.paymentDate),
     activityTypeLabel(item.activityType),
     item.description,
     item.pemasukan,
     item.pengeluaran
   ]);
-  let csvContent = headers.join(',') + '\n' +
-    rows.map(e => e.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute('download', 'laporan-keuangan.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Keuangan');
+  XLSX.writeFile(workbook, 'laporan-keuangan.xlsx');
 };
 
 const downloadPDF = () => {
