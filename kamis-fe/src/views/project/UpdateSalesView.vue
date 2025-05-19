@@ -49,10 +49,10 @@ const selectedQuantity = ref<number | null>(null);
 const selectedPrice = ref(0);
 
 // Helper functions
-const getStatusText = (status: number): string => {
+const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Dilaksanakan';
+    case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
@@ -69,12 +69,22 @@ const totalRevenue = computed(() => {
   return productList.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
 });
 
+// Custom date input handler
+const handleDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    const value = target.value;
+    if (formData.value) {
+      formData.value.projectStartDate = value;
+    }
+  }
+};
+
 // Fetch project details
 const fetchProjectDetails = async () => {
   isLoading.value = true;
   try {
     const projectData = await projectStore.fetchProjectById(projectId) as ProjectInterface;
-    
     
     // Check if this is a sales project (not distribution)
     if (projectData.projectType) {
@@ -83,31 +93,20 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates to YYYY-MM-DD with safe date parsing
+    // Format the dates to YYYY-MM-DD with timezone-safe parsing
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
       try {
-        const startDate = new Date(projectData.projectStartDate);
-        if (!isNaN(startDate.getTime())) { // Check if date is valid
-          formattedStartDate = startDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectStartDate.split('T')[0];
+        formattedStartDate = dateStr;
       } catch {
         console.error('Invalid start date:', projectData.projectStartDate);
       }
     }
     
-    let formattedEndDate = '';
-    if (projectData.projectEndDate) {
-      try {
-        const endDate = new Date(projectData.projectEndDate);
-        if (!isNaN(endDate.getTime())) { // Check if date is valid
-          formattedEndDate = endDate.toISOString().split('T')[0];
-        }
-      } catch {
-        console.error('Invalid end date:', projectData.projectEndDate);
-      }
-    }
-    
+    // For sales projects, end date should be the same as start date
+    const formattedEndDate = formattedStartDate;
     
     formData.value = {
       id: projectData.id,
@@ -132,6 +131,14 @@ const fetchProjectDetails = async () => {
     router.push('/project');
   }
 };
+
+// Watch for changes to start date and update end date accordingly
+watch(() => formData.value?.projectStartDate, (newStartDate) => {
+  if (formData.value && newStartDate) {
+    // For sales projects, always keep end date matching start date
+    formData.value.projectEndDate = newStartDate;
+  }
+});
 
 // Fetch clients
 const fetchClients = async () => {
@@ -371,9 +378,21 @@ const submitForm = async () => {
     return;
   }
   
-  if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
-    toast.error('Tanggal akhir harus lebih dari tanggal mulai');
-    return;
+  // Ensure end date is the same as start date for sales projects
+  formData.value.projectEndDate = formData.value.projectStartDate;
+
+  // Adjust dates to avoid timezone issues
+  if (formData.value.projectStartDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectStartDate.includes('T')) {
+      formData.value.projectStartDate = `${formData.value.projectStartDate}T12:00:00`;
+    }
+  }
+  if (formData.value.projectEndDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectEndDate.includes('T')) {
+      formData.value.projectEndDate = `${formData.value.projectEndDate}T12:00:00`;
+    }
   }
 
   // Update form data before submitting
@@ -452,7 +471,7 @@ onMounted(() => {
           'bg-purple-100 text-purple-800': formData.projectStatus === 3
         }">
           <div class="p-3 font-semibold text-center rounded">
-            Status: {{ getStatusText(formData.projectStatus) }}
+            Status: {{ formatStatus(formData.projectStatus) }}
           </div>
         </div>
   
@@ -524,7 +543,8 @@ onMounted(() => {
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    v-model="formData.projectStartDate"
+                    :value="formData.projectStartDate"
+                    @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': formData.projectStatus >= 1 }"

@@ -62,12 +62,14 @@ const shippingCost = ref(0);
 const availableAssets = ref<Asset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
+// Add a flag to track if availability check has run
+const availabilityChecked = ref(false);
 
 // Helper functions
-const getStatusText = (status: number): string => {
+const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Dilaksanakan';
+    case 1: return 'Dalam Pengiriman';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
@@ -93,6 +95,21 @@ const totalExpenses = computed(() => {
   return totalAssetCost.value + totalPhlCost.value;
 });
 
+// Add new methods for handling date input
+const handleStartDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value!.projectStartDate = target.value;
+  }
+};
+
+const handleEndDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value!.projectEndDate = target.value;
+  }
+};
+
 // Fetch project details
 const fetchProjectDetails = async () => {
   isLoading.value = true;
@@ -106,14 +123,13 @@ const fetchProjectDetails = async () => {
       return;
     }
     
-    // Format the dates to YYYY-MM-DD with safe date parsing
+    // Format the dates to YYYY-MM-DD with timezone-safe parsing
     let formattedStartDate = '';
     if (projectData.projectStartDate) {
       try {
-        const startDate = new Date(projectData.projectStartDate);
-        if (!isNaN(startDate.getTime())) { // Check if date is valid
-          formattedStartDate = startDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectStartDate.split('T')[0];
+        formattedStartDate = dateStr;
       } catch {
         console.error('Invalid start date:', projectData.projectStartDate);
       }
@@ -122,10 +138,9 @@ const fetchProjectDetails = async () => {
     let formattedEndDate = '';
     if (projectData.projectEndDate) {
       try {
-        const endDate = new Date(projectData.projectEndDate);
-        if (!isNaN(endDate.getTime())) { // Check if date is valid
-          formattedEndDate = endDate.toISOString().split('T')[0];
-        }
+        // Extract just the date part to avoid timezone issues
+        const dateStr = projectData.projectEndDate.split('T')[0];
+        formattedEndDate = dateStr;
       } catch {
         console.error('Invalid end date:', projectData.projectEndDate);
       }
@@ -249,6 +264,9 @@ const checkAvailableAssets = async () => {
     return;
   }
 
+  // If already checking or has been checked, don't run again
+  if (loadingAssets.value || availabilityChecked.value) return;
+
   try {
     loadingAssets.value = true;
     
@@ -288,6 +306,7 @@ const checkAvailableAssets = async () => {
     assetTypes.value = Array.from(types) as string[];
     
     datesSelected.value = true;
+    availabilityChecked.value = true;
     loadingAssets.value = false;
     
     // If no assets available
@@ -387,7 +406,6 @@ const updateFormData = () => {
   }));
 };
 
-
 // Form submission
 const submitForm = async () => {
   if (!formData.value) return;
@@ -416,6 +434,20 @@ const submitForm = async () => {
   if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
     toast.error('Tanggal akhir harus lebih dari tanggal mulai');
     return;
+  }
+  
+  // Adjust dates to avoid timezone issues
+  if (formData.value.projectStartDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectStartDate.includes('T')) {
+      formData.value.projectStartDate = `${formData.value.projectStartDate}T12:00:00`;
+    }
+  }
+  if (formData.value.projectEndDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectEndDate.includes('T')) {
+      formData.value.projectEndDate = `${formData.value.projectEndDate}T12:00:00`;
+    }
   }
   
   // Update form data before submitting
@@ -450,6 +482,8 @@ watch(
   [() => formData.value?.projectStartDate, () => formData.value?.projectEndDate],
   async ([newStartDate, newEndDate]) => {
     if (newStartDate && newEndDate) {
+      // Reset the check flag when dates change
+      availabilityChecked.value = false;
       await checkAvailableAssets();
     }
   }
@@ -467,10 +501,8 @@ onMounted(async () => {
     availableAssets.value = [...assets.value]; // Start with all assets
     datesSelected.value = true;
     
-    // Check availability for additional assets if dates are set
-    if (assets.value.length > 0) {
-      await checkAvailableAssets();
-    }
+    // We don't need to call checkAvailableAssets here - the watcher will handle it
+    // This prevents the double check
   }
 });
 </script> 
@@ -506,7 +538,7 @@ onMounted(async () => {
           'bg-purple-100 text-purple-800': formData.projectStatus === 3
         }">
           <div class="p-3 font-semibold text-center rounded">
-            Status: {{ getStatusText(formData.projectStatus) }}
+            Status: {{ formatStatus(formData.projectStatus) }}
           </div>
         </div>
   
@@ -535,7 +567,6 @@ onMounted(async () => {
                   v-model="formData.projectClientId"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
                   :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 0 }"
-
                   :disabled="formData.projectStatus >= 0"
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
@@ -571,6 +602,8 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-20 p-2 border border-gray-300 rounded mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                  :disabled="formData.projectStatus >= 2"
                 />
                 <span class="mr-3">Orang x upah sebesar Rp</span>
                 <input 
@@ -578,6 +611,8 @@ onMounted(async () => {
                   type="number" 
                   min="0"
                   class="w-32 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                  :disabled="formData.projectStatus >= 2"
                 />
               </div>
             </div>
@@ -601,18 +636,24 @@ onMounted(async () => {
                   <div class="w-1/2">
                     <div class="relative">
                       <input 
-                        v-model="formData.projectStartDate"
+                        :value="formData.projectStartDate"
+                        @input="handleStartDateInput($event)"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 1 }"
+                        :disabled="formData.projectStatus >= 1"
                       />
                     </div>
                   </div>
                   <div class="w-1/2">
                     <div class="relative">
                       <input 
-                        v-model="formData.projectEndDate"
+                        :value="formData.projectEndDate"
+                        @input="handleEndDateInput($event)"
                         type="date" 
                         class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :class="{ 'bg-gray-200 text-gray-700': formData.projectStatus >= 2 }"
+                        :disabled="formData.projectStatus >= 2"
                       />
                     </div>
                   </div>

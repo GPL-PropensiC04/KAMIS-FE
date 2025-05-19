@@ -8,6 +8,8 @@ export interface ProjectInterface {
   projectName: string;
   projectDescription: string;
   projectClientId: string;
+  projectClientName?: string; // Added client name property
+  
   projectStartDate: string; // ISO date string
   projectEndDate: string; // ISO date string
   projectTotalPemasukkan: number;

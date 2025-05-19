@@ -84,7 +84,8 @@
               <div class="w-full">
                 <div class="relative">
                   <input 
-                    v-model="formData.projectStartDate"
+                    :value="formData.projectStartDate"
+                    @input="handleDateInput($event)"
                     type="date" 
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -416,6 +417,13 @@ const updateFormData = () => {
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
+// Custom date input handler
+const handleDateInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    formData.value.projectStartDate = target.value;
+  }
+};
 
 // Form submission
 const submitForm = async () => {
@@ -439,7 +447,24 @@ const submitForm = async () => {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
+  
+  // Ensure end date is same as start date for sales projects
   formData.value.projectEndDate = formData.value.projectStartDate;
+  
+  // Adjust dates to avoid timezone issues
+  if (formData.value.projectStartDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectStartDate.includes('T')) {
+      formData.value.projectStartDate = `${formData.value.projectStartDate}T12:00:00`;
+    }
+  }
+  if (formData.value.projectEndDate) {
+    // Add 'T12:00:00' to ensure it's noon and won't shift days due to timezone
+    if (!formData.value.projectEndDate.includes('T')) {
+      formData.value.projectEndDate = `${formData.value.projectEndDate}T12:00:00`;
+    }
+  }
+  
   if (formData.value.projectEndDate && formData.value.projectStartDate && formData.value.projectEndDate < formData.value.projectStartDate) {
     console.log(formData.value.projectEndDate, formData.value.projectStartDate);
     toast.error('Tanggal akhir harus lebih dari tanggal mulai');
