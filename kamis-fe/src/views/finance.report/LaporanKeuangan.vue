@@ -1,87 +1,131 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-6 text-[#1E3A5F]">Laporan Keuangan</h1>
-
-      <!-- Filter Section -->
-      <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <!-- Filter Section in separate card -->
+    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <VDateRangeFilter v-model="dateRange" />
         <div class="flex items-center gap-2">
-          <label class="font-medium">Jenis Aktivitas</label>
-          <select v-model="activityType" class="border rounded p-2">
-            <option value="">Semua</option>
+          <select v-model="activityType" class="border rounded p-2 w-full">
+            <option value="">Semua Jenis Aktivitas</option>
             <option value="0">Distribusi</option>
             <option value="1">Penjualan</option>
-            <option value="2">Purchase</option>
+            <option value="2">Pembelian</option>
             <option value="3">Maintenance</option>
           </select>
         </div>
-        <VSortButton
-          :sortKey="sortKey"
-          :sortOrder="sortOrder"
-          @update:sortKey="(val: 'paymentDate' | 'pemasukan' | 'pengeluaran') => sortKey = val"
-          @update:sortOrder="(val: 'asc' | 'desc') => sortOrder = val"
-          :options="sortOptions"
-        />
-        <button class="bg-[#2D6A4F] text-white px-4 py-2 rounded" @click="fetchData">Terapkan Filter</button>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-2 text-[#1E3A5F]">
+        {{
+          activityType === '' || activityType === null || activityType === undefined
+            ? 'Laporan Keuangan'
+            : `Laporan Keuangan ${activityTypeLabel(Number(activityType))}`
+        }}
+      </h1>
+      <div class="mb-6 text-gray-600 text-base">
+        {{
+          dateRange.start && dateRange.end
+            ? `Periode ${formatDisplayDate(dateRange.start)} - ${formatDisplayDate(dateRange.end)}`
+            : 'Seluruh Periode'
+        }}
+      </div>
+      <div class="flex justify-end gap-2 mb-4">
+        <button @click="downloadXLSX" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          Download Excel
+        </button>
+        <button @click="downloadPDF" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+          Download PDF
+        </button>
       </div>
 
       <!-- Table Section -->
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border rounded">
-          <thead>
-            <tr class="bg-[#1E3A5F] text-white">
-              <th class="py-2 px-4">Tanggal</th>
-              <th class="py-2 px-4">Jenis Aktivitas</th>
-              <th class="py-2 px-4">Deskripsi</th>
-              <th class="py-2 px-4">Pemasukan</th>
-              <th class="py-2 px-4">Pengeluaran</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in sortedLapkeu" :key="item.id" class="border-b">
-              <td class="py-2 px-4">{{ item.paymentDate }}</td>
-              <td class="py-2 px-4">
-                {{ activityTypeLabel(item.activityType) }}
-              </td>
-              <td class="py-2 px-4">{{ item.description }}</td>
-              <td class="py-2 px-4 text-green-700 font-semibold">
-                {{ formatCurrency(item.pemasukan) }}
-              </td>
-              <td class="py-2 px-4 text-red-700 font-semibold">
-                {{ formatCurrency(item.pengeluaran) }}
-              </td>
-            </tr>
-            <tr v-if="lapkeuStore.lapkeuList.length === 0">
-              <td colspan="5" class="text-center py-4 text-gray-500">Tidak ada data</td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-if="lapkeuStore.loading" class="flex justify-center items-center py-14">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
+      <table v-else class="custom-table">
+        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+          <tr>
+            <th @click="sortTable('paymentDate')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Tanggal
+              <span v-if="sortKey === 'paymentDate' && sortOrder === 'asc'">▲</span>
+              <span v-if="sortKey === 'paymentDate' && sortOrder === 'desc'">▼</span>
+            </th>
+            <th class="px-6 py-4 table-header text-base">Jenis Aktivitas</th>
+            <th class="px-6 py-4 table-header text-base">Deskripsi</th>
+            <th @click="sortTable('pemasukan')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Pemasukan
+              <span v-if="sortKey === 'pemasukan' && sortOrder === 'asc'">▲</span>
+              <span v-if="sortKey === 'pemasukan' && sortOrder === 'desc'">▼</span>
+            </th>
+            <th @click="sortTable('pengeluaran')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Pengeluaran
+              <span v-if="sortKey === 'pengeluaran' && sortOrder === 'asc'">▲</span>
+              <span v-if="sortKey === 'pengeluaran' && sortOrder === 'desc'">▼</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in sortedLapkeu" :key="item.id" class="bg-white border-b border-gray-200 hover:bg-gray-50">
+            <td class="px-6 py-5">{{ formatDisplayDate(item.paymentDate) }}</td>
+            <td class="px-6 py-5">{{ activityTypeLabel(item.activityType) }}</td>
+            <td class="px-6 py-5">{{ item.description }}</td>
+            <td class="px-6 py-5 text-green-700 font-semibold">{{ formatCurrency(item.pemasukan) }}</td>
+            <td class="px-6 py-5 text-red-700 font-semibold">{{ formatCurrency(item.pengeluaran) }}</td>
+          </tr>
+          <tr v-if="lapkeuStore.lapkeuList.length === 0">
+            <td colspan="5" class="text-center text-gray-500 py-6 text-base">{{ lapkeuStore.error }}</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div v-if="lapkeuStore.lapkeuSummary"
-        class="mt-8 p-4 bg-[#F1FAEE] rounded shadow flex flex-wrap gap-8 justify-between"
+        class="mt-8 p-6 bg-[#FFFFF] rounded shadow grid grid-cols-1 md:grid-cols-4 gap-4 justify-between"
       >
-        <div><span class="font-bold">Total Transaksi:</span> {{ lapkeuStore.lapkeuSummary.totalTransaksi }}</div>
-        <div><span class="font-bold">Total Pemasukan:</span> {{ formatCurrency(lapkeuStore.lapkeuSummary.totalPemasukan) }}</div>
-        <div><span class="font-bold">Total Pengeluaran:</span> {{ formatCurrency(lapkeuStore.lapkeuSummary.totalPengeluaran) }}</div>
-        <div><span class="font-bold">Total Profit:</span> {{ formatCurrency(lapkeuStore.lapkeuSummary.totalProfit) }}</div>
+        <div class="text-center">
+          <div class="font-bold text-gray-700 mb-1">Total Transaksi</div>
+          <div class="text-xl font-semibold">{{ lapkeuStore.lapkeuSummary.totalTransaksi }} transaksi</div>
+        </div>
+        <div class="text-center">
+          <div class="font-bold text-gray-700 mb-1">Total Pemasukan</div>
+          <div class="text-xl font-semibold text-green-600">{{ formatCurrency(lapkeuStore.lapkeuSummary.totalPemasukan) }}</div>
+        </div>
+        <div class="text-center">
+          <div class="font-bold text-gray-700 mb-1">Total Pengeluaran</div>
+          <div class="text-xl font-semibold text-red-600">{{ formatCurrency(lapkeuStore.lapkeuSummary.totalPengeluaran) }}</div>
+        </div>
+        <div class="text-center">
+          <div class="font-bold text-gray-700 mb-1">Total Profit</div>
+          <div
+            class="text-xl font-semibold"
+            :class="{
+              'text-green-600': lapkeuStore.lapkeuSummary.totalProfit > 0,
+              'text-red-600': lapkeuStore.lapkeuSummary.totalProfit < 0,
+              'text-blue-600': lapkeuStore.lapkeuSummary.totalProfit === 0
+            }"
+          >
+            {{
+              lapkeuStore.lapkeuSummary.totalProfit < 0
+                ? formatCurrency(Math.abs(lapkeuStore.lapkeuSummary.totalProfit))
+                : formatCurrency(lapkeuStore.lapkeuSummary.totalProfit)
+            }}
+          </div>
+        </div>
       </div>
-
-      <!-- Loading & Error -->
-      <div v-if="lapkeuStore.loading" class="mt-4 text-center text-blue-600">Memuat data...</div>
-      <div v-if="lapkeuStore.error" class="mt-4 text-center text-red-600">{{ lapkeuStore.error }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useFinanceReportStore } from '@/stores/financereport';
 import VDateRangeFilter from '@/components/VDateRangeFilter.vue';
-import VSortButton from '@/components/VSortButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const lapkeuStore = useFinanceReportStore();
 
@@ -89,11 +133,6 @@ const dateRange = ref<{ start: string; end: string }>({ start: '', end: '' });
 const activityType = ref<string | number>('');
 const sortKey = ref<'paymentDate' | 'pemasukan' | 'pengeluaran'>('paymentDate');
 const sortOrder = ref<'asc' | 'desc'>('desc');
-const sortOptions = [
-  { label: 'Tanggal', value: 'paymentDate' },
-  { label: 'Pemasukan', value: 'pemasukan' },
-  { label: 'Pengeluaran', value: 'pengeluaran' }
-];
 
 const fetchData = () => {
   lapkeuStore.fetchLapkeu({
@@ -110,19 +149,69 @@ const fetchData = () => {
 
 onMounted(fetchData);
 
+watch([dateRange, activityType], fetchData, { deep: true });
+
+const downloadXLSX = () => {
+  const headers = ['Tanggal', 'Jenis Aktivitas', 'Deskripsi', 'Pemasukan', 'Pengeluaran'];
+  const data = lapkeuStore.lapkeuList.map(item => [
+    formatDisplayDate(item.paymentDate),
+    activityTypeLabel(item.activityType),
+    item.description,
+    item.pemasukan,
+    item.pengeluaran
+  ]);
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Keuangan');
+  XLSX.writeFile(workbook, 'laporan-keuangan.xlsx');
+};
+
+const downloadPDF = () => {
+  const doc = new jsPDF();
+  doc.text('Laporan Keuangan', 14, 14);
+  autoTable(doc, {
+    head: [['Tanggal', 'Jenis Aktivitas', 'Deskripsi', 'Pemasukan', 'Pengeluaran']],
+    body: lapkeuStore.lapkeuList.map(item => [
+      formatDisplayDate(item.paymentDate),
+      activityTypeLabel(item.activityType),
+      item.description,
+      formatCurrency(item.pemasukan),
+      formatCurrency(item.pengeluaran)
+    ]),
+    startY: 20,
+    styles: { fontSize: 9 }
+  });
+  doc.save('laporan-keuangan.pdf');
+};
+
 const activityTypeLabel = (type: number) => {
   switch (type) {
     case 0: return 'Distribusi';
     case 1: return 'Penjualan';
-    case 2: return 'Purchase';
+    case 2: return 'Pembelian';
     case 3: return 'Maintenance';
     default: return '-';
   }
 };
 
 const formatCurrency = (val: number) => {
-  if (!val) return '-';
-  return 'Rp ' + val.toLocaleString('id-ID');
+  if (!val) return 'Rp0';
+  return 'Rp' + val.toLocaleString('id-ID');
+};
+
+// Format date to display as "DD / MM / YYYY"
+const formatDisplayDate = (dateString: string) => {
+  const [day, month, year] = dateString.split('-').map(Number);
+  return `${String(day).padStart(2, '0')} / ${String(month).padStart(2, '0')} / ${year}`;
+};
+
+const sortTable = (key: string) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key as 'paymentDate' | 'pemasukan' | 'pengeluaran';
+    sortOrder.value = 'asc';
+  }
 };
 
 const sortedLapkeu = computed(() => {
@@ -130,6 +219,7 @@ const sortedLapkeu = computed(() => {
   arr.sort((a, b) => {
     let aVal = a[sortKey.value];
     let bVal = b[sortKey.value];
+    
     if (sortKey.value === 'paymentDate') {
       // Format: dd-MM-yyyy, convert to Date for sorting
       const parse = (d: string) => {
@@ -139,9 +229,60 @@ const sortedLapkeu = computed(() => {
       aVal = parse(String(aVal));
       bVal = parse(String(bVal));
     }
-    if (sortOrder.value === 'asc') return Number(aVal) - Number(bVal);
-    return Number(bVal) - Number(aVal);
+    
+    let modifier = 1;
+    if (sortOrder.value === 'desc') modifier = -1;
+    
+    if (aVal < bVal) return -1 * modifier;
+    if (aVal > bVal) return 1 * modifier;
+    return 0;
   });
+  
   return arr;
 });
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  table-layout: fixed;
+}
+
+.custom-table thead {
+  background-color: #1E3A5F;
+  color: white;
+}
+
+.custom-table th, .custom-table td {
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.custom-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.table-header:hover {
+  background-color: #32486B;
+}
+</style>
