@@ -67,7 +67,7 @@ const updateDate = (field: "start" | "end", value: Date | null) => {
 }
 
 :deep(.dp__input) {
-  background-color: #E5EAF2 !important;
+  background-color: #ffffff !important;
   color: black;
   border: 1px solid #1E3A5F;
   border-radius: 6px;

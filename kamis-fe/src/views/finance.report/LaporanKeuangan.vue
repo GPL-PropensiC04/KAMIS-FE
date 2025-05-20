@@ -18,29 +18,46 @@
     </div>
 
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-2 text-[#1E3A5F]">
-        {{
-          activityType === '' || activityType === null || activityType === undefined
-            ? 'Laporan Keuangan'
-            : `Laporan Keuangan ${activityTypeLabel(Number(activityType))}`
-        }}
-      </h1>
-      <div class="mb-6 text-gray-600 text-base">
-        {{
-          dateRange.start && dateRange.end
-            ? `Periode ${formatDisplayDate(dateRange.start)} - ${formatDisplayDate(dateRange.end)}`
-            : 'Seluruh Periode'
-        }}
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+        <div>
+          <h1 class="text-2xl font-bold mb-1 text-[#1E3A5F]">
+            {{
+              activityType === '' || activityType === null || activityType === undefined
+                ? 'Laporan Keuangan'
+                : `Laporan Keuangan ${activityTypeLabel(Number(activityType))}`
+            }}
+          </h1>
+          <div class="text-gray-600 text-base">
+            {{
+              dateRange.start && dateRange.end
+                ? `Periode ${formatDisplayDate(dateRange.start)} - ${formatDisplayDate(dateRange.end)}`
+                : 'Seluruh Periode'
+            }}
+          </div>
+        </div>
+        <div class="relative self-start md:self-auto">
+          <VButton
+            label="Unduh"
+            
+            @click.stop="toggleDropdown"
+          >
+            <template #default>
+              Unduh
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </template>
+          </VButton>
+          <div
+            v-if="showDropdown"
+            class="absolute right-0 mt-2 w-36 bg-white border rounded shadow z-10"
+            @click.stop
+          >
+            <button @click="() => { downloadPDF(); showDropdown = false }" class="block w-full text-left px-4 py-2 hover:bg-gray-100">PDF</button>
+            <button @click="() => { downloadXLSX(); showDropdown = false }" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Excel (.xlsx)</button>
+          </div>
+        </div>
       </div>
-      <div class="flex justify-end gap-2 mb-4">
-        <button @click="downloadXLSX" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          Download Excel
-        </button>
-        <button @click="downloadPDF" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-          Download PDF
-        </button>
-      </div>
-
       <!-- Table Section -->
       <div v-if="lapkeuStore.loading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
@@ -123,12 +140,13 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useFinanceReportStore } from '@/stores/financereport';
 import VDateRangeFilter from '@/components/VDateRangeFilter.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
+import VButton from '@/components/VButton.vue';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 const lapkeuStore = useFinanceReportStore();
-
+const showDropdown = ref(false);
 const dateRange = ref<{ start: string; end: string }>({ start: '', end: '' });
 const activityType = ref<string | number>('');
 const sortKey = ref<'paymentDate' | 'pemasukan' | 'pengeluaran'>('paymentDate');
@@ -146,6 +164,7 @@ const fetchData = () => {
     activityType: activityType.value !== '' ? Number(activityType.value) : undefined
   });
 };
+
 
 onMounted(fetchData);
 
@@ -168,7 +187,39 @@ const downloadXLSX = () => {
 
 const downloadPDF = () => {
   const doc = new jsPDF();
-  doc.text('Laporan Keuangan', 14, 14);
+
+  // Nama perusahaan (paling atas)
+  doc.setFontSize(14);
+  doc.text('PT Karina Aka Madina', 14, 14);
+
+  // Judul laporan
+  doc.setFontSize(12);
+  doc.text('Laporan Keuangan', 14, 24);
+
+  // Periode
+  let periodeText = 'Seluruh Periode';
+  if (dateRange.value.start && dateRange.value.end) {
+    periodeText = `Periode ${formatDisplayDate(dateRange.value.start)} - ${formatDisplayDate(dateRange.value.end)}`;
+  }
+  doc.setFontSize(11);
+  doc.text(periodeText, 14, 32);
+
+  // Summary
+  const summary = lapkeuStore.lapkeuSummary;
+  let y = 40;
+  if (summary) {
+    doc.setFontSize(10);
+    doc.text(`Total Transaksi: ${summary.totalTransaksi} transaksi`, 14, y);
+    y += 7;
+    doc.text(`Total Pemasukan: ${formatCurrency(summary.totalPemasukan)}`, 14, y);
+    y += 7;
+    doc.text(`Total Pengeluaran: ${formatCurrency(summary.totalPengeluaran)}`, 14, y);
+    y += 7;
+    doc.text(`Total Profit: ${formatCurrency(summary.totalProfit)}`, 14, y);
+    y += 5;
+  }
+
+  // Tabel
   autoTable(doc, {
     head: [['Tanggal', 'Jenis Aktivitas', 'Deskripsi', 'Pemasukan', 'Pengeluaran']],
     body: lapkeuStore.lapkeuList.map(item => [
@@ -178,9 +229,10 @@ const downloadPDF = () => {
       formatCurrency(item.pemasukan),
       formatCurrency(item.pengeluaran)
     ]),
-    startY: 20,
+    startY: y + 4, // Mulai di bawah summary
     styles: { fontSize: 9 }
   });
+
   doc.save('laporan-keuangan.pdf');
 };
 
@@ -239,6 +291,14 @@ const sortedLapkeu = computed(() => {
   });
   
   return arr;
+});
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+watch(showDropdown, (val) => {
+  if (!val) return;
 });
 </script>
 
