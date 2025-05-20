@@ -89,9 +89,21 @@ const password = ref('');
 const showPassword = ref(false);
 
 const handleLogin = async () => {
-  const success = await authStore.login({ email: email.value, password: password.value });
-  if (success) {
-    router.push('/');
+  try {
+    // Your existing login logic
+    await authStore.login({
+      email: email.value,
+      password: password.value
+    });
+    
+    // After successful login, redirect based on role
+    if (authStore.userRole === 'Admin') {
+      router.push('/account');
+    } else {
+      router.push('/'); // Default home for other roles
+    }
+  } catch (error) {
+    // Error handling
   }
 };
 
