@@ -34,6 +34,7 @@ import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
 import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
+import ListAccountView from '@/views/profile/ListAccountView.vue';
 import type { RouteLocationNormalized } from 'vue-router'
 
 const router = createRouter({
@@ -312,6 +313,16 @@ const router = createRouter({
       path: '/coming-soon',
       name: 'ComingSoon',
       component: () => import('@/views/ComingSoonView.vue')
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: ListAccountView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Manajemen Akun'
+      }
     }
   ]
 })
@@ -352,4 +363,58 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isLoggedIn = localStorage.getItem('auth_token') !== null;
+  const authStore = useAuthStore();
+  
+  // For login page, redirect logged in users appropriately
+  if (to.path === '/login' && isLoggedIn) {
+    // If user is already logged in and tries to access login page
+    // Redirect admin to account page, others to dashboard
+    if (authStore.userRole === 'Admin') {
+      return next('/account');
+    } else {
+      return next('/');
+    }
+  }
+  
+  // For routes requiring auth
+  if (requiresAuth) {
+    if (!isLoggedIn) {
+      // Redirect to login if not authenticated
+      return next('/login');
+    } else {
+      // Check role-based access
+      const requiredRoles = to.meta.roles as string[] | undefined;
+      
+      if (requiredRoles && requiredRoles.length > 0) {
+        if (authStore.userRole && requiredRoles.includes(authStore.userRole)) {
+          return next();
+        } else {
+          // Redirect users without required role
+          return next('/');
+        }
+      }
+      
+      return next();
+    }
+  }
+  
+  return next();
+});
+
+// If you have a login handler function that redirects after successful login,
+// update it to redirect admins to the account page:
+
+// Example login function in your auth store or component
+const handleLoginSuccess = (user: { role: string }) => {
+  if (user.role === 'Admin') {
+    router.push('/account');
+  } else {
+    router.push('/');
+  }
+};
+
 export default router
