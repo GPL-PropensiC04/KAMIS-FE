@@ -87,19 +87,16 @@
       <div class="bg-white rounded-2xl shadow-md p-6">
         <div class="flex items-center mb-4">
           <font-awesome-icon
-            :icon="['fas', 'chart-column']"
+            :icon="['fas', 'money-bill-transfer']"
             class="text-[24px] mr-2"
-            style="color: #1E3A5F;"
+            style="color: #2E7D32;"
           />
           <h2 class="text-lg font-bold leading-tight">
-            Pemasukan dan Pengeluaran
+            Distribusi Keuangan Perusahaan
           </h2>
         </div>
 
-        <div v-if="loadingCharts" class="h-[320px] flex justify-center items-center">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
-        </div>
-        <div v-else class="h-[320px]">
+        <div class="h-[320px]">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
       </div>
@@ -108,46 +105,25 @@
       <div class="bg-white rounded-2xl shadow-md p-6">
         <div class="flex items-center mb-4">
           <font-awesome-icon
-            :icon="['fas', 'chart-pie']"
+            :icon="['fas', 'money-bill']"
             class="text-[24px] mr-2"
-            style="color: #1E3A5F;"
+            style="color: #912018;"
           />
           <h2 class="text-lg font-bold leading-tight">
-            Pengeluaran per Jenis Pengeluaran
+            % Pengeluaran per Jenis Pengeluaran
           </h2>
         </div>
 
-        <div v-if="loadingCharts" class="h-[320px] flex justify-center items-center">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
-        </div>
-        <div v-else class="h-[320px]">
+        <div class="h-[320px]">
           <VDonutPengeluaran :range="selectedRange" @data-loaded="updateDonutChartData" />
         </div>
       </div>
     </div>
 
     <!-- Line Income Expense Chart -->
-    
-
-      <div v-if="loadingCharts" class="h-[mb-4] flex justify-center items-center">
-        <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-md p-6 mb-4">
-      <div class="flex items-center mb-4">
-        <font-awesome-icon
-          :icon="['fas', 'chart-line']"
-          class="text-[24px] mb-4"
-          style="color: #1E3A5F;"
-        />
-        <h2 class="text-lg font-bold leading-tight">
-          Tren Pemasukan dan Pengeluaran
-        </h2>
-      </div>
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
-        </div>
-      </div>
-      <div v-else class="mb-4">
+      <div class="h-[320px]">
         <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
       </div>
-
 
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <h2 class="text-xl font-bold mb-4">Daftar Supplier</h2>
@@ -243,7 +219,6 @@ const authStore = useAuthStore();
 const selectedRange = ref('THIS_YEAR');
 const chartView = ref('MONTH');
 const loading = ref(true);
-const loadingCharts = ref(true);
 const barChartData = ref(null);
 
 // Summary data
@@ -314,19 +289,18 @@ const setDateRange = (range: string) => {
 const updateBarChartData = (data: any) => {
   barChartData.value = data;
   console.log('Bar chart data loaded:', data);
-  loadingCharts.value = false;
+
 };
 
 // Update donut chart data when loaded
 const updateDonutChartData = (data: any) => {
   console.log('Donut chart data loaded:', data);
-  loadingCharts.value = false;
+
 };
 
 // Update line chart data when loaded
 const updateLineChartData = (data: any) => {
   console.log('Line chart data loaded:', data);
-  loadingCharts.value = false;
 };
 
 
@@ -414,7 +388,6 @@ const fetchTopClients = async () => {
 // Fetch all data
 const fetchData = async () => {
   loading.value = true;
-  loadingCharts.value = true;
   
   try {
     await Promise.all([
@@ -426,15 +399,6 @@ const fetchData = async () => {
     console.error('Error fetching dashboard data', error);
   } finally {
     loading.value = false;
-    
-    // Set a timeout to force charts to stop loading after 5 seconds
-    // This is a fallback in case the chart components don't emit their data-loaded events
-    setTimeout(() => {
-      if (loadingCharts.value) {
-        console.log('Charts taking too long to load, forcing loading state to complete');
-        loadingCharts.value = false;
-      }
-    }, 5000);
   }
 };
 
@@ -445,15 +409,7 @@ onMounted(() => {
 
 // Watch for chart view changes
 watch(chartView, () => {
-  loadingCharts.value = true;
   
-  // Set a timeout to force charts to stop loading after 5 seconds
-  setTimeout(() => {
-    if (loadingCharts.value) {
-      console.log('Chart view change taking too long, forcing loading state to complete');
-      loadingCharts.value = false;
-    }
-  }, 5000);
 });
 </script>
 

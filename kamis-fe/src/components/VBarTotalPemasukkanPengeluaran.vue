@@ -40,7 +40,7 @@ const chartData = ref({
   labels: ['Pemasukkan', 'Pengeluaran'],
   datasets: [{
     data: [0, 0],
-    backgroundColor: ['#2E7D32', '#D32F2F'], // Green for income, Red for expenses
+    backgroundColor: ['#2E7D32', '#B42318'], // Green for income, Red for expenses
     borderWidth: 0
   }]
 });
@@ -131,7 +131,7 @@ const updateChartData = () => {
   }, 100);
 };
 
-// Fetch data from API with improved error handling and timeout
+// Update fetchData function to sum all values in the array
 const fetchData = async () => {
   loading.value = true;
   error.value = null;
@@ -145,15 +145,11 @@ const fetchData = async () => {
   // Set a timeout to ensure loading doesn't last forever if the request hangs
   const timeoutId = setTimeout(() => {
     console.error('Request timeout for pemasukkan/pengeluaran data');
-    
-    // Update chart data with default values
     updateChartData();
-    
     error.value = 'Data tidak tersedia saat ini. Menampilkan placeholder.';
   }, 5000); // 5 second timeout
   
   try {
-    // Log authorization token (redacted for security)
     const token = localStorage.getItem('auth_token');
     console.log('Auth token available:', token ? 'Yes (redacted)' : 'No');
     
@@ -164,26 +160,57 @@ const fetchData = async () => {
       }
     });
     
-    // Clear timeout since we got a response
     clearTimeout(timeoutId);
-    
     console.log('Bar chart API response:', response.status, response.statusText);
     
     // Check if the response is valid
     if (response.data && response.data.status === 200 && response.data.data) {
-      const data = response.data.data;
-      console.log('Bar chart data received:', data);
+      const responseData = response.data.data;
+      console.log('Bar chart full response data:', responseData);
       
-      // Explicitly parse as numbers to avoid string issues
-      pemasukkan.value = parseFloat(data.totalPemasukkan) || 0;
-      pengeluaran.value = parseFloat(data.totalPengeluaran) || 0;
-      
-      // For testing - use placeholder data if both values are 0
-      if (pemasukkan.value === 0 && pengeluaran.value === 0) {
-        console.log('Both values are 0, using test data');
-        pemasukkan.value = 5000000;
-        pengeluaran.value = 4000000;
+      // Handle different possible data formats
+      if (Array.isArray(responseData) && responseData.length > 0) {
+        // If it's an array, sum all items
+        console.log('Summing array data with', responseData.length, 'items');
+        
+        // Sum up all totalPemasukan and totalPengeluaran values
+        let totalPemasukan = 0;
+        let totalPengeluaran = 0;
+        
+        responseData.forEach(item => {
+          // Check for valid numbers and add them to running totals
+          const itemPemasukan = parseFloat(item.totalPemasukan) || 0;
+          const itemPengeluaran = parseFloat(item.totalPengeluaran) || 0;
+          
+          totalPemasukan += itemPemasukan;
+          totalPengeluaran += itemPengeluaran;
+          
+          console.log(`Period: ${item.period}, Pemasukan: ${itemPemasukan}, Pengeluaran: ${itemPengeluaran}`);
+        });
+        
+        pemasukkan.value = totalPemasukan;
+        pengeluaran.value = totalPengeluaran;
+        
+        console.log('Total summed values:', {
+          totalPemasukan: totalPemasukan,
+          totalPengeluaran: totalPengeluaran
+        });
+      } else {
+        // If it's a direct object with the fields
+        console.log('Using direct object data');
+        
+        // Try both possible field names
+        pemasukkan.value = parseFloat(responseData.totalPemasukan || 
+                                    responseData.totalPemasukkan) || 0;
+        pengeluaran.value = parseFloat(responseData.totalPengeluaran) || 0;
       }
+      
+      console.log('Final values for chart:', {
+        pemasukkan: pemasukkan.value,
+        pengeluaran: pengeluaran.value
+      });
+      
+
       
       // Update chart
       updateChartData();
@@ -193,15 +220,9 @@ const fetchData = async () => {
       updateChartData();
     }
   } catch (err: any) {
-    // Clear timeout since we got an error
     clearTimeout(timeoutId);
-    
     console.error('Error fetching bar chart data:', err.message);
-    
-    // Update with default values
     updateChartData();
-    
-    // Show error but don't break the UI
     error.value = 'Terjadi kesalahan saat memuat data';
     emit('error', error.value);
   }
