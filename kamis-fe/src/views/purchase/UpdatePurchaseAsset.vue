@@ -74,7 +74,7 @@ const fetchPurchaseDetail = async () => {
                 
                 // Fetch asset image if available
                 if (data.purchaseAsset.fotoUrl) {
-                    fetchAssetImage(data.purchaseAsset.fotoUrl);
+                    fetchAssetImage(data.purchaseAsset.id);
                 }
             } else {
                 console.warn("No asset found in purchase data");
@@ -89,11 +89,11 @@ const fetchPurchaseDetail = async () => {
 };
 
 // Fetch gambar berdasarkan URL
-const fetchAssetImage = async (imagePath?: string) => {
-    if (!imagePath) return;
+const fetchAssetImage = async (assetId?: number) => {
+    if (!assetId) return;
     
     try {
-        const response = await axios.get(`${API_URLS.PURCHASE}${imagePath}`, { responseType: "blob" });
+        const response = await axios.get(`${API_URLS.PURCHASE}/purchase/asset/${assetId}/foto`, { responseType: "blob" });
         assetImage.value = URL.createObjectURL(response.data); // Konversi ke URL objek
     } catch (error) {
         console.error("Error fetching asset image:", error);
@@ -103,7 +103,7 @@ const fetchAssetImage = async (imagePath?: string) => {
 // Watch untuk mengambil gambar setiap kali `assetDetails` berubah
 watch(assetDetails, (newAsset) => {
     if (newAsset?.fotoUrl) {
-        fetchAssetImage(newAsset.fotoUrl);
+        fetchAssetImage(newAsset.id);
     }
 });
 
