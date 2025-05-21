@@ -1,4 +1,3 @@
-<!-- filepath: e:\Propen\KAMIS-FE\kamis-fe\src\views\finance.report\DashboardDireksi.vue -->
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
@@ -82,63 +81,84 @@
       </div>
     </div>
 
-    <!-- Charts Section - 2 Column Grid -->
+    <!-- Charts Section - 2 Column Grid for Bar and Donut Chart -->
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <!-- Pemasukan dan Pengeluaran Chart -->
-      <VBarTotalPemasukkanPengeluaran :range="selectedRange" />
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <font-awesome-icon
+            :icon="['fas', 'chart-column']"
+            class="text-[24px] mr-2"
+            style="color: #1E3A5F;"
+          />
+          <h2 class="text-lg font-bold leading-tight">
+            Pemasukan dan Pengeluaran
+          </h2>
+        </div>
+
+        <div v-if="loadingCharts" class="h-[320px] flex justify-center items-center">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
+        </div>
+        <div v-else class="h-[320px]">
+          <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
+        </div>
+      </div>
       
       <!-- Donut Pengeluaran Chart -->
-      <VDonutPengeluaran :range="selectedRange" />
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <font-awesome-icon
+            :icon="['fas', 'chart-pie']"
+            class="text-[24px] mr-2"
+            style="color: #1E3A5F;"
+          />
+          <h2 class="text-lg font-bold leading-tight">
+            Pengeluaran per Jenis Pengeluaran
+          </h2>
+        </div>
+
+        <div v-if="loadingCharts" class="h-[320px] flex justify-center items-center">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
+        </div>
+        <div v-else class="h-[320px]">
+          <VDonutPengeluaran :range="selectedRange" @data-loaded="updateDonutChartData" />
+        </div>
+      </div>
     </div>
 
-    <!-- Line Chart for Monthly Income-Expense -->
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
+    <!-- Line Income Expense Chart -->
+    
+
+      <div v-if="loadingCharts" class="h-[mb-4] flex justify-center items-center">
+        <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-md p-6 mb-4">
       <div class="flex items-center mb-4">
         <font-awesome-icon
           :icon="['fas', 'chart-line']"
-          class="text-[24px] mr-2 text-[#1E3A5F]"
+          class="text-[24px] mb-4"
+          style="color: #1E3A5F;"
         />
-        <h2 class="text-lg font-bold">
-          Total Pemasukan Distribusi dan Penjualan per Bulan
+        <h2 class="text-lg font-bold leading-tight">
+          Tren Pemasukan dan Pengeluaran
         </h2>
       </div>
-      
-      <!-- Filter buttons for chart -->
-      <div class="flex mb-4 gap-2">
-        <button 
-          :class="[
-            'px-6 py-1 text-sm rounded-md font-medium transition-colors', 
-            chartView === 'MONTH' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="chartView = 'MONTH'">
-          Bulan
-        </button>
-        <button 
-          :class="[
-            'px-6 py-1 text-sm rounded-md font-medium transition-colors', 
-            chartView === 'QUARTER' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="chartView = 'QUARTER'">
-          Kuartal
-        </button>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A5F]"></div>
+        </div>
       </div>
-      
-      <div class="h-[300px]">
-        <VLineIncomeExpense :range="selectedRange" :view="chartView" />
+      <div v-else class="mb-4">
+        <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
       </div>
-    </div>
-    
-    <!-- Daftar Supplier Section -->
+
+
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <h2 class="text-xl font-bold mb-4">Daftar Supplier</h2>
       
-      <table class="custom-table">
+      <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
           <tr>
-            <th class="px-4 py-3">Nama Supplier</th>
-            <th class="px-4 py-3">Jumlah Pembelian</th>
-            <th class="px-4 py-3">Nominal Transaksi</th>
-            <th class="px-4 py-3">Nomor Telepon</th>
+            <th class="px-4 py-3 text-left">Nama Supplier</th>
+            <th class="px-4 py-3 text-center">Jumlah Pembelian</th>
+            <th class="px-4 py-3 text-right">Nominal Transaksi</th>
+            <th class="px-4 py-3 text-center">Nomor Telepon</th>
           </tr>
         </thead>
         <tbody>
@@ -155,10 +175,10 @@
             </td>
           </tr>
           <tr v-for="supplier in topSuppliers" :key="supplier.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">{{ supplier.name }}</td>
+            <td class="px-4 py-3 text-left">{{ supplier.name }}</td>
             <td class="px-4 py-3 text-center">{{ supplier.purchaseCount }}</td>
             <td class="px-4 py-3 text-right">{{ formatCurrency(supplier.totalAmount) }}</td>
-            <td class="px-4 py-3">{{ supplier.phone }}</td>
+            <td class="px-4 py-3 text-center">{{ supplier.phone || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -168,13 +188,13 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
       <h2 class="text-xl font-bold mb-4">Daftar Klien</h2>
       
-      <table class="custom-table">
+      <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
           <tr>
-            <th class="px-4 py-3">Nama Klien</th>
-            <th class="px-4 py-3">Jumlah Aktivitas</th>
-            <th class="px-4 py-3">Total Profit</th>
-            <th class="px-4 py-3">Nomor Telepon</th>
+            <th class="px-4 py-3 text-left">Nama Klien</th>
+            <th class="px-4 py-3 text-center">Jumlah Aktivitas</th>
+            <th class="px-4 py-3 text-right">Total Profit</th>
+            <th class="px-4 py-3 text-center">Nomor Telepon</th>
           </tr>
         </thead>
         <tbody>
@@ -191,10 +211,10 @@
             </td>
           </tr>
           <tr v-for="client in topClients" :key="client.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">{{ client.name }}</td>
+            <td class="px-4 py-3 text-left">{{ client.name }}</td>
             <td class="px-4 py-3 text-center">{{ client.activityCount }}</td>
             <td class="px-4 py-3 text-right">{{ formatCurrency(client.totalProfit) }}</td>
-            <td class="px-4 py-3">{{ client.phone }}</td>
+            <td class="px-4 py-3 text-center">{{ client.phone || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -203,7 +223,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useProjectStore } from '@/stores/project';
 import { usePurchaseStore } from '@/stores/purchase';
 import { useAuthStore } from '@/stores/auth';
@@ -221,8 +241,10 @@ const authStore = useAuthStore();
 
 // State variables
 const selectedRange = ref('THIS_YEAR');
-const chartView = ref('MONTH'); // For monthly/quarterly chart toggle
+const chartView = ref('MONTH');
 const loading = ref(true);
+const loadingCharts = ref(true);
+const barChartData = ref(null);
 
 // Summary data
 const totalPurchase = ref(0);
@@ -233,8 +255,24 @@ const distributionPercentage = ref(0);
 const salesPercentage = ref(0);
 
 // Top suppliers and clients
-const topSuppliers = ref([]);
-const topClients = ref([]);
+interface Supplier {
+  id: string | number;
+  name: string;
+  purchaseCount: number;
+  totalAmount: number;
+  phone?: string;
+}
+
+interface Client {
+  id: string | number;
+  name: string;
+  activityCount: number;
+  totalProfit: number;
+  phone?: string;
+}
+
+const topSuppliers = ref<Supplier[]>([]);
+const topClients = ref<Client[]>([]);
 
 // Time ago text based on selected range
 const timeAgoText = computed(() => {
@@ -258,6 +296,7 @@ const userInfo = computed(() => {
 
 // Format currency function
 const formatCurrency = (amount: number): string => {
+  if (amount === null || amount === undefined) return 'Rp 0';
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -270,6 +309,26 @@ const setDateRange = (range: string) => {
   selectedRange.value = range;
   fetchData();
 };
+
+// Update bar chart data when loaded
+const updateBarChartData = (data: any) => {
+  barChartData.value = data;
+  console.log('Bar chart data loaded:', data);
+  loadingCharts.value = false;
+};
+
+// Update donut chart data when loaded
+const updateDonutChartData = (data: any) => {
+  console.log('Donut chart data loaded:', data);
+  loadingCharts.value = false;
+};
+
+// Update line chart data when loaded
+const updateLineChartData = (data: any) => {
+  console.log('Line chart data loaded:', data);
+  loadingCharts.value = false;
+};
+
 
 // Fetch summary data
 const fetchSummaryData = async () => {
@@ -288,21 +347,32 @@ const fetchSummaryData = async () => {
 
   } catch (error) {
     console.error('Error fetching summary data', error);
-  }
-};
 
-// Fetch top suppliers data
+  }
+};  // Fetch top suppliers data
 const fetchTopSuppliers = async () => {
-  try {
-    const response = await axios.get(`${API_URLS.SUPPLIER}/top-suppliers`, {
+  try {    const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
       params: { range: selectedRange.value, limit: 3 },
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
     
-    if (response.data && response.data.data) {
-      topSuppliers.value = response.data.data;
+    // Debug full response to check if we're getting HTML instead of JSON
+    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      console.error('Received HTML instead of JSON for supplier data. The API endpoint might be incorrect.');
+      topSuppliers.value = [];
+      return;
+    }
+      if (response.data && response.data.status === 200 && response.data.data) {
+      console.log('Received supplier data:', response.data.data);
+      // Take the first 3 items from the array
+      topSuppliers.value = Array.isArray(response.data.data) 
+        ? response.data.data.slice(0, 3)
+        : [];
+    } else {
+      topSuppliers.value = [];
+      console.log('No supplier data or unexpected response format:', response.data);
     }
   } catch (error) {
     console.error('Error fetching top suppliers', error);
@@ -312,19 +382,31 @@ const fetchTopSuppliers = async () => {
 
 // Fetch top clients data
 const fetchTopClients = async () => {
-  try {
-    const response = await axios.get(`${API_URLS.CLIENT}/top-clients`, {
+  try {    const response = await axios.get(`${API_URLS.PROFILE}/client/all`, {
       params: { range: selectedRange.value, limit: 3 },
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
     
-    if (response.data && response.data.data) {
-      topClients.value = response.data.data;
+    // Debug full response to check if we're getting HTML instead of JSON
+    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      console.error('Received HTML instead of JSON for client data. The API endpoint might be incorrect.');
+      topClients.value = [];
+      return;
+    }
+      if (response.data && response.data.status === 200 && response.data.data) {
+      console.log('Received client data:', response.data.data);
+      // Take the first 3 items from the array
+      topClients.value = Array.isArray(response.data.data) 
+        ? response.data.data.slice(0, 3)
+        : [];
+    } else {
+      topClients.value = [];
+      console.log('No client data or unexpected response format:', response.data);
     }
   } catch (error) {
-    console.error('Error fetching top clients', error);
+    console.error('Error fetching top clients', error)
     topClients.value = [];
   }
 };
@@ -332,6 +414,7 @@ const fetchTopClients = async () => {
 // Fetch all data
 const fetchData = async () => {
   loading.value = true;
+  loadingCharts.value = true;
   
   try {
     await Promise.all([
@@ -343,12 +426,34 @@ const fetchData = async () => {
     console.error('Error fetching dashboard data', error);
   } finally {
     loading.value = false;
+    
+    // Set a timeout to force charts to stop loading after 5 seconds
+    // This is a fallback in case the chart components don't emit their data-loaded events
+    setTimeout(() => {
+      if (loadingCharts.value) {
+        console.log('Charts taking too long to load, forcing loading state to complete');
+        loadingCharts.value = false;
+      }
+    }, 5000);
   }
 };
 
 // Initialize on component mount
 onMounted(() => {
   fetchData();
+});
+
+// Watch for chart view changes
+watch(chartView, () => {
+  loadingCharts.value = true;
+  
+  // Set a timeout to force charts to stop loading after 5 seconds
+  setTimeout(() => {
+    if (loadingCharts.value) {
+      console.log('Chart view change taking too long, forcing loading state to complete');
+      loadingCharts.value = false;
+    }
+  }, 5000);
 });
 </script>
 
@@ -360,6 +465,7 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  table-layout: fixed;
 }
 
 .custom-table thead {
