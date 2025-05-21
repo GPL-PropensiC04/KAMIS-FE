@@ -8,10 +8,13 @@ export interface ProjectInterface {
   projectName: string;
   projectDescription: string;
   projectClientId: string;
+  projectClientName?: string; // Added client name property
+  
   projectStartDate: string; // ISO date string
   projectEndDate: string; // ISO date string
   projectTotalPemasukkan: number;
   projectTotalPengeluaran: number;
+  projectProfit?: number;
   projectPHLCount?: number;
   projectPHLPay?: number;
   projectPickupAddress?: string;
@@ -20,6 +23,7 @@ export interface ProjectInterface {
   projectUseResource?: Array<ResourceUsageDTO>;
   data?: ProjectInterface; // For nested responses
   projectLogs: LogProjectInterface[];
+  projectPaymentDate?: string; // ISO date string
 }
 
 export interface ProjectResponseInterface {

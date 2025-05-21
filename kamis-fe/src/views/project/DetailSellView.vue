@@ -11,13 +11,13 @@
       <div v-if="!isLoading && !error" class="flex gap-2">
         <!-- Payment Status Button (only for Finance) -->
         <VSuccessButton 
-          v-if="(canEditFinancial || userRole === 'Direksi') && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
-          label="Bayar" 
+          v-if="(canEditFinancial) && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
+          label="Konfirmasi Pembayaran" 
           @click="openPaymentModal"
         />
         <VCancelButton 
-          v-if="(canEditFinancial || userRole === 'Direksi') && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
-          label="Kembalikan" 
+          v-if="(canEditFinancial) && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
+          label="Konfirmasi Pengembalian" 
           @click="openPaymentModal"
         />
         
@@ -61,7 +61,7 @@
             <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
             <!-- Edit button only for Finance role AND when project is not Selesai -->
             <VSuccessButton
-              v-if="canEditProject && projectData.projectStatus !== 2"
+              v-if="canEditProject && projectData.projectStatus <= 2"
               label="Ubah"
               @click="editSalesInfo"
             />
@@ -75,7 +75,7 @@
             </div>
             <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName }}</p>
+              <p class="font-semibold">{{ projectData.projectClientName || 'Unknown Client' }}</p>
             </div>
             <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Mulai</p>
@@ -103,7 +103,7 @@
         <!-- Products Sold Table -->
         <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
           <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Barang Yang Terjual</h2>
+            <h2 class="text-xl font-bold text-white">Rekap Penjualan</h2>
           </div>
           
           <div class="overflow-x-auto">
@@ -113,6 +113,8 @@
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">No</th>
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">Nama</th>
                   <th class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Jumlah</th>
+                  <th v-if="canViewFinancialInfo" class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Harga Jual</th>
+                  <th v-if="canViewFinancialInfo" class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Total</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -127,67 +129,26 @@
                     </template>
                   </td>
                   <td class="px-6 py-4 text-right">{{ resource.resourceStockUsed }}</td>
+                  <td v-if="canViewFinancialInfo" class="px-6 py-4 text-right">{{ formatCurrency(resource.sellPrice) }}</td>
+                  <td v-if="canViewFinancialInfo" class="px-6 py-4 text-right">{{ formatCurrency(resource.sellPrice * resource.resourceStockUsed) }}</td>
+                </tr>
+                <tr v-if="canViewFinancialInfo">
+                  <td class="px-6 py-3">Total Pemasukkan</td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right"></td>
+                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
                 </tr>
                 <tr v-if="!projectData.projectUseResource || projectData.projectUseResource.length === 0">
-                  <td colspan="3" class="px-6 py-4 text-center">Tidak ada data barang yang terjual</td>
+                  <td colspan="5" class="px-6 py-4 text-center">Tidak ada data barang yang terjual</td>
                 </tr>
+                
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Financial Information -->
-        <div v-if="canViewFinancialInfo" class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Informasi Keuangan</h2>
-          </div>
-          
-          <div class="p-4">
-            <table class="min-w-full border-collapse">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">Nama Akun</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium text-gray-600">Pemasukkan</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium text-gray-600">Pengeluaran</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <!-- Income items -->
-                <tr>
-                  <td class="px-6 py-3">Total Pemasukkan Penjualan</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</td>
-                  <td class="px-6 py-3 text-right">-</td>
-                </tr>
-                
-                <!-- Expense items -->
-                <tr>
-                  <td class="px-6 py-3">Harga Modal Barang</td>
-                  <td class="px-6 py-3 text-right">-</td>
-                  <td class="px-6 py-3 text-right">{{ formatCurrency(getTotalProductCost()) }}</td>
-                </tr>
-                
-                <!-- Totals row with border-top -->
-                <tr class="border-t-2 border-gray-300 font-medium">
-                  <td class="px-6 py-3">Total</td>
-                  <td class="px-6 py-3 text-right text-green-600 ">{{ formatCurrency(projectData.projectTotalPemasukkan) }} </td>
-                  <td class="px-6 py-3 text-right text-red-600">{{ formatCurrency(getTotalProductCost()) }}</td>
-                </tr>
-                
-                <!-- Profit/Loss row with special styling -->
-                <tr class="bg-gray-50">
-                  <td class="px-6 py-3 font-medium">Total Profit</td>
-                  <td colspan="2" :class="{
-                    'px-6 py-3 text-right font-bold': true,
-                    'text-red-600': getProfit() < 0,
-                    'text-green-600': getProfit() > 0
-                  }">
-                    {{ formatCurrency(getProfit()) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+
     </div>
       <!-- Log Penjualan -->
       <div v-if="logsLoading" class="flex justify-center py-8">
@@ -325,6 +286,7 @@ interface ProjectData {
   id: string;
   projectName: string;
   projectClientId: string;
+  projectClientName: string;
   projectStartDate: string;
   projectEndDate?: string;
   projectDeliveryAddress: string;
@@ -343,7 +305,7 @@ interface ProjectLog {
   actionDate: string;
 }
 
-const project = ref<any>({});
+const project = ref<ProjectData>({} as ProjectData);
 const projectData = ref<ProjectData>({} as ProjectData);
 const clientName = ref<string>('');
 const isLoading = ref(true);
@@ -355,8 +317,6 @@ const newStatusToUpdate = ref<number | null>(null);
 // Add these state variables
 const clientLoading = ref(true);
 const resourcesLoading = ref(false); // For DetailSellView only
-const assetsLoading = ref(false); // For DetailDistributionView only
-
 // Add this state variable
 const logsLoading = ref(false);
 
@@ -460,11 +420,11 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Direksi';
+  return userRole === 'Operasional';
 });
 
 const canEditFinancial = computed(() => {
-  return authStore.userRole === 'Finance';
+  return authStore.userRole === 'Finance' || authStore.userRole === 'Direksi';
 });
 
 const showPaymentModal = ref(false);
@@ -549,7 +509,7 @@ const formatCurrency = (value: number): string => {
 const formatStatus = (status: number): string => {
   switch (status) {
     case 0: return 'Direncanakan';
-    case 1: return 'Dalam Pengiriman';
+    case 1: return 'Sedang Dikerjakan';
     case 2: return 'Selesai';
     case 3: return 'Dibatalkan';
     default: return 'Unknown';
@@ -571,24 +531,6 @@ interface ProjectResource {
   sellPrice: number;
   resourceStockUsed: number;
 }
-
-// Calculate total product cost
-const getTotalProductCost = (): number => {
-  if (!projectData.value.projectUseResource) return 0;
-  
-  // Use ProjectResource interface in reduce function
-  return projectData.value.projectUseResource.reduce((total: number, resource: ProjectResource) => {
-    return total + (resource.sellPrice * resource.resourceStockUsed * 0.8);
-  }, 0);
-};
-
-
-// Calculate total profit
-const getProfit = (): number => {
-  const revenue = projectData.value.projectTotalPemasukkan || 0;
-  const cost = getTotalProductCost();
-  return revenue - cost;
-};
 
 // Load data from API
 const loadData = async () => {
@@ -644,9 +586,7 @@ const loadData = async () => {
       console.log('Project data loaded:', projectData.value);
       
       // Fetch client name if needed
-      if (projectData.value.projectClientId) {
-        await fetchClientName(projectData.value.projectClientId);
-      }
+    
 
       // Fetch resource names with retry logic
       await fetchResourcesWithRetry();
@@ -668,39 +608,6 @@ const loadData = async () => {
   }
 };
 
-// Update fetchClientName function
-const fetchClientName = async (clientId: string) => {
-  if (!clientId) {
-    clientName.value = '-';
-    clientLoading.value = false;
-    return;
-  }
-  
-  clientLoading.value = true;
-  
-  try {
-    // Make a real API call to fetch client data
-    const response = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    if (response.data && response.data.status === 200 && response.data.data) {
-      // Extract the client name from the response data
-      clientName.value = response.data.data.nameClient || response.data.data.clientName || '';
-      console.log('Fetched client name:', clientName.value);
-    } else {
-      console.error('Client data not found or invalid format');
-      clientName.value = `Client ${clientId.substring(0, 8)}`;
-    }
-  } catch (err) {
-    console.error('Error fetching client name:', err);
-    clientName.value = 'Unknown Client';
-  } finally {
-    clientLoading.value = false;
-  }
-};
 
 // Action methods for buttons
 const cancelProject = async () => {

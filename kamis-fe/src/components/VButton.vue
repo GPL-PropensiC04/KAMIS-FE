@@ -29,4 +29,11 @@ defineProps({
 .font-inter {
   font-family: 'Inter', sans-serif;
 }
+
+button:hover {
+  background-color: #ffffff !important; /* warna biru lebih muda saat hover */
+  color: #1E3A5F !important; /* warna teks putih saat hover */
+  border: 1px solid #1E3A5F !important; /* border biru saat hover */
+}
+
 </style>
