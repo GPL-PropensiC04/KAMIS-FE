@@ -78,9 +78,7 @@
       </div>
     </div>
 
-
-    <!-- Line Chart Trend Aktivitas -->
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
+    <div class="mb-4">
       <VLineActivityTrend :range="selectedRange" />
     </div>
 
