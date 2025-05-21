@@ -2,7 +2,7 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <!-- Filter Section -->
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <template v-if="canViewFinancialInfo">
         <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
           <div class="relative">
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Main Content Section -->
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
         <VOptionInput 
           v-model="selectedType" 
@@ -62,7 +62,7 @@
           class="w-1/3" 
         />
         <div class="flex gap-2">
-          <VButton v-if="canEditProject" label="Tambah Proyek" @click="goToAddProject" />
+          <VButton v-if="canEditProject" label="+ Tambah Aktivitas" @click="goToAddProject" />
         </div>
       </div>
 
@@ -166,7 +166,7 @@
   <div v-if="showModal" class="fixed inset-0 backdrop-blur-xs flex justify-center items-center z-50" @click="closeModal">
     <div class="bg-white rounded-lg shadow-lg max-w-md w-full overflow-hidden" @click.stop>
       <div class="border-b px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-[#1E3A5F]">Tipe Proyek</h3>
+        <h3 class="text-lg font-semibold text-[#1E3A5F]">Tipe Aktivitas</h3>
         <button class="text-gray-500 hover:text-gray-700 text-2xl" @click="closeModal">&times;</button>
       </div>
       

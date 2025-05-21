@@ -1,14 +1,14 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="flex justify-between items-center gap-2">
         <VSearchBar v-model="searchName" placeholder="Cari Nama Resource..." />
-        <VButton v-if="showAddButton" label="Tambah Resource" @click="goToAddResource" />
+        <VButton v-if="showAddButton" label="+ Tambah Resource" @click="goToAddResource" />
       </div>
     </div>
     
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div v-if="loading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>

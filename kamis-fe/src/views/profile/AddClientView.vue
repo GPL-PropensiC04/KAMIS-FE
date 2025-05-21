@@ -1,7 +1,6 @@
 <script setup lang="ts">
     import { ref, watch } from "vue";
     import { useClientStore } from "@/stores/client";
-    import VButton from "@/components/VButton.vue";
     import VDropDownInput from "@/components/VDropDownInput.vue";
     import { useRouter } from "vue-router";
     import { useToast } from "vue-toastification";
@@ -93,7 +92,7 @@
                     <label class="block font-semibold mb-1">Nama Klien</label>
                     <input 
                         v-model="nameClient" 
-                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#E5EAF2]" 
+                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#ffffff]" 
                     />
                 </div>
                 <div>
@@ -101,7 +100,7 @@
                     <input 
                         v-model="companyClient" 
                         :disabled="typeClientLabel === 'Perorangan'"
-                        :class="typeClientLabel === 'Perorangan' ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#E5EAF2]'"
+                        :class="typeClientLabel === 'Perorangan' ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#ffffff]'"
                         class="w-full p-2 border border-[#1E3A5F] rounded-md" 
                     />
                 </div>
@@ -116,14 +115,14 @@
                         inputmode="numeric"
                         pattern="[0-9]*"
                         @input="noTelpClient = noTelpClient.replace(/\D/g, '')"
-                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#E5EAF2]" 
+                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#ffffff]" 
                     />
                 </div>
                 <div>
                     <label class="block font-semibold mb-1">Email</label>
                     <input 
                         v-model="emailClient" 
-                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#E5EAF2]" 
+                        class="w-full p-2 border border-[#1E3A5F] rounded-md bg-[#ffffff]" 
                     />
                 </div>
                 <div>
@@ -141,7 +140,7 @@
                 <textarea 
                     v-model="addressClient"
                     rows="4"
-                    class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#E5EAF2]"
+                    class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#ffffff]"
                 ></textarea>
             </div>
         </div>

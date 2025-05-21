@@ -8,13 +8,13 @@
       {{ notificationMessage }}
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-1 gap-2 items-center">
         <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div v-if="loading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
