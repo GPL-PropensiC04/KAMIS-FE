@@ -295,7 +295,7 @@ const router = createRouter({
       component: UpdateDistributionView,
       props: true,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Finance"], 
+        roles: ["Admin", "Finance", "Operasional"], 
         breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
     },
     {
@@ -305,7 +305,7 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Finance"], 
+        roles: ["Admin", "Finance", "Operasional"], 
         breadcrumb: 'Edit Penjualan', 
         parent: (route: RouteLocationNormalized) => ({ name: 'project-detailSale', params: { id: route.params.id } }) 
       }
