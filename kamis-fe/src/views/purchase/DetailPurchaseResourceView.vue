@@ -76,7 +76,7 @@
         </div>
         <div>
           <p class="text-lg font-bold font-lato">Supplier</p>
-          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ purchase.purchaseSupplier }}</p>
+          <p class="text-[#1E3A5F] text-lg font-lato font-bold">{{ supplierName }}</p>
         </div>
         <div>
           <p class="text-lg font-bold font-lato">Tipe Barang</p>
@@ -174,7 +174,7 @@
                       <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
                           <p>
                               <strong>User</strong> : 
-                              {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
+                              {{ log.user === currentUsername ? log.user + ' (You)' : log.user }}
                           </p>
                           <p class="mt-1"><strong>Action</strong> :</p>
                           <p>{{ log.action }}</p>
@@ -247,6 +247,8 @@ import VSuccessButton from '@/components/VSuccessButton.vue'
 import VCancelButton from '@/components/VCancelButton.vue'
 import VLockedInput from '@/components/VLockedInput.vue'
 import type { UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase/purchase.interface'
+import axios from 'axios';
+import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
@@ -259,6 +261,19 @@ const loading = computed(() => purchaseStore.loading)
 const error = computed(() => purchaseStore.error)
 const purchase = computed(() => purchaseStore.currentPurchase)
 const userRole = computed(() => authStore.userRole)
+
+const supplierName = ref<string>(""); 
+const fetchSupplierName = async () => {
+    try {
+        const response = await axios.get(`${API_URLS.PROFILE}/supplier/name/${purchase.value?.purchaseSupplier}`, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        supplierName.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching suppliers:", error);
+    }
+};
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('id-ID')
 const formatCurrency = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val)
@@ -350,9 +365,10 @@ const handleEditDetail = () => router.push(`/purchase/update-resource/${purchase
 const loadPurchaseData = async () => {
   if (!purchaseId.value) return
   await purchaseStore.getPurchaseById(purchaseId.value)
+  fetchSupplierName()
 }
 
-onMounted(() => loadPurchaseData())
+onMounted(() => {loadPurchaseData()})
 </script>
 
 
