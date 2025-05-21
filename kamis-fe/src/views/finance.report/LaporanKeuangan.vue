@@ -153,7 +153,6 @@ const dateRange = ref<{ start: string; end: string }>({ start: '', end: '' });
 const activityType = ref<string | number>('');
 const sortKey = ref<'paymentDate' | 'pemasukan' | 'pengeluaran'>('paymentDate');
 const sortOrder = ref<'asc' | 'desc'>('desc');
-const authStore = useAuthStore();
 
 const fetchData = () => {
   lapkeuStore.fetchLapkeu({
