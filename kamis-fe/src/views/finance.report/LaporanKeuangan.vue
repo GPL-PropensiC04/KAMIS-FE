@@ -125,7 +125,7 @@
           >
             {{
               lapkeuStore.lapkeuSummary.totalProfit < 0
-                ? formatCurrency(Math.abs(lapkeuStore.lapkeuSummary.totalProfit))
+                ? '- ' + formatCurrency(Math.abs(lapkeuStore.lapkeuSummary.totalProfit)).replace('Rp','Rp')
                 : formatCurrency(lapkeuStore.lapkeuSummary.totalProfit)
             }}
           </div>
@@ -138,6 +138,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useFinanceReportStore } from '@/stores/financereport';
+import { useAuthStore } from '@/stores/auth';
 import VDateRangeFilter from '@/components/VDateRangeFilter.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VButton from '@/components/VButton.vue';
@@ -152,6 +153,7 @@ const dateRange = ref<{ start: string; end: string }>({ start: '', end: '' });
 const activityType = ref<string | number>('');
 const sortKey = ref<'paymentDate' | 'pemasukan' | 'pengeluaran'>('paymentDate');
 const sortOrder = ref<'asc' | 'desc'>('desc');
+const authStore = useAuthStore();
 
 const fetchData = () => {
   lapkeuStore.fetchLapkeu({
@@ -275,7 +277,7 @@ const downloadXLSX = () => {
   // Add company header
   XLSX.utils.sheet_add_aoa(worksheet, [
     ["PT KARINA AKA MADINA"],
-    ["Jl. Ledta Sudjono Gg. Jambu No. 03 Kel. Bandar Selamat, Medan, Indonesia"],
+    ["Jl. Letda Sudjono Gg. Jambu No. 03, Kel. Bandar Selamat, Medan, Indonesia"],
     [""],
     [`LAPORAN KEUANGAN${activityTypeText.toUpperCase()}`],
     [`Periode: ${periodeText}`],
@@ -580,7 +582,7 @@ const downloadPDF = async () => {
           `${summary.totalTransaksi} transaksi`,
           formatCurrency(summary.totalPemasukan),
           formatCurrency(summary.totalPengeluaran),
-          formatCurrency(summary.totalProfit),
+          summary.totalProfit < 0 ? '- ' + formatCurrency(Math.abs(summary.totalProfit)) : formatCurrency(summary.totalProfit),
         ],
       ],
       startY: summaryY,
@@ -597,8 +599,7 @@ const downloadPDF = async () => {
       },
       columnStyles: {
         3: {
-          fillColor: summary.totalProfit >= 0 ? [230, 255, 230] : [255, 230, 230],
-          textColor: summary.totalProfit >= 0 ? [0, 100, 0] : [150, 0, 0],
+          textColor: summary.totalProfit < 0 ? [192, 0, 0] : [0, 97, 0], // Merah atau hijau tua
         },
       },
       margin: { left: 14, right: 14 },
@@ -622,9 +623,13 @@ const downloadPDF = async () => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text("Mengetahui,", 250, footerY);
-    doc.text("Divisi Finance", 250, footerY + 15);
-    doc.setFont("helvetica", "bold");
-    doc.text("Budi Santoso", 250, footerY + 20);
+
+    const signatureGap = 10;
+
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.3);
+    // Garis untuk tanda tangan (panjang 40mm)
+    doc.line(240, footerY + signatureGap + 15, 280, footerY + signatureGap + 15);
   }
 
   // Tambahkan nomor halaman
@@ -680,7 +685,8 @@ const formatCurrency = (val: number) => {
 
 // Format date to display as "DD / MM / YYYY"
 const formatDisplayDate = (dateString: string) => {
-  const [day, month, year] = dateString.split('-').map(Number);
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-');
   return `${String(day).padStart(2, '0')} / ${String(month).padStart(2, '0')} / ${year}`;
 };
 
