@@ -31,9 +31,9 @@ const selectOption = (option: string) => {
   <div class="relative w-full max-w-md font-inter">
     <!-- Input Field -->
     <div 
-      class="flex items-center justify-between border border-[#1E3A5F] bg-[#E5EAF2] text-black px-4 py-2 rounded-md h-[45px]"
+      class="flex items-center justify-between border border-[#1E3A5F] bg-[#ffffff] text-black px-4 py-2 rounded-md h-[45px]"
       :class="{
-        'border-[#1E3A5F] bg-[#E5EAF2] text-black rounded-md': true, 
+        'border-[#1E3A5F] bg-[#ffffff] text-black rounded-md': true, 
       }"
       @click="toggleDropdown"
     >
@@ -49,7 +49,7 @@ const selectOption = (option: string) => {
     <!-- Dropdown List -->
     <ul 
       v-if="isOpen" 
-      class="absolute left-0 mt-2 w-full border border-[#1E3A5F] bg-[#E5EAF2] rounded-md shadow-lg z-10"
+      class="absolute left-0 mt-2 w-full border border-[#1E3A5F] bg-[#ffffff] rounded-md shadow-lg z-10"
     >
       <li 
         v-for="option in props.options" 

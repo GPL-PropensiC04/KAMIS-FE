@@ -1,7 +1,7 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
         <VSearchBar v-model="searchCompany" placeholder="Cari Nama Perusahaan..." />
         <VSearchBar v-model="searchPIC" placeholder="Cari Nama PIC..." />
@@ -9,28 +9,31 @@
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <table class="custom-table">
-        <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <div v-if="supplierStore.loading" class="flex justify-center items-center py-14">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      </div>
+      <table v-else class="custom-table">
+        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th @click="sortBy('companySupplier')" class="px-6 py-3 table-header cursor-pointer">Nama Perusahaan</th>
-            <th @click="sortBy('nameSupplier')" class="px-6 py-3 table-header cursor-pointer">Nama PIC</th>
-            <th @click="sortBy('totalPurchases')" class="px-6 py-3 table-header cursor-pointer">Jumlah Pembelian</th>
+            <th @click="sortBy('companySupplier')" class="px-6 py-4 table-header cursor-pointer text-base">Nama Perusahaan</th>
+            <th @click="sortBy('nameSupplier')" class="px-6 py-4 table-header cursor-pointer text-base">Nama PIC</th>
+            <th @click="sortBy('totalPurchases')" class="px-6 py-4 table-header cursor-pointer text-base">Jumlah Pembelian</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="supplier in sortedSuppliers"
             :key="supplier.id"
-            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             @click="goToDetailSupplier(supplier.id)"
           >
-            <td class="px-6 py-4">{{ supplier.companySupplier }}</td>
-            <td class="px-6 py-4">{{ supplier.nameSupplier }}</td>
-            <td class="px-6 py-4">{{ supplier.totalPurchases }} Pembelian</td>
+            <td class="px-6 py-5">{{ supplier.companySupplier }}</td>
+            <td class="px-6 py-5">{{ supplier.nameSupplier }}</td>
+            <td class="px-6 py-5">{{ supplier.totalPurchases }} Pembelian</td>
           </tr>
-          <tr v-if="supplierStore.suppliers.length === 0">
-            <td colspan="3" class="text-center text-gray-500 py-6">Data supplier tidak ditemukan.</td>
+          <tr v-if="sortedSuppliers.length === 0">
+            <td colspan="3" class="text-center text-gray-500 py-6 text-base">Data supplier tidak ditemukan.</td>
           </tr>
         </tbody>
       </table>
@@ -125,6 +128,7 @@ const goToDetailSupplier = (supplierId: string) => {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  table-layout: fixed;
 }
 
 .custom-table thead {
@@ -133,8 +137,25 @@ const goToDetailSupplier = (supplierId: string) => {
 }
 
 .custom-table th, .custom-table td {
-  padding: 12px 16px;
+  padding: 16px 20px;
   text-align: center;
+  font-size: 15px;
+}
+
+.custom-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
 }
 
 .table-header:hover {

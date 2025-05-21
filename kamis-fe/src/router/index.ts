@@ -33,8 +33,12 @@ import ListSupplierView from '@/views/profile/ListSupplierView.vue';
 import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
 import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
+import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
+import ListAccountView from '@/views/profile/ListAccountView.vue';
+import DashboardOperasional from '@/views/finance.report/DashboardOperasional.vue'
+import AddAccountView from '@/views/profile/AddAccountView.vue';
+import UpdateAccountView from '@/views/profile/UpdateAccountView.vue'
 import type { RouteLocationNormalized } from 'vue-router'
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -44,6 +48,12 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
+        {
+      path: '/operasional',
+      name: 'operasional',
+      component: DashboardOperasional,
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+    },
     {
       path: '/login',
       name: 'login',
@@ -51,10 +61,16 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
+      path: '/finance-report',
+      name: 'finance-report',
+      component: LaporanKeuangan,
+      meta: { requiresAuth: true, breadcrumb: 'Laporan Keuangan' }
+    },
+    {
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
+      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
     },
     {
       path: '/supplier',
@@ -66,14 +82,14 @@ const router = createRouter({
       path: '/supplier/detail/:id',
       name: 'supplier-detail',
       component: DetailSupplierView,
-      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
       props: true
     },
     {
       path: '/supplier/update/:id',
       name: 'supplier-update',
       component: () => import('@/views/profile/UpdateSupplierView.vue'),
-      meta: { requiresAuth: true, roles: ["Operational", "Admin"], breadcrumb: 'Edit Supplier', parent: (route: RouteLocationNormalized) => ({ name: 'supplier-detail', params: { id: route.params.id } }) },
+      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Update Supplier', parent: (route: RouteLocationNormalized) => ({ name: 'supplier-detail', params: { id: route.params.id } }) },
       props: true
     },
     {
@@ -86,14 +102,14 @@ const router = createRouter({
       path: '/client/add',
       name: 'client-add',
       component: AddClientView,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Tambah Klien', parent: '/client' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Klien', parent: '/client' }
     },
     {
       path: '/client/update/:id',
       name: 'client-update', 
       component: UpdateClient,
       props: true,
-      meta: { requiresAuth: true, roles: ["Operational"], breadcrumb: 'Edit Klien', parent: (route: RouteLocationNormalized) => ({ name: 'client-detail', params: { id: route.params.id } }) }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Edit Klien', parent: (route: RouteLocationNormalized) => ({ name: 'client-detail', params: { id: route.params.id } }) }
     },
     {
       path: '/client/:id',
@@ -103,46 +119,40 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'Detail Klien', parent: '/client' }
     },
     {
-      path: '/client/update/:id',
-      name: 'update-client',
-      component:UpdateClient,
-      meta: { requiresAuth: true, roles: ["Operational"] }
-    },
-    {
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
     },
     {
       path: '/purchase/add',
       name: 'purchase-add',
       component:AddPurchaseStepOne,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
     },
     {
       path: '/purchase/add/asset',
       name: 'purchase-addAsset',
       component:AddPurchaseAsset,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource',
       name: 'purchase-addResource',
       component: AddPurchaseResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'purchase-addResourceSummary',
       component: AddPurchaseResourceSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'purchase-addAssetSummary',
       component: AddPurchaseAssetSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
     },
     {
       path: '/purchase/update-resource/:purchaseId',
@@ -151,7 +161,7 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
+        roles: ["Admin", "Operasional"], 
         breadcrumb: 'Edit Pembelian Resource', 
         parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailResource', params: { id: route.params.id } }) 
       }
@@ -163,9 +173,9 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
+        roles: ["Admin", "Operasional"], 
         breadcrumb: 'Edit Pembelian Aset', 
-        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.id } }) 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.purchaseId } }) 
       }
     },
     {
@@ -205,7 +215,7 @@ const router = createRouter({
       name: 'resource-update',
       component:UpdateResource,
       props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], breadcrumb: 'Edit Resource', parent: '/resource' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Edit Resource', parent: '/resource' }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -228,7 +238,7 @@ const router = createRouter({
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational"], 
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], 
         breadcrumb: 'Edit Aset', parent: (route: RouteLocationNormalized) => ({ name: 'assets-detail', params: { platNomor: route.params.platNomor }}) }
     },
     {
@@ -243,7 +253,7 @@ const router = createRouter({
       name: 'add-distribution',
       component: AddDistributionView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
+        roles: ["Admin", "Operasional"], 
         breadcrumb: 'Tambah Distribusi', parent: '/project' }
     },
     {
@@ -251,7 +261,7 @@ const router = createRouter({
       name: 'distribution-summary',
       component: DistributionSummaryView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operational"],
+        roles: ["Admin", "Operasional"],
         breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
     },
     {
@@ -259,7 +269,7 @@ const router = createRouter({
       name: 'add-sales',
       component: AddSalesView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
+        roles: ["Admin", "Operasional"], 
         breadcrumb: 'Tambah Penjualan', parent: '/project' }
     },
     {
@@ -267,7 +277,7 @@ const router = createRouter({
       name: 'sales-summary',
       component: SalesSummaryView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operational"], 
+        roles: ["Admin", "Operasional"], 
         breadcrumb: 'Konfirmasi Penjualan', parent: '/project/add/sales' }
     },
     {
@@ -292,7 +302,7 @@ const router = createRouter({
       component: UpdateDistributionView,
       props: true,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Finance"], 
+        roles: ["Admin", "Finance", "Operasional"], 
         breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
     },
     {
@@ -302,7 +312,7 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Finance"], 
+        roles: ["Admin", "Finance", "Operasional"], 
         breadcrumb: 'Edit Penjualan', 
         parent: (route: RouteLocationNormalized) => ({ name: 'project-detailSale', params: { id: route.params.id } }) 
       }
@@ -311,6 +321,35 @@ const router = createRouter({
       path: '/coming-soon',
       name: 'ComingSoon',
       component: () => import('@/views/ComingSoonView.vue')
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: ListAccountView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Manajemen Akun'
+      }
+    },
+    {
+      path: '/account/add',
+      name: 'account-add',
+      component: () => AddAccountView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Tambah Akun', parent: '/account' }
+    },
+    {
+      path: '/account/update/:email',
+      name: 'account-update',
+      component: () => UpdateAccountView,
+      props: true,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Edit Akun', parent: '/account' }
     }
   ]
 })
@@ -351,4 +390,58 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isLoggedIn = localStorage.getItem('auth_token') !== null;
+  const authStore = useAuthStore();
+  
+  // For login page, redirect logged in users appropriately
+  if (to.path === '/login' && isLoggedIn) {
+    // If user is already logged in and tries to access login page
+    // Redirect admin to account page, others to dashboard
+    if (authStore.userRole === 'Admin') {
+      return next('/account');
+    } else {
+      return next('/');
+    }
+  }
+  
+  // For routes requiring auth
+  if (requiresAuth) {
+    if (!isLoggedIn) {
+      // Redirect to login if not authenticated
+      return next('/login');
+    } else {
+      // Check role-based access
+      const requiredRoles = to.meta.roles as string[] | undefined;
+      
+      if (requiredRoles && requiredRoles.length > 0) {
+        if (authStore.userRole && requiredRoles.includes(authStore.userRole)) {
+          return next();
+        } else {
+          // Redirect users without required role
+          return next('/');
+        }
+      }
+      
+      return next();
+    }
+  }
+  
+  return next();
+});
+
+// If you have a login handler function that redirects after successful login,
+// update it to redirect admins to the account page:
+
+// Example login function in your auth store or component
+const handleLoginSuccess = (user: { role: string }) => {
+  if (user.role === 'Admin') {
+    router.push('/account');
+  } else {
+    router.push('/');
+  }
+};
+
 export default router

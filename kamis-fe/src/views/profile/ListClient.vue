@@ -2,18 +2,11 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
-      <div class="flex justify-between items-center gap-2">
-        <div class="flex items-center gap-3 flex-nowrap w-full">
-          <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." class="flex-1" />
-          <VOptionInput v-model="typeClient" :options="['All', 'Perusahaan', 'Perorangan']"/>
-          <VDropDownInput
-            v-if="isFinance || isDireksi"
-            v-model="selectedNominal"
-            :options="nominalOptions.map(opt => opt.label)"
-            class="w-48"
-          />
-        </div>
-        <VButton v-if="isOperational" class="ml-4 whitespace-nowrap" label="+ Tambah Klien" @click="goToAddClient"/>
+      <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+        <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." />
+        <VOptionInput v-model="typeClient" :options="['Semua', 'Perusahaan', 'Perorangan']"/>
+        <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal" :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
+        <VButton v-if="isOperational" class="ml-auto" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
     </div>
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
@@ -76,7 +69,7 @@ const searchName = ref('');
 const clientStore = useClientStore();
 const authStore = useAuthStore();
 const router = useRouter();
-const typeClient = ref('All');
+const typeClient = ref('Semua');
 
 const nominalOptions = [
   { label: "Semua Profit", min: null, max: null },
