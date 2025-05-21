@@ -35,12 +35,10 @@ import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
 import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
 import ListAccountView from '@/views/profile/ListAccountView.vue';
-<<<<<<< HEAD
-=======
 import DashboardOperasional from '@/views/finance.report/DashboardOperasional.vue'
 import AddAccountView from '@/views/profile/AddAccountView.vue';
 import UpdateAccountView from '@/views/profile/UpdateAccountView.vue'
->>>>>>> ae517267c845e06b1c1fc090be7d971219a65334
+import DashboardDireksi from '@/views/finance.report/DashboardDireksi.vue';
 import type { RouteLocationNormalized } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -334,8 +332,6 @@ const router = createRouter({
         roles: ["Admin"],
         breadcrumb: 'Manajemen Akun'
       }
-<<<<<<< HEAD
-=======
     },
     {
       path: '/account/add',
@@ -355,7 +351,15 @@ const router = createRouter({
         requiresAuth: true, 
         roles: ["Admin"],
         breadcrumb: 'Edit Akun', parent: '/account' }
->>>>>>> ae517267c845e06b1c1fc090be7d971219a65334
+    },
+    {
+      path: '/direksi/dashboard',
+      name: 'dashboard-direksi',
+      component: DashboardDireksi,
+      meta: {
+        requiresAuth: true,
+        roles: ['Direksi']
+      }
     }
   ]
 })
@@ -405,12 +409,19 @@ router.beforeEach((to, from, next) => {
   // For login page, redirect logged in users appropriately
   if (to.path === '/login' && isLoggedIn) {
     // If user is already logged in and tries to access login page
-    // Redirect admin to account page, others to dashboard
+    // Redirect admin to account page, Direksi to their dashboard, others to home
     if (authStore.userRole === 'Admin') {
       return next('/account');
+    } else if (authStore.userRole === 'Direksi') {
+      return next('/direksi/dashboard');
     } else {
       return next('/');
     }
+  }
+  
+  // For home page, redirect Direksi to their dashboard
+  if (to.path === '/' && isLoggedIn && authStore.userRole === 'Direksi') {
+    return next('/direksi/dashboard');
   }
   
   // For routes requiring auth
@@ -427,7 +438,11 @@ router.beforeEach((to, from, next) => {
           return next();
         } else {
           // Redirect users without required role
-          return next('/');
+          if (authStore.userRole === 'Direksi') {
+            return next('/direksi/dashboard');
+          } else {
+            return next('/');
+          }
         }
       }
       
@@ -445,6 +460,8 @@ router.beforeEach((to, from, next) => {
 const handleLoginSuccess = (user: { role: string }) => {
   if (user.role === 'Admin') {
     router.push('/account');
+  } else if (user.role === 'Direksi') {
+    router.push('/direksi/dashboard');
   } else {
     router.push('/');
   }
