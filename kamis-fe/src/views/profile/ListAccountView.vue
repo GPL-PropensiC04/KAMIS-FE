@@ -31,8 +31,9 @@
         <tbody>
           <tr
             v-for="account in filteredAccounts"
-            :key="account.id"
+            :key="account.email"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+            @click="goToUpdateAccount(account.email)"
           >
             <td class="px-6 py-4 text-center">{{ account.email }}</td>
             <td class="px-6 py-4 text-center">{{ account.username }}</td>
@@ -65,27 +66,29 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
-import { API_URLS } from '@/config/api.config';
+import { useAccountStore } from '@/stores/account';
 import VButton from '@/components/VButton.vue';
 import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
-import { useToast } from 'vue-toastification';
+
 
 const router = useRouter();
 const authStore = useAuthStore();
-const toast = useToast();
+const accountStore = useAccountStore();
 
 // State variables
-const accounts = ref<any[]>([]);
-const loading = ref(true);
 const searchTerm = ref('');
 const roleFilter = ref('Semua');
 
 // Computed properties
 const isAdmin = computed(() => authStore.userRole === 'Admin');
 const roleOptions = ['Semua', 'Admin', 'Finance', 'Operasional', 'Direksi'];
+
+// Get accounts and loading state from the account store
+const accounts = computed(() => accountStore.accounts);
+const loading = computed(() => accountStore.loading);
+const error = computed(() => accountStore.error);
 
 const filteredAccounts = computed(() => {
   return accounts.value.filter(account => {
@@ -98,7 +101,7 @@ const filteredAccounts = computed(() => {
     const matchesRole = 
       roleFilter.value === 'Semua' || 
       account.role?.toLowerCase() === roleFilter.value.toLowerCase() ||
-      (roleFilter.value === 'Operasional' && account.role?.toLowerCase() === 'operational');
+      (roleFilter.value === 'Operasional' && account.role?.toLowerCase() === 'operasional');
     
     return matchesSearch && matchesRole;
   });
@@ -106,30 +109,21 @@ const filteredAccounts = computed(() => {
 
 // Methods
 const fetchAccounts = async () => {
-  loading.value = true;
-  try {
-    const response = await axios.get(`${API_URLS.PROFILE}/profile/all`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    if (response.data && response.data.status === 200) {
-      accounts.value = Array.isArray(response.data.data) ? response.data.data : [];
-      console.log('Fetched accounts:', accounts.value);
-    } else {
-      toast.error('Gagal memuat data akun');
-    }
-  } catch (error) {
-    console.error('Error fetching accounts:', error);
-    toast.error('Terjadi kesalahan saat memuat data akun');
-  } finally {
-    loading.value = false;
+  // Use the store method to fetch accounts
+  await accountStore.getAllAccounts();
+  
+  // The store automatically handles errors and loading state
+  if (accountStore.error) {
+    console.error('Error fetching accounts:', accountStore.error);
   }
 };
 
 const goToAddAccount = () => {
   router.push('/account/add');
+};
+
+const goToUpdateAccount = (email: string) => {
+  router.push(`/account/update/${email}`);
 };
 
 // Set up watchers to filter data when inputs change
@@ -138,14 +132,12 @@ let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 watch(searchTerm, () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    // You could make an API call here if you want server-side filtering
-    // For now, we're just using the computed property
+    // Client-side filtering happens via the computed property
   }, 400);
 });
 
 watch(roleFilter, () => {
-  // You could make an API call here if you want server-side filtering
-  // For now, we're just using the computed property
+  // Client-side filtering happens via the computed property
 });
 
 // Initialize component
