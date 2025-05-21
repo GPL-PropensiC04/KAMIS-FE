@@ -175,7 +175,7 @@ const router = createRouter({
         requiresAuth: true, 
         roles: ["Admin", "Operasional"], 
         breadcrumb: 'Edit Pembelian Aset', 
-        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.id } }) 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.purchaseId } }) 
       }
     },
     {
