@@ -211,7 +211,7 @@
       const updateData: UpdateAccountInterface = {
         email: formData.value.email,
         username: formData.value.username,
-        password: formData.value.password,
+        
       };
   
       // Only include password if it's provided
