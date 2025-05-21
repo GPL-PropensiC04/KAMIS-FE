@@ -35,8 +35,9 @@ import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
 import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
 import ListAccountView from '@/views/profile/ListAccountView.vue';
+import AddAccountView from '@/views/profile/AddAccountView.vue';
+import UpdateAccountView from '@/views/profile/UpdateAccountView.vue'
 import type { RouteLocationNormalized } from 'vue-router'
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -323,6 +324,25 @@ const router = createRouter({
         roles: ["Admin"],
         breadcrumb: 'Manajemen Akun'
       }
+    },
+    {
+      path: '/account/add',
+      name: 'account-add',
+      component: () => AddAccountView,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Tambah Akun', parent: '/account' }
+    },
+    {
+      path: '/account/update/:email',
+      name: 'account-update',
+      component: () => UpdateAccountView,
+      props: true,
+      meta: { 
+        requiresAuth: true, 
+        roles: ["Admin"],
+        breadcrumb: 'Edit Akun', parent: '/account' }
     }
   ]
 })
