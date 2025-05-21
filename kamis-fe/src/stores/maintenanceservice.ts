@@ -66,5 +66,26 @@ export const MaintenanceService = {
       console.error('Error completing maintenance:', error);
       throw error;
     }
+  },
+
+    /**
+   * Get list of assets in maintenance (new method)
+   */
+  async getAssetsInMaintenance(): Promise<Maintenance[]> {
+    try {
+      const response = await axios.get(`${API_URLS.ASSET}/api/maintenance-in-progress`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+
+      if (response.data && response.data.data) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching assets in maintenance:', error);
+      throw error;
+    }
   }
 };

@@ -35,6 +35,7 @@ import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
 import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
 import ListAccountView from '@/views/profile/ListAccountView.vue';
+import DashboardOperasional from '@/views/finance.report/DashboardOperasional.vue'
 import type { RouteLocationNormalized } from 'vue-router'
 
 const router = createRouter({
@@ -44,6 +45,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+    },
+        {
+      path: '/operasional',
+      name: 'operasional',
+      component: DashboardOperasional,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
     {
@@ -114,7 +121,7 @@ const router = createRouter({
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
-      meta: { requiresAuth: true, roles: ["Admin", "Operational", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
     },
     {
       path: '/purchase/add',

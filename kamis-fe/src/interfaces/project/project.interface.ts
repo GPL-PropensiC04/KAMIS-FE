@@ -140,3 +140,10 @@ export interface UpdateProjectPaymentStatusInterface {
   idProject: string;
   projectPaymentStatus: number;
 }
+
+export interface SellDistributionSummaryDTO {
+    totalSell: number;                    // Jumlah total penjualan
+    percentageSellChange: number;         // Persentase perubahan penjualan
+    totalDistribution: number;            // Jumlah total distribusi
+    percentageDistributionChange: number; // Persentase perubahan distribusi
+}
