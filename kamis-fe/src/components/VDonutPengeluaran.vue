@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -13,6 +13,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import type { ChartPengeluaranResponseDTO } from '@/interfaces/finance.report/lapkeu.interface';
 import { API_URLS } from '@/config/api.config';
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 // Registrasi plugin Chart.js
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
@@ -22,9 +23,16 @@ const props = defineProps<{
   range?: string;
 }>();
 
+// Add emit events
+const emit = defineEmits(['data-loaded', 'error']);
+
+const toast = useToast();
+
 // State
 const labels = ref<string[]>([]);
 const data = ref<number[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
 const backgroundColors = ['#912018', '#F04438', '#FDA29B'];
 
 const chartData = ref({
@@ -89,73 +97,165 @@ const chartOptions: ChartOptions<'doughnut'> = {
   }
 };
 
-
-// Fetch API
-const fetchPengeluaran = async () => {
-  try {
-    const response = await axios.get(`${API_URLS.FINANCE}/lapkeu/chart-pengeluaran`, {
-      params: { range: props.range || 'THIS_YEAR' }
-    });
-
-    const json: ChartPengeluaranResponseDTO[] = response.data.data;
-
-    const labelList = json.map(item => item.activityType);
-    const valueList = json.map(item => item.totalPengeluaran);
-
-    // Gabungkan label + value + warna ke satu array
-    const combined = labelList.map((label, index) => ({
-    label,
-    value: valueList[index],
-    }));
-
-    // Urutkan dari terbesar ke terkecil
-    combined.sort((a, b) => b.value - a.value);
-
-    // Tentukan urutan warna dari index 0 sesuai urutan value
-    const orderedColors = backgroundColors.slice(0, combined.length);
-
-    // Update state
-    labels.value = combined.map(item => item.label);
-    data.value = combined.map(item => item.value);
-
-    chartData.value = {
+// Update chart data with current values
+const updateChartData = () => {
+  chartData.value = {
     labels: labels.value,
     datasets: [{
-        data: data.value,
-        backgroundColor: orderedColors,
-        borderWidth: 1
+      data: data.value,
+      backgroundColor: backgroundColors.slice(0, labels.value.length),
+      borderWidth: 1
     }]
-    };
+  };
+  
+  // Emit the data-loaded event to notify parent component
+  emit('data-loaded', {
+    labels: labels.value,
+    data: data.value
+  });
+};
 
+// Fetch API with improved error handling and timeout
+const fetchPengeluaran = async () => {
+  loading.value = true;
+  error.value = null;
+  
+  // Set a timeout to ensure loading doesn't last forever if the request hangs
+  const timeoutId = setTimeout(() => {
+    console.error('Request timeout for pengeluaran data');
+    
+    // Set default values on timeout
+    labels.value = ['Jasa', 'Material', 'Lainnya'];
+    data.value = [0, 0, 0];
+    
+    // Update chart data with default values
+    updateChartData();
+    
+    loading.value = false;
+    error.value = 'Data tidak tersedia saat ini. Menampilkan placeholder.';
+    emit('error', error.value);
+  }, 5000); // 5 second timeout
+  
+  try {
+    console.log('Requesting pengeluaran data from:', `${API_URLS.FINANCE}/lapkeu/chart-pengeluaran`);
+    console.log('With params:', { range: props.range || 'THIS_YEAR' });
+    
+    try {
+      const response = await axios.get(`${API_URLS.FINANCE}/lapkeu/chart-pengeluaran`, {
+        params: { range: props.range || 'THIS_YEAR' },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
+      
+      // Debug full response to check if we're getting HTML instead of JSON
+      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+        console.error('Received HTML instead of JSON. The API endpoint might be incorrect or returning an error page.');
+        error.value = 'Terjadi kesalahan pada server. Mohon hubungi administrator.';
+        emit('error', error.value);
+        
+        // Set default values
+        labels.value = ['Jasa', 'Material', 'Lainnya'];
+        data.value = [0, 0, 0];
+        
+        // Update chart data with default values
+        updateChartData();
+        
+        loading.value = false;
+        return;
+      }
+      
+      if (response.data && response.data.status === 200 && response.data.data) {
+        const json: ChartPengeluaranResponseDTO[] = response.data.data;
+        
+        if (json.length === 0) {
+          // No data, use placeholders
+          labels.value = ['Jasa', 'Material', 'Lainnya'];
+          data.value = [0, 0, 0];
+        } else {
+          const labelList = json.map(item => item.activityType);
+          const valueList = json.map(item => item.totalPengeluaran);
+
+          // Gabungkan label + value + warna ke satu array
+          const combined = labelList.map((label, index) => ({
+            label,
+            value: valueList[index],
+          }));
+
+          // Urutkan dari terbesar ke terkecil
+          combined.sort((a, b) => b.value - a.value);
+
+          // Update state
+          labels.value = combined.map(item => item.label);
+          data.value = combined.map(item => item.value);
+        }
+        
+        // Update chart data
+        updateChartData();
+      } else {
+        const errorMsg = 'Gagal memuat data: ' + (response.data?.message || 'Unknown error');
+        error.value = errorMsg;
+        emit('error', errorMsg);
+        
+        // Set default values
+        labels.value = ['Jasa', 'Material', 'Lainnya'];
+        data.value = [0, 0, 0];
+        
+        // Update chart data with default values
+        updateChartData();
+      }
+    } catch (err) {
+      // Clear timeout since we got an error
+      clearTimeout(timeoutId);
+      throw err;
+    }
   } catch (err) {
-    console.error('Gagal fetch data pengeluaran:', err);
+    const errorMsg = 'Terjadi kesalahan saat memuat data pengeluaran';
+    console.error(errorMsg, err);
+    error.value = errorMsg;
+    emit('error', errorMsg);
+    
+    // Set default values
+    labels.value = ['Jasa', 'Material', 'Lainnya'];
+    data.value = [0, 0, 0];
+    
+    // Update chart data with default values
+    updateChartData();
+  } finally {
+    loading.value = false;
   }
 };
 
+// Watch for changes in range prop
+watch(() => props.range, (newRange) => {
+  if (newRange) {
+    fetchPengeluaran();
+  }
+}, { immediate: false });
+
+// Initialize on component mount
 onMounted(fetchPengeluaran);
 </script>
 
 <template>
-  <div
-    class="bg-white rounded-2xl shadow-md p-6 w-full max-w-md mx-auto flex flex-col items-center"
-  >
-    <div class="flex items-center mb-4 w-full">
-        <font-awesome-icon
-            :icon="['fas', 'money-bill']"
-            class="text-[24px] mr-2"
-            style="color: #912018;"
-        />
-        <h2 class="text-lg font-bold font-lato text-left leading-tight">
-            % Pengeluaran per Jenis Pengeluaran
-        </h2>
+  <div class="w-full h-full">
+    <!-- Loading State -->
+    <div v-if="loading" class="w-full h-full flex justify-center items-center">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
     </div>
 
-
-    <!-- Container dibatasi ukuran chart -->
-    <div class="w-full h-[320px] max-w-[380px] relative">
-        <Doughnut :data="chartData" :options="chartOptions" />
+    <!-- Error State -->
+    <div v-else-if="error" class="w-full h-full flex justify-center items-center text-red-600">
+      <p>{{ error }}</p>
     </div>
 
+    <!-- Chart Container -->
+    <div v-else class="w-full h-full relative">
+      <Doughnut :data="chartData" :options="chartOptions" />
+    </div>
   </div>
 </template>
 
