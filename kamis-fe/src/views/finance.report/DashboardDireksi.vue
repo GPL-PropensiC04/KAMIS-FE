@@ -87,7 +87,11 @@
       <div class="bg-white rounded-2xl shadow-md p-6">
         <div class="flex items-center mb-4">
           <font-awesome-icon
+<<<<<<< HEAD
             :icon="['fas', 'scale-balanced']"
+=======
+            :icon="['fas', 'money-bill-transfer']"
+>>>>>>> 174c36aa3298e6b0d381c9151a95d913d2157db0
             class="text-[24px] mr-2"
             style="color: #2E7D32;"
           />
@@ -121,7 +125,11 @@
     </div>
 
     <!-- Line Income Expense Chart -->
+<<<<<<< HEAD
       <div class="mb-4">
+=======
+      <div class="h-[320px]">
+>>>>>>> 174c36aa3298e6b0d381c9151a95d913d2157db0
         <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
       </div>
 
