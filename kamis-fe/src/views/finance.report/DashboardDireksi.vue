@@ -3,7 +3,7 @@
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <!-- Header Section -->
     <div class="max-w-7xl mx-auto bg-white p-5 rounded-lg shadow-md mb-4">
-      <div class="welcome-message text-xl font-bold mb-4">
+      <div class="welcome-message text-5xl font-bold mb-4">
         Welcome, {{ userInfo.username }}
       </div>
       
@@ -46,7 +46,7 @@
             <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(totalPurchase) }}</div>
+        <div class="text-5xl font-semibold mt-2">{{ totalPurchase }}</div>
         <div :class="{'text-green-500': purchasePercentage >= 0, 'text-red-500': purchasePercentage < 0}" class="text-sm mt-1">
           {{ purchasePercentage >= 0 ? '+' : '' }}{{ purchasePercentage }}% dari {{ timeAgoText }}
         </div>
@@ -60,7 +60,7 @@
             <font-awesome-icon :icon="['fas', 'truck']" class="text-[#1E3A5F]" />
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(totalDistribution) }}</div>
+        <div class="text-5xl font-semibold mt-2">{{ totalDistribution }}</div>
         <div :class="{'text-green-500': distributionPercentage >= 0, 'text-red-500': distributionPercentage < 0}" class="text-sm mt-1">
           {{ distributionPercentage >= 0 ? '+' : '' }}{{ distributionPercentage }}% dari {{ timeAgoText }}
         </div>
@@ -74,7 +74,7 @@
             <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F]" />
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(totalSales) }}</div>
+        <div class="text-5xl font-semibold mt-2">{{ totalSales }}</div>
         <div :class="{'text-green-500': salesPercentage >= 0, 'text-red-500': salesPercentage < 0}" class="text-sm mt-1">
           {{ salesPercentage >= 0 ? '+' : '' }}{{ salesPercentage }}% dari {{ timeAgoText }}
         </div>
@@ -125,23 +125,39 @@
         <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
       </div>
 
+    <!-- Daftar Supplier Section -->
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">Daftar Supplier</h2>
-        <!-- Tombol sortir -->
-        <button @click="supplierSortAsc = !supplierSortAsc" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-1">
-          <font-awesome-icon :icon="['fas', supplierSortAsc ? 'sort-amount-up' : 'sort-amount-down']" class="text-sm" />
-          {{ supplierSortAsc ? 'Pembelian Terendah' : 'Pembelian Tertinggi' }}
-        </button>
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-center">Daftar Supplier Teratas</h2>
       </div>
       
       <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
           <tr>
-            <th class="px-4 py-3 text-left">Nama Supplier</th>
-            <th class="px-4 py-3 text-center">Jumlah Pembelian</th>
-            <th class="px-4 py-3 text-right">Perusahaan</th>
-            <th class="px-4 py-3 text-center">Nomor Telepon</th>
+            <th @click="sortTable('supplier', 'nameSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Nama Supplier
+              <span v-if="sortSupplierKey === 'nameSupplier'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('supplier', 'purchaseCount')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Jumlah Pembelian
+              <span v-if="sortSupplierKey === 'purchaseCount'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('supplier', 'companySupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Perusahaan
+              <span v-if="sortSupplierKey === 'companySupplier'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('supplier', 'noTelpSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Nomor Telepon
+              <span v-if="sortSupplierKey === 'noTelpSupplier'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -152,15 +168,20 @@
               </div>
             </td>
           </tr>
-          <tr v-else-if="sortedSuppliers.length === 0">
+          <tr v-else-if="topThreeSuppliers.length === 0">
             <td colspan="4" class="text-center py-4 text-gray-500 italic">
               Tidak ada data supplier.
             </td>
           </tr>
-          <tr v-for="supplier in sortedSuppliers" :key="supplier.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-left">{{ supplier.nameSupplier }}</td>
+          <tr 
+            v-for="supplier in topThreeSuppliers" 
+            :key="supplier.id" 
+            class="hover:bg-gray-100 cursor-pointer transition-colors"
+            @click="goToSupplierDetail(supplier.id)"
+          >
+            <td class="px-4 py-3 text-center">{{ supplier.nameSupplier }}</td>
             <td class="px-4 py-3 text-center">{{ supplier.purchaseCount || 0 }} Pembelian</td>
-            <td class="px-4 py-3 text-right">{{ supplier.companySupplier || '-' }}</td>
+            <td class="px-4 py-3 text-center">{{ supplier.companySupplier || '-' }}</td>
             <td class="px-4 py-3 text-center">{{ supplier.noTelpSupplier || '-' }}</td>
           </tr>
         </tbody>
@@ -169,22 +190,43 @@
 
     <!-- Daftar Klien Section -->
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">Daftar Klien</h2>
-        <!-- Tombol sortir untuk klien -->
-        <button @click="clientSortAsc = !clientSortAsc" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-1">
-          <font-awesome-icon :icon="['fas', clientSortAsc ? 'sort-amount-up' : 'sort-amount-down']" class="text-sm" />
-          {{ clientSortAsc ? 'Profit Terendah' : 'Profit Tertinggi' }}
-        </button>
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-center">Daftar Klien Teratas</h2>
       </div>
       
       <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
           <tr>
-            <th class="px-4 py-3 text-left">Nama Klien</th>
-            <th class="px-4 py-3 text-center">Jumlah Aktivitas</th>
-            <th class="px-4 py-3 text-right">Total Profit</th>
-            <th class="px-4 py-3 text-center">Nomor Telepon</th>
+            <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Nama Klien
+              <span v-if="sortClientKey === 'nameClient'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Jumlah Aktivitas
+              <span v-if="sortClientKey === 'projectCount'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Total Profit
+              <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Nomor Telepon
+              <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
+            <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+              Perusahaan
+              <span v-if="sortClientKey === 'companyClient'" class="ml-1">
+                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+              </span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -195,16 +237,22 @@
               </div>
             </td>
           </tr>
-          <tr v-else-if="sortedClients.length === 0">
+          <tr v-else-if="topThreeClients.length === 0">
             <td colspan="5" class="text-center py-4 text-gray-500 italic">
               Tidak ada data klien.
             </td>
           </tr>
-          <tr v-for="client in sortedClients" :key="client.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-left">{{ client.nameClient }}</td>
+          <tr 
+            v-for="client in topThreeClients" 
+            :key="client.id" 
+            class="hover:bg-gray-100 cursor-pointer transition-colors"
+            @click="goToClientDetail(client.id)"
+          >
+            <td class="px-4 py-3 text-center">{{ client.nameClient }}</td>
             <td class="px-4 py-3 text-center">{{ client.projectCount || 0 }} Aktivitas</td>
-            <td class="px-4 py-3 text-right">{{ formatCurrency(client.totalProfit || 0) }}</td>
+            <td class="px-4 py-3 text-center">{{ formatCurrency(client.totalProfit || 0) }}</td>
             <td class="px-4 py-3 text-center">{{ client.noTelpClient || '-' }}</td>
+            <td class="px-4 py-3 text-center">{{ client.companyClient || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -214,6 +262,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProjectStore } from '@/stores/project';
 import { usePurchaseStore } from '@/stores/purchase';
 import { useAuthStore } from '@/stores/auth';
@@ -228,6 +277,9 @@ import VLineIncomeExpense from '@/components/VLineIncomeExpense.vue';
 const projectStore = useProjectStore();
 const purchaseStore = usePurchaseStore();
 const authStore = useAuthStore();
+
+// Tambahkan useRouter untuk navigasi
+const router = useRouter();
 
 // State variables
 const selectedRange = ref('THIS_YEAR');
@@ -270,6 +322,12 @@ const supplierSortAsc = ref(false);
 // Tambahkan state untuk pengurutan klien
 const clientSortAsc = ref(false);
 
+// Ganti dengan variable sorting seperti di ListAsset
+const sortSupplierKey = ref('purchaseCount');
+const sortSupplierOrder = ref('desc'); // Default desc (tertinggi dulu)
+const sortClientKey = ref('totalProfit');
+const sortClientOrder = ref('desc'); // Default desc (tertinggi dulu)
+
 // Computed property untuk mengurutkan supplier berdasarkan jumlah pembelian
 const sortedSuppliers = computed(() => {
   return [...topSuppliers.value].sort((a, b) => {
@@ -292,6 +350,98 @@ const sortedClients = computed(() => {
       ? aProfit - bProfit 
       : bProfit - aProfit;
   });
+});
+
+// Computed property untuk top 3 suppliers berdasarkan kriteria sorting saat ini
+// Meningkatkan fungsi sort untuk menangani semua tipe kolom
+const topThreeSuppliers = computed(() => {
+  // Jika tidak ada data, kembalikan array kosong
+  if (!topSuppliers.value || topSuppliers.value.length === 0) {
+    return [];
+  }
+
+  return [...topSuppliers.value]
+    .sort((a, b) => {
+      let aValue = a[sortSupplierKey.value];
+      let bValue = b[sortSupplierKey.value];
+      
+      // Khusus untuk purchaseCount, jika tidak ada gunakan panjang purchaseIds
+      if (sortSupplierKey.value === 'purchaseCount') {
+        aValue = typeof aValue === 'number' ? aValue : 
+          (a.purchaseIds ? a.purchaseIds.length : 0);
+        bValue = typeof bValue === 'number' ? bValue : 
+          (b.purchaseIds ? b.purchaseIds.length : 0);
+      }
+      
+      // Handle undefined atau null
+      if (aValue === undefined || aValue === null) aValue = '';
+      if (bValue === undefined || bValue === null) bValue = '';
+      
+      // Untuk string, gunakan localeCompare
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortSupplierOrder.value === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      }
+      
+      // Untuk angka
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortSupplierOrder.value === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+      
+      // Fallback untuk tipe campuran
+      const aString = String(aValue);
+      const bString = String(bValue);
+      
+      return sortSupplierOrder.value === 'asc' 
+        ? aString.localeCompare(bString) 
+        : bString.localeCompare(aString);
+    })
+    .slice(0, 3); // Ambil 3 teratas saja
+});
+
+// Computed property untuk top 3 clients berdasarkan kriteria sorting saat ini
+// Meningkatkan fungsi sort untuk menangani semua tipe kolom
+const topThreeClients = computed(() => {
+  // Jika tidak ada data, kembalikan array kosong
+  if (!topClients.value || topClients.value.length === 0) {
+    return [];
+  }
+
+  return [...topClients.value]
+    .sort((a, b) => {
+      let aValue = a[sortClientKey.value];
+      let bValue = b[sortClientKey.value];
+      
+      // Handle undefined atau null
+      if (aValue === undefined || aValue === null) aValue = '';
+      if (bValue === undefined || bValue === null) bValue = '';
+      
+      // Untuk string, gunakan localeCompare
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortClientOrder.value === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      }
+      
+      // Untuk angka
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortClientOrder.value === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+      
+      // Fallback untuk tipe campuran
+      const aString = String(aValue);
+      const bString = String(bValue);
+      
+      return sortClientOrder.value === 'asc' 
+        ? aString.localeCompare(bString) 
+        : bString.localeCompare(aString);
+    })
+    .slice(0, 3); // Ambil 3 teratas saja
 });
 
 // Time ago text based on selected range
@@ -385,19 +535,16 @@ const fetchTopSuppliers = async () => {
     console.log('Supplier API response:', response.data);
     
     if (response.data && response.data.status === 200 && response.data.data) {
-      // Transformasi data supplier untuk sesuai dengan format yang diinginkan
+      // Transformasi data supplier untuk menghitung purchaseCount dari purchaseIds
       topSuppliers.value = Array.isArray(response.data.data) ? 
         response.data.data.map(supplier => {
           return {
-            id: supplier.id,
-            nameSupplier: supplier.nameSupplier,
-            noTelpSupplier: supplier.noTelpSupplier,
-            companySupplier: supplier.companySupplier,
-            // Jika purchaseCount tidak ada, gunakan panjang purchaseIds jika tersedia
-            purchaseCount: supplier.purchaseCount || (supplier.purchaseIds ? supplier.purchaseIds.length : 0),
-            totalAmount: supplier.totalAmount || 0
+            ...supplier,
+            // Gunakan purchaseCount dari API jika ada, jika tidak hitung dari purchaseIds
+            purchaseCount: supplier.purchaseCount || (supplier.purchaseIds ? supplier.purchaseIds.length : 0)
           };
         }) : [];
+      console.log('Processed suppliers:', topSuppliers.value);
     } else {
       console.warn('Unexpected supplier API response structure:', response.data);
       topSuppliers.value = [];
@@ -467,6 +614,47 @@ onMounted(() => {
 watch(chartView, () => {
   
 });
+
+// Perbarui fungsi sortTable untuk memastikan semua kolom dapat di-sort
+const sortTable = (tableType: string, key: string) => {
+  if (tableType === 'supplier') {
+    if (sortSupplierKey.value === key) {
+      // Toggle urutan jika key yang sama
+      sortSupplierOrder.value = sortSupplierOrder.value === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set key baru dan default ke descending
+      sortSupplierKey.value = key;
+      sortSupplierOrder.value = 'desc';
+    }
+  } else if (tableType === 'client') {
+    if (sortClientKey.value === key) {
+      // Toggle urutan jika key yang sama
+      sortClientOrder.value = sortClientOrder.value === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set key baru dan default ke descending
+      sortClientKey.value = key;
+      sortClientOrder.value = 'desc';
+    }
+  }
+};
+
+/// Fungsi untuk navigasi ke halaman detail supplier
+const goToSupplierDetail = (supplierId: string) => {
+  console.log('Navigating to supplier detail with ID:', supplierId);
+  router.push({
+    name: 'supplier-detail', // Perbaikan: nama rute yang benar dari router
+    params: { id: supplierId }
+  });
+};
+
+// Fungsi untuk navigasi ke halaman detail klien
+const goToClientDetail = (clientId: string) => {
+  console.log('Navigating to client detail with ID:', clientId);
+  router.push({
+    name: 'client-detail', // Perbaikan: nama rute yang benar dari router
+    params: { id: clientId }
+  });
+};
 </script>
 
 <style scoped>
@@ -487,6 +675,7 @@ watch(chartView, () => {
 
 .custom-table th, .custom-table td {
   padding: 12px 16px;
+  text-align: center;
 }
 
 .custom-table tbody tr {
@@ -507,5 +696,40 @@ watch(chartView, () => {
 
 .text-red-500 {
   color: #EF4444;
+}
+
+/* Tambahkan style untuk sort indicator dari ListAsset */
+.table-header:hover {
+  background-color: #32486B;
+}
+
+/* Tambahkan style untuk baris tabel yang dapat diklik */
+.custom-table tbody tr {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #EDF2F7;
+}
+
+/* Tambahkan efek visual seperti pada ListAsset */
+.custom-table tbody tr td {
+  border-bottom: 1px solid #E2E8F0;
+}
+
+/* Tambahkan highlight effect saat hover */
+.custom-table tbody tr:hover td {
+  position: relative;
+}
+
+.custom-table tbody tr:hover td::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background-color: #4299E1;
 }
 </style>
