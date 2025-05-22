@@ -126,24 +126,24 @@
             <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncome) }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="font-medium text-gray-700">Total Pembelian</span>
+            <span class="font-medium text-gray-700">Pengeluaran Pembelian</span>
             <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalPurchase) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="font-medium text-gray-700">Pemasukan dari Distribusi</span>
             <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncomeFromDistribusi) }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="font-medium text-gray-700">Pengeluaran Maintenance</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalMaintenanceExpense) }}</span>
+            <div class="flex justify-between">
+            <span class="font-medium text-gray-700">Pengeluaran dari Distribusi</span>
+            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalProjectExpense) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="font-medium text-gray-700">Pemasukan dari Penjualan</span>
             <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncomeFromPenjualan) }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="font-medium text-gray-700">Pengeluaran Proyek</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalProjectExpense) }}</span>
+            <span class="font-medium text-gray-700">Pengeluaran Maintenance</span>
+            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalMaintenanceExpense) }}</span>
           </div>
           <div class="flex justify-between md:col-start-1">
             <span class="font-medium text-gray-700">Total Profit</span>
