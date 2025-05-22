@@ -60,7 +60,7 @@ const router = createRouter({
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
     {
-      path: '/finance',
+      path: '/dashboard/finance',
       name: 'dashboard-finance',
       component: DashboardFinance,
       meta: {
@@ -190,7 +190,7 @@ const router = createRouter({
         requiresAuth: true, 
         roles: ["Operasional"], 
         breadcrumb: 'Edit Pembelian Aset', 
-        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.id } }) 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.purchaseId } }) 
       }
     },
     {
@@ -467,13 +467,8 @@ router.beforeEach((to, from, next) => {
           return next();
         } else {
           // Redirect users without required role
-          return next('/forbidden');
-        }
-      }
-        if (authStore.userRole === 'Direksi') {
-          return next('/direksi/dashboard');
-        } else {
-          return next('/');
+            return next('/forbidden');
+          }
         }
       }
     }

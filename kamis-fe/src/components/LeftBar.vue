@@ -96,7 +96,17 @@ const handleSidebarClick = (event: MouseEvent) => {
 }
 
 const goTo = (routeName: string) => {
-  router.push({ name: routeName })
+  if (routeName === 'dashboard') {
+    if (authStore.userRole === 'Finance') {
+      router.push({ name: 'dashboard-finance' });
+    } else if (authStore.userRole === 'Direksi') {
+      router.push({ name: 'dashboard-direksi' });
+    } else {
+      router.push({ name: 'operasional' }); // atau 'home' jika ingin ke /
+    }
+  } else {
+    router.push({ name: routeName });
+  }
 }
 
 const logout = () => {
@@ -106,7 +116,19 @@ const logout = () => {
 }
 
 const isActive = (routeName: string) => {
-  return route.name && route.name.toString().includes(routeName);
+  // Map menu ke nama route yang valid
+  const menuRouteNames: Record<string, string[]> = {
+    dashboard: ['dashboard-finance', 'dashboard-direksi', 'dashboard-operasional'],
+    'finance': ['finance-report'],
+    'purchase': ['purchase'],
+    'assets': ['assets'],
+    'resource': ['resource'],
+    'project': ['project'],
+    'client': ['client'],
+    'supplier': ['supplier'],
+    'account': ['account'],
+  };
+  return route.name && menuRouteNames[routeName]?.includes(route.name.toString());
 };
 
 const isAdmin = computed(() => {
