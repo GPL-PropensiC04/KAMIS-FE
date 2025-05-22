@@ -8,13 +8,13 @@
       {{ notificationMessage }}
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-1 gap-2 items-center">
         <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div v-if="loading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
@@ -26,6 +26,7 @@
               <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
               <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
             </th>
+            <th class="px-6 py-4 table-header text-base">Jenis Aset</th>
             <th @click="sortTable('tanggalPerolehan')" class="px-6 py-4 table-header cursor-pointer text-base">
               Tanggal Perolehan
               <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
@@ -42,11 +43,12 @@
             @click="goToDetailAsset(asset.platNomor)"
           >
             <td class="px-6 py-5">{{ asset.nama }}</td>
+            <td class="px-6 py-5">{{ asset.tipeAset }}</td>
             <td class="px-6 py-5">{{ formatDate(asset.tanggalPerolehan) }}</td>
             <td class="px-6 py-5">{{ thirdColumnValue(asset) }}</td>
           </tr>
           <tr v-if="sortedAssets.length === 0">
-            <td colspan="3" class="text-center text-gray-500 py-6 text-base">Data aset tidak ditemukan.</td>
+            <td colspan="4" class="text-center text-gray-500 py-6 text-base">Data aset tidak ditemukan.</td>
           </tr>
         </tbody>
       </table>
@@ -119,6 +121,7 @@ const fetchAssets = async () => {
     const data = await AsetService.viewAllAsset();
     assets.value = data.map((item: any) => ({
       ...item,
+      tipeAset: item.tipeAset ?? '',
       tanggalPerolehan: item.tanggalPerolehan ?? '',
       deskripsi: item.deskripsi ?? '',
       assetMaintenance: item.assetMaintenance ?? '',
@@ -164,7 +167,7 @@ const formatDate = (dateString: string) => {
 };
 
 const formatCurrency = (value: number) => {
-  return `Rp ${value.toLocaleString('id-ID')},00`;
+  return `Rp${value.toLocaleString('id-ID')}`;
 };
 
 const thirdColumnHeader = computed(() => {

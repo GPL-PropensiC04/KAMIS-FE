@@ -138,7 +138,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useFinanceReportStore } from '@/stores/financereport';
-import { useAuthStore } from '@/stores/auth';
 import VDateRangeFilter from '@/components/VDateRangeFilter.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VButton from '@/components/VButton.vue';
