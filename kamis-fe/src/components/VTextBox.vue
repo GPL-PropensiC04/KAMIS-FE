@@ -56,4 +56,8 @@ const focusInput = () => {
 .font-inter {
     font-family: 'Inter', sans-serif;
 }
+
+textarea {
+    resize: none;
+}
 </style>

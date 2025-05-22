@@ -16,11 +16,25 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th @click="sortBy('nameClient')" class="px-6 py-4 table-header cursor-pointer text-base">Nama Klien</th>
-            <th @click="sortBy('typeClient')" class="px-6 py-4 table-header cursor-pointer text-base">Tipe Klien</th>
-            <th @click="sortBy('companyClient')" class="px-6 py-4 table-header cursor-pointer text-base">Perusahaan</th>
-            <th v-if="isOperational || isDireksi" @click="sortBy('projectCount')" class="px-6 py-4 table-header cursor-pointer text-base">Jumlah Aktivitas</th>
-            <th v-if="isFinance || isDireksi" @click="sortBy('totalProfit')" class="px-6 py-4 table-header cursor-pointer text-base">Total Profit</th>
+            <th @click="sortBy('nameClient')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Nama Klien
+              <span v-if="sortKey === 'nameClient'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
+            <th class="px-6 py-4 table-header text-base">
+              Tipe Klien
+            </th>
+            <th @click="sortBy('companyClient')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Perusahaan
+              <span v-if="sortKey === 'companyClient'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
+            <th v-if="isOperational || isDireksi" @click="sortBy('projectCount')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Jumlah Aktivitas
+              <span v-if="sortKey === 'projectCount'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
+            <th v-if="isFinance || isDireksi" @click="sortBy('totalProfit')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Total Profit
+              <span v-if="sortKey === 'totalProfit'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>

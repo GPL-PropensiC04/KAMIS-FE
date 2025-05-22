@@ -18,7 +18,7 @@
           <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
               <th class="px-6 py-4 table-header cursor-pointer text-base">Nama Resource</th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base">Stock</th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base">Stok</th>
               <th v-if="showHargaJual" class="px-6 py-4 table-header text-base">Harga Jual</th>
               <th class="px-6 py-4 table-header text-base">Deskripsi</th>
               <th v-if="showAction" class="px-6 py-4 table-header text-base">Action</th>
@@ -37,7 +37,7 @@
               <td v-if="showAction" class="px-6 py-5">
                 <VSuccessButton
                   label="Update"
-                  @click.stop="goToUpdateResource(resource.id!)"
+                  @click="goToUpdateResource(resource.id!)"
                 />
               </td>
             </tr>
@@ -106,7 +106,10 @@ const getColspan = computed(() => {
 
 // Navigasi
 const goToAddResource = () => router.push("/resource/add");
-const goToUpdateResource = (id: number) => router.push(`/resource/update/${id}`);
+const goToUpdateResource = (id: number, event?: Event) => {
+  if (event) event.stopPropagation();
+  router.push(`/resource/update/${id}`);
+};
 
 // Role-based visibility
 const showHargaJual = computed(() => authStore.userRole !== 'Operasional');

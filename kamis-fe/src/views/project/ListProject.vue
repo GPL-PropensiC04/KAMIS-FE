@@ -20,7 +20,6 @@
             </button>
           </div>
           <VDateRangeFilter v-model="dateRange" class="w-full" />
-          <VSortButton v-model:sortOrder="sortByDate" />
           <VDropDownInput
             :options="nominalOptions.map((opt) => opt.label)"
             v-model="selectedNominalLabel"
@@ -28,7 +27,6 @@
             class="w-full"
             placeholder="Filter berdasarkan profit"
           />
-          <VSortButton v-model:sortOrder="sortByNominal" label="Profit" />
         </div>
       </template>
       <template v-else>
@@ -48,7 +46,6 @@
             </button>
           </div>
           <VDateRangeFilter v-model="dateRange" class="w-full" />
-          <VSortButton v-model:sortOrder="sortByDate" />
         </div>
       </template>
     </div>
