@@ -270,7 +270,7 @@ export const usePurchaseStore = defineStore('purchase', {
         );
 
         this.purchaseSummary = response.data.data;
-        useToast().success('Ringkasan pembelian berhasil diambil');
+
       } catch (err: unknown) {
         this.error = `Gagal mendapatkan ringkasan pembelian: ${err instanceof Error ? err.message : 'Unknown error'}`;
         useToast().error(this.error);
