@@ -50,7 +50,7 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
-        {
+    {
       path: '/operasional/dashboard',
       name: 'operasional-dashboard',
       component: DashboardOperasional,
@@ -63,16 +63,6 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
         roles: ['Finance']  
-      }
-    },
-    {
-      path: '/finance',
-      name: 'dashboard-finance',
-      component: DashboardFinance,
-      meta: {
-        requiresAuth: true,
-        roles: ['Finance'],
-        breadcrumb: 'Dashboard'
       }
     },
     {
