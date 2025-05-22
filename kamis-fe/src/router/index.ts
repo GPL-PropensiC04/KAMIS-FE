@@ -40,6 +40,7 @@ import AddAccountView from '@/views/profile/AddAccountView.vue';
 import UpdateAccountView from '@/views/profile/UpdateAccountView.vue'
 import DashboardDireksi from '@/views/finance.report/DashboardDireksi.vue';
 import type { RouteLocationNormalized } from 'vue-router'
+import DashboardFinance from '@/views/finance.report/DashboardFinance.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -54,6 +55,16 @@ const router = createRouter({
       name: 'operasional',
       component: DashboardOperasional,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+    },
+    {
+      path: '/finance',
+      name: 'dashboard-finance',
+      component: DashboardFinance,
+      meta: {
+        requiresAuth: true,
+        roles: ['Finance'],
+        breadcrumb: 'Dashboard'
+      }
     },
     {
       path: '/login',
