@@ -1,38 +1,43 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <template v-if="canViewFinancialInfo">
         <div class="grid grid-cols-1 gap-2 items-center">
-          <div class="flex flex-wrap gap-2 items-center">
-            <VSearchBar v-model="searchId" placeholder="Cari ID..." class="flex-1" />
-            <VDateRangeFilter v-model="dateRange" class="flex-1" />
-            <VSortButton v-model:sortOrder="sortByDate" />
-            <VDropDownInput
-              :options="nominalOptions.map((opt) => opt.label)"
-              v-model="selectedNominalLabel"
-              @update:modelValue="updateNominalFilter"
-              class="flex-1"
-            />
-            <VSortButton v-model:sortOrder="sortByNominal" />
+          <div class="flex flex-wrap gap-2 items-center justify-between">
+            <div class="flex flex-1 gap-2 items-center">
+              <VSearchBar v-model="searchId" placeholder="Cari ID..." class="flex-1" />
+              <VDropDownInput
+                :options="nominalOptions.map((opt) => opt.label)"
+                v-model="selectedNominalLabel"
+                @update:modelValue="updateNominalFilter"
+                class="flex-1"
+              />
+            </div>
+            <div class="flex-shrink-0 min-w-[250px]">
+              <VDateRangeFilter v-model="dateRange" />
+            </div>
           </div>
         </div>
       </template>
       <template v-else>
         <div class="grid grid-cols-1 gap-2 items-center">
-          <div class="flex flex-wrap gap-2 items-center">
-            <VSearchBar v-model="searchId" placeholder="Cari ID..." class="flex-1" />
-            <VDateRangeFilter v-model="dateRange" class="flex-1" />
-            <VSortButton v-model:sortOrder="sortByDate" />
+          <div class="flex flex-wrap gap-2 items-center justify-between">
+            <div class="flex flex-1 gap-2 items-center">
+              <VSearchBar v-model="searchId" placeholder="Cari ID..." class="flex-1" />
+            </div>
+            <div class="flex-shrink-0 min-w-[250px]">
+              <VDateRangeFilter v-model="dateRange" />
+            </div>
           </div>
         </div>
       </template>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
         <VOptionInput v-model="selectedType" :options="['All', 'Aset', 'Resource']" class="w-1/4" />
-        <VButton v-if="canEditPurchase" label="Tambah Pembelian" @click="goToAddPurchase" />
+        <VButton v-if="canEditPurchase" label="+ Tambah Pembelian" @click="goToAddPurchase" />
       </div>
 
       <div v-if="loading" class="flex justify-center items-center py-14">
@@ -104,7 +109,6 @@ import { usePurchaseStore } from "@/stores/purchase";
 import { useAuthStore } from "@/stores/auth";
 import VSearchBar from "@/components/VSearchBar.vue";
 import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
-import VSortButton from "@/components/VSortButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
@@ -148,10 +152,10 @@ const canEditPurchase = computed(() => {
 // **List Rentang Harga**
 const nominalOptions = [
   { label: "Seluruh Total Harga", start: null, end: null },
-  { label: "0 - 1 Juta", start: 0, end: 1000000 },
-  { label: "1 Juta - 10 Juta", start: 1000000, end: 10000000 },
-  { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
-  { label: "100 Juta - 1 Miliar", start: 100000000, end: 1000000000 },
+  { label: "Rp0 - Rp1.000.000", start: 0, end: 1000000 },
+  { label: "Rp1.000.000 - Rp10.000.000", start: 1000000, end: 10000000 },
+  { label: "Rp10.000.000 - Rp100.000.000", start: 10000000, end: 100000000 },
+  { label: "> Rp100.000.000", start: 100000000, end: 1000000000 },
 ];
 
 // **Ambil daftar pembelian dari API**

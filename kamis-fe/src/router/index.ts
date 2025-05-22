@@ -12,6 +12,7 @@ import UpdatePurchaseAsset from '@/views/purchase/UpdatePurchaseAsset.vue'
 import ListPurchase from '@/views/purchase/ListPurchase.vue'
 import AddPurchaseAsset from '@/views/purchase/AddPurchaseAsset.vue'
 import ListResource from '@/views/resource/ListResource.vue'
+import AddResource from '@/views/resource/AddResourceView.vue'
 import UpdateResource from '@/views/resource/UpdateResource.vue'
 import ListClient from '@/views/profile/ListClient.vue'
 import DetailClientView from '@/views/profile/DetailClientView.vue'
@@ -21,24 +22,26 @@ import DetailPurchaseResourceView from '@/views/purchase/DetailPurchaseResourceV
 import EditAssetView from '@/views/asset/EditAssetView.vue'
 import AddClientView from '@/views/profile/AddClientView.vue'
 import UpdateClient from '@/views/profile/UpdateClient.vue'
-import AddSupplierView from '@/views/profile/AddSupplierView.vue';
-import ListProject from '@/views/project/ListProject.vue';
-import AddDistributionView from '@/views/project/AddDistributionView.vue';
-import AddSalesView from '@/views/project/AddSalesView.vue';
-import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue';
-import SalesSummaryView from '@/views/project/SalesSummaryView.vue';
-import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue';
-import UpdateSalesView from '@/views/project/UpdateSalesView.vue';
-import ListSupplierView from '@/views/profile/ListSupplierView.vue';
-import DetailSupplierView from '@/views/profile/DetailSupplierView.vue';
+import AddSupplierView from '@/views/profile/AddSupplierView.vue'
+import ListProject from '@/views/project/ListProject.vue'
+import AddDistributionView from '@/views/project/AddDistributionView.vue'
+import AddSalesView from '@/views/project/AddSalesView.vue'
+import DistributionSummaryView from '@/views/project/DistributionSummaryView.vue'
+import SalesSummaryView from '@/views/project/SalesSummaryView.vue'
+import UpdateDistributionView from '@/views/project/UpdateDistributionView.vue'
+import UpdateSalesView from '@/views/project/UpdateSalesView.vue'
+import ListSupplierView from '@/views/profile/ListSupplierView.vue'
+import DetailSupplierView from '@/views/profile/DetailSupplierView.vue'
 import DetailDistributionView from '@/views/project/DetailDistributionView.vue'
 import DetailSellView from '@/views/project/DetailSellView.vue'
-import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue';
-import ListAccountView from '@/views/profile/ListAccountView.vue';
+import LaporanKeuangan from '@/views/finance.report/LaporanKeuangan.vue'
+import ListAccountView from '@/views/profile/ListAccountView.vue'
 import DashboardOperasional from '@/views/finance.report/DashboardOperasional.vue'
-import AddAccountView from '@/views/profile/AddAccountView.vue';
+import AddAccountView from '@/views/profile/AddAccountView.vue'
 import UpdateAccountView from '@/views/profile/UpdateAccountView.vue'
-import DashboardDireksi from '@/views/finance.report/DashboardDireksi.vue';
+import BadRequestView from '@/views/errorpage/BadRequestView.vue'
+import InternalErrorView from '@/views/errorpage/InternalErrorView.vue'
+import DashboardDireksi from '@/views/finance.report/DashboardDireksi.vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import DashboardFinance from '@/views/finance.report/DashboardFinance.vue'
 const router = createRouter({
@@ -52,7 +55,7 @@ const router = createRouter({
     },
     {
       path: '/operasional/dashboard',
-      name: 'operasional-dashboard',
+      name: 'dashboard-operasional',
       component: DashboardOperasional,
       meta: { requiresAuth: true, roles: ['Operasional'] }
     },
@@ -81,7 +84,7 @@ const router = createRouter({
       path: '/supplier/add',
       name: 'supplier-add',
       component: AddSupplierView,
-      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Supplier', parent: '/supplier'}
     },
     {
       path: '/supplier',
@@ -93,14 +96,14 @@ const router = createRouter({
       path: '/supplier/detail/:id',
       name: 'supplier-detail',
       component: DetailSupplierView,
-      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
+      meta: { requiresAuth: true, roles: ["Operasional", "Admin", "Finance", "Direksi"], breadcrumb: 'Detail Supplier', parent: '/supplier' },
       props: true
     },
     {
       path: '/supplier/update/:id',
       name: 'supplier-update',
       component: () => import('@/views/profile/UpdateSupplierView.vue'),
-      meta: { requiresAuth: true, roles: ["Operasional", "Admin"], breadcrumb: 'Update Supplier', parent: (route: RouteLocationNormalized) => ({ name: 'supplier-detail', params: { id: route.params.id } }) },
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Update Supplier', parent: (route: RouteLocationNormalized) => ({ name: 'supplier-detail', params: { id: route.params.id } }) },
       props: true
     },
     {
@@ -139,31 +142,31 @@ const router = createRouter({
       path: '/purchase/add',
       name: 'purchase-add',
       component:AddPurchaseStepOne,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Pembelian', parent: '/purchase' }
     },
     {
       path: '/purchase/add/asset',
       name: 'purchase-addAsset',
       component:AddPurchaseAsset,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Pembelian Aset', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource',
       name: 'purchase-addResource',
       component: AddPurchaseResource,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Pembelian Resource', parent: '/purchase' }
     },
     {
       path: '/purchase/add/resource-summary',
       name: 'purchase-addResourceSummary',
       component: AddPurchaseResourceSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Ringkasan Pembelian Resource', parent: '/purchase/add/resource' }
     },
     {
       path: '/purchase/add/asset-summary',
       name: 'purchase-addAssetSummary',
       component: AddPurchaseAssetSummary,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Ringkasan Pembelian Aset', parent: '/purchase/add/asset' }
     },
     {
       path: '/purchase/update-resource/:purchaseId',
@@ -172,9 +175,9 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Edit Pembelian Resource', 
-        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailResource', params: { id: route.params.id } }) 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailResource', params: { id: route.params.purchaseId } }) 
       }
     },
     {
@@ -184,9 +187,9 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Edit Pembelian Aset', 
-        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.id } }) 
+        parent: (route: RouteLocationNormalized) => ({ name: 'purchase-detailAsset', params: { id: route.params.purchaseId } }) 
       }
     },
     {
@@ -212,26 +215,26 @@ const router = createRouter({
     {
       path: '/resource/add',
       name: 'resource-add',
-      component: () => import('@/views/resource/AddResourceView.vue'),
-      meta: { requiresAuth: true, breadcrumb: 'Tambah Resource', parent: '/resource' }
+      component: AddResource,
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Tambah Resource', parent: '/resource' }
     },
     {
       path: '/resource',
       name: 'resource',
-      component:ListResource,
+      component: ListResource,
       meta: { requiresAuth: true, breadcrumb: 'List Resource' }
     },
     {
       path: '/resource/update/:id',
       name: 'resource-update',
-      component:UpdateResource,
+      component: UpdateResource,
       props: true,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], breadcrumb: 'Edit Resource', parent: '/resource' }
+      meta: { requiresAuth: true, roles: ["Operasional"], breadcrumb: 'Edit Resource', parent: '/resource' }
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue')
+      component: () => import('@/views/errorpage/NotFoundView.vue')
     },
     {
       path: '/assets',
@@ -249,7 +252,7 @@ const router = createRouter({
       path: '/asset/edit/:platNomor',
       name: 'assets-edit',
       component: EditAssetView,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional"], 
+      meta: { requiresAuth: true, roles: ["Operasional"], 
         breadcrumb: 'Edit Aset', parent: (route: RouteLocationNormalized) => ({ name: 'assets-detail', params: { platNomor: route.params.platNomor }}) }
     },
     {
@@ -264,7 +267,7 @@ const router = createRouter({
       name: 'add-distribution',
       component: AddDistributionView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Tambah Distribusi', parent: '/project' }
     },
     {
@@ -272,7 +275,7 @@ const router = createRouter({
       name: 'distribution-summary',
       component: DistributionSummaryView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operasional"],
+        roles: ["Operasional"],
         breadcrumb: 'Ringkasan Distribusi', parent: '/project/add/distribution' }
     },
     {
@@ -280,7 +283,7 @@ const router = createRouter({
       name: 'add-sales',
       component: AddSalesView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Tambah Penjualan', parent: '/project' }
     },
     {
@@ -288,7 +291,7 @@ const router = createRouter({
       name: 'sales-summary',
       component: SalesSummaryView,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Konfirmasi Penjualan', parent: '/project/add/sales' }
     },
     {
@@ -313,7 +316,7 @@ const router = createRouter({
       component: UpdateDistributionView,
       props: true,
       meta: { requiresAuth: true, 
-        roles: ["Admin", "Finance", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Edit Distribusi', parent: (route: RouteLocationNormalized) => ({ name: 'project-detailDistribution', params: { id: route.params.id } }) }
     },
     {
@@ -323,10 +326,15 @@ const router = createRouter({
       props: true,
       meta: { 
         requiresAuth: true, 
-        roles: ["Admin", "Finance", "Operasional"], 
+        roles: ["Operasional"], 
         breadcrumb: 'Edit Penjualan', 
         parent: (route: RouteLocationNormalized) => ({ name: 'project-detailSale', params: { id: route.params.id } }) 
       }
+    },
+    {
+      path: '/forbidden',
+      name: 'forbidden',
+      component: () => import('@/views/errorpage/NotAuthorizedView.vue'),
     },
     {
       path: '/coming-soon',
@@ -361,6 +369,16 @@ const router = createRouter({
         requiresAuth: true, 
         roles: ["Admin"],
         breadcrumb: 'Edit Akun', parent: '/account' }
+    },
+    {
+      path: '/bad-request',
+      name: 'bad-request',
+      component: BadRequestView
+    },
+    {
+      path: '/internal-server-error',
+      name: 'internal-server-error',
+      component: InternalErrorView
     },
     {
       path: '/direksi/dashboard',
@@ -437,11 +455,9 @@ router.beforeEach((to, from, next) => {
   // For home page, redirect Direksi to their dashboard
   if (to.path === '/' && isLoggedIn && authStore.userRole === 'Direksi') {
     return next('/direksi/dashboard');
-  }
-  else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Finance') {
+  } else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Finance') {
     return next('/finance/dashboard');
-  }
-  else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Operasional') {
+  } else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Operasional') {
     return next('/operasional/dashboard');
   }
   
@@ -459,26 +475,14 @@ router.beforeEach((to, from, next) => {
           return next();
         } else {
           // Redirect users without required role
-          if (authStore.userRole === 'Direksi') {
-            return next('/direksi/dashboard');
-          } else if (authStore.userRole === 'Finance') {
-            return next('/finance/dashboard');
-          } else if (authStore.userRole === 'Operasional') {
-            return next('/operasional/dashboard');
-          }
-          else {
-          return next('/');
+            return next('/forbidden');
           }
         }
       }
-      
-      return next();
     }
-  }
-  
-  return next();
-});
-
+    
+    return next();
+  });
 // If you have a login handler function that redirects after successful login,
 // update it to redirect admins to the account page:
 
