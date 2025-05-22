@@ -28,7 +28,7 @@ const selectOption = (option: string) => {
       :class="[
         modelValue === option
           ? 'bg-[#1E3A5F] text-white'
-          : 'bg-[#E5EAF2] text-[#1E3A5F]',
+          : 'bg-[#ffffff] text-[#1E3A5F]',
       ]"
       @click="selectOption(option.toString())"
     >
