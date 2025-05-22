@@ -126,14 +126,21 @@
       </div>
 
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <h2 class="text-xl font-bold mb-4">Daftar Supplier</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Daftar Supplier</h2>
+        <!-- Tombol sortir -->
+        <button @click="supplierSortAsc = !supplierSortAsc" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-1">
+          <font-awesome-icon :icon="['fas', supplierSortAsc ? 'sort-amount-up' : 'sort-amount-down']" class="text-sm" />
+          {{ supplierSortAsc ? 'Pembelian Terendah' : 'Pembelian Tertinggi' }}
+        </button>
+      </div>
       
       <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
           <tr>
             <th class="px-4 py-3 text-left">Nama Supplier</th>
             <th class="px-4 py-3 text-center">Jumlah Pembelian</th>
-            <th class="px-4 py-3 text-right">Nominal Transaksi</th>
+            <th class="px-4 py-3 text-right">Perusahaan</th>
             <th class="px-4 py-3 text-center">Nomor Telepon</th>
           </tr>
         </thead>
@@ -145,16 +152,16 @@
               </div>
             </td>
           </tr>
-          <tr v-else-if="topSuppliers.length === 0">
+          <tr v-else-if="sortedSuppliers.length === 0">
             <td colspan="4" class="text-center py-4 text-gray-500 italic">
               Tidak ada data supplier.
             </td>
           </tr>
-          <tr v-for="supplier in topSuppliers" :key="supplier.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-left">{{ supplier.name }}</td>
-            <td class="px-4 py-3 text-center">{{ supplier.purchaseCount }}</td>
-            <td class="px-4 py-3 text-right">{{ formatCurrency(supplier.totalAmount) }}</td>
-            <td class="px-4 py-3 text-center">{{ supplier.phone || '-' }}</td>
+          <tr v-for="supplier in sortedSuppliers" :key="supplier.id" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-left">{{ supplier.nameSupplier }}</td>
+            <td class="px-4 py-3 text-center">{{ supplier.purchaseCount || 0 }} Pembelian</td>
+            <td class="px-4 py-3 text-right">{{ supplier.companySupplier || '-' }}</td>
+            <td class="px-4 py-3 text-center">{{ supplier.noTelpSupplier || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -162,7 +169,14 @@
 
     <!-- Daftar Klien Section -->
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <h2 class="text-xl font-bold mb-4">Daftar Klien</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Daftar Klien</h2>
+        <!-- Tombol sortir untuk klien -->
+        <button @click="clientSortAsc = !clientSortAsc" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-1">
+          <font-awesome-icon :icon="['fas', clientSortAsc ? 'sort-amount-up' : 'sort-amount-down']" class="text-sm" />
+          {{ clientSortAsc ? 'Profit Terendah' : 'Profit Tertinggi' }}
+        </button>
+      </div>
       
       <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
@@ -175,22 +189,22 @@
         </thead>
         <tbody>
           <tr v-if="loading" class="text-center">
-            <td colspan="4" class="py-4">
+            <td colspan="5" class="py-4">
               <div class="flex justify-center">
                 <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1E3A5F]"></div>
               </div>
             </td>
           </tr>
-          <tr v-else-if="topClients.length === 0">
-            <td colspan="4" class="text-center py-4 text-gray-500 italic">
+          <tr v-else-if="sortedClients.length === 0">
+            <td colspan="5" class="text-center py-4 text-gray-500 italic">
               Tidak ada data klien.
             </td>
           </tr>
-          <tr v-for="client in topClients" :key="client.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-left">{{ client.name }}</td>
-            <td class="px-4 py-3 text-center">{{ client.activityCount }}</td>
-            <td class="px-4 py-3 text-right">{{ formatCurrency(client.totalProfit) }}</td>
-            <td class="px-4 py-3 text-center">{{ client.phone || '-' }}</td>
+          <tr v-for="client in sortedClients" :key="client.id" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-left">{{ client.nameClient }}</td>
+            <td class="px-4 py-3 text-center">{{ client.projectCount || 0 }} Aktivitas</td>
+            <td class="px-4 py-3 text-right">{{ formatCurrency(client.totalProfit || 0) }}</td>
+            <td class="px-4 py-3 text-center">{{ client.noTelpClient || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -231,11 +245,12 @@ const salesPercentage = ref(0);
 
 // Top suppliers and clients
 interface Supplier {
-  id: string | number;
-  name: string;
-  purchaseCount: number;
+  id: string;
+  nameSupplier: string;
+  noTelpSupplier: string;
+  companySupplier: string;
+  totalPurchases: number;
   totalAmount: number;
-  phone?: string;
 }
 
 interface Client {
@@ -248,6 +263,36 @@ interface Client {
 
 const topSuppliers = ref<Supplier[]>([]);
 const topClients = ref<Client[]>([]);
+
+// Tambahkan state untuk pengurutan supplier
+const supplierSortAsc = ref(false);
+
+// Tambahkan state untuk pengurutan klien
+const clientSortAsc = ref(false);
+
+// Computed property untuk mengurutkan supplier berdasarkan jumlah pembelian
+const sortedSuppliers = computed(() => {
+  return [...topSuppliers.value].sort((a, b) => {
+    const aPurchaseCount = a.purchaseCount || 0;
+    const bPurchaseCount = b.purchaseCount || 0;
+    
+    return supplierSortAsc.value 
+      ? aPurchaseCount - bPurchaseCount 
+      : bPurchaseCount - aPurchaseCount;
+  });
+});
+
+// Computed property untuk mengurutkan klien berdasarkan total profit
+const sortedClients = computed(() => {
+  return [...topClients.value].sort((a, b) => {
+    const aProfit = a.totalProfit || 0;
+    const bProfit = b.totalProfit || 0;
+    
+    return clientSortAsc.value 
+      ? aProfit - bProfit 
+      : bProfit - aProfit;
+  });
+});
 
 // Time ago text based on selected range
 const timeAgoText = computed(() => {
@@ -326,82 +371,73 @@ const fetchSummaryData = async () => {
 };  // Fetch top suppliers data
 const fetchTopSuppliers = async () => {
   try {
-    console.log('Fetching suppliers with params:', { range: selectedRange.value, limit: 3 });
+    loading.value = true;
     const token = localStorage.getItem('auth_token');
-    console.log('Auth token available:', token ? 'Yes (first 10 chars: ' + token.substring(0, 10) + '...)' : 'No');
+    console.log('Fetching suppliers with range:', selectedRange.value);
     
-    const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
-      params: { range: selectedRange.value, limit: 3 },
+    const response = await axios.get(`${API_URLS.PROFILE}/supplier/getall`, {
+      params: { range: selectedRange.value },
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     
-    console.log('Supplier API response status:', response.status);
-    console.log('Supplier API response data structure:', Object.keys(response.data));
+    console.log('Supplier API response:', response.data);
     
-    // Cek struktur respons dengan lebih detail
-    if (response.data) {
-      if (typeof response.data === 'string') {
-        console.error('Received string instead of JSON:', response.data.substring(0, 100) + '...');
-        topSuppliers.value = [];
-      } else if (response.data.status === 200 && response.data.data) {
-        // Cek apakah data adalah array
-        if (Array.isArray(response.data.data)) {
-          console.log('Received supplier array with length:', response.data.data.length);
-          topSuppliers.value = response.data.data.slice(0, 3);
-        } else {
-          console.log('Received supplier data but not an array:', typeof response.data.data);
-          topSuppliers.value = [];
-        }
-      } else {
-        console.warn('Invalid response format. Status:', response.data.status);
-        topSuppliers.value = [];
-      }
+    if (response.data && response.data.status === 200 && response.data.data) {
+      // Transformasi data supplier untuk sesuai dengan format yang diinginkan
+      topSuppliers.value = Array.isArray(response.data.data) ? 
+        response.data.data.map(supplier => {
+          return {
+            id: supplier.id,
+            nameSupplier: supplier.nameSupplier,
+            noTelpSupplier: supplier.noTelpSupplier,
+            companySupplier: supplier.companySupplier,
+            // Jika purchaseCount tidak ada, gunakan panjang purchaseIds jika tersedia
+            purchaseCount: supplier.purchaseCount || (supplier.purchaseIds ? supplier.purchaseIds.length : 0),
+            totalAmount: supplier.totalAmount || 0
+          };
+        }) : [];
+    } else {
+      console.warn('Unexpected supplier API response structure:', response.data);
+      topSuppliers.value = [];
     }
   } catch (error: any) {
-    console.error('Error fetching top suppliers:', error);
-    
-    // Log lebih detail tentang error
-    if (error.response) {
-      console.error('Error response status:', error.response.status);
-      console.error('Error response data:', error.response.data);
-    } else if (error.request) {
-      console.error('No response received. Request:', error.request);
-    }
-    
+    console.error('Error fetching suppliers:', error.message, error.response?.data);
     topSuppliers.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
-// Fetch top clients data
+// Fungsi yang sama untuk klien
 const fetchTopClients = async () => {
-  try {    const response = await axios.get(`${API_URLS.PROFILE}/client/all`, {
-      params: { range: selectedRange.value, limit: 3 },
+  try {
+    loading.value = true;
+    const token = localStorage.getItem('auth_token');
+    console.log('Fetching clients with range:', selectedRange.value);
+    
+    const response = await axios.get(`${API_URLS.PROFILE}/client/all`, {
+      params: { range: selectedRange.value },
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
     
-    // Debug full response to check if we're getting HTML instead of JSON
-    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-      console.error('Received HTML instead of JSON for client data. The API endpoint might be incorrect.');
-      topClients.value = [];
-      return;
-    }
-      if (response.data && response.data.status === 200 && response.data.data) {
-      console.log('Received client data:', response.data.data);
-      // Take the first 3 items from the array
-      topClients.value = Array.isArray(response.data.data) 
-        ? response.data.data.slice(0, 3)
-        : [];
+    console.log('Client API response:', response.data);
+    
+    if (response.data && response.data.status === 200 && response.data.data) {
+      topClients.value = Array.isArray(response.data.data) ? response.data.data : [];
+      console.log('Loaded clients:', topClients.value);
     } else {
+      console.warn('Unexpected client API response structure:', response.data);
       topClients.value = [];
-      console.log('No client data or unexpected response format:', response.data);
     }
   } catch (error: any) {
-    console.error('Error fetching top clients', error)
+    console.error('Error fetching clients:', error.message, error.response?.data);
     topClients.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
