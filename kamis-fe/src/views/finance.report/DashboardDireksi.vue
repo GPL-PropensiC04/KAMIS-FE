@@ -87,7 +87,11 @@
       <div class="bg-white rounded-2xl shadow-md p-6">
         <div class="flex items-center mb-4">
           <font-awesome-icon
+<<<<<<< HEAD
+            :icon="['fas', 'scale-balanced']"
+=======
             :icon="['fas', 'money-bill-transfer']"
+>>>>>>> 174c36aa3298e6b0d381c9151a95d913d2157db0
             class="text-[24px] mr-2"
             style="color: #2E7D32;"
           />
@@ -121,7 +125,11 @@
     </div>
 
     <!-- Line Income Expense Chart -->
+<<<<<<< HEAD
+      <div class="mb-4">
+=======
       <div class="h-[320px]">
+>>>>>>> 174c36aa3298e6b0d381c9151a95d913d2157db0
         <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
       </div>
 
@@ -319,37 +327,57 @@ const fetchSummaryData = async () => {
     distributionPercentage.value = projectStore.sellDistributionSummary?.percentageDistributionChange || 0;
     salesPercentage.value = projectStore.sellDistributionSummary?.percentageSellChange || 0;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching summary data', error);
 
   }
 };  // Fetch top suppliers data
 const fetchTopSuppliers = async () => {
-  try {    const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
+  try {
+    console.log('Fetching suppliers with params:', { range: selectedRange.value, limit: 3 });
+    const token = localStorage.getItem('auth_token');
+    console.log('Auth token available:', token ? 'Yes (first 10 chars: ' + token.substring(0, 10) + '...)' : 'No');
+    
+    const response = await axios.get(`${API_URLS.PROFILE}/supplier/all`, {
       params: { range: selectedRange.value, limit: 3 },
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
     
-    // Debug full response to check if we're getting HTML instead of JSON
-    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-      console.error('Received HTML instead of JSON for supplier data. The API endpoint might be incorrect.');
-      topSuppliers.value = [];
-      return;
+    console.log('Supplier API response status:', response.status);
+    console.log('Supplier API response data structure:', Object.keys(response.data));
+    
+    // Cek struktur respons dengan lebih detail
+    if (response.data) {
+      if (typeof response.data === 'string') {
+        console.error('Received string instead of JSON:', response.data.substring(0, 100) + '...');
+        topSuppliers.value = [];
+      } else if (response.data.status === 200 && response.data.data) {
+        // Cek apakah data adalah array
+        if (Array.isArray(response.data.data)) {
+          console.log('Received supplier array with length:', response.data.data.length);
+          topSuppliers.value = response.data.data.slice(0, 3);
+        } else {
+          console.log('Received supplier data but not an array:', typeof response.data.data);
+          topSuppliers.value = [];
+        }
+      } else {
+        console.warn('Invalid response format. Status:', response.data.status);
+        topSuppliers.value = [];
+      }
     }
-      if (response.data && response.data.status === 200 && response.data.data) {
-      console.log('Received supplier data:', response.data.data);
-      // Take the first 3 items from the array
-      topSuppliers.value = Array.isArray(response.data.data) 
-        ? response.data.data.slice(0, 3)
-        : [];
-    } else {
-      topSuppliers.value = [];
-      console.log('No supplier data or unexpected response format:', response.data);
+  } catch (error: any) {
+    console.error('Error fetching top suppliers:', error);
+    
+    // Log lebih detail tentang error
+    if (error.response) {
+      console.error('Error response status:', error.response.status);
+      console.error('Error response data:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received. Request:', error.request);
     }
-  } catch (error) {
-    console.error('Error fetching top suppliers', error);
+    
     topSuppliers.value = [];
   }
 };
@@ -379,7 +407,7 @@ const fetchTopClients = async () => {
       topClients.value = [];
       console.log('No client data or unexpected response format:', response.data);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching top clients', error)
     topClients.value = [];
   }
@@ -395,7 +423,7 @@ const fetchData = async () => {
       fetchTopSuppliers(),
       fetchTopClients()
     ]);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching dashboard data', error);
   } finally {
     loading.value = false;
