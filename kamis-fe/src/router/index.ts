@@ -66,6 +66,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/finance',
+      name: 'dashboard-finance',
+      component: DashboardFinance,
+      meta: {
+        requiresAuth: true,
+        roles: ['Finance'],
+        breadcrumb: 'Dashboard'
+      }
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView,
