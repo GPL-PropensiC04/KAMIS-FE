@@ -35,7 +35,7 @@
               id="email"
               v-model="email"
               required
-              placeholder="Enter your email"
+              placeholder="Masukkan email Anda"
               class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
           </div>
@@ -48,7 +48,7 @@
                 id="password"
                 v-model="password"
                 required
-                placeholder="Enter your password"
+                placeholder="Masukkan password Anda"
                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
               <button
