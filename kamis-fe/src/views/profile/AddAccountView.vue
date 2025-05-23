@@ -26,8 +26,8 @@
                 v-model="formData.email"
                 type="email"
                 required
-                class="w-full p-2 border border-[#1E3A5F] rounded-md 
-                      focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#E5EAF2]"
+               class="w-full p-2 border border-gray-300 rounded-md 
+                        focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
               />
               <div v-if="validationErrors.email" class="text-red-500 text-xs mt-1">
                 {{ validationErrors.email }}
@@ -43,8 +43,8 @@
                 v-model="formData.username"
                 type="text"
                 required
-                class="w-full p-2 border border-[#1E3A5F] rounded-md 
-                      focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#E5EAF2]"
+                class="w-full p-2 border border-gray-300 rounded-md 
+                                        focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
               />
               <div v-if="validationErrors.username" class="text-red-500 text-xs mt-1">
                 {{ validationErrors.username }}
@@ -64,8 +64,8 @@
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
                   required
-                  class="w-full p-2 border border-[#1E3A5F] rounded-md 
-                        focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#E5EAF2]"
+                  class="w-full p-2 border border-gray-300 rounded-md 
+                                          focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] bg-[#f8fafc]"
                 />
                 <button 
                   type="button" 
@@ -191,8 +191,8 @@
     if (!formData.value.password) {
       validationErrors.value.password = 'Password harus diisi';
       isValid = false;
-    } else if (formData.value.password.length < 6) {
-      validationErrors.value.password = 'Password minimal 6 karakter';
+    } else if (formData.value.password.length < 5) {
+      validationErrors.value.password = 'Password minimal 5 karakter';
       isValid = false;
     }
   
@@ -213,7 +213,6 @@
     
     try {
       await accountStore.addAccount(formData.value);
-      toast.success('Akun berhasil ditambahkan');
       router.push('/account');
     } catch (error: any) {
       // Error is already handled by the store, but we can add additional handling here
