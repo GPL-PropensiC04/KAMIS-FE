@@ -76,10 +76,10 @@
     </div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="bg-white rounded-2xl shadow-md p-6">
+            <div class="bg-white rounded-2xl shadow-md p-6">
         <div class="flex items-center mb-4">
           <font-awesome-icon
-            :icon="['fas', 'money-bill-transfer']"
+            :icon="['fas', 'scale-balanced']"
             class="text-[24px] mr-2"
             style="color: #2E7D32;"
           />
@@ -87,6 +87,7 @@
             Distribusi Keuangan Perusahaan
           </h2>
         </div>
+
         <div class="h-[320px]">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
@@ -109,10 +110,8 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-md p-6 mb-6">
-      <div class="h-[425px]">
+    <div class="mb-6">
         <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
-      </div>
     </div>
 
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mb-6">

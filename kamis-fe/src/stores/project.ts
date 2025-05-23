@@ -301,7 +301,6 @@ export const useProjectStore = defineStore('project', {
 
                 // Menyimpan data proyek dalam state
                 this.projects = response.data.data || [];
-                useToast().success('Daftar proyek berhasil diambil');
             } catch (err: unknown) {
                 this.error = `Gagal mengambil daftar proyek: ${err instanceof Error ? err.message : 'Unknown error'}`;
                 useToast().error(this.error);

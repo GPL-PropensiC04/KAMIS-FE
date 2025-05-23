@@ -53,20 +53,19 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
     },
-        {
-      path: '/operasional',
-      name: 'operasional',
+    {
+      path: '/operasional/dashboard',
+      name: 'dashboard-operasional',
       component: DashboardOperasional,
-      meta: { requiresAuth: true, breadcrumb: 'Dashboard' }
+      meta: { requiresAuth: true, roles: ['Operasional'] }
     },
     {
-      path: '/finance',
+      path: '/finance/dashboard',
       name: 'dashboard-finance',
       component: DashboardFinance,
       meta: {
         requiresAuth: true,
-        roles: ['Finance'],
-        breadcrumb: 'Dashboard'
+        roles: ['Finance']  
       }
     },
     {
@@ -443,7 +442,12 @@ router.beforeEach((to, from, next) => {
       return next('/account');
     } else if (authStore.userRole === 'Direksi') {
       return next('/direksi/dashboard');
-    } else {
+    } else if (authStore.userRole === 'Finance') {
+      return next('/finance/dashboard');
+    } else if (authStore.userRole === 'Operasional') {
+      return next('/operasional/dashboard');
+    }
+    else {
       return next('/');
     }
   }
@@ -451,6 +455,10 @@ router.beforeEach((to, from, next) => {
   // For home page, redirect Direksi to their dashboard
   if (to.path === '/' && isLoggedIn && authStore.userRole === 'Direksi') {
     return next('/direksi/dashboard');
+  } else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Finance') {
+    return next('/finance/dashboard');
+  } else if (to.path === '/' && isLoggedIn && authStore.userRole === 'Operasional') {
+    return next('/operasional/dashboard');
   }
   
   // For routes requiring auth
@@ -484,7 +492,12 @@ const handleLoginSuccess = (user: { role: string }) => {
     router.push('/account');
   } else if (user.role === 'Direksi') {
     router.push('/direksi/dashboard');
-  } else {
+  } else if (user.role === 'Finance') {
+    router.push('/finance/dashboard');
+  } else if (user.role === 'Operasional') {
+    router.push('/operasional/dashboard');
+  } 
+  else {
     router.push('/');
   }
 };
