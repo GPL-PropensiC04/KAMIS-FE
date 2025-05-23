@@ -43,7 +43,7 @@ const focusInput = () => {
                 ref="inputRef"
                 v-model="textValue"
                 :placeholder="placeholder"
-                class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#E5EAF2] font-lato"
+                class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#ffffff] font-lato"
                 rows="4"
                 @input="updateValue"
             ></textarea>
@@ -55,5 +55,9 @@ const focusInput = () => {
 /* Menggunakan font Inter */
 .font-inter {
     font-family: 'Inter', sans-serif;
+}
+
+textarea {
+    resize: none;
 }
 </style>

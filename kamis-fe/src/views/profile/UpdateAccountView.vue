@@ -192,8 +192,8 @@
     }
   
     // Password validation - only if provided
-    if (formData.value.password && formData.value.password.length > 0 && formData.value.password.length < 6) {
-      validationErrors.value.password = 'Password minimal 6 karakter';
+    if (formData.value.password && formData.value.password.length > 0 && formData.value.password.length < 5) {
+      validationErrors.value.password = 'Password minimal 5 karakter';
       isValid = false;
     }
   
@@ -223,7 +223,6 @@
       await accountStore.updateAccount(accountEmail, updateData);
       
       // Show success message and navigate back
-      toast.success('Akun berhasil diperbarui');
       router.push('/account');
     } catch (error) {
       console.error('Error updating account:', error);

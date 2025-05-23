@@ -221,7 +221,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
 import { AsetService } from '@/stores/assetservices';
@@ -303,14 +303,6 @@ const canEditAsset = computed(() => {
   // Only Staf Operasional can edit assets
   return userRole === 'Operasional' || userRole === 'Admin';
 });
-
-// Helper function for table colspan (updated to account for action column)
-const getColspanUpdated = () => {
-  let span = 3; // Default columns (Tanggal Pengajuan, Tanggal Selesai, Deskripsi)
-  if (canViewFinancialInfo.value) span++;
-  if (canEditAsset.value) span++; // Add column for actions
-  return span;
-};
 
 // Add this computed property after your other computed properties
 const sortedMaintenanceHistory = computed(() => {
