@@ -65,17 +65,8 @@ const router = createRouter({
       component: DashboardFinance,
       meta: {
         requiresAuth: true,
-        roles: ['Finance']  
-      }
-    },
-    {
-      path: '/finance',
-      name: 'dashboard-finance',
-      component: DashboardFinance,
-      meta: {
-        requiresAuth: true,
         roles: ['Finance'],
-        breadcrumb: 'Dashboard'
+        breadcrumb: 'Dashboard' 
       }
     },
     {
