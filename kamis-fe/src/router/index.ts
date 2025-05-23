@@ -65,7 +65,8 @@ const router = createRouter({
       component: DashboardFinance,
       meta: {
         requiresAuth: true,
-        roles: ['Finance']  
+        roles: ['Finance'],
+        breadcrumb: 'Dashboard' 
       }
     },
     {
