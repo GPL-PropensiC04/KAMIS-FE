@@ -36,47 +36,32 @@
       </div>
     </div>
 
-    <!-- Total Pembelian, Distribusi, Penjualan Cards -->
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <!-- Total Pembelian -->
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <!-- Card Total Profit -->
       <div class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Pembelian</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-5xl font-semibold mt-2">{{ totalPurchase }}</div>
-        <div :class="{'text-green-500': purchasePercentage >= 0, 'text-red-500': purchasePercentage < 0}" class="text-sm mt-1">
-          {{ purchasePercentage >= 0 ? '+' : '' }}{{ purchasePercentage }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <!-- Total Distribusi -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Distribusi</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'truck']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-5xl font-semibold mt-2">{{ totalDistribution }}</div>
-        <div :class="{'text-green-500': distributionPercentage >= 0, 'text-red-500': distributionPercentage < 0}" class="text-sm mt-1">
-          {{ distributionPercentage >= 0 ? '+' : '' }}{{ distributionPercentage }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <!-- Total Penjualan -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Penjualan</div>
+          <div class="text-xl font-bold">Total Profit/Loss</div>
           <div class="bg-[#E5EAF2] p-3 rounded-full">
             <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F]" />
           </div>
         </div>
-        <div class="text-5xl font-semibold mt-2">{{ totalSales }}</div>
-        <div :class="{'text-green-500': salesPercentage >= 0, 'text-red-500': salesPercentage < 0}" class="text-sm mt-1">
-          {{ salesPercentage >= 0 ? '+' : '' }}{{ salesPercentage }}% dari {{ timeAgoText }}
+        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(cardTotalProfit) }}</div>
+        <div :class="{'text-green-500': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" class="text-sm mt-1">
+          {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+        </div>
+      </div>
+
+      <!-- Card Total Transaksi -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center">
+          <div class="text-xl font-bold">Total Transaksi</div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full">
+            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
+          </div>
+        </div>
+        <div class="text-3xl font-semibold mt-2">{{ cardTotalTransaction }}</div>
+        <div :class="{'text-green-500': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" class="text-sm mt-1">
+          {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
         </div>
       </div>
     </div>
@@ -272,6 +257,8 @@ import Breadcrumb from '@/components/Breadcrumb.vue';
 import VDonutPengeluaran from '@/components/VDonutPengeluaran.vue';
 import VBarTotalPemasukkanPengeluaran from '@/components/VBarTotalPemasukkanPengeluaran.vue';
 import VLineIncomeExpense from '@/components/VLineIncomeExpense.vue';
+import type { FinancialSummaryResponseDTO } from '@/interfaces/finance.report/lapkeu.interface';
+import { useFinanceReportStore } from '@/stores/financereport';
 
 // Stores
 const projectStore = useProjectStore();
@@ -288,12 +275,10 @@ const loading = ref(true);
 const barChartData = ref(null);
 
 // Summary data
-const totalPurchase = ref(0);
-const totalDistribution = ref(0);
-const totalSales = ref(0);
-const purchasePercentage = ref(0);
-const distributionPercentage = ref(0);
-const salesPercentage = ref(0);
+const cardTotalProfit = ref(0);
+const cardTotalTransaction = ref(0);
+const cardTotalProfitPercentage = ref(0);
+const cardTotalTransactionPercentage = ref(0);
 
 // Top suppliers and clients
 interface Supplier {
@@ -498,25 +483,24 @@ const updateLineChartData = (data: any) => {
   console.log('Line chart data loaded:', data);
 };
 
+const financialSummary = computed<FinancialSummaryResponseDTO | null | undefined>(() => financeReportStore.financialSummary);
+const financeReportStore = useFinanceReportStore();
 
 // Fetch summary data
 const fetchSummaryData = async () => {
   try {
-    // Fetch purchase summary
-    await purchaseStore.getPurchaseSummary(selectedRange.value);
-    totalPurchase.value = purchaseStore.purchaseSummary?.totalPurchase || 0;
-    purchasePercentage.value = purchaseStore.purchaseSummary?.percentageChange || 0;
+    await financeReportStore.fetchFinancialSummary(selectedRange.value);
+    cardTotalProfit.value = financialSummary.value?.totalProfit || 0;
+    cardTotalTransaction.value = financialSummary.value?.totalTransactions || 0;
+    cardTotalProfitPercentage.value = financialSummary.value?.profitPercentageChange || 0;
+    cardTotalTransactionPercentage.value = financialSummary.value?.transactionPercentageChange || 0; 
 
-    // Fetch sell distribution summary
-    await projectStore.getSellDistributionSummary(selectedRange.value);
-    totalDistribution.value = projectStore.sellDistributionSummary?.totalDistribution || 0;
-    totalSales.value = projectStore.sellDistributionSummary?.totalSell || 0;
-    distributionPercentage.value = projectStore.sellDistributionSummary?.percentageDistributionChange || 0;
-    salesPercentage.value = projectStore.sellDistributionSummary?.percentageSellChange || 0;
-
-  } catch (error: any) {
-    console.error('Error fetching summary data', error);
-
+  } catch (error) {
+    console.error('Error fetching card summary data', error);
+    cardTotalProfit.value = 0;
+    cardTotalTransaction.value = 0;
+    cardTotalProfitPercentage.value = 0;
+    cardTotalTransactionPercentage.value = 0;
   }
 };  // Fetch top suppliers data
 const fetchTopSuppliers = async () => {

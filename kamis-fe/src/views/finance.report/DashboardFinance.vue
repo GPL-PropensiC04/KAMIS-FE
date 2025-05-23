@@ -34,43 +34,32 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <!-- Card Total Profit -->
       <div class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Pembelian</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-3xl font-semibold mt-2">{{ cardTotalPurchase }}</div>
-        <div :class="{'text-green-500': cardPurchasePercentage >= 0, 'text-red-500': cardPurchasePercentage < 0}" class="text-sm mt-1">
-          {{ cardPurchasePercentage >= 0 ? '+' : '' }}{{ cardPurchasePercentage.toFixed(2) }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Pemasukan Distribusi</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'truck']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-3xl font-semibold mt-2">{{ cardTotalDistribution }}</div>
-        <div :class="{'text-green-500': cardDistributionPercentage >= 0, 'text-red-500': cardDistributionPercentage < 0}" class="text-sm mt-1">
-          {{ cardDistributionPercentage >= 0 ? '+' : '' }}{{ cardDistributionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Pemasukan Penjualan</div>
+          <div class="text-xl font-bold">Total Profit/Loss</div>
           <div class="bg-[#E5EAF2] p-3 rounded-full">
             <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F]" />
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ cardTotalSales }}</div>
-        <div :class="{'text-green-500': cardSalesPercentage >= 0, 'text-red-500': cardSalesPercentage < 0}" class="text-sm mt-1">
-          {{ cardSalesPercentage >= 0 ? '+' : '' }}{{ cardSalesPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(cardTotalProfit) }}</div>
+        <div :class="{'text-green-500': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" class="text-sm mt-1">
+          {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+        </div>
+      </div>
+
+      <!-- Card Total Transaksi -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center">
+          <div class="text-xl font-bold">Total Transaksi</div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full">
+            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
+          </div>
+        </div>
+        <div class="text-3xl font-semibold mt-2">{{ cardTotalTransaction }}</div>
+        <div :class="{'text-green-500': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" class="text-sm mt-1">
+          {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
         </div>
       </div>
     </div>
@@ -87,7 +76,6 @@
             Distribusi Keuangan Perusahaan
           </h2>
         </div>
-
         <div class="h-[320px]">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
@@ -175,6 +163,9 @@ export interface FinancialSummaryResponseDTO {
   totalMaintenanceExpense: number;
   totalProjectExpense: number;
   totalProfit: number;
+  totalTransactions: number;                 // Total Transaction
+  transactionPercentageChange: number; // Transaction Percentage Change
+  profitPercentageChange: number;       // Profit Percentage Change
 }
 
 const selectedRange = ref('THIS_YEAR');
@@ -188,12 +179,10 @@ const purchaseStore = usePurchaseStore();
 
 const financialSummary = computed<FinancialSummaryResponseDTO | null | undefined>(() => financeReportStore.financialSummary);
 
-const cardTotalPurchase = ref(0);
-const cardTotalDistribution = ref(0);
-const cardTotalSales = ref(0);
-const cardPurchasePercentage = ref(0);
-const cardDistributionPercentage = ref(0);
-const cardSalesPercentage = ref(0);
+const cardTotalProfit = ref(0);
+const cardTotalTransaction = ref(0);
+const cardTotalProfitPercentage = ref(0);
+const cardTotalTransactionPercentage = ref(0);
 
 const timeAgoText = computed(() => {
   switch (selectedRange.value) {
@@ -250,24 +239,18 @@ const updateLineChartData = (data: any) => {
 
 const fetchCardSummaryData = async () => {
   try {
-    await purchaseStore.getPurchaseSummary(selectedRange.value);
-    cardTotalPurchase.value = purchaseStore.purchaseSummary?.totalPurchase || 0;
-    cardPurchasePercentage.value = purchaseStore.purchaseSummary?.percentageChange || 0;
-
-    await projectStore.getSellDistributionSummary(selectedRange.value);
-    cardTotalDistribution.value = projectStore.sellDistributionSummary?.totalDistribution || 0;
-    cardTotalSales.value = projectStore.sellDistributionSummary?.totalSell || 0;
-    cardDistributionPercentage.value = projectStore.sellDistributionSummary?.percentageDistributionChange || 0;
-    cardSalesPercentage.value = projectStore.sellDistributionSummary?.percentageSellChange || 0;
+    await financeReportStore.fetchFinancialSummary(selectedRange.value);
+    cardTotalProfit.value = financialSummary.value?.totalProfit || 0;
+    cardTotalTransaction.value = financialSummary.value?.totalTransactions || 0;
+    cardTotalProfitPercentage.value = financialSummary.value?.profitPercentageChange || 0;
+    cardTotalTransactionPercentage.value = financialSummary.value?.transactionPercentageChange || 0;  
 
   } catch (error) {
     console.error('Error fetching card summary data', error);
-    cardTotalPurchase.value = 0;
-    cardPurchasePercentage.value = 0;
-    cardTotalDistribution.value = 0;
-    cardTotalSales.value = 0;
-    cardDistributionPercentage.value = 0;
-    cardSalesPercentage.value = 0;
+    cardTotalProfit.value = 0;
+    cardTotalTransaction.value = 0;
+    cardTotalProfitPercentage.value = 0;
+    cardTotalTransactionPercentage.value = 0;
   }
 };
 
