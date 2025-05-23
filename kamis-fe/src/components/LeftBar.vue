@@ -102,7 +102,7 @@ const goTo = (routeName: string) => {
     } else if (authStore.userRole === 'Direksi') {
       router.push({ name: 'dashboard-direksi' });
     } else {
-      router.push({ name: 'operasional' }); // atau 'home' jika ingin ke /
+      router.push({ name: 'dashboard-operasional' }); // atau 'home' jika ingin ke /
     }
   } else {
     router.push({ name: routeName });
