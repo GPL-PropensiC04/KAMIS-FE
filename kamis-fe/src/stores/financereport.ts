@@ -64,7 +64,7 @@ export const useFinanceReportStore = defineStore('financereport', {
       this.error = null;
       try {
         const response = await axios.get<CommonResponseInterface<FinancialSummaryResponseDTO>>(
-          `${API_URLS.FINANCE}/finance-report/summary`, // Update URL to /finance-report/summary
+          `${API_URLS.FINANCE}/finance-report/summary`, 
           { params: { range } }
         );
         if (response.data.status === 200 && response.data.data) {

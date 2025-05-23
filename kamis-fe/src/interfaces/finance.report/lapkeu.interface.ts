@@ -40,7 +40,7 @@ export interface FinancialSummaryResponseDTO {
     totalMaintenanceExpense: number;          // Total Maintenance Expense
     totalProjectExpense: number;              // Total Project Expense
     totalProfit: number;                      // Total Profit
-    totalTransactions: number;                 // Total Transaction
-    transactionPercentageChange: number; // Transaction Percentage Change
-    profitPercentageChange: number;       // Profit Percentage Change
+    totalTransactions: number;                   // Total Transactions
+    transactionPercentageChange: number; // Percentage change in transactions
+    profitPercentageChange: number;        // Percentage change in profit
 }
