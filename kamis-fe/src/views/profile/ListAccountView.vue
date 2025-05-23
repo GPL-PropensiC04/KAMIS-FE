@@ -2,6 +2,15 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
 
+    <!-- Welcome Section -->
+    <div class="max-w-7xl mx-auto bg-white p-5 rounded-lg shadow-md mb-4">
+      <div class="welcome-message text-4xl font-bold mb-4">
+        Welcome, {{ userInfo.username }}
+      </div>
+      
+      <!-- Additional content can go here (like filter buttons) -->
+    </div>
+
     <div class="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
         <VSearchBar v-model="searchTerm" placeholder="Cari email atau nama akun..." />
@@ -72,7 +81,6 @@ import VSearchBar from '@/components/VSearchBar.vue';
 import VOptionInput from '@/components/VOptionInput.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
-
 const router = useRouter();
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
@@ -89,6 +97,12 @@ const roleOptions = ['Semua', 'Admin', 'Finance', 'Operasional', 'Direksi'];
 const accounts = computed(() => accountStore.accounts);
 const loading = computed(() => accountStore.loading);
 const error = computed(() => accountStore.error);
+
+// Auth store
+const userInfo = computed(() => {
+  const user = authStore.user;
+  return { username: user ? user.username : 'User' };
+});
 
 const filteredAccounts = computed(() => {
   return accounts.value.filter(account => {
