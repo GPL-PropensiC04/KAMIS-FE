@@ -250,7 +250,6 @@ export const usePurchaseStore = defineStore('purchase', {
         this.purchases = response.data.data;
       } catch (err: unknown) {
         this.error = `Gagal mengambil daftar pembelian: ${err instanceof Error ? err.message : 'Unknown error'}`;
-        useToast().error(this.error);
       } finally {
         this.loading = false;
       }
@@ -272,7 +271,6 @@ export const usePurchaseStore = defineStore('purchase', {
 
       } catch (err: unknown) {
         this.error = `Gagal mendapatkan ringkasan pembelian: ${err instanceof Error ? err.message : 'Unknown error'}`;
-        useToast().error(this.error);
       } finally {
         this.loading = false;
       }
