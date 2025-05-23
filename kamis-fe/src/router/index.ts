@@ -467,13 +467,8 @@ router.beforeEach((to, from, next) => {
           return next();
         } else {
           // Redirect users without required role
-          return next('/forbidden');
-        }
-      }
-        if (authStore.userRole === 'Direksi') {
-          return next('/direksi/dashboard');
-        } else {
-          return next('/');
+            return next('/forbidden');
+          }
         }
       }
     }
