@@ -87,7 +87,6 @@
             Distribusi Keuangan Perusahaan
           </h2>
         </div>
-
         <div class="h-[320px]">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
