@@ -62,6 +62,9 @@ const chartOptions: ChartOptions<'line'> = {
     },
     title: {
       display: false
+    },
+    datalabels: {
+      display: false
     }
   },
   scales: {
@@ -167,6 +170,8 @@ watch(
   (newRange) => {
     if (newRange === 'THIS_YEAR') {
       periodType.value = 'Monthly';
+    } else if (newRange === 'THIS_MONTH') {
+      periodType.value = 'Weekly';
     } else {
       periodType.value = '';
     }

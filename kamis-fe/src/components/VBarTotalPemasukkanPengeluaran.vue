@@ -63,6 +63,9 @@ const chartOptions: ChartOptions<'bar'> = {
           }).format(value);
         }
       }
+    },
+    datalabels: {
+      display: false
     }
   },
   scales: {
@@ -110,7 +113,7 @@ const updateChartData = () => {
     labels: ['Pemasukkan', 'Pengeluaran'],
     datasets: [{
       data: [income, expense],
-      backgroundColor: ['#2E7D32', '#D32F2F'],
+      backgroundColor: ['#14532D', '#912018'],
       borderWidth: 0
     }]
   };
