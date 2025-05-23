@@ -2,7 +2,7 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <div class="max-w-7xl mx-auto bg-white p-5 rounded-lg shadow-md mb-6">
-      <div class="welcome-message text-xl font-bold mb-4">
+      <div class="welcome-message text-5xl font-bold mb-4">
         Welcome, {{ userInfo.username }}
       </div>
       <div class="flex flex-wrap gap-2">
