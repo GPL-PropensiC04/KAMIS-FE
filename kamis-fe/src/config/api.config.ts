@@ -7,6 +7,7 @@ export const API_PROFILE_URL = import.meta.env.VITE_API_PROFILE_URL;
 export const API_PROJECT_URL = import.meta.env.VITE_API_PROJECT_URL;
 export const API_AUTH_URL = import.meta.env.VITE_API_AUTH_URL;
 export const API_FOTO_URL = import.meta.env.VITE_API_FOTO_URL;
+export const API_FINANCE_URL = import.meta.env.VITE_API_FINANCE_URL;
 
 // Define service URLs by appending the specific path
 export const API_URLS = {
@@ -17,6 +18,7 @@ export const API_URLS = {
   PROJECT: `${API_PROJECT_URL}`,
   AUTH: `${API_AUTH_URL}`,
   FOTO: `${API_FOTO_URL}`,
+  FINANCE: `${API_FINANCE_URL}`,
   // Add others as needed (e.g. asset, profile, etc.)
 };
 

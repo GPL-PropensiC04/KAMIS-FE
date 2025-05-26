@@ -15,7 +15,7 @@ export interface AsetInterface {
 export interface AsetListInterface {
   platNomor: string;
   nama: string;
-  jenisAset: string;
+  tipeAset: string;
   status: string;
   nilaiPerolehan: number;
   supplierId: string; // UUID will be represented as string in TypeScript

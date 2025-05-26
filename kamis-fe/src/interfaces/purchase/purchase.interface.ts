@@ -37,4 +37,8 @@ export interface UpdatePurchaseStatusRequestInterface {
     platNomor?: string;                      // Plat nomor kendaraan
 }
 
+export interface PurchaseSummaryResponseDTO {
+    totalPurchase: number;        // jumlah total pembelian saat ini
+    percentageChange: number;     // persen perubahan dibanding periode sebelumnya
+}
 
