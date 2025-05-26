@@ -33,7 +33,7 @@ const focusTextarea = () => {
         <!-- Textarea -->
         <div 
             class="border px-4 py-2 cursor-text relative"
-            :class="{ 'border-[#1E3A5F] bg-[#E5EAF2] text-black rounded-md': true }"
+            :class="{ 'border-[#1E3A5F] bg-[#ffffff] text-black rounded-md': true }"
             @click="focusTextarea"
         >
             <textarea

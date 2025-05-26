@@ -8,58 +8,50 @@
       {{ notificationMessage }}
     </div>
 
-    <div class="max-w-6xl mx-auto bg-white p-4 rounded-lg shadow-md mb-4">
-      <div class="flex items-center">
-        <div class="w-full">
-          <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." class="w-full" />
-        </div>
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+      <div class="grid grid-cols-1 gap-2 items-center">
+        <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-center text-gray-700 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-          <thead class="text-xs text-white bg-[#1E3A5F] rounded-t-lg">
-            <tr>
-              <th scope="col" class="px-6 py-3 cursor-pointer text-center" @click="sortTable('nama')">
-                Nama Aset
-                <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
-                <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
-              </th>
-              <th scope="col" class="px-6 py-3 cursor-pointer text-center" @click="sortTable('tanggalPerolehan')">
-                Tanggal Perolehan
-                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
-                <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
-              </th>
-              <th scope="col" class="px-6 py-3 text-center">{{ thirdColumnHeader }}</th>
-            </tr>
-          </thead>
-          <tbody v-if="loading">
-            <tr>
-              <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                Loading...
-              </td>
-            </tr>
-          </tbody>
-          <tbody v-else-if="sortedAssets.length > 0">
-            <tr v-for="asset in sortedAssets" 
-                :key="asset.platNomor" 
-                class="bg-white border-b border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
-                @click="goToDetailAsset(asset.platNomor)">
-              <td class="px-6 py-4 text-center">{{ asset.nama }}</td>
-              <td class="px-6 py-4 text-center">{{ formatDate(asset.tanggalPerolehan) }}</td>
-              <td class="px-6 py-4 text-center">{{ thirdColumnValue(asset) }}</td>
-            </tr>
-          </tbody>
-          <tbody v-else>
-            <tr>
-              <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                Data tidak ditemukan.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+      <div v-if="loading" class="flex justify-center items-center py-14">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
+      <table v-else class="custom-table">
+        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+          <tr>
+            <th @click="sortTable('nama')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Nama Aset
+              <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
+              <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
+            </th>
+            <th class="px-6 py-4 table-header text-base">Jenis Aset</th>
+            <th @click="sortTable('tanggalPerolehan')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Tanggal Perolehan
+              <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
+              <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
+            </th>
+            <th class="px-6 py-4 table-header text-base">{{ thirdColumnHeader }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="asset in sortedAssets"
+            :key="asset.platNomor"
+            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
+            @click="goToDetailAsset(asset.platNomor)"
+          >
+            <td class="px-6 py-5">{{ asset.nama }}</td>
+            <td class="px-6 py-5">{{ asset.tipeAset }}</td>
+            <td class="px-6 py-5">{{ formatDate(asset.tanggalPerolehan) }}</td>
+            <td class="px-6 py-5">{{ thirdColumnValue(asset) }}</td>
+          </tr>
+          <tr v-if="sortedAssets.length === 0">
+            <td colspan="4" class="text-center text-gray-500 py-6 text-base">Data aset tidak ditemukan.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -129,6 +121,7 @@ const fetchAssets = async () => {
     const data = await AsetService.viewAllAsset();
     assets.value = data.map((item: any) => ({
       ...item,
+      tipeAset: item.tipeAset ?? '',
       tanggalPerolehan: item.tanggalPerolehan ?? '',
       deskripsi: item.deskripsi ?? '',
       assetMaintenance: item.assetMaintenance ?? '',
@@ -174,7 +167,7 @@ const formatDate = (dateString: string) => {
 };
 
 const formatCurrency = (value: number) => {
-  return `Rp ${value.toLocaleString('id-ID')},00`;
+  return `Rp${value.toLocaleString('id-ID')}`;
 };
 
 const thirdColumnHeader = computed(() => {
@@ -185,7 +178,6 @@ const thirdColumnHeader = computed(() => {
   }
   return '';
 });
-
 
 const thirdColumnValue = (asset: AsetListInterface) => {
   if (canViewMaintenanceInfo.value) {
@@ -215,8 +207,46 @@ const sortTable = (key: string) => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-* {
-  font-family: 'Inter', sans-serif;
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  table-layout: fixed;
+}
+
+.custom-table thead {
+  background-color: #1E3A5F;
+  color: white;
+}
+
+.custom-table th, .custom-table td {
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.custom-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.table-header:hover {
+  background-color: #32486B;
 }
 
 @keyframes slide-in {
@@ -232,13 +262,5 @@ const sortTable = (key: string) => {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
-}
-
-th {
-  cursor: pointer;
-}
-
-th span {
-  margin-left: 4px;
 }
 </style>

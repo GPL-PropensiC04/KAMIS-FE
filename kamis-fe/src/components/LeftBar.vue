@@ -10,11 +10,11 @@
     </div>
     <!-- Top Icons -->
     <div class="top-icons">
-      <div :class="['icon-item', { active: isActive('dashboard') }]" @click="goTo('dashboard')">
+      <div v-if = "!isAdmin" :class="['icon-item', { active: isActive('dashboard') }]" @click="goTo('dashboard')">
         <BaseIcon icon="fa-solid fa-chart-simple" clickable />
         <span v-if="!isCollapsed" class="icon-label">Dashboard</span>
       </div>
-      <div :class="['icon-item', { active: isActive('laporan') }]" @click="goTo('laporan')">
+      <div v-if = "isFinance || isDireksi" :class="['icon-item', { active: isActive('finance') }]" @click="goTo('finance-report')">
         <BaseIcon icon="fa-solid fa-file" clickable />
         <span v-if="!isCollapsed" class="icon-label">Laporan</span>
       </div>
@@ -41,6 +41,10 @@
       <div :class="['icon-item', { active: isActive('supplier') }]" @click="goTo('supplier')">
         <BaseIcon icon="fa-solid fa-boxes-stacked" clickable />
         <span v-if="!isCollapsed" class="icon-label">Supplier</span>
+      </div>
+      <div v-if = "isAdmin" :class="['icon-item', { active: isActive('account') }]" @click="goTo('account')">
+        <BaseIcon icon="fa-solid fa-gear" clickable />
+        <span v-if="!isCollapsed" class="icon-label">Manajemen Akun</span>
       </div>
     </div>
 
@@ -92,7 +96,17 @@ const handleSidebarClick = (event: MouseEvent) => {
 }
 
 const goTo = (routeName: string) => {
-  router.push({ name: routeName })
+  if (routeName === 'dashboard') {
+    if (authStore.userRole === 'Finance') {
+      router.push({ name: 'dashboard-finance' });
+    } else if (authStore.userRole === 'Direksi') {
+      router.push({ name: 'dashboard-direksi' });
+    } else {
+      router.push({ name: 'dashboard-operasional' }); // atau 'home' jika ingin ke /
+    }
+  } else {
+    router.push({ name: routeName });
+  }
 }
 
 const logout = () => {
@@ -102,8 +116,32 @@ const logout = () => {
 }
 
 const isActive = (routeName: string) => {
-  return route.name && route.name.toString().includes(routeName);
+  // Map menu ke nama route yang valid
+  const menuRouteNames: Record<string, string[]> = {
+    dashboard: ['dashboard-finance', 'dashboard-direksi', 'dashboard-operasional'],
+    'finance': ['finance-report'],
+    'purchase': ['purchase'],
+    'assets': ['assets'],
+    'resource': ['resource'],
+    'project': ['project'],
+    'client': ['client'],
+    'supplier': ['supplier'],
+    'account': ['account'],
+  };
+  return route.name && menuRouteNames[routeName]?.includes(route.name.toString());
 };
+
+const isAdmin = computed(() => {
+  return authStore.userRole === 'Admin';
+});
+
+const isFinance = computed(() => {
+  return authStore.userRole === 'Finance';
+});
+
+const isDireksi = computed(() => {
+  return authStore.userRole === 'Direksi';
+});
 
 const userInfo = computed(() => {
   if (!authStore.user) return null

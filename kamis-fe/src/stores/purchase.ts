@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { PurchaseInterface, AddPurchaseRequestInterface, UpdatePurchaseRequestInterface, UpdatePurchaseStatusRequestInterface } from '@/interfaces/purchase/purchase.interface';
+import type { PurchaseInterface, AddPurchaseRequestInterface, UpdatePurchaseRequestInterface, UpdatePurchaseStatusRequestInterface, PurchaseSummaryResponseDTO } from '@/interfaces/purchase/purchase.interface';
 // import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
@@ -17,6 +17,7 @@ export const usePurchaseStore = defineStore('purchase', {
     })(),
     loading: false,
     error: null as null | string,
+    purchaseSummary: null as PurchaseSummaryResponseDTO | null,
   }),
   actions: {
     setDraftPurchase(data: PurchaseInterface) {
@@ -230,6 +231,46 @@ export const usePurchaseStore = defineStore('purchase', {
       } catch (err: unknown) {
         this.error = `Gagal mengambil data pembelian ${err instanceof Error ? err.message : "Unknown error"}`;
         useToast().error(this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+        // Method untuk mendapatkan daftar pembelian berdasarkan rentang
+    async getPurchaseListByRange(range: string = 'THIS_YEAR') {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get<CommonResponseInterface<PurchaseInterface[]>>(
+          `${API_URLS.PURCHASE}/purchase/range`, {
+            params: { range }
+          }
+        );
+        
+        this.purchases = response.data.data;
+      } catch (err: unknown) {
+        this.error = `Gagal mengambil daftar pembelian: ${err instanceof Error ? err.message : 'Unknown error'}`;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Method untuk mendapatkan ringkasan pembelian berdasarkan rentang
+    async getPurchaseSummary(range: string = 'THIS_YEAR') {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get<CommonResponseInterface<PurchaseSummaryResponseDTO>>(
+          `${API_URLS.PURCHASE}/purchase/summary`, {
+            params: { range }
+          }
+        );
+
+        this.purchaseSummary = response.data.data;
+
+      } catch (err: unknown) {
+        this.error = `Gagal mendapatkan ringkasan pembelian: ${err instanceof Error ? err.message : 'Unknown error'}`;
       } finally {
         this.loading = false;
       }

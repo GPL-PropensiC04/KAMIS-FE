@@ -75,7 +75,7 @@
             </div>
             <div class="break-words">
               <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName }}</p>
+              <p class="font-semibold">{{ projectData.projectClientName || 'Unknown Client' }}</p>
             </div>
             <div class="break-words">
               <p class="text-gray-600 text-sm">Tanggal Mulai</p>
@@ -184,7 +184,7 @@
                         <div class="bg-[#E5EAF2] p-4 rounded-md text-sm whitespace-pre-line">
                             <p>
                                 <strong>User</strong> : 
-                                {{ log.user === currentUsername ? log.user + ' (You) - ' + userRole : log.user + " - " + userRole }}
+                                {{ log.user === currentUsername ? log.user + ' (You)': log.user }}
                             </p>
                             <p class="mt-1"><strong>Action</strong> :</p>
                             <p>{{ log.action }}</p>
@@ -286,6 +286,7 @@ interface ProjectData {
   id: string;
   projectName: string;
   projectClientId: string;
+  projectClientName: string;
   projectStartDate: string;
   projectEndDate?: string;
   projectDeliveryAddress: string;
@@ -585,9 +586,7 @@ const loadData = async () => {
       console.log('Project data loaded:', projectData.value);
       
       // Fetch client name if needed
-      if (projectData.value.projectClientId) {
-        await fetchClientName(projectData.value.projectClientId);
-      }
+    
 
       // Fetch resource names with retry logic
       await fetchResourcesWithRetry();
@@ -609,39 +608,6 @@ const loadData = async () => {
   }
 };
 
-// Update fetchClientName function
-const fetchClientName = async (clientId: string) => {
-  if (!clientId) {
-    clientName.value = '-';
-    clientLoading.value = false;
-    return;
-  }
-  
-  clientLoading.value = true;
-  
-  try {
-    // Make a real API call to fetch client data
-    const response = await axios.get(`${API_URLS.PROFILE}/client/${clientId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    if (response.data && response.data.status === 200 && response.data.data) {
-      // Extract the client name from the response data
-      clientName.value = response.data.data.nameClient || response.data.data.clientName || '';
-      console.log('Fetched client name:', clientName.value);
-    } else {
-      console.error('Client data not found or invalid format');
-      clientName.value = `Client ${clientId.substring(0, 8)}`;
-    }
-  } catch (err) {
-    console.error('Error fetching client name:', err);
-    clientName.value = 'Unknown Client';
-  } finally {
-    clientLoading.value = false;
-  }
-};
 
 // Action methods for buttons
 const cancelProject = async () => {

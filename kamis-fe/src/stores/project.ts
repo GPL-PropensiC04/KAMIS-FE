@@ -9,7 +9,8 @@ import type {
     ProjectInterface,
     ListProjectResponseInterface,
     UpdateProjectStatusInterface,
-    UpdateProjectPaymentStatusInterface
+    UpdateProjectPaymentStatusInterface,
+    SellDistributionSummaryDTO
 } from '@/interfaces/project/project.interface';
 import type { CommonResponseInterface } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
@@ -25,6 +26,7 @@ export const useProjectStore = defineStore('project', {
         projects: [] as ProjectInterface[],
         loading: false,
         error: null as null | string,
+        sellDistributionSummary: null as SellDistributionSummaryDTO | null,  // Untuk menyimpan ringkasan penjualan dan distribusi
     }),
     actions: {
         async fetchProjects(filters = {}) {
@@ -281,6 +283,56 @@ export const useProjectStore = defineStore('project', {
               this.loading = false;
             }
           },
+        // Fetch daftar proyek berdasarkan rentang waktu tertentu
+        async getProjectListByRange(range: string = 'THIS_YEAR') {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await axios.get<CommonResponseInterface<ProjectInterface[]>>(
+                    `${API_URLS.PROJECT}/project/range`,
+                    {
+                        params: { range },
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        },
+                    }
+                );
+
+                // Menyimpan data proyek dalam state
+                this.projects = response.data.data || [];
+            } catch (err: unknown) {
+                this.error = `Gagal mengambil daftar proyek: ${err instanceof Error ? err.message : 'Unknown error'}`;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // Fetch ringkasan penjualan dan distribusi berdasarkan rentang waktu tertentu
+        async getSellDistributionSummary(range: string = 'THIS_YEAR') {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await axios.get<CommonResponseInterface<SellDistributionSummaryDTO>>(
+                    `${API_URLS.PROJECT}/project/summary`,
+                    {
+                        params: { range },
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        },
+                    }
+                );
+
+                // Menyimpan hasil ringkasan penjualan dan distribusi dalam state
+                this.sellDistributionSummary = response.data.data;
+            } catch (err: unknown) {
+                this.error = `Gagal mengambil ringkasan penjualan dan distribusi: ${err instanceof Error ? err.message : 'Unknown error'}`;
+            } finally {
+                this.loading = false;
+            }
+        },
+
     },
     getters: {
         getProjectById: (state) => (id: string) => {
