@@ -104,7 +104,7 @@ const client = ref<ClientDetailInterface>({
   nameClient: '',
   noTelpClient: '',
   emailClient: '',
-  typeClient: '',
+  typeClient: false,
   companyClient: '',
   addressClient: '',
   createdDate: '',
