@@ -89,14 +89,8 @@ watch(selectedType, () => {
 </script>
 
 <template>
+    <Breadcrumb />
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <!-- Header Section -->
-        <div class="bg-white shadow-sm border-b border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Breadcrumb />
-            </div>
-        </div>
-
         <!-- Main Content -->
         <div class="max-w-full mx-auto px-8 py-6">
             <!-- Header Card -->
