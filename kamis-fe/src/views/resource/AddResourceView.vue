@@ -362,8 +362,8 @@ const fetchSuppliers = async () => {
             headers: { "Content-Type": "application/json" }
         });
 
-        supplierOptions.value = response.data.data.map((item: { id: UUID; nameSupplier: string; }) => ({
-            label: item.nameSupplier, // untuk ditampilkan
+        supplierOptions.value = response.data.data.map((item: { id: UUID; nameSupplier: string; companySupplier: string}) => ({
+            label: item.companySupplier, // untuk ditampilkan
             value: item.id // untuk disimpan
         }));
     } catch (error) {
