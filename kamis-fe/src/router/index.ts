@@ -355,7 +355,7 @@ const router = createRouter({
     {
       path: '/account/add',
       name: 'account-add',
-      component: () => AddAccountView,
+      component:AddAccountView,
       meta: { 
         requiresAuth: true, 
         roles: ["Admin"],
@@ -364,7 +364,7 @@ const router = createRouter({
     {
       path: '/account/update/:email',
       name: 'account-update',
-      component: () => UpdateAccountView,
+      component: UpdateAccountView,
       props: true,
       meta: { 
         requiresAuth: true, 

@@ -5,7 +5,7 @@
       <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
         <VSearchBar v-model="searchCompany" placeholder="Cari Nama Perusahaan..." />
         <VSearchBar v-model="searchPIC" placeholder="Cari Nama PIC..." />
-        <VButton v-if="isOperationalOrAdmin" label="+ Tambah Supplier" @click="goToAddSupplier" />
+        <VButton v-if="isOperational" label="+ Tambah Supplier" @click="goToAddSupplier" />
       </div>
     </div>
 
@@ -56,8 +56,8 @@ const supplierStore = useSupplierStore();
 const authStore = useAuthStore();
 const router = useRouter();
 
-const isOperationalOrAdmin = computed(() => {
-  return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
+const isOperational = computed(() => {
+  return authStore.userRole === 'Operasional';
 });
 
 onMounted(() => {

@@ -242,12 +242,12 @@ const tipeProyekOption = ref("Penjualan");
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Direksi" || userRole === "Finance" || userRole === "Admin";
+  return userRole === "Direksi" || userRole === "Finance";
 });
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Operasional" || userRole === "Admin";
+  return userRole === "Operasional";
 });
 
 // Price range options
