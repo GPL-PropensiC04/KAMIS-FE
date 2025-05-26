@@ -248,7 +248,7 @@ const downloadXLSX = () => {
       }
     },
     profitValue: { 
-      font: { bold: true, color: { rgb: lapkeuStore.lapkeuSummary?.totalProfit >= 0 ? "006100" : "C00000" } },
+      font: { bold: true, color: { rgb: (lapkeuStore.lapkeuSummary?.totalProfit ?? 0) >= 0 ? "006100" : "C00000" } },
       fill: { fgColor: { rgb: "EEF1F5" } },
       alignment: { horizontal: "right" },
       numFmt: '"Rp"#,##0',
@@ -556,7 +556,7 @@ const downloadPDF = async () => {
   // Summary dengan styling yang lebih menarik
   const summary = lapkeuStore.lapkeuSummary;
   if (summary) {
-    const finalY = doc.lastAutoTable.finalY || 50;
+    const finalY = (doc as any).lastAutoTable?.finalY || 50;
 
     // Tambahkan jarak
     const summaryY = finalY + 15;
@@ -607,7 +607,7 @@ const downloadPDF = async () => {
     });
 
     // Tambahkan catatan kaki
-    const footerY = doc.lastAutoTable.finalY + 15;
+    const footerY = (doc as any).lastAutoTable.finalY + 15;
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(100, 100, 100);

@@ -381,7 +381,7 @@ const goToSummary = () => {
                             </div>
                             <div class="text-right">
                                 <p class="text-sm text-gray-500">{{ resourceList.length }} item</p>
-                                <p class="text-sm text-gray-500">{{ resourceList.reduce((sum, item) => sum + item.quantity, 0) }} total unit</p>
+                                <p class="text-sm text-gray-500">{{ resourceList.reduce((sum : any, item : any) => sum + item.quantity, 0) }} total unit</p>
                             </div>
                         </div>
                     </div>

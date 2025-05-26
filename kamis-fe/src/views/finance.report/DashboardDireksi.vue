@@ -303,14 +303,17 @@ interface Supplier {
   companySupplier: string;
   totalPurchases: number;
   totalAmount: number;
+  purchaseCount: number; // Jumlah pembelian
+  purchaseIds?: string[]; // Daftar ID pembelian
 }
 
 interface Client {
-  id: string | number;
-  name: string;
-  activityCount: number;
+  id: string ;
+  nameClient: string;
+  projectCount: number;
   totalProfit: number;
-  phone?: string;
+  noTelpClient?: string;
+  companyClient?: string;
 }
 
 const topSuppliers = ref<Supplier[]>([]);
@@ -362,8 +365,8 @@ const topThreeSuppliers = computed(() => {
 
   return [...topSuppliers.value]
     .sort((a, b) => {
-      let aValue = a[sortSupplierKey.value];
-      let bValue = b[sortSupplierKey.value];
+      let aValue = a[sortSupplierKey.value as keyof Supplier];
+      let bValue = b[sortSupplierKey.value as keyof Supplier];
       
       // Khusus untuk purchaseCount, jika tidak ada gunakan panjang purchaseIds
       if (sortSupplierKey.value === 'purchaseCount') {
@@ -412,8 +415,8 @@ const topThreeClients = computed(() => {
 
   return [...topClients.value]
     .sort((a, b) => {
-      let aValue = a[sortClientKey.value];
-      let bValue = b[sortClientKey.value];
+      let aValue = a[sortClientKey.value as keyof Client];
+      let bValue = b[sortClientKey.value as keyof Client];
       
       // Handle undefined atau null
       if (aValue === undefined || aValue === null) aValue = '';
@@ -537,7 +540,7 @@ const fetchTopSuppliers = async () => {
     if (response.data && response.data.status === 200 && response.data.data) {
       // Transformasi data supplier untuk menghitung purchaseCount dari purchaseIds
       topSuppliers.value = Array.isArray(response.data.data) ? 
-        response.data.data.map(supplier => {
+        response.data.data.map((supplier: { purchaseCount: any; purchaseIds: string | any[]; }) => {
           return {
             ...supplier,
             // Gunakan purchaseCount dari API jika ada, jika tidak hitung dari purchaseIds
