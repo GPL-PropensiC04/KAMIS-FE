@@ -70,8 +70,8 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th class="px-6 py-4 table-header text-base">ID Proyek</th>
-            <th class="px-6 py-4 table-header text-base">Nama Proyek</th>
+            <th class="px-6 py-4 table-header text-base">ID Aktivitas</th>
+            <th class="px-6 py-4 table-header text-base">Nama Aktivitas</th>
             <th class="px-6 py-4 table-header text-base">Tipe</th>
             <th class="px-6 py-4 table-header text-base">Status</th>
             <th class="px-6 py-4 table-header text-base">Tanggal Mulai</th>
@@ -197,7 +197,6 @@ import { useProjectStore } from "@/stores/project";
 import { useAuthStore } from "@/stores/auth";
 import VSearchBar from "@/components/VSearchBar.vue";
 import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
-import VSortButton from "@/components/VSortButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";

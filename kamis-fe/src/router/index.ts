@@ -57,7 +57,7 @@ const router = createRouter({
       path: '/operasional/dashboard',
       name: 'dashboard-operasional',
       component: DashboardOperasional,
-      meta: { requiresAuth: true, roles: ['Operasional'] }
+      meta: { requiresAuth: true, roles: ['Operasional'], breadcrumb: 'Dashboard' }
     },
     {
       path: '/finance/dashboard',
@@ -91,7 +91,7 @@ const router = createRouter({
       path: '/supplier',
       name: 'supplier',
       component: ListSupplierView,
-      meta: { requiresAuth: true, breadcrumb: 'List Supplier' }
+      meta: { requiresAuth: true, breadcrumb: 'Daftar Supplier' }
     },    
     {
       path: '/supplier/detail/:id',
@@ -111,7 +111,7 @@ const router = createRouter({
       path: '/client',
       name: 'client',
       component: ListClient,
-      meta: { requiresAuth: true, breadcrumb: 'List Klien' }
+      meta: { requiresAuth: true, breadcrumb: 'Daftar Klien' }
     },
     {
       path: '/client/add',
@@ -137,7 +137,7 @@ const router = createRouter({
       path: '/purchase',
       name: 'purchase',
       component:ListPurchase,
-      meta: { requiresAuth: true, roles: ["Admin", "Operasional", "Finance", "Direksi"], breadcrumb: 'List Pembelian' }
+      meta: { requiresAuth: true, roles: ["Admin", "Operasional", "Finance", "Direksi"], breadcrumb: 'Daftar Pembelian' }
     },
     {
       path: '/purchase/add',
@@ -223,7 +223,7 @@ const router = createRouter({
       path: '/resource',
       name: 'resource',
       component: ListResource,
-      meta: { requiresAuth: true, breadcrumb: 'List Resource' }
+      meta: { requiresAuth: true, breadcrumb: 'Daftar Resource' }
     },
     {
       path: '/resource/update/:id',
@@ -241,7 +241,7 @@ const router = createRouter({
       path: '/assets',
       name: 'assets',
       component: ListAsset,
-      meta: { requiresAuth: true, breadcrumb: 'List Aset' }
+      meta: { requiresAuth: true, breadcrumb: 'Daftar Aset' }
     },
     {
       path: '/asset/:platNomor',
@@ -261,7 +261,7 @@ const router = createRouter({
       name: 'project',
       component: ListProject,
       meta: { requiresAuth: true, 
-        breadcrumb: 'List Distribusi dan Penjualan' }
+        breadcrumb: 'Daftar Distribusi dan Penjualan' }
     },
     {
       path: '/project/add/distribution',
@@ -486,21 +486,5 @@ router.beforeEach((to, from, next) => {
   });
 // If you have a login handler function that redirects after successful login,
 // update it to redirect admins to the account page:
-
-// Example login function in your auth store or component
-const handleLoginSuccess = (user: { role: string }) => {
-  if (user.role === 'Admin') {
-    router.push('/account');
-  } else if (user.role === 'Direksi') {
-    router.push('/direksi/dashboard');
-  } else if (user.role === 'Finance') {
-    router.push('/finance/dashboard');
-  } else if (user.role === 'Operasional') {
-    router.push('/operasional/dashboard');
-  } 
-  else {
-    router.push('/');
-  }
-};
 
 export default router
