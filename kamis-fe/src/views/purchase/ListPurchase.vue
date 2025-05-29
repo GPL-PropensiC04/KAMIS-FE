@@ -192,7 +192,7 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditPurchase = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Operasional" || userRole === "Admin";
+  return userRole === "Operasional";
 });
 
 // **Computed untuk data yang sudah disort**

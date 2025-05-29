@@ -178,9 +178,9 @@ const goToUpdateResource = (id: number, event?: Event) => {
 
 // Role-based visibility
 const showHargaJual = computed(() => authStore.userRole !== 'Operasional');
-const showAction = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
+const showAction = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
 // Role-based visibility tombol Tambah Resource
-const showAddButton = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
+const showAddButton = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
 
 // Fetch on load
 onMounted(() => {
