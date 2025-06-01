@@ -139,8 +139,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useProjectStore } from '@/stores/project';
-import type { DistributionFormData } from '@/interfaces/project/project.interface';
+import type { DistributionFormData, ProjectAsset } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue'; 
+
 
 const router = useRouter();
 const toast = useToast();
@@ -148,16 +149,7 @@ const projectStore = useProjectStore();
 
 const formData = ref<DistributionFormData>(JSON.parse(localStorage.getItem('distributionFormData') || '{}'));
 const clients = ref<Array<{id: string, name: string}>>([]);
-const assetList = ref<Array<{
-  id: string;
-  type: string;
-  name: string;
-  fuelCost: number;
-  shippingCost: number;
-  usageCost: number;
-  totalCost: number;
-  platNomor?: string;
-}>>([]);
+const assetList = ref<Array<ProjectAsset>>([]);
 
 // Computed values
 const totalAssetCost = computed(() => {

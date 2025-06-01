@@ -46,7 +46,7 @@
               >
                 <option value="" disabled>Nama Klien Tujuan Barang</option>
                 <option v-for="client in clients" :key="client.id" :value="client.id">
-                  {{ client.name }}
+                  {{ client.nameClient }}
                 </option>
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -263,7 +263,7 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
+                <tr v-for="(asset, index) in selectedAssetList" :key="index" class="hover:bg-gray-50">
                   <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
                   <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
@@ -278,7 +278,7 @@
                     </button>
                   </td>
                 </tr>
-                <tr v-if="assetList.length === 0">
+                <tr v-if="selectedAssetList.length === 0">
                   <td colspan="4" class="px-6 py-4 text-center text-gray-500">
                     Belum ada aset yang ditambahkan
                   </td>
@@ -314,6 +314,8 @@ import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import type { DistributionFormData, AssetUsageDTO } from '@/interfaces/project/project.interface';
+import type { ProjectAsset, AvailableAsset } from '@/interfaces/project/project.interface';
+import type { ClientInterface } from '@/interfaces/profile/client.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useAssetStore } from '@/stores/assetReservability';
 
@@ -337,36 +339,11 @@ const formData = ref<DistributionFormData>({
   projectUseAsset: [] as Array<AssetUsageDTO>
 });
 
-// Client data
-interface Client {
-  id: string;
-  name: string;
-}
+const clients = ref<ClientInterface[]>([]);
 
-const clients = ref<Client[]>([]);
 
-// Asset data
-interface Asset {
-  id: string;
-  assetType: string;
-  assetName: string;
-  assetUsageCost?: number;
-  platNomor?: string;
-}
-
-interface ProjectAsset {
-  id: string;
-  type: string;
-  name: string;
-  fuelCost: number;
-  shippingCost: number;
-  usageCost: number;
-  totalCost: number;
-  platNomor?: string;
-}
-
-const assets = ref<Asset[]>([]);
-const assetList = ref<ProjectAsset[]>([]);
+const assets = ref<AvailableAsset[]>([]);
+const selectedAssetList = ref<ProjectAsset[]>([]);
 const assetTypes = ref<string[]>([]);
 const selectedAssetType = ref('');
 const selectedAssetName = ref('');
@@ -378,7 +355,7 @@ const shippingCost = ref(0);
 const assetStore = useAssetStore();
 
 // Add a new state variable to track available assets
-const availableAssets = ref<Asset[]>([]);
+const availableAssets = ref<AvailableAsset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
 // Add a flag to track if availability check has run
@@ -386,7 +363,7 @@ const availabilityChecked = ref(false);
 
 // Computed values
 const totalAssetCost = computed(() => {
-  return assetList.value.reduce((sum, asset) => sum + asset.totalCost, 0);
+  return selectedAssetList.value.reduce((sum, asset) => sum + asset.totalCost, 0);
 });
 
 const totalPhlCost = computed(() => {
@@ -515,7 +492,7 @@ const updateAssetNames = () => {
   
   const filteredAssets = availableAssets.value.filter(asset => 
     asset.assetType === selectedAssetType.value &&
-    !assetList.value.some(a => a.id === asset.id)
+    !selectedAssetList.value.some(a => a.id === asset.id)
   );
   
   assetNames.value = filteredAssets.map(asset => asset.assetName);
@@ -543,13 +520,13 @@ const addAsset = () => {
     return;
   }
   
-  if (assetList.value.some(asset => asset.id === selectedAsset.id)) {
+  if (selectedAssetList.value.some(asset => asset.id === selectedAsset.id)) {
     toast.error('Aset sudah ditambahkan');
     return;
   }
   
   // Add asset to list with costs
-  assetList.value.push({
+  selectedAssetList.value.push({
     id: selectedAsset.id,
     type: selectedAssetType.value,
     name: selectedAssetName.value,
@@ -574,14 +551,14 @@ const addAsset = () => {
 
 // Remove asset from list
 const removeAsset = (index: number) => {
-  assetList.value.splice(index, 1);
+  selectedAssetList.value.splice(index, 1);
   updateFormData();
 };
 
 // Update form data with current asset list
 const updateFormData = () => {
   formData.value.projectTotalPengeluaran = totalExpenses.value;
-  formData.value.projectUseAsset = assetList.value.map(asset => ({
+  formData.value.projectUseAsset = selectedAssetList.value.map(asset => ({
     platNomor: asset.id,
     tipeAset: asset.type || '',
     assetUseCost: asset.usageCost || 0,
@@ -590,7 +567,7 @@ const updateFormData = () => {
   
   // Store form data in localStorage for summary page
   localStorage.setItem('distributionFormData', JSON.stringify(formData.value));
-  localStorage.setItem('distributionAssetList', JSON.stringify(assetList.value));
+  localStorage.setItem('distributionselectedAssetList', JSON.stringify(selectedAssetList.value));
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
@@ -627,7 +604,7 @@ const submitForm = async () => {
     return;
   }
   
-  if (assetList.value.length === 0) {
+  if (selectedAssetList.value.length === 0) {
     toast.error('Minimal satu aset harus ditambahkan');
     return;
   }
@@ -687,7 +664,7 @@ onMounted(() => {
       
       // Restore asset list if available
       if (parsedData.projectUseAsset && Array.isArray(parsedData.projectUseAsset)) {
-        // We'll need to fetch full asset details to reconstruct assetList
+        // We'll need to fetch full asset details to reconstruct selectedAssetList
         // This is simplified for now
       }
     } catch (error) {

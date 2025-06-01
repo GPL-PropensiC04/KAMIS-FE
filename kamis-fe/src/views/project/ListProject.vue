@@ -201,21 +201,7 @@ import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
-
-
-// Add this interface above your component's setup function
-interface Project {
-  id: string;
-  projectId?: string; // Using optional in case both exist
-  projectName: string;
-  projectType: boolean;
-  projectStatus: number;
-  projectStartDate?: string;
-  projectEndDate?: string;
-  projectTotalPemasukkan?: number;
-  projectTotalPengeluaran?: number;
-  projectProfit?: number;
-}
+import type { ListProject } from "@/interfaces/project/project.interface";
 
 // Store & Router
 const projectStore = useProjectStore();
@@ -380,7 +366,7 @@ const hasActiveFilters = computed(() => {
 });
 
 // Navigations
-const goToProjectDetails = (project: Project) => {
+const goToProjectDetails = (project: ListProject) => {
   if (project.projectType === true) {
     router.push(`/project/distribution/${project.id}`);
   } else {
