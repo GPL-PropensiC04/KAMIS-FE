@@ -139,13 +139,17 @@ import { computed } from 'vue';
 const chartTitle = computed(() => {
   switch (props.range) {
     case 'THIS_MONTH':
-      return 'Trend Pemasukan dan Pengeluaran per Minggu';
+      return 'Trend Pemasukan dan Pengeluaran Bulan Ini per Minggu';
     case 'THIS_QUARTER':
-      return 'Trend Pemasukan dan Pengeluaran per Bulan';
+      return 'Trend Pemasukan dan Pengeluaran Kuartal Ini per Bulan';
     case 'THIS_YEAR':
       return periodType.value === 'Quarterly'
-        ? 'Trend Pemasukan dan Pengeluaran per Kuartal'
-        : 'Trend Pemasukan dan Pengeluaran per Bulan';
+        ? 'Trend Pemasukan dan Pengeluaran Tahun Ini per Kuartal'
+        : 'Trend Pemasukan dan Pengeluaran Tahun Ini per Bulan';
+    case 'LAST_YEAR':
+      return periodType.value === 'Quarterly'
+        ? 'Trend Pemasukan dan Pengeluaran Tahun Lalu per Kuartal'
+        : 'Trend Pemasukan dan Pengeluaran Tahun Lalu per Bulan';
     default:
       return 'Trend Pemasukan dan Pengeluaran';
   }
@@ -160,9 +164,14 @@ watch(
       periodType.value = 'Monthly';
     } else if (newRange === 'THIS_MONTH') {
       periodType.value = 'Weekly';
+    } else if (newRange === 'THIS_QUARTER') {
+      periodType.value = 'Monthly';
+    } else if (newRange === 'LAST_YEAR') {
+      periodType.value = 'Monthly';
     } else {
       periodType.value = '';
     }
+    fetchChartData();
   },
   { immediate: true } // agar dijalankan saat onMounted juga
 );
@@ -183,7 +192,7 @@ onMounted(fetchChartData);
 
       <!-- Tampilkan toggle HANYA jika range THIS_YEAR -->
       <div
-        v-if="props.range === 'THIS_YEAR'"
+        v-if="props.range === 'THIS_YEAR' || props.range === 'LAST_YEAR'"
         class="flex border border-[#1E3A5F] rounded-md overflow-hidden font-inter h-[38px] text-sm"
       >
         <button

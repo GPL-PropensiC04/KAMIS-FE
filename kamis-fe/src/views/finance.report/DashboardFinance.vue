@@ -10,6 +10,14 @@
         <button
           :class="[
             'px-6 py-2 rounded-md font-medium transition-colors',
+            selectedRange === 'LAST_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
+          @click="setDateRange('LAST_YEAR')">
+          Tahun Lalu
+        </button>
+        <button
+          :class="[
+            'px-6 py-2 rounded-md font-medium transition-colors',
             selectedRange === 'THIS_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
           ]"
           @click="setDateRange('THIS_YEAR')">
