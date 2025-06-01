@@ -136,7 +136,7 @@ const formatPeriodLabel = (label: string): string => {
     return label.split('-Q')[1] ? `Q${label.split('-Q')[1]}` : label;
   }
 
-  if (periodType.value === 'Monthly' || props.range === 'THIS_QUARTER' || props.range === 'THIS_YEAR') {
+  if (periodType.value === 'Monthly' || props.range === 'THIS_QUARTER' || props.range === 'THIS_YEAR' || props.range === 'LAST_YEAR') {
     const monthMap: Record<string, string> = {
       '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
       '05': 'Mei', '06': 'Jun', '07': 'Jul', '08': 'Agu',
@@ -152,13 +152,17 @@ const formatPeriodLabel = (label: string): string => {
 const chartTitle = computed(() => {
   switch (props.range) {
     case 'THIS_MONTH':
-      return 'Trend Aktivitas per Minggu';
+      return 'Trend Aktivitas Bulan Ini per Minggu';
     case 'THIS_QUARTER':
-      return 'Trend Aktivitas per Bulan';
+      return 'Trend Aktivitas Kuartal Ini per Bulan';
     case 'THIS_YEAR':
       return periodType.value === 'Quarterly'
-        ? 'Trend Aktivitas per Kuartal'
-        : 'Trend Aktivitas per Bulan';
+        ? 'Trend Aktivitas Tahun Ini per Kuartal'
+        : 'Trend Aktivitas Tahun Ini per Bulan';
+    case 'LAST_YEAR':
+      return periodType.value === 'Quarterly'
+        ? 'Trend Aktivitas Tahun Lalu per Kuartal'
+        : 'Trend Aktivitas Tahun Lalu per Bulan';
     default:
       return 'Trend Aktivitas';
   }
@@ -172,9 +176,14 @@ watch(
       periodType.value = 'Monthly';
     } else if (newRange === 'THIS_MONTH') {
       periodType.value = 'Weekly';
+    } else if (newRange === 'THIS_QUARTER') {
+      periodType.value = 'Monthly';
+    } else if (newRange === 'LAST_YEAR') {
+      periodType.value = 'Monthly';
     } else {
       periodType.value = '';
     }
+    fetchChartData();
   },
   { immediate: true }
 );
@@ -196,7 +205,7 @@ onMounted(fetchChartData);
       <div class="flex gap-2 items-center">
         <!-- PeriodType Toggle -->
         <div
-            v-if="props.range === 'THIS_YEAR'"
+            v-if="props.range === 'THIS_YEAR' || props.range === 'LAST_YEAR'"
             class="flex border border-[#1E3A5F] font-inter text-sm"
         >
             <button
