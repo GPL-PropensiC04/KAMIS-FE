@@ -8,7 +8,7 @@ export const MaintenanceService = {
    */
   async getMaintenanceByAsetId(platNomor: string): Promise<Maintenance[]> {
     try {
-      const response = await axios.get(`${API_URLS.ASSET}/api/maintenance/${platNomor}`, {
+      const response = await axios.get(`${API_URLS.ASSET}/maintenance/${platNomor}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -29,7 +29,7 @@ export const MaintenanceService = {
    */
   async addMaintenance(data: MaintenanceRequest): Promise<Maintenance> {
     try {
-      const response = await axios.post(`${API_URLS.ASSET}/api/maintenance`, data, {
+      const response = await axios.post(`${API_URLS.ASSET}/maintenance/`, data, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -51,7 +51,7 @@ export const MaintenanceService = {
    */
   async completeMaintenance(id: number): Promise<Maintenance> {
     try {
-      const response = await axios.patch(`${API_URLS.ASSET}/api/maintenance/${id}/complete`, {}, {
+      const response = await axios.patch(`${API_URLS.ASSET}/maintenance/${id}/complete`, {}, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -73,7 +73,7 @@ export const MaintenanceService = {
    */
   async getAssetsInMaintenance(): Promise<Maintenance[]> {
     try {
-      const response = await axios.get(`${API_URLS.ASSET}/api/maintenance-in-progress`, {
+      const response = await axios.get(`${API_URLS.ASSET}/maintenance/maintenance-in-progress`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
