@@ -19,12 +19,50 @@ export interface ProjectInterface {
   projectPHLPay?: number;
   projectPickupAddress?: string;
   projectDeliveryAddress?: string;
-  projectUseAsset?: Array<AssetUsageDTO>;
+  projectUseAsset?: AssetUsageDTO[];
   projectUseResource?: Array<ResourceUsageDTO>;
   data?: ProjectInterface; // For nested responses
   projectLogs: LogProjectInterface[];
   projectPaymentDate?: string; // ISO date string
 }
+
+// State variables
+export interface DistributionProjectData {
+  id: string;
+  projectName: string;
+  projectClientId: string;
+  projectClientName: string;
+  projectStartDate: string;
+  projectEndDate: string | null;
+  projectPickupAddress: string;
+  projectDeliveryAddress: string;
+  projectStatus: number;
+  projectPaymentStatus: number;
+  projectPHLCount: number;
+  projectPHLPay: number;
+  projectTotalPemasukkan: number;
+  projectTotalPengeluaran: number;
+  projectType: boolean;
+  projectUseAsset: AssetUsageDTO[];
+  projectLogs: LogProjectInterface[];
+}
+
+export interface SalesProjectData {
+    id: string;
+    projectName: string;
+    projectClientId: string;
+    projectClientName: string;
+    projectStartDate: string;
+    projectEndDate?: string;
+    projectDeliveryAddress: string;
+    projectStatus: number;
+    projectPaymentStatus: number;
+    projectTotalPemasukkan: number;
+    projectType: boolean;
+    projectUseResource: ResourceUsageDTO[];
+    projectLogs: LogProjectInterface[];
+  }
+  
 
 export interface ProjectResponseInterface {
   status: number;
@@ -40,6 +78,20 @@ export interface ListProjectResponseInterface {
   data: ProjectInterface[];
 }
 
+
+export interface ListProject {
+  id: string;
+  projectId?: string; 
+  projectName: string;
+  projectType: boolean;
+  projectStatus: number;
+  projectStartDate?: string;
+  projectEndDate?: string;
+  projectTotalPemasukkan?: number;
+  projectTotalPengeluaran?: number;
+  projectProfit?: number;
+}
+
 export interface FilterProjectInterface {
   idProject?: string;
   statusProject?: string;
@@ -51,8 +103,31 @@ export interface FilterProjectInterface {
   startNominal?: number;
   endNominal?: number;
 }
+export interface AvailableAsset {
+  id: string;
+  assetType: string;
+  assetName: string;
+  assetUsageCost?: number;
+  platNomor?: string;
+}
 
-// New interfaces for add project requests
+export interface ProjectAsset {
+  id: string;
+  type: string;
+  name: string;
+  fuelCost: number;
+  shippingCost: number;
+  usageCost: number;
+  totalCost: number;
+  platNomor?: string;
+}
+
+export interface ProjectResource {
+  id: string;
+  resourceName: string;
+  resourcePrice: number;
+  resourceQuantity: number;
+}
 
 export interface AssetUsageDTO {
   platNomor: string;

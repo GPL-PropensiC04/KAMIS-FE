@@ -275,38 +275,15 @@ import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VModal from '@/components/VModal.vue';
+import type { SalesProjectData, ResourceUsageDTO } from '@/interfaces/project/project.interface';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
-// State variables
-interface ProjectData {
-  id: string;
-  projectName: string;
-  projectClientId: string;
-  projectClientName: string;
-  projectStartDate: string;
-  projectEndDate?: string;
-  projectDeliveryAddress: string;
-  projectStatus: number;
-  projectPaymentStatus: number;
-  projectTotalPemasukkan: number;
-  projectType: boolean;
-  projectUseResource: ProjectResource[];
-  projectLogs: ProjectLog[];
-}
-
-interface ProjectLog {
-  id: string;
-  user: string;
-  action: string;
-  actionDate: string;
-}
-
-const project = ref<ProjectData>({} as ProjectData);
-const projectData = ref<ProjectData>({} as ProjectData);
+const project = ref<SalesProjectData>({} as SalesProjectData);
+const projectData = ref<SalesProjectData>({} as SalesProjectData);
 const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
@@ -369,9 +346,6 @@ const fetchResourceNames = async () => {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           }
         });
-        
-        console.log(`Response status for resource ${resourceId}:`, response.status);
-        console.log(`Response data for resource ${resourceId}:`, response.data);
         
         if (response.data && response.data.status === 200 && response.data.data) {
           const resourceData = response.data.data;

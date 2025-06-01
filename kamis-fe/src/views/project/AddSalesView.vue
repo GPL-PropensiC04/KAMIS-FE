@@ -81,7 +81,7 @@
                   >
                     <option value="" disabled>Pilih klien tujuan penjualan</option>
                     <option v-for="client in clients" :key="client.id" :value="client.id">
-                      {{ client.name }}
+                      {{ client.nameClient }}
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
@@ -171,7 +171,7 @@
                   >
                     <option value="" disabled>Pilih Barang</option>
                     <option v-for="product in availableProducts" :key="product.id" :value="product.id">
-                      {{ product.name }}
+                      {{ product.resourceName }}
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -191,7 +191,7 @@
                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
                   >
                     <option value="" disabled>Pilih Jumlah</option>
-                    <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
+                    <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.resourceStock || 0)" :key="num" :value="num">{{ num }}</option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +274,7 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="(product, index) in productList" :key="index" class="hover:bg-blue-50 transition-colors duration-150">
+                  <tr v-for="(product, index) in selectedProductList" :key="index" class="hover:bg-blue-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center space-x-3">
                         <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg">
@@ -282,14 +282,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                           </svg>
                         </div>
-                        <span class="text-sm font-medium text-gray-900">{{ product.name }}</span>
+                        <span class="text-sm font-medium text-gray-900">{{ product.resourceName }}</span>
                       </div>
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
-                      <span class="text-sm font-medium text-gray-900">{{ product.quantity }}</span>
+                      <span class="text-sm font-medium text-gray-900">{{ product.resourceQuantity }}</span>
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                      <span class="text-sm font-bold text-gray-900">{{ formatCurrency(product.price) }}</span>
+                      <span class="text-sm font-bold text-gray-900">{{ formatCurrency(product.resourcePrice) }}</span>
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                       <button 
@@ -303,7 +303,7 @@
                       </button>
                     </td>
                   </tr>
-                  <tr v-if="productList.length === 0">
+                  <tr v-if="selectedProductList.length === 0">
                     <td colspan="4" class="px-6 py-12 text-center">
                       <div class="flex flex-col items-center space-y-3">
                         <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                     </td>
                   </tr>
                 </tbody>
-                <tfoot v-if="productList.length > 0" class="bg-gray-50">
+                <tfoot v-if="selectedProductList.length > 0" class="bg-gray-50">
                   <tr>
                     <td colspan="2" class="px-6 py-4 text-right font-semibold text-gray-700">Total Pemasukan:</td>
                     <td class="px-6 py-4 text-right font-bold text-lg text-gray-900">{{ formatCurrency(totalRevenue) }}</td>
@@ -355,10 +355,10 @@
                 </div>
                 <div>
                   <p class="text-sm font-medium text-blue-700">Total Barang</p>
-                  <p class="text-xs text-blue-600">{{ productList.length }} jenis barang</p>
+                  <p class="text-xs text-blue-600">{{ selectedProductList.length }} jenis barang</p>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-blue-800">{{ productList.reduce((sum, product) => sum + product.quantity, 0) }} item</p>
+              <p class="text-2xl font-bold text-blue-800">{{ selectedProductList.reduce((sum, product) => sum + product.resourceQuantity, 0) }} item</p>
             </div>
 
             <!-- Total Revenue -->
@@ -390,6 +390,9 @@ import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue';
+import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
+import type { ClientInterface } from '@/interfaces/profile/client.interface';
+import type { ProjectResource } from '@/interfaces/project/project.interface';
 
 // Router & Toast
 const router = useRouter();
@@ -411,38 +414,17 @@ const formData = ref({
   }>
 });
 
-// Client data
-interface Client {
-  id: string;
-  name: string;
-}
+const clients = ref<ClientInterface[]>([]);
 
-const clients = ref<Client[]>([]);
-
-// Product data
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-}
-
-interface CartProduct {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-const availableProducts = ref<Product[]>([]);
-const productList = ref<CartProduct[]>([]);
+const availableProducts = ref<ResourceInterface[]>([]);
+const selectedProductList = ref<ProjectResource[]>([]);
 const selectedProduct = ref('');
 const selectedQuantity = ref<number | null>(null);
 const selectedPrice = ref(0);
 
 // Computed values
 const totalRevenue = computed(() => {
-  return productList.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+  return selectedProductList.value.reduce((sum, product) => sum + (product.resourcePrice * product.resourceQuantity), 0);
 });
 
 // Watch selected product to update price
@@ -450,7 +432,7 @@ watch(selectedProduct, (newValue) => {
   if (newValue) {
     const product = availableProducts.value.find(p => p.id === newValue);
     if (product) {
-      selectedPrice.value = product.price;
+      selectedPrice.value = product.resourcePrice;
     } else {
       selectedPrice.value = 0;
     }
@@ -470,7 +452,7 @@ const fetchClients = async () => {
     });
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
-      name: client.nameClient
+      nameClient: client.nameClient
     }));
   } catch (error) {
     console.error('Error fetching clients:', error);
@@ -487,21 +469,12 @@ const fetchProducts = async () => {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
-    
-    // Define interface for resource response
-    interface ResourceResponse {
-      id: string;
-      resourceName: string;
-      resourcePrice?: number;
-      resourceStock?: number;
-    }
-    
-    // Assuming the API returns resources with this structure
-    availableProducts.value = response.data.data.map((resource: ResourceResponse) => ({
+
+    availableProducts.value = response.data.data.map((resource: ResourceInterface) => ({
       id: resource.id,
-      name: resource.resourceName,
-      price: resource.resourcePrice, 
-      stock: resource.resourceStock 
+      resourceName: resource.resourceName,
+      resourcePrice: resource.resourcePrice, 
+      resourceStock: resource.resourceStock 
     }));
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -522,9 +495,9 @@ const addProduct = () => {
     return;
   }
   
-  const product = availableProducts.value.find(p => p.id === selectedProduct.value);
+  const productDetails = availableProducts.value.find(p => p.id === selectedProduct.value);
   
-  if (!product) {
+  if (!productDetails) {
     toast.error('Barang tidak ditemukan');
     return;
   }
@@ -534,31 +507,31 @@ const addProduct = () => {
     return;
   }
   
-  if (selectedQuantity.value > product.stock) {
-    toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
+  if (selectedQuantity.value > productDetails.resourceStock) {
+    toast.error(`Stok barang tidak cukup. Sisa stok: ${productDetails.resourceStock}`);
     return;
   }
   
   // Check if product already exists in cart
-  const existingIndex = productList.value.findIndex(p => p.id === product.id);
+  const existingIndex = selectedProductList.value.findIndex(p => p.id === productDetails.id);
   
   if (existingIndex >= 0) {
     // Update existing product
-    const newQuantity = productList.value[existingIndex].quantity + selectedQuantity.value;
+    const newQuantity = selectedProductList.value[existingIndex].resourceQuantity + selectedQuantity.value;
     
-    if (newQuantity > product.stock) {
-      toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
+    if (newQuantity > productDetails.resourceStock) {
+      toast.error(`Stok barang tidak cukup. Sisa stok: ${productDetails.resourceStock}`);
       return;
     }
     
-    productList.value[existingIndex].quantity = newQuantity;
+    selectedProductList.value[existingIndex].resourceQuantity = newQuantity;
   } else {
-    // Add new product
-    productList.value.push({
-      id: product.id,
-      name: product.name,
-      quantity: selectedQuantity.value,
-      price: product.price
+    // Add new product, ensuring it matches ProjectResource interface
+    selectedProductList.value.push({
+      id: String(productDetails.id),
+      resourceName: productDetails.resourceName,
+      resourceQuantity: selectedQuantity.value,
+      resourcePrice: productDetails.resourcePrice
     });
   }
   
@@ -573,22 +546,22 @@ const addProduct = () => {
 
 // Remove product from cart
 const removeProduct = (index: number) => {
-  productList.value.splice(index, 1);
+  selectedProductList.value.splice(index, 1);
   updateFormData();
 };
 
 // Update form data with current product list
 const updateFormData = () => {
   formData.value.projectTotalPemasukkan = totalRevenue.value;
-  formData.value.projectUseResource = productList.value.map(product => ({
+  formData.value.projectUseResource = selectedProductList.value.map(product => ({
     resourceId: product.id,
-    resourceStockUsed: product.quantity,
-    sellPrice: product.price
+    resourceStockUsed: product.resourceQuantity,
+    sellPrice: product.resourcePrice
   }));
   
   // Store form data in localStorage for summary page
   localStorage.setItem('salesFormData', JSON.stringify(formData.value));
-  localStorage.setItem('salesProductList', JSON.stringify(productList.value));
+  localStorage.setItem('salesProductList', JSON.stringify(selectedProductList.value));
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
@@ -618,7 +591,7 @@ const submitForm = async () => {
     return;
   }
   
-  if (productList.value.length === 0) {
+  if (selectedProductList.value.length === 0) {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
@@ -666,16 +639,18 @@ onMounted(() => {
   
   // Check for saved form data
   const savedData = localStorage.getItem('salesFormData');
+  const savedSelectedProductList = localStorage.getItem('salesProductList');
+
   if (savedData) {
     try {
       const parsedData = JSON.parse(savedData);
       formData.value = { ...formData.value, ...parsedData };
       
       // Restore product list if available
-      if (parsedData.projectUseResource && Array.isArray(parsedData.projectUseResource)) {
-        // We'd need to fetch full product details to reconstruct the product list
-        // This is simplified for now
+      if (savedSelectedProductList) {
+        selectedProductList.value = JSON.parse(savedSelectedProductList);
       }
+      updateFormData();
     } catch (error) {
       console.error('Error parsing saved form data:', error);
     }
@@ -714,7 +689,7 @@ button, input, textarea, select {
 /* Input focus effects */
 input:focus, select:focus, textarea:focus {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 4px 12px rgba(59, 130 246, 0.15);
 }
 
 /* Button hover effects */
