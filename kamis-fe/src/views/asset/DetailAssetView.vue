@@ -563,7 +563,7 @@ const getStatusColor = (status: string) => {
     'Tidak Tersedia': 'bg-red-100 text-red-800',
     'Maintenance': 'bg-yellow-100 text-yellow-800'
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return (status in colors ? colors[status as keyof typeof colors] : 'bg-gray-100 text-gray-800');
 };
 
 // Add this computed property after your other computed properties
@@ -648,7 +648,7 @@ const submitMaintenance = async () => {
   try {
     newMaintenance.value.platNomor = platNomor;
     
-    const response = await axios.post(`${API_URLS.ASSET}/maintenance`, newMaintenance.value, {
+    const response = await axios.post(`${API_URLS.ASSET}/maintenance/`, newMaintenance.value, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`

@@ -22,21 +22,8 @@ const projectStore = useProjectStore();
 const formData = ref<UpdateProjectFormData | null>(null);
 const isLoading = ref(true);
 
-// Client data
-interface Client {
-  id: string;
-  name: string;
-}
 
-const clients = ref<Client[]>([]);
-
-// Product data
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-}
+const clients = ref<ClientInterface[]>([]);
 
 const availableProducts = ref<ResourceInterface[]>([]);
 const productList = ref<ProjectResource[]>([]);
@@ -147,7 +134,7 @@ const fetchClients = async () => {
     });
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
-      name: client.nameClient
+      nameClient: client.nameClient
     }));
   } catch (error) {
     console.error('Error fetching clients:', error);
@@ -224,7 +211,7 @@ const fetchProducts = async () => {
       
       return {
         id: String(resource.id).trim(), // Convert to string and trim whitespace
-        name: resource.resourceName,
+        resourceName: resource.resourceName,
         price: resource.resourcePrice || 0,
         stock: resource.resourceStock || 0
       };
@@ -343,6 +330,7 @@ const updateFormData = () => {
   formData.value.projectTotalPemasukkan = totalRevenue.value;
   formData.value.projectUseResource = productList.value.map(product => ({
     resourceId: product.id,
+    resourceName: product.resourceName,
     resourceStockUsed: product.resourceQuantity,
     sellPrice: product.resourcePrice
   }));
@@ -500,7 +488,7 @@ onMounted(() => {
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">
-                    {{ client.name }}
+                    {{ client.nameClient }}
                   </option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">

@@ -124,7 +124,7 @@ const toast = useToast();
 const projectStore = useProjectStore();
 
 const formData = ref<SalesFormData>(JSON.parse(localStorage.getItem('salesFormData') || '{}'));
-const clients = ref<Array<{id: string, name: string}>>([]);
+const clients = ref<Array<{id: string, nameClient: string}>>([]);
 const productList = ref<Array<ProjectResource>>([]);
 
 // Computed values
@@ -152,7 +152,7 @@ const formatDate = (dateString: string): string => {
 // Get client name from client id
 const getClientName = (clientId: string): string => {
   const client = clients.value.find(c => c.id === clientId);
-  return client ? client.name : clientId;
+  return client ? client.nameClient : clientId; // Changed client.name to client.nameClient
 };
 
 // Navigation
@@ -210,4 +210,4 @@ onMounted(() => {
   // Update total income in form data based on products
   formData.value.projectTotalPemasukkan = totalProductCost.value;
 });
-</script> 
+</script>
