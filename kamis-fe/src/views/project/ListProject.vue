@@ -70,8 +70,8 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th class="px-6 py-4 table-header text-base">ID Proyek</th>
-            <th class="px-6 py-4 table-header text-base">Nama Proyek</th>
+            <th class="px-6 py-4 table-header text-base">ID Aktivitas</th>
+            <th class="px-6 py-4 table-header text-base">Nama Aktivitas</th>
             <th class="px-6 py-4 table-header text-base">Tipe</th>
             <th class="px-6 py-4 table-header text-base">Status</th>
             <th class="px-6 py-4 table-header text-base">Tanggal Mulai</th>
@@ -91,7 +91,7 @@
             <td class="px-6 py-5">{{ project.id }}</td>
             <td class="px-6 py-5">{{ project.projectName }}</td>
             <td class="px-6 py-5">{{ formatType(project.projectType) }}</td>
-            <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
+            <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType, project.projectPaymentStatus) }}</td>
             <td class="px-6 py-5">{{ formatDate(project.projectStartDate) }}</td>
             <td class="px-6 py-5">{{ formatDate(project.projectEndDate) }}</td>
             <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-green-600">
@@ -197,26 +197,11 @@ import { useProjectStore } from "@/stores/project";
 import { useAuthStore } from "@/stores/auth";
 import VSearchBar from "@/components/VSearchBar.vue";
 import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
-import VSortButton from "@/components/VSortButton.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
-
-
-// Add this interface above your component's setup function
-interface Project {
-  id: string;
-  projectId?: string; // Using optional in case both exist
-  projectName: string;
-  projectType: boolean;
-  projectStatus: number;
-  projectStartDate?: string;
-  projectEndDate?: string;
-  projectTotalPemasukkan?: number;
-  projectTotalPengeluaran?: number;
-  projectProfit?: number;
-}
+import type { ListProject } from "@/interfaces/project/project.interface";
 
 // Store & Router
 const projectStore = useProjectStore();
@@ -242,12 +227,12 @@ const tipeProyekOption = ref("Penjualan");
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Direksi" || userRole === "Finance" || userRole === "Admin";
+  return userRole === "Direksi" || userRole === "Finance";
 });
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Operasional" || userRole === "Admin";
+  return userRole === "Operasional";
 });
 
 // Price range options
@@ -343,7 +328,11 @@ const formatCurrency = (value: number) => {
 };
 
 // Status formatter
-const formatStatus = (status: number, projectType: boolean) => {
+const formatStatus = (status: number, projectType: boolean, projectPaymentStatus: number) => {
+  const userRole = authStore.userRole;
+  if ((userRole === "Direksi" || userRole === "Finance") &&  projectPaymentStatus === 0) {
+    return "Menunggu Pembayaran";
+  }
   if (projectType) {
     switch (status) { // Distribusi
       case 0: return 'Direncanakan';
@@ -381,7 +370,7 @@ const hasActiveFilters = computed(() => {
 });
 
 // Navigations
-const goToProjectDetails = (project: Project) => {
+const goToProjectDetails = (project: ListProject) => {
   if (project.projectType === true) {
     router.push(`/project/distribution/${project.id}`);
   } else {

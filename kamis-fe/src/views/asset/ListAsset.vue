@@ -76,7 +76,7 @@ const canViewFinancialInfo = computed(() => {
 });
 
 const canViewMaintenanceInfo = computed(() => {
-  return authStore.userRole === 'Operasional';
+  return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
 });
 
 // Notifikasi state

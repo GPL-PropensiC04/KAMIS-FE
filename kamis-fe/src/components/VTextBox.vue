@@ -34,19 +34,19 @@ const focusInput = () => {
 </script>
 
 <template>
-    <div class="relative w-full max-w-lg font-inter">
-        <!-- Textbox -->
+    <div class="relative w-full max-w-full font-inter">
+        <!-- Textbox 1 baris -->
         <div
             @click="focusInput"
         >
-            <textarea 
+            <input 
                 ref="inputRef"
                 v-model="textValue"
                 :placeholder="placeholder"
-                class="w-full border border-[#1E3A5F] p-2 rounded-md bg-[#ffffff] font-lato"
-                rows="4"
+                type="text"
+                class="w-full border text-gray-800 placeholder-gray-500 border-gray-300 px-4 py-3 rounded-lg bg-white font-lato"
                 @input="updateValue"
-            ></textarea>
+            />
         </div>
     </div>
 </template>
@@ -55,9 +55,5 @@ const focusInput = () => {
 /* Menggunakan font Inter */
 .font-inter {
     font-family: 'Inter', sans-serif;
-}
-
-textarea {
-    resize: none;
 }
 </style>

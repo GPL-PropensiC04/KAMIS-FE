@@ -17,8 +17,25 @@
         <table class="custom-table">
           <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
             <tr>
-              <th class="px-6 py-4 table-header cursor-pointer text-base">Nama Resource</th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base">Stok</th>
+              <th class="px-3 py-4 table-header text-base" style="width: 60px;">No</th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="sortBy('resourceName')">
+                <div class="flex items-center justify-center gap-2">
+                  <span>Nama Resource</span>
+                  <span v-if="sortField === 'resourceName'" class="sort-indicator">
+                    <span v-if="sortOrder === 'asc'" class="text-white">▲</span>
+                    <span v-else class="text-white">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="sortBy('resourceStock')">
+                <div class="flex items-center justify-center gap-2">
+                  <span>Stok</span>
+                  <span v-if="sortField === 'resourceStock'" class="sort-indicator">
+                    <span v-if="sortOrder === 'asc'" class="text-white">▲</span>
+                    <span v-else class="text-white">▼</span>
+                  </span>
+                </div>
+              </th>
               <th v-if="showHargaJual" class="px-6 py-4 table-header text-base">Harga Jual</th>
               <th class="px-6 py-4 table-header text-base">Deskripsi</th>
               <th v-if="showAction" class="px-6 py-4 table-header text-base">Action</th>
@@ -26,10 +43,11 @@
           </thead>
           <tbody>
             <tr 
-              v-for="resource in filteredResources" 
+              v-for="(resource, index) in sortedAndFilteredResources" 
               :key="resource.id"
               class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             >
+              <td class="px-3 py-5 font-medium text-gray-600" style="width: 60px;">{{ index + 1 }}</td>
               <td class="px-6 py-5">{{ resource.resourceName }}</td>
               <td class="px-6 py-5">{{ resource.resourceStock }}</td>
               <td v-if="showHargaJual" class="px-6 py-5 font-bold">{{ formatCurrency(resource.resourcePrice) }}</td>
@@ -42,7 +60,7 @@
               </td>
             </tr>
             
-            <tr v-if="filteredResources.length === 0">
+            <tr v-if="sortedAndFilteredResources.length === 0">
               <td :colspan="getColspan" class="text-center text-gray-500 py-6 text-base italic">
                 Data resource tidak ditemukan.
               </td>
@@ -72,6 +90,8 @@ const router = useRouter();
 // State
 const searchName = ref('');
 const loading = ref(true);
+const sortField = ref<string>('');
+const sortOrder = ref<'asc' | 'desc'>('asc');
 
 // Fetch data
 const fetchResources = async () => {
@@ -96,9 +116,54 @@ const filteredResources = computed(() => {
   );
 });
 
+// Sorting function
+const sortBy = (field: string) => {
+  if (sortField.value === field) {
+    // Toggle sort order if same field
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Set new field and default to ascending
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+};
+
+// Sorted and filtered resources
+const sortedAndFilteredResources = computed(() => {
+  const resources = [...filteredResources.value];
+  
+  if (sortField.value) {
+    resources.sort((a, b) => {
+      let aValue = a[sortField.value as keyof typeof a];
+      let bValue = b[sortField.value as keyof typeof b];
+      
+      // Handle string comparison
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      // Handle number comparison
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Handle string comparison
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortOrder.value === 'asc' ? 1 : -1;
+      if (bValue == null) return sortOrder.value === 'asc' ? -1 : 1;
+      if (aValue < bValue) return sortOrder.value === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder.value === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+  
+  return resources;
+});
+
 // Dynamic colspan for empty state message
 const getColspan = computed(() => {
-  let colspan = 3; // Base columns (name, stock, description)
+  let colspan = 4; // Base columns (no, name, stock, description)
   if (showHargaJual.value) colspan++;
   if (showAction.value) colspan++;
   return colspan;
@@ -113,9 +178,9 @@ const goToUpdateResource = (id: number, event?: Event) => {
 
 // Role-based visibility
 const showHargaJual = computed(() => authStore.userRole !== 'Operasional');
-const showAction = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
+const showAction = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
 // Role-based visibility tombol Tambah Resource
-const showAddButton = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
+const showAddButton = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
 
 // Fetch on load
 onMounted(() => {
@@ -165,6 +230,15 @@ onMounted(() => {
 
 .table-header:hover {
   background-color: #32486B;
+}
+
+.sort-indicator {
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 12px;
 }
 
 @keyframes slide-in {

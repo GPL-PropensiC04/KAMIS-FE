@@ -360,47 +360,19 @@ import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VModal from '@/components/VModal.vue';
+import type { AssetUsageDTO, DistributionProjectData } from '@/interfaces/project/project.interface';
+import type { LogProjectInterface } from '@/interfaces/project/logproject.interface';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
-// State variables
-interface ProjectData {
-  id: string;
-  projectName: string;
-  projectClientId: string;
-  projectClientName: string;
-  projectStartDate: string;
-  projectEndDate: string | null;
-  projectPickupAddress: string;
-  projectDeliveryAddress: string;
-  projectStatus: number;
-  projectPaymentStatus: number;
-  projectPHLCount: number;
-  projectPHLPay: number;
-  projectTotalPemasukkan: number;
-  projectTotalPengeluaran: number;
-  projectType: boolean;
-  projectUseAsset: ProjectAsset[];
-  projectLogs: ProjectLog[];
-}
-
-interface ProjectLog {
-  id: string;
-  user: string;
-  action: string;
-  actionDate: string;
-}
-
-const project = ref<ProjectData>({} as ProjectData);
-const projectData = ref<ProjectData>({} as ProjectData);
+const project = ref<DistributionProjectData>({} as DistributionProjectData);
+const projectData = ref<DistributionProjectData> ({} as DistributionProjectData);
 const isLoading = ref(true);
 const error = ref('');
-const clientName = ref<string>('');
 const logsLoading = ref(false);
-const clientLoading = ref(true);
 const assetsLoading = ref(false); // For DetailDistributionView only
 
 // Role-based permission computed properties
@@ -411,7 +383,7 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Direksi';
+  return userRole === 'Operasional';
 });
 
 const canEditFinancial = computed(() => {
@@ -466,18 +438,12 @@ const getPaymentModalMessage = computed(() => {
     : 'Apakah Anda yakin ingin mengembalikan pembayaran ini?';
 });
 
-// First, define an interface for the asset structure
-interface ProjectAsset {
-  platNomor: string;
-  assetUseCost: number;
-  assetFuelCost: number;
-}
 
 // Now update both computed properties with proper type annotations
 const totalAssetUseCost = computed(() => {
   if (!projectData.value || !projectData.value.projectUseAsset) return 0;
   
-  return projectData.value.projectUseAsset.reduce((total: number, asset: ProjectAsset) => {
+  return projectData.value.projectUseAsset.reduce((total: number, asset: AssetUsageDTO) => {
     return total + (asset.assetUseCost || 0);
   }, 0);
 });
@@ -485,7 +451,7 @@ const totalAssetUseCost = computed(() => {
 const totalAssetFuelCost = computed(() => {
   if (!projectData.value || !projectData.value.projectUseAsset) return 0;
   
-  return projectData.value.projectUseAsset.reduce((total: number, asset: ProjectAsset) => {
+  return projectData.value.projectUseAsset.reduce((total: number, asset: AssetUsageDTO) => {
     return total + (asset.assetFuelCost || 0);
   }, 0);
 });
@@ -712,12 +678,6 @@ const editDistributionInfo = () => {
   // Navigate to the update distribution view
   router.push(`/project/update/distribution/${projectData.value.id}`);
 };
-
-
-/// 
-// Handle Log //
-///
-const userRole = computed(() => authStore.userRole)
 
 const searchLog = ref('');
 

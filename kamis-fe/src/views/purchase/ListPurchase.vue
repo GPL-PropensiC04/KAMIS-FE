@@ -44,23 +44,63 @@
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       
-      <!-- 📋 Updated Table Style -->
+      <!-- 📋 Updated Table Style with Sorting -->
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th class="px-6 py-4 table-header cursor-pointer text-base">ID Pembelian</th>
-            <th class="px-6 py-4 table-header cursor-pointer text-base">Tanggal Pengajuan</th>
-            <th class="px-6 py-4 table-header text-base">Status</th>
-            <th class="px-6 py-4 table-header text-base">Supplier</th>
+            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('id')">
+              <div class="flex items-center justify-center gap-1">
+                ID Pembelian
+                <span class="sort-indicator">
+                  <span v-if="currentSort.field === 'id' && currentSort.direction === 'asc'">▲</span>
+                  <span v-else-if="currentSort.field === 'id' && currentSort.direction === 'desc'">▼</span>
+                </span>
+              </div>
+            </th>
+            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('date')">
+              <div class="flex items-center justify-center gap-1">
+                Tanggal Pengajuan
+                <span class="sort-indicator">
+                  <span v-if="currentSort.field === 'date' && currentSort.direction === 'asc'">▲</span>
+                  <span v-else-if="currentSort.field === 'date' && currentSort.direction === 'desc'">▼</span>
+                </span>
+              </div>
+            </th>
+            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('status')">
+              <div class="flex items-center justify-center gap-1">
+                Status
+                <span class="sort-indicator">
+                  <span v-if="currentSort.field === 'status' && currentSort.direction === 'asc'">▲</span>
+                  <span v-else-if="currentSort.field === 'status' && currentSort.direction === 'desc'">▼</span>
+                </span>
+              </div>
+            </th>
+            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('supplier')">
+              <div class="flex items-center justify-center gap-1">
+                Supplier
+                <span class="sort-indicator">
+                  <span v-if="currentSort.field === 'supplier' && currentSort.direction === 'asc'">▲</span>
+                  <span v-else-if="currentSort.field === 'supplier' && currentSort.direction === 'desc'">▼</span>
+                </span>
+              </div>
+            </th>
             <th class="px-6 py-4 table-header text-base">Tipe Barang</th>
             <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Total Harga</th>
-            <th class="px-6 py-4 table-header text-base">Last Updated</th>
+            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('lastUpdate')">
+              <div class="flex items-center justify-center gap-1">
+                Last Updated
+                <span class="sort-indicator">
+                  <span v-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'asc'">▲</span>
+                  <span v-else-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'desc'">▼</span>
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
-          <template v-if="purchaseStore.purchases.length">
+          <template v-if="sortedPurchases.length">
             <tr 
-              v-for="purchase in purchaseStore.purchases" 
+              v-for="purchase in sortedPurchases" 
               :key="purchase.id" 
               class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
               @click="goToPurchaseDetail(purchase.purchaseId)"
@@ -131,6 +171,12 @@ const selectedType = ref("All");
 const sortByDate = ref(null);
 const sortByNominal = ref(null);
 
+// **State untuk sorting**
+const currentSort = ref({
+  field: '',
+  direction: ''
+});
+
 const userRole = computed(() => authStore.userRole)
 
 // **State untuk Filter Rentang Nominal**
@@ -146,8 +192,88 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditPurchase = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === "Operasional" || userRole === "Admin";
+  return userRole === "Operasional";
 });
+
+// **Computed untuk data yang sudah disort**
+const sortedPurchases = computed(() => {
+  if (!currentSort.value.field || !currentSort.value.direction) {
+    return purchaseStore.purchases;
+  }
+
+  const purchases = [...purchaseStore.purchases];
+  
+  purchases.sort((a, b) => {
+    let valueA, valueB;
+    
+    switch (currentSort.value.field) {
+      case 'id':
+        valueA = a.purchaseId.toLowerCase();
+        valueB = b.purchaseId.toLowerCase();
+        break;
+      case 'date':
+        valueA = new Date(a.purchaseSubmissionDate);
+        valueB = new Date(b.purchaseSubmissionDate);
+        break;
+      case 'status':
+        // Get display status for comparison
+        valueA = getDisplayStatus(a).toLowerCase();
+        valueB = getDisplayStatus(b).toLowerCase();
+        break;
+      case 'supplier':
+        valueA = a.purchaseSupplier.toLowerCase();
+        valueB = b.purchaseSupplier.toLowerCase();
+        break;
+      case 'lastUpdate':
+        valueA = new Date(a.purchaseUpdateDate);
+        valueB = new Date(b.purchaseUpdateDate);
+        break;
+      default:
+        return 0;
+    }
+    
+    if (valueA < valueB) {
+      return currentSort.value.direction === 'asc' ? -1 : 1;
+    }
+    if (valueA > valueB) {
+      return currentSort.value.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+  
+  return purchases;
+});
+
+// **Helper function untuk mendapatkan status yang ditampilkan**
+const getDisplayStatus = (purchase: any) => {
+  if ((userRole.value === 'Finance' || userRole.value === 'Direksi') && purchase.purchaseStatus === 'Diajukan') {
+    return 'Menunggu Persetujuan';
+  } else if ((userRole.value === 'Finance') && (purchase.purchaseStatus === 'Diproses' || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null) {
+    return 'Menunggu Pembayaran';
+  } else {
+    return purchase.purchaseStatus;
+  }
+};
+
+// **Handle sorting**
+const handleSort = (field: string) => {
+  if (currentSort.value.field === field) {
+    // Toggle direction
+    if (currentSort.value.direction === 'asc') {
+      currentSort.value.direction = 'desc';
+    } else if (currentSort.value.direction === 'desc') {
+      // Reset sorting
+      currentSort.value.field = '';
+      currentSort.value.direction = '';
+    } else {
+      currentSort.value.direction = 'asc';
+    }
+  } else {
+    // New field, start with ascending
+    currentSort.value.field = field;
+    currentSort.value.direction = 'asc';
+  }
+};
 
 // **List Rentang Harga**
 const nominalOptions = [
@@ -263,6 +389,13 @@ const goToPurchaseDetail = (purchaseId: string) => {
 
 .table-header:hover {
   background-color: #32486B;
+}
+
+.sort-indicator {
+  min-width: 12px;
+  font-size: 12px;
+  color: #ffffff;
+  display: inline-block;
 }
 
 @keyframes slide-in {
