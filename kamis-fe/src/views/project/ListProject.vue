@@ -91,7 +91,7 @@
             <td class="px-6 py-5">{{ project.id }}</td>
             <td class="px-6 py-5">{{ project.projectName }}</td>
             <td class="px-6 py-5">{{ formatType(project.projectType) }}</td>
-            <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType) }}</td>
+            <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType, project.projectPaymentStatus) }}</td>
             <td class="px-6 py-5">{{ formatDate(project.projectStartDate) }}</td>
             <td class="px-6 py-5">{{ formatDate(project.projectEndDate) }}</td>
             <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-green-600">
@@ -328,7 +328,11 @@ const formatCurrency = (value: number) => {
 };
 
 // Status formatter
-const formatStatus = (status: number, projectType: boolean) => {
+const formatStatus = (status: number, projectType: boolean, projectPaymentStatus: number) => {
+  const userRole = authStore.userRole;
+  if ((userRole === "Direksi" || userRole === "Finance") &&  projectPaymentStatus === 0) {
+    return "Menunggu Pembayaran";
+  }
   if (projectType) {
     switch (status) { // Distribusi
       case 0: return 'Direncanakan';

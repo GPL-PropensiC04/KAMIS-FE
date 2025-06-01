@@ -372,9 +372,7 @@ const project = ref<DistributionProjectData>({} as DistributionProjectData);
 const projectData = ref<DistributionProjectData> ({} as DistributionProjectData);
 const isLoading = ref(true);
 const error = ref('');
-const clientName = ref<string>('');
 const logsLoading = ref(false);
-const clientLoading = ref(true);
 const assetsLoading = ref(false); // For DetailDistributionView only
 
 // Role-based permission computed properties
@@ -680,12 +678,6 @@ const editDistributionInfo = () => {
   // Navigate to the update distribution view
   router.push(`/project/update/distribution/${projectData.value.id}`);
 };
-
-
-/// 
-// Handle Log //
-///
-const userRole = computed(() => authStore.userRole)
 
 const searchLog = ref('');
 

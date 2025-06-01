@@ -1,353 +1,479 @@
 <template>
-  <Breadcrumb />
-  <div class="min-h-screen bg-gray-100 p-6">
-    <!-- Back Button -->
-    <div class="mb-4 flex justify-between items-center">
-      <router-link to="/project" class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center">
-        <span>←</span>
-      </router-link>
-      
-      <div class="flex gap-2">
-        <!-- Payment Status Button -->
-        <VSuccessButton v-if="canViewFinancialInfo && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" label="Bayar" @click="openPaymentModal"/>
-        <VCancelButton v-if="canViewFinancialInfo && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" label="Kembalikan" @click="openPaymentModal"/>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Breadcrumb -->
+    <Breadcrumb />
+    
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+      <!-- Header Section -->
+      <div class="mb-6 flex justify-between items-center">
+        <!-- Back Button -->
+        <router-link 
+          to="/project" 
+          class="text-[#1E3A5F] hover:text-[#1a325a] text-2xl flex items-center transition-colors"
+        >
+          <span class="mr-2">←</span>
+          <span class="text-base font-medium">Kembali</span>
+        </router-link>
         
-        <!-- Project Action Buttons -->
-        <template v-if="canEditProject && projectData.projectType === true">
-          <VCancelButton v-if="projectData.projectStatus < 2" label="Batal" @click="cancelProject" />
-          <VSuccessButton v-if="projectData.projectStatus < 2" label="Update" @click="updateProject"/>
-        </template>
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <!-- Payment Status Buttons -->
+          <VSuccessButton 
+            v-if="canViewFinancialInfo && showPaymentUpdateButton && projectData.projectPaymentStatus === 0" 
+            label="Bayar" 
+            @click="openPaymentModal"
+          />
+          <VCancelButton 
+            v-if="canViewFinancialInfo && projectData.projectStatus === 3 && projectData.projectPaymentStatus === 1" 
+            label="Kembalikan" 
+            @click="openPaymentModal"
+          />
+          
+          <!-- Project Action Buttons -->
+          <template v-if="canEditProject && projectData.projectType === true">
+            <VCancelButton 
+              v-if="projectData.projectStatus < 2" 
+              label="Batal" 
+              @click="cancelProject" 
+            />
+            <VSuccessButton 
+              v-if="projectData.projectStatus < 2" 
+              label="Update" 
+              @click="updateProject"
+            />
+          </template>
+        </div>
       </div>
-    </div>
 
-    <div v-if="isLoading" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
-      <p>Memuat data...</p>
-    </div>
-
-    <div v-else-if="error" class="bg-[#E5EAF2] rounded-lg shadow-md p-8 text-center">
-      <p class="text-red-500">{{ error }}</p>
-      <button 
-        @click="loadData" 
-        class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-      >
-        Coba Lagi
-      </button>
-    </div>
-
-    <template v-else>
-      <!-- Distribution Details Section -->
-      <div v-if="projectData.projectType === true" class="space-y-6">
-        <!-- Header with Edit button -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Informasi Distribusi - {{ projectData.id }}</h2>
-            <!-- Edit button for Operasional role -->
-            <VSuccessButton
-              v-if="canEditProject"
-              label="Ubah"
-              @click="editDistributionInfo"
-            />
+      <!-- Loading State -->
+      <div v-if="isLoading" class="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <div class="flex flex-col items-center">
+          <div class="animate-pulse mb-4">
+            <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
           </div>
-
-          <!-- Basic Info -->
-          <div class="grid grid-cols-3 gap-4 p-4">
-            <div>
-              <p class="text-gray-600 text-sm">Nama Atribusi</p>
-              <p class="font-semibold">{{ projectData.projectUseAsset && projectData.projectUseAsset[0] ? projectData.projectUseAsset[0].platNomor : '-' }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ projectData.projectName }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Tanggal Mulai</p>
-              <p class="font-semibold">{{ formatDate(projectData.projectStartDate) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Jumlah PHL</p>
-              <p class="font-semibold">{{ projectData.projectPHLCount }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Status</p>
-              <p class="font-semibold">{{ formatStatus(projectData.projectStatus) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Tanggal Selesai</p>
-              <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Alamat Pengambilan</p>
-              <p class="font-semibold">{{ projectData.projectPickupAddress }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
-              <p class="font-semibold">{{ projectData.projectDeliveryAddress }}</p>
-            </div>
-            <div v-if="projectData.projectUseAsset && projectData.projectUseAsset.length">
-              <p class="text-gray-600 text-sm">Aset yang digunakan</p>
-              <p class="font-semibold">{{ projectData.projectUseAsset.length }} aset</p>
-            </div>
-          </div>
+          <p class="text-gray-600">Memuat data...</p>
         </div>
+      </div>
 
-        <!-- Assets Used Table with Edit button -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Aset Yang Digunakan</h2>
-            <!-- Edit button for Operasional role -->
-            <VSuccessButton
-              v-if="canEditProject"
-              label="Ubah"
-              @click="editAssets"
-            />
+      <!-- Error State -->
+      <div v-else-if="error" class="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <span class="text-red-600 text-xl">⚠</span>
           </div>
-          
-          <div class="overflow-x-auto">
-            <table class="min-w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">No</th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">Nomor Polisi</th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">Jenis</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(asset, index) in projectData.projectUseAsset" :key="index">
-                  <td class="px-6 py-4">{{ index + 1 }}</td>
-                  <td class="px-6 py-4">{{ asset.platNomor }}</td>
-                  <td class="px-6 py-4">Truk</td> <!-- We might need to fetch this from an asset service -->
-                </tr>
-                <tr v-if="!projectData.projectUseAsset || projectData.projectUseAsset.length === 0">
-                  <td colspan="3" class="px-6 py-4 text-center">Tidak ada data aset yang digunakan</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button 
+            @click="loadData" 
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
+          >
+            Coba Lagi
+          </button>
         </div>
+      </div>
 
-        <!-- Financial Information -->
-        <div v-if="canViewFinancialInfo" class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Informasi Keuangan</h2>
-          </div>
-          
-          <div class="p-4 grid grid-cols-2 gap-4">
-            <div>
-              <p class="text-gray-600 text-sm">Jumlah Pengeluaran:</p>
-              <p class="font-semibold">{{ formatCurrency(projectData.projectTotalPengeluaran) }}</p>
+      <!-- Main Content -->
+      <template v-else>
+        <!-- Distribution Project Details -->
+        <div v-if="projectData.projectType === true" class="space-y-6">
+          <!-- Project Information Card -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4 flex justify-between items-center">
+              <h2 class="text-xl font-semibold text-white">
+                Informasi Distribusi - {{ projectData.id }}
+              </h2>
+              <VSuccessButton
+                v-if="canEditProject"
+                label="Ubah"
+                @click="editDistributionInfo"
+                class="text-sm"
+              />
             </div>
-            <div>
-              <p class="text-gray-600 text-sm">Total Upah PHL:</p>
-              <p class="font-semibold">{{ formatCurrency(projectData.projectPHLPay * projectData.projectPHLCount) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Total Pemasukkan Bersih:</p>
-              <p class="font-semibold">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Total Profit:</p>
-              <p :class="{'font-semibold': true, 'text-red-600': (projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) < 0, 'text-green-600': (projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) > 0}">
-                {{ formatCurrency(projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) }}
-              </p>
-            </div>
-          </div>
-        </div>
 
-        <!-- Log Distribusi -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Log Distribusi</h2>
-          </div>
-          
-          <div class="p-4">
-            <!-- Timeline Component -->
-            <div class="relative">
-              <!-- Timeline vertical line -->
-              <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-
-              <!-- Timeline items -->
-              <div v-for="(log, index) in projectData.projectLogs" :key="index" 
-                   class="relative pl-12 pb-8 flex flex-col">
-                <!-- Timeline dot -->
-                <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
-                
-                <!-- Timestamp -->
-                <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
-                
-                <!-- User info -->
-                <div class="mb-1 text-sm">
-                  <span class="font-medium">User:</span> {{ log.user }}
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Nama Atribusi</p>
+                  <p class="text-base font-semibold text-gray-900">
+                    {{ projectData.projectUseAsset && projectData.projectUseAsset[0] ? projectData.projectUseAsset[0].platNomor : '-' }}
+                  </p>
                 </div>
                 
-                <!-- Action -->
-                <div class="bg-gray-50 rounded-md p-3 text-sm">
-                  <span class="font-medium">Action:</span>
-                  <p>{{ log.action }}</p>
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Nama Klien</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectName }}</p>
                 </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Tanggal Mulai</p>
+                  <p class="text-base font-semibold text-gray-900">{{ formatDate(projectData.projectStartDate) }}</p>
+                </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Jumlah PHL</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectPHLCount }}</p>
+                </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Status</p>
+                  <p class="text-base font-semibold text-gray-900">{{ formatStatus(projectData.projectStatus) }}</p>
+                </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Tanggal Selesai</p>
+                  <p class="text-base font-semibold text-gray-900">
+                    {{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}
+                  </p>
+                </div>
+                
+                <div class="space-y-1 md:col-span-2 lg:col-span-1">
+                  <p class="text-sm font-medium text-gray-500">Alamat Pengambilan</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectPickupAddress }}</p>
+                </div>
+                
+                <div class="space-y-1 md:col-span-2 lg:col-span-1">
+                  <p class="text-sm font-medium text-gray-500">Alamat Pengiriman</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectDeliveryAddress }}</p>
+                </div>
+                
+                <div v-if="projectData.projectUseAsset && projectData.projectUseAsset.length" class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Aset yang digunakan</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectUseAsset.length }} aset</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <!-- If it's the last item, display the timestamp on the right -->
-                <div v-if="index === projectData.projectLogs.length - 1" class="absolute right-0 top-0 text-xs text-gray-500">
-                  {{ formatDateTime(log.actionDate) }}
+          <!-- Assets Used Table -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4 flex justify-between items-center">
+              <h2 class="text-xl font-semibold text-white">Aset Yang Digunakan</h2>
+              <VSuccessButton
+                v-if="canEditProject"
+                label="Ubah"
+                @click="editAssets"
+                class="text-sm"
+              />
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nomor Polisi
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jenis
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(asset, index) in projectData.projectUseAsset" :key="index" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ index + 1 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {{ asset.platNomor }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      Truk
+                    </td>
+                  </tr>
+                  <tr v-if="!projectData.projectUseAsset || projectData.projectUseAsset.length === 0">
+                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500">
+                      Tidak ada data aset yang digunakan
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Financial Information -->
+          <div v-if="canViewFinancialInfo" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">Informasi Keuangan</h2>
+            </div>
+            
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm font-medium text-gray-500 mb-1">Jumlah Pengeluaran</p>
+                  <p class="text-lg font-bold text-gray-900">{{ formatCurrency(projectData.projectTotalPengeluaran) }}</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm font-medium text-gray-500 mb-1">Total Upah PHL</p>
+                  <p class="text-lg font-bold text-gray-900">{{ formatCurrency(projectData.projectPHLPay * projectData.projectPHLCount) }}</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm font-medium text-gray-500 mb-1">Total Pemasukkan Bersih</p>
+                  <p class="text-lg font-bold text-gray-900">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-sm font-medium text-gray-500 mb-1">Total Profit</p>
+                  <p class="text-lg font-bold" :class="{
+                    'text-red-600': (projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) < 0,
+                    'text-green-600': (projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) > 0,
+                    'text-gray-900': (projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) === 0
+                  }">
+                    {{ formatCurrency(projectData.projectTotalPemasukkan - projectData.projectTotalPengeluaran) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Log Distribusi -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">Log Distribusi</h2>
+            </div>
+            
+            <div class="p-6">
+              <div class="relative">
+                <!-- Timeline vertical line -->
+                <div class="absolute left-6 top-0 bottom-0 w-px bg-gray-300"></div>
+
+                <!-- Timeline items -->
+                <div v-for="(log, index) in projectData.projectLogs" :key="index" 
+                     class="relative flex pb-8 last:pb-0">
+                  <!-- Timeline dot -->
+                  <div class="absolute left-4 w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow"></div>
+                  
+                  <!-- Content -->
+                  <div class="ml-12 flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="text-xs text-gray-500">
+                        {{ formatDateTime(log.actionDate) }}
+                      </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <div class="mb-2">
+                        <span class="text-sm font-medium text-gray-700">User:</span>
+                        <span class="text-sm text-gray-900 ml-2">{{ log.user }}</span>
+                      </div>
+                      
+                      <div>
+                        <span class="text-sm font-medium text-gray-700">Action:</span>
+                        <p class="text-sm text-gray-900 mt-1">{{ log.action }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div v-if="!projectData.projectLogs || projectData.projectLogs.length === 0" 
+                     class="text-center py-8 text-gray-500">
+                  Tidak ada log aktivitas
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Sales Details Section -->
-      <div v-else-if="projectData.projectType === false" class="space-y-6">
-        <!-- Header -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Informasi Penjualan - {{ projectData.id }}</h2>
-          </div>
+        <!-- Sales Project Details -->
+        <div v-else-if="projectData.projectType === false" class="space-y-6">
+          <!-- Project Information Card -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">
+                Informasi Penjualan - {{ projectData.id }}
+              </h2>
+            </div>
 
-          <!-- Basic Info -->
-          <div class="grid grid-cols-3 gap-4 p-4">
-            <div>
-              <p class="text-gray-600 text-sm">Nama Atribusi</p>
-              <p class="font-semibold">{{ projectData.projectName || 'Klien - Jatin' }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Nama Klien</p>
-              <p class="font-semibold">{{ clientName || 'Pedlar' }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Tanggal Mulai</p>
-              <p class="font-semibold">{{ formatDate(projectData.projectStartDate) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Alamat Pengiriman</p>
-              <p class="font-semibold">{{ projectData.projectDeliveryAddress || 'Jalan Sudirman' }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Status</p>
-              <p class="font-semibold">{{ formatStatus(projectData.projectStatus) }}</p>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Tanggal Selesai</p>
-              <p class="font-semibold">{{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Products Sold Table -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Barang Yang Terjual</h2>
-          </div>
-          
-          <div class="overflow-x-auto">
-            <table class="min-w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">No</th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase">Nama</th>
-                  <th class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase">Jumlah</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(resource, index) in projectData.projectUseResource" :key="index">
-                  <td class="px-6 py-4">{{ index + 1 }}</td>
-                  <td class="px-6 py-4">{{ getResourceName(resource.resourceId) }}</td>
-                  <td class="px-6 py-4 text-right">{{ resource.resourceStockUsed }}</td>
-                </tr>
-                <tr v-if="!projectData.projectUseResource || projectData.projectUseResource.length === 0">
-                  <td colspan="3" class="px-6 py-4 text-center">Tidak ada data barang yang terjual</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Financial Information -->
-        <div v-if="canViewFinancialInfo" class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Informasi Keuangan</h2>
-          </div>
-          
-          <div class="p-4 space-y-2">
-            <div class="flex justify-between">
-              <p class="text-gray-600">Jumlah Pemasukkan:</p>
-              <p class="font-semibold">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</p>
-            </div>
-            <div class="flex justify-between">
-              <p class="text-gray-600">Total Harga Barang:</p>
-              <p class="font-semibold">{{ formatCurrency(getTotalProductCost()) }}</p>
-            </div>
-            <div class="flex justify-between">
-              <p class="text-gray-600">Total Pemasukkan Bersih:</p>
-              <p class="font-semibold">{{ formatCurrency(getNetProfit()) }}</p>
-            </div>
-            <div class="flex justify-between">
-              <p class="text-gray-600">Total Profit:</p>
-              <p :class="{
-                'font-semibold': true,
-                'text-red-600': getProfit() < 0,
-                'text-green-600': getProfit() > 0
-              }">
-                {{ formatCurrency(getProfit()) }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Log Penjualan -->
-        <div class="bg-[#E5EAF2] rounded-lg shadow-md overflow-hidden">
-          <div class="bg-[#1E3A5F] p-4">
-            <h2 class="text-xl font-bold text-white">Log Penjualan</h2>
-          </div>
-          
-          <div class="p-4">
-            <!-- Timeline Component -->
-            <div class="relative">
-              <!-- Timeline vertical line -->
-              <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-
-              <!-- Timeline items -->
-              <div v-for="(log, index) in projectData.projectLogs" :key="index" 
-                   class="relative pl-12 pb-8 flex flex-col">
-                <!-- Timeline dot -->
-                <div class="absolute left-4 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-600"></div>
-                
-                <!-- Timestamp -->
-                <div class="text-xs text-gray-500 mb-1">{{ formatDateTime(log.actionDate) }}</div>
-                
-                <!-- User info -->
-                <div class="mb-1 text-sm">
-                  <span class="font-medium">User:</span> {{ log.user }}
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Nama Atribusi</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectName || 'Klien - Jatin' }}</p>
                 </div>
                 
-                <!-- Action -->
-                <div class="bg-gray-50 rounded-md p-3 text-sm">
-                  <span class="font-medium">Action:</span>
-                  <p>{{ log.action }}</p>
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Nama Klien</p>
+                  <p class="text-base font-semibold text-gray-900">{{ clientName || 'Pedlar' }}</p>
                 </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Tanggal Mulai</p>
+                  <p class="text-base font-semibold text-gray-900">{{ formatDate(projectData.projectStartDate) }}</p>
+                </div>
+                
+                <div class="space-y-1 md:col-span-2 lg:col-span-1">
+                  <p class="text-sm font-medium text-gray-500">Alamat Pengiriman</p>
+                  <p class="text-base font-semibold text-gray-900">{{ projectData.projectDeliveryAddress || 'Jalan Sudirman' }}</p>
+                </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Status</p>
+                  <p class="text-base font-semibold text-gray-900">{{ formatStatus(projectData.projectStatus) }}</p>
+                </div>
+                
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-500">Tanggal Selesai</p>
+                  <p class="text-base font-semibold text-gray-900">
+                    {{ projectData.projectEndDate ? formatDate(projectData.projectEndDate) : '-' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <!-- If it's the last or first item, display the timestamp on the right -->
-                <div v-if="index === 0 || index === projectData.projectLogs.length - 1" 
-                     class="absolute right-0 top-0 text-xs text-gray-500">
-                  {{ formatDateTime(log.actionDate) }}
+          <!-- Products Sold Table -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">Barang Yang Terjual</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nama
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jumlah
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(resource, index) in projectData.projectUseResource" :key="index" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ index + 1 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {{ getResourceName(resource.resourceId) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      {{ resource.resourceStockUsed }}
+                    </td>
+                  </tr>
+                  <tr v-if="!projectData.projectUseResource || projectData.projectUseResource.length === 0">
+                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500">
+                      Tidak ada data barang yang terjual
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Financial Information -->
+          <div v-if="canViewFinancialInfo" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">Informasi Keuangan</h2>
+            </div>
+            
+            <div class="p-6">
+              <div class="space-y-4">
+                <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                  <p class="text-sm font-medium text-gray-600">Jumlah Pemasukkan:</p>
+                  <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(projectData.projectTotalPemasukkan) }}</p>
+                </div>
+                
+                <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                  <p class="text-sm font-medium text-gray-600">Total Harga Barang:</p>
+                  <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(getTotalProductCost()) }}</p>
+                </div>
+                
+                <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                  <p class="text-sm font-medium text-gray-600">Total Pemasukkan Bersih:</p>
+                  <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(getNetProfit()) }}</p>
+                </div>
+                
+                <div class="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-4">
+                  <p class="text-sm font-medium text-gray-600">Total Profit:</p>
+                  <p class="text-lg font-bold" :class="{
+                    'text-red-600': getProfit() < 0,
+                    'text-green-600': getProfit() > 0,
+                    'text-gray-900': getProfit() === 0
+                  }">
+                    {{ formatCurrency(getProfit()) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Log Penjualan -->
+          <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="bg-[#1E3A5F] px-6 py-4">
+              <h2 class="text-xl font-semibold text-white">Log Penjualan</h2>
+            </div>
+            
+            <div class="p-6">
+              <div class="relative">
+                <!-- Timeline vertical line -->
+                <div class="absolute left-6 top-0 bottom-0 w-px bg-gray-300"></div>
+
+                <!-- Timeline items -->
+                <div v-for="(log, index) in projectData.projectLogs" :key="index" 
+                     class="relative flex pb-8 last:pb-0">
+                  <!-- Timeline dot -->
+                  <div class="absolute left-4 w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow"></div>
+                  
+                  <!-- Content -->
+                  <div class="ml-12 flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="text-xs text-gray-500">
+                        {{ formatDateTime(log.actionDate) }}
+                      </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <div class="mb-2">
+                        <span class="text-sm font-medium text-gray-700">User:</span>
+                        <span class="text-sm text-gray-900 ml-2">{{ log.user }}</span>
+                      </div>
+                      
+                      <div>
+                        <span class="text-sm font-medium text-gray-700">Action:</span>
+                        <p class="text-sm text-gray-900 mt-1">{{ log.action }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div v-if="!projectData.projectLogs || projectData.projectLogs.length === 0" 
+                     class="text-center py-8 text-gray-500">
+                  Tidak ada log aktivitas
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </template>
+    </div>
+
+    <!-- Payment Modal -->
+    <VModal v-model="showPaymentModal">
+      <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          Konfirmasi Perubahan Status Pembayaran
+        </h3>
+        <p class="mb-6 text-gray-600 leading-relaxed">
+          {{ getPaymentModalMessage }}
+        </p>
+        
+        <div class="flex justify-end gap-3">
+          <VCancelButton label="Tidak" @click="closePaymentModal" />
+          <VSuccessButton label="Ya" @click="updatePaymentStatus" />
+        </div>
       </div>
-    </template>
+    </VModal>
   </div>
-  <VModal v-model="showPaymentModal">
-    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
-      <h3 class="text-lg font-bold mb-4">Konfirmasi Perubahan Status Pembayaran</h3>
-      <p class="mb-6 text-gray-600">{{ getPaymentModalMessage }}</p>
-      
-      <div class="flex justify-end gap-2">
-        <VCancelButton label="Tidak" @click="closePaymentModal" />
-        <VSuccessButton label="Ya" @click="updatePaymentStatus" />
-      </div>
-    </div>
-  </VModal>
 </template>
 
 <script setup lang="ts">
@@ -533,11 +659,6 @@ const loadData = async () => {
       // Extract the nested data object
       projectData.value = response.data.data.data || {};
       console.log('Project data loaded:', projectData.value);
-      
-      // Fetch client name if needed
-      if (projectData.value.projectClientId) {
-        await fetchClientName(projectData.value.projectClientId);
-      }
     } else {
       error.value = 'Gagal memuat data proyek';
     }
@@ -556,16 +677,6 @@ const loadData = async () => {
 };
 
 // Fetch client name
-const fetchClientName = async (clientId: string) => {
-  try {
-    // In a real implementation, you'd make an API call to get the client name
-    // For this demo, we'll just set a placeholder
-    clientName.value = 'Pedlar'; 
-  } catch (err) {
-    console.error('Error fetching client name:', err);
-    clientName.value = 'Unknown Client';
-  }
-};
 
 // Action methods for buttons
 const cancelProject = async () => {
