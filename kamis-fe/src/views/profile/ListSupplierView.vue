@@ -5,7 +5,7 @@
       <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
         <VSearchBar v-model="searchCompany" placeholder="Cari Nama Perusahaan..." />
         <VSearchBar v-model="searchPIC" placeholder="Cari Nama PIC..." />
-        <VButton v-if="isOperationalOrAdmin" label="+ Tambah Supplier" @click="goToAddSupplier" />
+        <VButton v-if="isOperational" label="+ Tambah Supplier" @click="goToAddSupplier" />
       </div>
     </div>
 
@@ -16,9 +16,18 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
-            <th @click="sortBy('companySupplier')" class="px-6 py-4 table-header cursor-pointer text-base">Nama Perusahaan</th>
-            <th @click="sortBy('nameSupplier')" class="px-6 py-4 table-header cursor-pointer text-base">Nama PIC</th>
-            <th @click="sortBy('totalPurchases')" class="px-6 py-4 table-header cursor-pointer text-base">Jumlah Pembelian</th>
+            <th @click="sortBy('companySupplier')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Nama Perusahaan
+              <span v-if="sortKey === 'companySupplier'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
+            <th @click="sortBy('nameSupplier')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Nama PIC
+              <span v-if="sortKey === 'nameSupplier'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
+            <th @click="sortBy('totalPurchases')" class="px-6 py-4 table-header cursor-pointer text-base">
+              Jumlah Pembelian
+              <span v-if="sortKey === 'totalPurchases'">{{ sortAsc ? '▲' : '▼' }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -56,8 +65,8 @@ const supplierStore = useSupplierStore();
 const authStore = useAuthStore();
 const router = useRouter();
 
-const isOperationalOrAdmin = computed(() => {
-  return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
+const isOperational = computed(() => {
+  return authStore.userRole === 'Operasional';
 });
 
 onMounted(() => {

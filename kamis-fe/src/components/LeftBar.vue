@@ -118,15 +118,65 @@ const logout = () => {
 const isActive = (routeName: string) => {
   // Map menu ke nama route yang valid
   const menuRouteNames: Record<string, string[]> = {
-    dashboard: ['dashboard-finance', 'dashboard-direksi', 'dashboard-operasional'],
-    'finance': ['finance-report'],
-    'purchase': ['purchase'],
-    'assets': ['assets'],
-    'resource': ['resource'],
-    'project': ['project'],
-    'client': ['client'],
-    'supplier': ['supplier'],
-    'account': ['account'],
+    dashboard: [
+      'home', // Assuming 'home' is a general dashboard
+      'dashboard-finance', 
+      'dashboard-direksi', 
+      'dashboard-operasional'
+    ],
+    'finance': [ // Corresponds to "Laporan" which goes to 'finance-report'
+      'finance-report'
+    ],
+    'purchase': [
+      'purchase',
+      'purchase-add',
+      'purchase-addAsset',
+      'purchase-addResource',
+      'purchase-addResourceSummary',
+      'purchase-addAssetSummary',
+      'purchase-updateResource',
+      'purchase-updateAsset',
+      'purchase-detailResource',
+      'purchase-detailAsset'
+    ],
+    'assets': [
+      'assets',
+      'assets-detail',
+      'assets-edit'
+    ],
+    'resource': [
+      'resource',
+      'resource-add',
+      'resource-update'
+    ],
+    'project': [ 
+      'project',
+      'add-distribution',
+      'distribution-summary',
+      'add-sales',
+      'sales-summary',
+      'project-detailDistribution',
+      'project-detailSale',
+      'update-distribution',
+      'update-sales'
+    ],
+    'client': [
+      'client',
+      'client-add',
+      'client-update',
+      'client-detail'
+    ],
+    'supplier': [
+      'supplier',
+      'supplier-add',
+      'supplier-detail',
+      'supplier-update'
+    ],
+    'account': [ 
+      'account', 
+      'account-add', 
+      'account-update'
+    ],
   };
   return route.name && menuRouteNames[routeName]?.includes(route.name.toString());
 };

@@ -78,7 +78,6 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Aset</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Biaya Pakai</th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Biaya Bensin</th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ongkos Kirim</th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
@@ -89,9 +88,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
-                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.usageCost) }}</td>
                 <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.fuelCost) }}</td>
-                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.shippingCost) }}</td>
+                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.usageCost) }}</td>
                 <td class="px-6 py-4 text-right whitespace-nowrap font-medium">{{ formatCurrency(asset.totalCost) }}</td>
               </tr>
               <tr v-if="assetList.length === 0">
@@ -139,25 +137,17 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useProjectStore } from '@/stores/project';
-import type { DistributionFormData } from '@/interfaces/project/project.interface';
+import type { DistributionFormData, ProjectAsset } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue'; 
+
 
 const router = useRouter();
 const toast = useToast();
 const projectStore = useProjectStore();
 
 const formData = ref<DistributionFormData>(JSON.parse(localStorage.getItem('distributionFormData') || '{}'));
-const clients = ref<Array<{id: string, name: string}>>([]);
-const assetList = ref<Array<{
-  id: string;
-  type: string;
-  name: string;
-  fuelCost: number;
-  shippingCost: number;
-  usageCost: number;
-  totalCost: number;
-  platNomor?: string;
-}>>([]);
+const clients = ref<Array<{id: string, name: string, nameClient: string}>>([]);
+const assetList = ref<Array<ProjectAsset>>([]);
 
 // Computed values
 const totalAssetCost = computed(() => {
@@ -192,7 +182,7 @@ const formatDate = (dateString: string): string => {
 // Get client name from client id
 const getClientName = (clientId: string): string => {
   const client = clients.value.find(c => c.id === clientId);
-  return client ? client.name : clientId;
+  return client ? client.nameClient : clientId; // Changed client.name to client.nameClient
 };
 
 // Navigation
@@ -250,4 +240,4 @@ onMounted(() => {
   // Update total expenses in form data
   formData.value.projectTotalPengeluaran = totalExpenses.value;
 });
-</script> 
+</script>

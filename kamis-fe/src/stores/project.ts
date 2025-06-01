@@ -303,7 +303,6 @@ export const useProjectStore = defineStore('project', {
                 this.projects = response.data.data || [];
             } catch (err: unknown) {
                 this.error = `Gagal mengambil daftar proyek: ${err instanceof Error ? err.message : 'Unknown error'}`;
-                useToast().error(this.error);
             } finally {
                 this.loading = false;
             }
@@ -329,7 +328,6 @@ export const useProjectStore = defineStore('project', {
                 this.sellDistributionSummary = response.data.data;
             } catch (err: unknown) {
                 this.error = `Gagal mengambil ringkasan penjualan dan distribusi: ${err instanceof Error ? err.message : 'Unknown error'}`;
-                useToast().error(this.error);
             } finally {
                 this.loading = false;
             }
