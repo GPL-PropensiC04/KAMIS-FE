@@ -445,7 +445,19 @@
                 placeholder="Masukkan biaya maintenance"
               />
             </div>
-            
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Tanggal Mulai Maintenance <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                v-model="newMaintenance.tanggalMulaiMaintenance"
+                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                required
+              />
+            </div>
+
             <p v-if="maintenanceError" class="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-200">
               {{ maintenanceError }}
             </p>
@@ -509,7 +521,8 @@ const maintenanceError = ref('');
 const newMaintenance = ref({
   platNomor: '',
   deskripsiPekerjaan: '',
-  biaya: 0
+  biaya: 0,
+  tanggalMulaiMaintenance: new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 });
 
 // Notification state
@@ -644,29 +657,35 @@ const fetchMaintenanceHistory = async () => {
 const submitMaintenance = async () => {
   maintenanceError.value = '';
   const loadingToastId = toast.info('Menambah maintenance...', { timeout: false });
-  
+
   try {
     newMaintenance.value.platNomor = platNomor;
-    
-    const response = await axios.post(`${API_URLS.ASSET}/maintenance/`, newMaintenance.value, {
+
+    const payload = {
+      ...newMaintenance.value,
+      tanggalMulaiMaintenance: newMaintenance.value.tanggalMulaiMaintenance
+    };
+
+    const response = await axios.post(`${API_URLS.ASSET}/maintenance/`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
-    
+
     if (response.data && response.data.status === 201) {
       toast.dismiss(loadingToastId);
       toast.success('Maintenance berhasil ditambah');
       showMaintenanceModal.value = false;
-      
+
       // Reset form
       newMaintenance.value = {
         platNomor: '',
         deskripsiPekerjaan: '',
-        biaya: 0
+        biaya: 0,
+        tanggalMulaiMaintenance: new Date().toISOString().slice(0, 10)
       };
-      
+
       // Refresh data
       await Promise.all([
         loadData(),
@@ -676,7 +695,7 @@ const submitMaintenance = async () => {
   } catch (err: any) {
     toast.dismiss(loadingToastId);
     console.error('Error submitting maintenance:', err);
-    
+
     if (err.response && err.response.data && err.response.data.message) {
       maintenanceError.value = err.response.data.message;
     } else {
