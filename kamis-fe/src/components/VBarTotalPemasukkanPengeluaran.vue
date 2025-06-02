@@ -1,4 +1,4 @@
-<!-- filepath: e:\Propen\KAMIS-FE\kamis-fe\src\components\VBarTotalPemasukkanPengeluaran.vue -->
+<!-- filepath: e:\Propen\KAMIS-FE\kamis-fe\src\components\VBarTotalPemasukanPengeluaran.vue -->
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { Bar } from 'vue-chartjs';
@@ -30,14 +30,14 @@ const emit = defineEmits(['data-loaded', 'error']);
 const toast = useToast();
 
 // State
-const pemasukkan = ref(0);
+const Pemasukan = ref(0);
 const pengeluaran = ref(0);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
 // Fix the chart data initialization to include all required properties
 const chartData = ref({
-  labels: ['Pemasukkan', 'Pengeluaran'],
+  labels: ['Pemasukan', 'Pengeluaran'],
   datasets: [{
     data: [0, 0],
     backgroundColor: ['#2E7D32', '#B42318'], // Green for income, Red for expenses
@@ -101,16 +101,16 @@ const chartOptions: ChartOptions<'bar'> = {
 const updateChartData = () => {
   // Log the values before updating
   console.log('Updating chart with values:', {
-    pemasukkan: pemasukkan.value,
+    Pemasukan: Pemasukan.value,
     pengeluaran: pengeluaran.value
   });
   
   // Ensure we're using integers or safe numbers
-  const income = Number(pemasukkan.value) || 0;
+  const income = Number(Pemasukan.value) || 0;
   const expense = Number(pengeluaran.value) || 0;
   
   chartData.value = {
-    labels: ['Pemasukkan', 'Pengeluaran'],
+    labels: ['Pemasukan', 'Pengeluaran'],
     datasets: [{
       data: [income, expense],
       backgroundColor: ['#14532D', '#912018'],
@@ -121,12 +121,12 @@ const updateChartData = () => {
   // Emit the data-loaded event with a small delay to ensure the chart has updated
   setTimeout(() => {
     console.log('Emitting data-loaded event with values:', {
-      pemasukkan: income,
+      Pemasukan: income,
       pengeluaran: expense
     });
     
     emit('data-loaded', {
-      pemasukkan: income,
+      Pemasukan: income,
       pengeluaran: expense
     });
     
@@ -140,14 +140,14 @@ const fetchData = async () => {
   error.value = null;
   
   // Set default values before fetching
-  pemasukkan.value = 0;
+  Pemasukan.value = 0;
   pengeluaran.value = 0;
   
   console.log('Fetching bar chart data, range:', props.range);
   
   // Set a timeout to ensure loading doesn't last forever if the request hangs
   const timeoutId = setTimeout(() => {
-    console.error('Request timeout for pemasukkan/pengeluaran data');
+    console.error('Request timeout for Pemasukan/pengeluaran data');
     updateChartData();
     error.value = 'Data tidak tersedia saat ini. Menampilkan placeholder.';
   }, 5000); // 5 second timeout
@@ -191,7 +191,7 @@ const fetchData = async () => {
           console.log(`Period: ${item.period}, Pemasukan: ${itemPemasukan}, Pengeluaran: ${itemPengeluaran}`);
         });
         
-        pemasukkan.value = totalPemasukan;
+        Pemasukan.value = totalPemasukan;
         pengeluaran.value = totalPengeluaran;
         
         console.log('Total summed values:', {
@@ -203,13 +203,13 @@ const fetchData = async () => {
         console.log('Using direct object data');
         
         // Try both possible field names
-        pemasukkan.value = parseFloat(responseData.totalPemasukan || 
-                                    responseData.totalPemasukkan) || 0;
+        Pemasukan.value = parseFloat(responseData.totalPemasukan || 
+                                    responseData.totalPemasukan) || 0;
         pengeluaran.value = parseFloat(responseData.totalPengeluaran) || 0;
       }
       
       console.log('Final values for chart:', {
-        pemasukkan: pemasukkan.value,
+        Pemasukan: Pemasukan.value,
         pengeluaran: pengeluaran.value
       });
       
