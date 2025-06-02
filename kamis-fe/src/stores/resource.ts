@@ -85,12 +85,21 @@ export const useResourceStore = defineStore('resource', {
             }
         },
 
-        async viewAllResourcesWithPagination(page: number, size: number = 10) {
+        async viewAllResourcesWithPagination(page: number, size: number = 10, searchParams?: {
+            resourceName?: string;
+
+        }) {
             this.isLoading = true;
             this.error = null;
             try {
+                const params: any = { page, size };
+
+                if (searchParams?.resourceName && searchParams.resourceName.trim() !== '') {
+                    params.resourceName = searchParams.resourceName;
+                }
+
                 const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall/paginated`, {
-                    params: { page, size },
+                    params,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -108,7 +117,6 @@ export const useResourceStore = defineStore('resource', {
                 this.isLoading = false;
             }
         },
-
 
         async fetchResourceById(id: number) {
             this.loading = true;
