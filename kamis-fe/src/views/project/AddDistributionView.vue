@@ -217,14 +217,9 @@
                   <span>Total Pemasukan</span>
                 </label>
                 <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span class="text-gray-500 font-medium">Rp</span>
-                  </div>
-                  <input 
+                  <VPriceInput 
                     v-model.number="formData.projectTotalPemasukkan"
-                    type="number" 
-                    min="0"
-                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    type="number"
                     placeholder="0"
                   />
                 </div>
@@ -252,44 +247,24 @@
               <!-- Jenis Aset -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Aset</label>
-                <div class="relative">
-                  <select 
-                    v-model="selectedAssetType"
-                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
-                    :class="{ 'bg-gray-100 text-gray-400': !datesSelected }"
-                    @change="updateAssetNames"
-                    :disabled="!datesSelected"
-                  >
-                    <option value="" disabled>{{ datesSelected ? 'Pilih Jenis Aset' : 'Pilih Tanggal Terlebih Dahulu' }}</option>
-                    <option v-for="type in assetTypes" :key="type" :value="type">{{ type }}</option>
-                  </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                  </div>
-                </div>
+                <SearchableDropdown
+                  v-model="selectedAssetType"
+                  :options="assetTypes"
+                  :placeholder="datesSelected ? 'Pilih atau ketik jenis aset...' : 'Pilih tanggal terlebih dahulu'"
+                  :disabled="!datesSelected"
+                  @update:modelValue="onAssetTypeChange"
+                />
               </div>
               
               <!-- Nama Aset -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Aset</label>
-                <div class="relative">
-                  <select 
-                    v-model="selectedAssetName"
-                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
-                    :class="{ 'bg-gray-100 text-gray-400': !datesSelected || !selectedAssetType }"
-                    :disabled="!datesSelected || !selectedAssetType"
-                  >
-                    <option value="" disabled>{{ !datesSelected ? 'Pilih Tanggal Terlebih Dahulu' : !selectedAssetType ? 'Pilih Jenis Aset Terlebih Dahulu' : 'Pilih Nama Aset' }}</option>
-                    <option v-for="name in assetNames" :key="name" :value="name">{{ name }}</option>
-                  </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                  </div>
-                </div>
+                <SearchableDropdown
+                  v-model="selectedAssetName"
+                  :options="assetNames"
+                  :placeholder="!datesSelected ? 'Pilih tanggal terlebih dahulu' : !selectedAssetType ? 'Pilih jenis aset terlebih dahulu' : 'Pilih atau ketik nama aset...'"
+                  :disabled="!datesSelected || !selectedAssetType"
+                />
               </div>
               
               <!-- Biaya Bensin -->
@@ -551,6 +526,9 @@
   import VLockedInput from '@/components/VLockedInput.vue';
   import VTextBox from '@/components/VTextBox.vue';
   import { useAssetStore } from '@/stores/assetReservability';
+  import SearchableDropdown from '@/components/SearchableDropdown.vue';
+  import VNumberInput from '@/components/VNumberInput.vue';
+  import VPriceInput from '@/components/VPriceInput.vue';
 
   // Router & Toast
   const router = useRouter();
@@ -631,6 +609,13 @@
   const totalExpenses = computed(() => {
     return totalAssetCost.value + totalPhlCost.value;
   });
+
+  const onAssetTypeChange = (newAssetType: string) => {
+    selectedAssetType.value = newAssetType;
+    // Reset selected asset name when asset type changes
+    selectedAssetName.value = '';
+    updateAssetNames();
+  };
 
   // Fetch clients from API
   const fetchClients = async () => {
@@ -896,6 +881,18 @@
   // Watch for asset type changes
   watch(selectedAssetType, updateAssetNames);
 
+  watch(selectedAssetType, () => {
+    selectedAssetName.value = '';
+    updateAssetNames();
+  });
+
+  watch(selectedAssetName, () => {
+    // Reset costs when asset name changes
+    fuelCost.value = 0;
+    shippingCost.value = 0;
+  });
+
+
   // Watch for date changes to automatically check asset availability
   watch(
     [() => formData.value.projectStartDate, () => formData.value.projectEndDate],
@@ -910,25 +907,43 @@
 
   // Load data on component mount
   onMounted(() => {
+    // Clear any existing form data from localStorage to ensure fresh start
+    localStorage.removeItem('distributionFormData');
+    localStorage.removeItem('distributionAssetList');
+    localStorage.removeItem('clientList');
+    
+    // Reset all reactive variables to initial state
+    formData.value = {
+      projectName: '',
+      projectClientId: '',
+      projectType: true, // True for Distribution
+      projectStartDate: '',
+      projectEndDate: '',
+      projectPHLCount: 0,
+      projectPHLPay: 0,
+      projectPickupAddress: '',
+      projectDeliveryAddress: '',
+      projectTotalPemasukkan: 0,
+      projectTotalPengeluaran: 0,
+      projectUseAsset: [] as Array<AssetUsageDTO>
+    };
+    
+    // Reset asset-related variables
+    assetList.value = [];
+    assetTypes.value = [];
+    selectedAssetType.value = '';
+    selectedAssetName.value = '';
+    assetNames.value = [];
+    fuelCost.value = 0;
+    shippingCost.value = 0;
+    availableAssets.value = [];
+    datesSelected.value = false;
+    loadingAssets.value = false;
+    availabilityChecked.value = false;
+    
+    // Fetch fresh data
     fetchClients();
     fetchAssets();
-    
-    // Check for saved form data
-    const savedData = localStorage.getItem('distributionFormData');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        formData.value = { ...formData.value, ...parsedData };
-        
-        // Restore asset list if available
-        if (parsedData.projectUseAsset && Array.isArray(parsedData.projectUseAsset)) {
-          // We'll need to fetch full asset details to reconstruct assetList
-          // This is simplified for now
-        }
-      } catch (error) {
-        console.error('Error parsing saved form data:', error);
-      }
-    }
   });
 </script>
 
@@ -972,11 +987,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  /* Group hover effects */
-  .group:hover .group-hover\:scale-105 {
-      transform: scale(1.05);
-  }
-
   /* Custom scrollbar */
   .overflow-x-auto::-webkit-scrollbar {
       height: 6px;
@@ -990,16 +1000,6 @@
   .overflow-x-auto::-webkit-scrollbar-thumb {
       background: #c1c1c1;
       border-radius: 3px;
-  }
-
-  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-      background: #a1a1a1;
-  }
-
-  /* Table hover effects */
-  tbody tr:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   /* Loading animation */
@@ -1016,10 +1016,6 @@
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  /* Card hover effects */
-  .bg-white:hover {
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
 
   /* Responsive design */
   @media (max-width: 1024px) {

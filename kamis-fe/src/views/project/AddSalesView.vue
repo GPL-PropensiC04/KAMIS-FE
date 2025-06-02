@@ -717,17 +717,6 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
-/* Button hover effects */
-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Group hover effects */
-.group:hover .group-hover\:scale-105 {
-    transform: scale(1.05);
-}
-
 /* Custom scrollbar */
 .overflow-x-auto::-webkit-scrollbar {
     height: 6px;
@@ -741,21 +730,6 @@ button:hover:not(:disabled) {
 .overflow-x-auto::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 3px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
-}
-
-/* Table hover effects */
-tbody tr:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Card hover effects */
-.bg-white:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */

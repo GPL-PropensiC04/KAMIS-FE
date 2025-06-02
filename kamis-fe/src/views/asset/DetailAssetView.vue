@@ -275,9 +275,9 @@
             </div>
 
             <!-- Maintenance Table -->
-            <div v-else class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
+            <div v-else class="rounded-xl p-6">
               <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full border border-gray-200">
                   <thead>
                     <tr class="bg-[#1E3A5F] text-white">
                       <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider rounded-tl-lg">
@@ -285,7 +285,7 @@
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2"></path>
                           </svg>
-                          <span>Tanggal Dibuat</span>
+                          <span>Tanggal Pengajuan</span>
                         </div>
                       </th>
                       <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
@@ -891,12 +891,6 @@ textarea::-webkit-scrollbar-thumb {
 
 textarea::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
-}
-
-/* Table hover effects */
-tbody tr:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */
