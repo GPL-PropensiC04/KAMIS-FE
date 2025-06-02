@@ -59,10 +59,10 @@
               @change="handlePageSizeChange"
               class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
             >
-              <option :value="1">1</option>
-              <option :value="3">3</option>
-              <option :value="5">5</option>
               <option :value="10">10</option>
+              <option :value="25">25</option>
+              <option :value="20">20</option>
+              <option :value="50">50</option>
             </select>
           </div>
           
@@ -278,7 +278,7 @@ const goToDetailSupplier = (supplierId: string) => {
 onMounted(() => {
   // Set initial page size if needed
   if (supplierStore.pageSize) {
-    selectedPageSize.value = supplierStore.pageSize;
+    selectedPageSize.value = 10;
   }
   
   // Load initial data with pagination

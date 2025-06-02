@@ -70,18 +70,18 @@
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
           <!-- Page Size Selector -->
           <div class="flex items-center space-x-2">
-            <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-            <select 
-              id="pageSizeSelect" 
-              v-model="selectedPageSize" 
-              @change="handlePageSizeChange"
-              class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-            >
-              <option :value="1">1</option>
-              <option :value="3">3</option>
-              <option :value="5">5</option>
-              <option :value="10">10</option>
-            </select>
+          <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+          <select 
+            id="pageSizeSelect" 
+            v-model.number="selectedPageSize" 
+            @change="handlePageSizeChange"
+            class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+          >
+            <option :value="10">10</option>
+            <option :value="20">20</option>
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+          </select>
           </div>
           
           <!-- Page Navigation -->
@@ -153,7 +153,7 @@ const sortKey = ref('');
 const sortAsc = ref(true);
 
 // Pagination state
-const selectedPageSize = ref(clientStore.pageSize || 5);
+const selectedPageSize = ref(clientStore.pageSize || 10);
 
 const nominalOptions = [
   { label: "Semua Profit", min: null, max: null },
@@ -331,7 +331,7 @@ const isDireksi = computed(() => authStore.userRole === 'Direksi');
 onMounted(() => {
   // Set initial page size if needed
   if (clientStore.pageSize) {
-    selectedPageSize.value = clientStore.pageSize;
+    selectedPageSize.value = 10;
   }
   
   // Load initial data with pagination
