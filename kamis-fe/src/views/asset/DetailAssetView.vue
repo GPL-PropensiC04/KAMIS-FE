@@ -1031,12 +1031,6 @@ textarea::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
 }
 
-/* Table hover effects */
-tbody tr:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 /* Responsive design */
 @media (max-width: 1024px) {
     .grid-cols-12 .col-span-7,

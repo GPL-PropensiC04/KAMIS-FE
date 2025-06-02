@@ -57,10 +57,9 @@
                   <span>Nama Aktivitas</span>
                   <span class="text-red-500">*</span>
                 </label>
-                <input 
+                <VTextBox 
                   v-model="formData.projectName"
                   type="text" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="Masukkan nama aktivitas penjualan"
                 />
               </div>
@@ -81,7 +80,7 @@
                   >
                     <option value="" disabled>Pilih klien tujuan penjualan</option>
                     <option v-for="client in clients" :key="client.id" :value="client.id">
-                      {{ client.nameClient }}
+                      {{ client.name }}
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
@@ -101,11 +100,10 @@
                   </svg>
                   <span>Alamat Pengiriman</span>
                 </label>
-                <input 
+                <VTextBox 
                   v-model="formData.projectDeliveryAddress"
                   type="text" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Masukkan alamat pengiriman"
+                  placeholder="Masukkan alamat pengiriman barang"
                 />
               </div>
             </div>
@@ -120,9 +118,7 @@
                   </svg>
                   <span>Jenis Aktivitas</span>
                 </label>
-                <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 font-medium">
-                  Penjualan
-                </div>
+                <VLockedInput value="Penjualan" />
               </div>
 
               <!-- Tanggal Aktivitas -->
@@ -134,12 +130,14 @@
                   <span>Tanggal Aktivitas</span>
                   <span class="text-red-500">*</span>
                 </label>
-                <input 
-                  :value="formData.projectStartDate"
-                  @input="handleDateInput($event)"
-                  type="date" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
+                <div class="w-full">
+                  <input 
+                    :value="formData.projectStartDate"
+                    @input="handleDateInput($event)"
+                    type="date" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -147,7 +145,7 @@
       </div>
 
       <!-- Products Section -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="bg-[#1E3A5F] px-8 py-5">
           <div class="flex items-center space-x-3">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,21 +158,26 @@
         <div class="p-8">
           <!-- Product Selection Form -->
           <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <!-- Nama Barang -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Barang</label>
+                <label class="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                  </svg>
+                  <span>Nama Barang</span>
+                </label>
                 <div class="relative">
                   <select 
                     v-model="selectedProduct"
-                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
                   >
                     <option value="" disabled>Pilih Barang</option>
                     <option v-for="product in availableProducts" :key="product.id" :value="product.id">
-                      {{ product.resourceName }}
+                      {{ product.name }}
                     </option>
                   </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -184,16 +187,21 @@
               
               <!-- Jumlah -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah</label>
+                <label class="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                  </svg>
+                  <span>Jumlah</span>
+                </label>
                 <div class="relative">
                   <select 
                     v-model="selectedQuantity"
-                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
                   >
                     <option value="" disabled>Pilih Jumlah</option>
-                    <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.resourceStock || 0)" :key="num" :value="num">{{ num }}</option>
+                    <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
                   </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -203,7 +211,12 @@
               
               <!-- Harga Jual -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Harga Jual</label>
+                <label class="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                  </svg>
+                  <span>Harga Jual</span>
+                </label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-500 text-sm">Rp</span>
@@ -219,7 +232,7 @@
               </div>
               
               <!-- Add Button -->
-              <div class="flex items-end">
+              <div>
                 <button 
                   @click="addProduct"
                   class="w-full px-4 py-2.5 bg-[#1E3A5F] hover:bg-[#152c49] text-white rounded-lg transition-colors duration-200 font-medium flex items-center justify-center space-x-2"
@@ -250,7 +263,7 @@
                     <th class="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wider">
                       <div class="flex items-center justify-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
                         </svg>
                         <span>Jumlah</span>
                       </div>
@@ -274,7 +287,7 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="(product, index) in selectedProductList" :key="index" class="hover:bg-blue-50 transition-colors duration-150">
+                  <tr v-for="(product, index) in productList" :key="index" class="hover:bg-blue-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center space-x-3">
                         <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg">
@@ -282,20 +295,20 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                           </svg>
                         </div>
-                        <span class="text-sm font-medium text-gray-900">{{ product.resourceName }}</span>
+                        <span class="text-sm font-medium text-gray-900">{{ product.name }}</span>
                       </div>
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
-                      <span class="text-sm font-medium text-gray-900">{{ product.resourceQuantity }}</span>
+                      <span class="text-sm font-medium text-gray-900">{{ product.quantity }}</span>
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                      <span class="text-sm font-bold text-gray-900">{{ formatCurrency(product.resourcePrice) }}</span>
+                      <span class="text-sm font-bold text-gray-900">{{ formatCurrency(product.price) }}</span>
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                       <button 
                         @click="removeProduct(index)"
                         class="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                        title="Hapus produk"
+                        title="Hapus barang"
                       >
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
@@ -303,7 +316,7 @@
                       </button>
                     </td>
                   </tr>
-                  <tr v-if="selectedProductList.length === 0">
+                  <tr v-if="productList.length === 0">
                     <td colspan="4" class="px-6 py-12 text-center">
                       <div class="flex flex-col items-center space-y-3">
                         <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,70 +324,46 @@
                         </svg>
                         <div class="text-center">
                           <h3 class="text-sm font-medium text-gray-700 mb-1">Belum ada barang yang ditambahkan</h3>
-                          <p class="text-xs text-gray-500">Pilih barang dari dropdown untuk menambahkan ke daftar penjualan</p>
+                          <p class="text-xs text-gray-500">Pilih barang dari daftar di atas untuk menambahkannya</p>
                         </div>
                       </div>
                     </td>
                   </tr>
                 </tbody>
-                <tfoot v-if="selectedProductList.length > 0" class="bg-gray-50">
-                  <tr>
-                    <td colspan="2" class="px-6 py-4 text-right font-semibold text-gray-700">Total Pemasukan:</td>
-                    <td class="px-6 py-4 text-right font-bold text-lg text-gray-900">{{ formatCurrency(totalRevenue) }}</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Summary Section -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-8 py-6 border-b border-gray-200">
-          <div class="flex items-center space-x-3">
-            <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
-              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">Ringkasan Penjualan</h3>
-          </div>
-        </div>
-
-        <div class="p-8">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Total Items -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-              <div class="flex items-center space-x-3 mb-3">
-                <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          <!-- Summary Section -->
+          <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-8 py-6 border-b border-gray-200">
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                   </svg>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-blue-700">Total Barang</p>
-                  <p class="text-xs text-blue-600">{{ selectedProductList.length }} jenis barang</p>
-                </div>
+                <h3 class="text-xl font-bold text-gray-800">Ringkasan Penjualan</h3>
               </div>
-              <p class="text-2xl font-bold text-blue-800">{{ selectedProductList.reduce((sum, product) => sum + product.resourceQuantity, 0) }} item</p>
             </div>
 
-            <!-- Total Revenue -->
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-              <div class="flex items-center space-x-3 mb-3">
-                <div class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
-                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-green-700">Total Pemasukan</p>
-                  <p class="text-xs text-green-600">Dari penjualan barang</p>
+            <div class="p-8">
+              <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
+                      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-lg font-semibold text-green-700">Total Pemasukan</p>
+                      <p class="text-sm text-green-600">{{ productList.length }} barang terjual</p>
+                    </div>
+                  </div>
+                  <div class="text-3xl font-bold text-green-800">{{ formatCurrency(totalRevenue) }}</div>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-green-800">{{ formatCurrency(totalRevenue) }}</p>
             </div>
           </div>
         </div>
@@ -390,9 +379,8 @@ import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue';
-import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
-import type { ClientInterface } from '@/interfaces/profile/client.interface';
-import type { ProjectResource } from '@/interfaces/project/project.interface';
+import VTextBox from '@/components/VTextBox.vue';
+import VLockedInput from '@/components/VLockedInput.vue';
 
 // Router & Toast
 const router = useRouter();
@@ -414,17 +402,38 @@ const formData = ref({
   }>
 });
 
-const clients = ref<ClientInterface[]>([]);
+// Client data
+interface Client {
+  id: string;
+  name: string;
+}
 
-const availableProducts = ref<ResourceInterface[]>([]);
-const selectedProductList = ref<ProjectResource[]>([]);
+const clients = ref<Client[]>([]);
+
+// Product data
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+interface CartProduct {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+const availableProducts = ref<Product[]>([]);
+const productList = ref<CartProduct[]>([]);
 const selectedProduct = ref('');
 const selectedQuantity = ref<number | null>(null);
 const selectedPrice = ref(0);
 
 // Computed values
 const totalRevenue = computed(() => {
-  return selectedProductList.value.reduce((sum, product) => sum + (product.resourcePrice * product.resourceQuantity), 0);
+  return productList.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
 });
 
 // Watch selected product to update price
@@ -432,7 +441,7 @@ watch(selectedProduct, (newValue) => {
   if (newValue) {
     const product = availableProducts.value.find(p => p.id === newValue);
     if (product) {
-      selectedPrice.value = product.resourcePrice;
+      selectedPrice.value = product.price;
     } else {
       selectedPrice.value = 0;
     }
@@ -452,7 +461,7 @@ const fetchClients = async () => {
     });
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
-      nameClient: client.nameClient
+      name: client.nameClient
     }));
   } catch (error) {
     console.error('Error fetching clients:', error);
@@ -469,12 +478,21 @@ const fetchProducts = async () => {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
-
-    availableProducts.value = response.data.data.map((resource: ResourceInterface) => ({
+    
+    // Define interface for resource response
+    interface ResourceResponse {
+      id: string;
+      resourceName: string;
+      resourcePrice?: number;
+      resourceStock?: number;
+    }
+    
+    // Assuming the API returns resources with this structure
+    availableProducts.value = response.data.data.map((resource: ResourceResponse) => ({
       id: resource.id,
-      resourceName: resource.resourceName,
-      resourcePrice: resource.resourcePrice, 
-      resourceStock: resource.resourceStock 
+      name: resource.resourceName,
+      price: resource.resourcePrice, 
+      stock: resource.resourceStock 
     }));
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -495,9 +513,9 @@ const addProduct = () => {
     return;
   }
   
-  const productDetails = availableProducts.value.find(p => p.id === selectedProduct.value);
+  const product = availableProducts.value.find(p => p.id === selectedProduct.value);
   
-  if (!productDetails) {
+  if (!product) {
     toast.error('Barang tidak ditemukan');
     return;
   }
@@ -507,31 +525,31 @@ const addProduct = () => {
     return;
   }
   
-  if (selectedQuantity.value > productDetails.resourceStock) {
-    toast.error(`Stok barang tidak cukup. Sisa stok: ${productDetails.resourceStock}`);
+  if (selectedQuantity.value > product.stock) {
+    toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
     return;
   }
   
   // Check if product already exists in cart
-  const existingIndex = selectedProductList.value.findIndex(p => p.id === productDetails.id);
+  const existingIndex = productList.value.findIndex(p => p.id === product.id);
   
   if (existingIndex >= 0) {
     // Update existing product
-    const newQuantity = selectedProductList.value[existingIndex].resourceQuantity + selectedQuantity.value;
+    const newQuantity = productList.value[existingIndex].quantity + selectedQuantity.value;
     
-    if (newQuantity > productDetails.resourceStock) {
-      toast.error(`Stok barang tidak cukup. Sisa stok: ${productDetails.resourceStock}`);
+    if (newQuantity > product.stock) {
+      toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
       return;
     }
     
-    selectedProductList.value[existingIndex].resourceQuantity = newQuantity;
+    productList.value[existingIndex].quantity = newQuantity;
   } else {
-    // Add new product, ensuring it matches ProjectResource interface
-    selectedProductList.value.push({
-      id: String(productDetails.id),
-      resourceName: productDetails.resourceName,
-      resourceQuantity: selectedQuantity.value,
-      resourcePrice: productDetails.resourcePrice
+    // Add new product
+    productList.value.push({
+      id: product.id,
+      name: product.name,
+      quantity: selectedQuantity.value,
+      price: product.price
     });
   }
   
@@ -546,22 +564,22 @@ const addProduct = () => {
 
 // Remove product from cart
 const removeProduct = (index: number) => {
-  selectedProductList.value.splice(index, 1);
+  productList.value.splice(index, 1);
   updateFormData();
 };
 
 // Update form data with current product list
 const updateFormData = () => {
   formData.value.projectTotalPemasukkan = totalRevenue.value;
-  formData.value.projectUseResource = selectedProductList.value.map(product => ({
+  formData.value.projectUseResource = productList.value.map(product => ({
     resourceId: product.id,
-    resourceStockUsed: product.resourceQuantity,
-    sellPrice: product.resourcePrice
+    resourceStockUsed: product.quantity,
+    sellPrice: product.price
   }));
   
   // Store form data in localStorage for summary page
   localStorage.setItem('salesFormData', JSON.stringify(formData.value));
-  localStorage.setItem('salesProductList', JSON.stringify(selectedProductList.value));
+  localStorage.setItem('salesProductList', JSON.stringify(productList.value));
   localStorage.setItem('clientList', JSON.stringify(clients.value));
 };
 
@@ -591,7 +609,7 @@ const submitForm = async () => {
     return;
   }
   
-  if (selectedProductList.value.length === 0) {
+  if (productList.value.length === 0) {
     toast.error('Minimal satu barang harus ditambahkan');
     return;
   }
@@ -639,18 +657,16 @@ onMounted(() => {
   
   // Check for saved form data
   const savedData = localStorage.getItem('salesFormData');
-  const savedSelectedProductList = localStorage.getItem('salesProductList');
-
   if (savedData) {
     try {
       const parsedData = JSON.parse(savedData);
       formData.value = { ...formData.value, ...parsedData };
       
       // Restore product list if available
-      if (savedSelectedProductList) {
-        selectedProductList.value = JSON.parse(savedSelectedProductList);
+      if (parsedData.projectUseResource && Array.isArray(parsedData.projectUseResource)) {
+        // We'd need to fetch full product details to reconstruct the product list
+        // This is simplified for now
       }
-      updateFormData();
     } catch (error) {
       console.error('Error parsing saved form data:', error);
     }
@@ -659,164 +675,166 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap');
 
-* {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
+  * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
 
-/* Custom animations */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+  /* Custom animations */
+  @keyframes slideIn {
+      from {
+          opacity: 0;
+          transform: translateY(10px);
+      }
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
 
-.grid > div {
-    animation: slideIn 0.3s ease-out;
-}
+  .grid > div {
+      animation: slideIn 0.3s ease-out;
+  }
 
-/* Smooth transitions */
-button, input, textarea, select {
-    transition: all 0.2s ease;
-}
+  /* Smooth transitions */
+  button, input, textarea, select {
+      transition: all 0.2s ease;
+  }
 
-/* Input focus effects */
-input:focus, select:focus, textarea:focus {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130 246, 0.15);
-}
+  /* Input focus effects */
+  input:focus, select:focus, textarea:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
 
-/* Button hover effects */
-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+  /* Custom scrollbar */
+  .overflow-x-auto::-webkit-scrollbar {
+      height: 6px;
+  }
 
-/* Group hover effects */
-.group:hover .group-hover\:scale-105 {
-    transform: scale(1.05);
-}
+  .overflow-x-auto::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+  }
 
-/* Custom scrollbar */
-.overflow-x-auto::-webkit-scrollbar {
-    height: 6px;
-}
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+  }
 
-.overflow-x-auto::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
+  /* Loading animation */
+  @keyframes pulse {
+      0%, 100% {
+          opacity: 1;
+      }
+      50% {
+          opacity: 0.5;
+      }
+  }
 
-.overflow-x-auto::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
+  .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
-}
 
-/* Table hover effects */
-tbody tr:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+  /* Responsive design */
+  @media (max-width: 1024px) {
+      .grid-cols-1.lg\\:grid-cols-2 {
+          grid-template-columns: 1fr;
+      }
+  }
 
-/* Card hover effects */
-.bg-white:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
+  @media (max-width: 768px) {
+      .grid-cols-1.md\\:grid-cols-4 {
+          grid-template-columns: 1fr;
+      }
+      
+      .px-8 {
+          padding-left: 1rem;
+          padding-right: 1rem;
+      }
+      
+      .py-8 {
+          padding-top: 1.5rem;
+          padding-bottom: 1.5rem;
+      }
+      
+      .space-x-4 > * + * {
+          margin-left: 0;
+          margin-top: 1rem;
+      }
+      
+      .flex-col {
+          flex-direction: column;
+      }
+  }
 
-/* Responsive design */
-@media (max-width: 1024px) {
-    .grid-cols-1.lg\\:grid-cols-2 {
-        grid-template-columns: 1fr;
-    }
-    
-    .grid-cols-1.lg\\:grid-cols-4 {
-        grid-template-columns: 1fr;
-    }
-}
+  @media (max-width: 640px) {
+      .text-2xl {
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+      }
+      
+      .text-xl {
+          font-size: 1.125rem;
+          line-height: 1.75rem;
+      }
+      
+      .px-6 {
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+      }
+      
+      .py-6 {
+          padding-top: 1rem;
+          padding-bottom: 1rem;
+      }
+  }
 
-@media (max-width: 768px) {
-    .grid-cols-1.md\\:grid-cols-2,
-    .grid-cols-1.md\\:grid-cols-4 {
-        grid-template-columns: 1fr;
-    }
-    
-    .px-8 {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-    
-    .py-8 {
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
-    }
-    
-    .space-x-4 > * + * {
-        margin-left: 0;
-        margin-top: 1rem;
-    }
-    
-    .flex-col {
-        flex-direction: column;
-    }
-}
+  /* Modern gradient overlays */
+  .bg-gradient-to-br {
+      background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+  }
 
-@media (max-width: 640px) {
-    .text-2xl {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-    }
-    
-    .text-xl {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
-    }
-    
-    .px-6 {
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-    }
-    
-    .py-6 {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-    }
-}
+  .bg-gradient-to-r {
+      background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
 
-/* Modern gradient overlays */
-.bg-gradient-to-br {
-    background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-}
+  /* Focus ring improvements */
+  .focus\\:ring-2:focus {
+      ring-width: 2px;
+      ring-color: rgb(59 130 246 / 0.5);
+  }
 
-.bg-gradient-to-r {
-    background-image: linear-gradient(to right, var(--tw-gradient-stops));
-}
+  /* Disabled state improvements */
+  .disabled\\:opacity-50:disabled {
+      opacity: 0.5;
+  }
 
-/* Focus ring improvements */
-.focus\\:ring-2:focus {
-    ring-width: 2px;
-    ring-color: rgb(59 130 246 / 0.5);
-}
+  .disabled\\:cursor-not-allowed:disabled {
+      cursor: not-allowed;
+  }
 
-/* Modern shadow effects */
-.shadow-sm {
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
+  /* Modern shadow effects */
+  .shadow-sm {
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
 
-.shadow-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
+  .shadow-lg {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
 
-.shadow-xl {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+  .shadow-xl {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Backdrop filter support */
+  .backdrop-filter {
+      backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  }
+
+  .backdrop-blur-sm {
+      --tw-backdrop-blur: blur(4px);
+  }
 </style>
