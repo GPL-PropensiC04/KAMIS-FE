@@ -40,104 +40,167 @@
         <VButton v-if="canEditPurchase" label="+ Tambah Pembelian" @click="goToAddPurchase" />
       </div>
 
-      <div v-if="loading" class="flex justify-center items-center py-14">
+      <div v-if="purchaseStore.isLoading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       
-      <!-- 📋 Updated Table Style with Sorting -->
-      <table v-else class="custom-table">
-        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
-          <tr>
-            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('id')">
-              <div class="flex items-center justify-center gap-1">
-                ID Pembelian
-                <span class="sort-indicator">
-                  <span v-if="currentSort.field === 'id' && currentSort.direction === 'asc'">▲</span>
-                  <span v-else-if="currentSort.field === 'id' && currentSort.direction === 'desc'">▼</span>
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('date')">
-              <div class="flex items-center justify-center gap-1">
-                Tanggal Pengajuan
-                <span class="sort-indicator">
-                  <span v-if="currentSort.field === 'date' && currentSort.direction === 'asc'">▲</span>
-                  <span v-else-if="currentSort.field === 'date' && currentSort.direction === 'desc'">▼</span>
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('status')">
-              <div class="flex items-center justify-center gap-1">
-                Status
-                <span class="sort-indicator">
-                  <span v-if="currentSort.field === 'status' && currentSort.direction === 'asc'">▲</span>
-                  <span v-else-if="currentSort.field === 'status' && currentSort.direction === 'desc'">▼</span>
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('supplier')">
-              <div class="flex items-center justify-center gap-1">
-                Supplier
-                <span class="sort-indicator">
-                  <span v-if="currentSort.field === 'supplier' && currentSort.direction === 'asc'">▲</span>
-                  <span v-else-if="currentSort.field === 'supplier' && currentSort.direction === 'desc'">▼</span>
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-4 table-header text-base">Tipe Barang</th>
-            <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Total Harga</th>
-            <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('lastUpdate')">
-              <div class="flex items-center justify-center gap-1">
-                Last Updated
-                <span class="sort-indicator">
-                  <span v-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'asc'">▲</span>
-                  <span v-else-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'desc'">▼</span>
-                </span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-if="sortedPurchases.length">
-            <tr 
-              v-for="purchase in sortedPurchases" 
-              :key="purchase.id" 
-              class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
-              @click="goToPurchaseDetail(purchase.purchaseId)"
-            >
-              <td class="px-6 py-5">{{ purchase.purchaseId }}</td>
-              <td class="px-6 py-5">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
-              <td class="px-6 py-5">
-                <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
-                  Menunggu Persetujuan
-                </template>
-                <template v-else-if="(userRole === 'Finance') && (purchase.purchaseStatus === 'Diproses'
-                  || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
-                  Menunggu Pembayaran
-                </template>
-                <template v-else>
-                  {{ purchase.purchaseStatus }}
-                </template>
-              </td>
-              <td class="px-6 py-5">{{ purchase.purchaseSupplier }}</td>
-              <td class="px-6 py-5">{{ purchase.purchaseType }}</td>
-              <td v-if="canViewFinancialInfo" class="px-6 py-5 font-bold">
-                {{ formatCurrency(purchase.purchasePrice) }}
-              </td>
-              <td class="px-6 py-5 text-sm">
-                {{ formatDate(purchase.purchaseUpdateDate) }}
+      <div v-else>
+        <!-- 📋 Table -->
+        <table class="custom-table">
+          <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+            <tr>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('id')">
+                <div class="flex items-center justify-center gap-1">
+                  ID Pembelian
+                  <span class="sort-indicator">
+                    <span v-if="currentSort.field === 'id' && currentSort.direction === 'asc'">▲</span>
+                    <span v-else-if="currentSort.field === 'id' && currentSort.direction === 'desc'">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('date')">
+                <div class="flex items-center justify-center gap-1">
+                  Tanggal Pengajuan
+                  <span class="sort-indicator">
+                    <span v-if="currentSort.field === 'date' && currentSort.direction === 'asc'">▲</span>
+                    <span v-else-if="currentSort.field === 'date' && currentSort.direction === 'desc'">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('status')">
+                <div class="flex items-center justify-center gap-1">
+                  Status
+                  <span class="sort-indicator">
+                    <span v-if="currentSort.field === 'status' && currentSort.direction === 'asc'">▲</span>
+                    <span v-else-if="currentSort.field === 'status' && currentSort.direction === 'desc'">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('supplier')">
+                <div class="flex items-center justify-center gap-1">
+                  Supplier
+                  <span class="sort-indicator">
+                    <span v-if="currentSort.field === 'supplier' && currentSort.direction === 'asc'">▲</span>
+                    <span v-else-if="currentSort.field === 'supplier' && currentSort.direction === 'desc'">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header text-base">Tipe Barang</th>
+              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Total Harga</th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('lastUpdate')">
+                <div class="flex items-center justify-center gap-1">
+                  Last Updated
+                  <span class="sort-indicator">
+                    <span v-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'asc'">▲</span>
+                    <span v-else-if="currentSort.field === 'lastUpdate' && currentSort.direction === 'desc'">▼</span>
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-if="sortedPurchases.length">
+              <tr 
+                v-for="purchase in sortedPurchases" 
+                :key="purchase.id" 
+                class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
+                @click="goToPurchaseDetail(purchase.purchaseId)"
+              >
+                <td class="px-6 py-5">{{ purchase.purchaseId }}</td>
+                <td class="px-6 py-5">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
+                <td class="px-6 py-5">
+                  <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
+                    Menunggu Persetujuan
+                  </template>
+                  <template v-else-if="(userRole === 'Finance') && (purchase.purchaseStatus === 'Diproses'
+                    || purchase.purchaseStatus === 'Selesai') && purchase.purchasePaymentDate === null">
+                    Menunggu Pembayaran
+                  </template>
+                  <template v-else>
+                    {{ purchase.purchaseStatus }}
+                  </template>
+                </td>
+                <td class="px-6 py-5">{{ purchase.purchaseSupplier }}</td>
+                <td class="px-6 py-5">{{ purchase.purchaseType }}</td>
+                <td v-if="canViewFinancialInfo" class="px-6 py-5 font-bold">
+                  {{ formatCurrency(purchase.purchasePrice) }}
+                </td>
+                <td class="px-6 py-5 text-sm">
+                  {{ formatDate(purchase.purchaseUpdateDate) }}
+                </td>
+              </tr>
+            </template>
+
+            <!-- Jika Tidak Ada Data -->
+            <tr v-else>
+              <td :colspan="canViewFinancialInfo ? 7 : 6" class="text-center text-gray-500 py-6 text-base italic">
+                {{ searchId ? `Tidak ada pembelian dengan pencarian "${searchId}"` : 'Data pembelian tidak ditemukan.' }}
               </td>
             </tr>
-          </template>
+          </tbody>
+        </table>
 
-          <!-- Jika Tidak Ada Data -->
-          <tr v-else>
-            <td :colspan="canViewFinancialInfo ? 7 : 6" class="text-center text-gray-500 py-6 text-base italic">
-              Data pembelian tidak ditemukan.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <!-- Pagination Navigation (Same as ListResource) -->
+        <div v-if="purchaseStore.totalPages > 1 || purchaseStore.purchases.length > 0" class="mt-6 text-center">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+              <select 
+                id="pageSizeSelect" 
+                v-model="selectedPageSize" 
+                @change="handlePageSizeChange"
+                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option :value="1">1</option>
+                <option :value="10">10</option>
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+              </select>
+            </div>          
+
+            <!-- Page Navigation -->
+            <div class="flex items-center justify-center space-x-2">
+              <button
+                @click="changePage(purchaseStore.currentPage)"
+                :disabled="purchaseStore.currentPage === 0"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Sebelumnya
+              </button>
+              
+              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                <button
+                  v-if="typeof pageNumber === 'number'"
+                  @click="changePage(pageNumber)"
+                  :class="[
+                    'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                    pageNumber === purchaseStore.currentPage + 1 ? 
+                      'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                      'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pageNumber }}
+                </button>
+                <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+              </template>
+              
+              <button
+                @click="changePage(purchaseStore.currentPage + 2)"
+                :disabled="purchaseStore.currentPage >= purchaseStore.totalPages - 1"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Selanjutnya
+              </button>
+            </div>
+              
+            <p v-if="purchaseStore.purchases.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
+              Menampilkan <span class="font-medium">{{ (purchaseStore.currentPage * purchaseStore.pageSize) + 1 }}</span>
+              sampai <span class="font-medium">{{ (purchaseStore.currentPage * purchaseStore.pageSize) + purchaseStore.purchases.length }} hasil</span>
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -152,24 +215,18 @@ import VDateRangeFilter from "@/components/VDateRangeFilter.vue";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VOptionInput from "@/components/VOptionInput.vue";
 import VButton from "@/components/VButton.vue";
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
-// Router
+// Router & Store
 const router = useRouter();
-
-// Store
 const purchaseStore = usePurchaseStore();
 const authStore = useAuthStore();
-
-// Loading state
-const loading = ref(true);
 
 // **State untuk filter & sorting**
 const searchId = ref("");
 const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
-const sortByDate = ref(null);
-const sortByNominal = ref(null);
+const selectedPageSize = ref(purchaseStore.pageSize || 10);
 
 // **State untuk sorting**
 const currentSort = ref({
@@ -177,12 +234,31 @@ const currentSort = ref({
   direction: ''
 });
 
-const userRole = computed(() => authStore.userRole)
+const userRole = computed(() => authStore.userRole);
 
 // **State untuk Filter Rentang Nominal**
 const startNominal = ref<number | null>(null);
 const endNominal = ref<number | null>(null);
 const selectedNominalLabel = ref("Seluruh Total Harga");
+
+// Debounce search
+let searchTimeout: ReturnType<typeof setTimeout>;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchPurchases(1); // Reset to first page when searching
+  }, 500);
+};
+
+// Watch for search changes
+watch(searchId, () => {
+  debouncedSearch();
+});
+
+// Watch for other filter changes
+watch([dateRange, selectedType, startNominal, endNominal], () => {
+  fetchPurchases(1); // Reset to first page when filters change
+});
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -195,7 +271,7 @@ const canEditPurchase = computed(() => {
   return userRole === "Operasional";
 });
 
-// **Computed untuk data yang sudah disort**
+// **Computed untuk data yang sudah disort (client-side sorting for current page)**
 const sortedPurchases = computed(() => {
   if (!currentSort.value.field || !currentSort.value.direction) {
     return purchaseStore.purchases;
@@ -216,7 +292,6 @@ const sortedPurchases = computed(() => {
         valueB = new Date(b.purchaseSubmissionDate);
         break;
       case 'status':
-        // Get display status for comparison
         valueA = getDisplayStatus(a).toLowerCase();
         valueB = getDisplayStatus(b).toLowerCase();
         break;
@@ -244,6 +319,109 @@ const sortedPurchases = computed(() => {
   return purchases;
 });
 
+// Get current filters for API calls
+const getCurrentFilters = () => {
+  return {
+    idSearch: searchId.value || null,
+    startDate: dateRange.value.start || null,
+    endDate: dateRange.value.end || null,
+    startNominal: startNominal.value,
+    endNominal: endNominal.value,
+    type: selectedType.value,
+  };
+};
+
+// **Fetch purchases with pagination**
+const fetchPurchases = async (page: number = 1) => {
+  try {
+    await purchaseStore.viewAllPurchasesPaginated(
+      page - 1, 
+      selectedPageSize.value,
+      getCurrentFilters()
+    );
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+  }
+};
+
+// **Handle sorting**
+const handleSort = (field: string) => {
+  if (currentSort.value.field === field) {
+    if (currentSort.value.direction === 'asc') {
+      currentSort.value.direction = 'desc';
+    } else if (currentSort.value.direction === 'desc') {
+      currentSort.value.field = '';
+      currentSort.value.direction = '';
+    } else {
+      currentSort.value.direction = 'asc';
+    }
+  } else {
+    currentSort.value.field = field;
+    currentSort.value.direction = 'asc';
+  }
+};
+
+// Pagination functions
+const changePage = (page: number) => {
+  if (page < 1 || page > purchaseStore.totalPages || page === purchaseStore.currentPage + 1) {
+    return;
+  }
+  fetchPurchases(page);
+};
+
+const handlePageSizeChange = () => {
+  purchaseStore.pageSize = selectedPageSize.value;
+  fetchPurchases(1);
+};
+
+// Pagination navigation computed
+const pageNavigation = computed(() => {
+  const current = purchaseStore.currentPage + 1; // 1-indexed
+  const total = purchaseStore.totalPages;
+  
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1;
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  range.push(1);
+  
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  if (total > 1) {
+    range.push(total);
+  }
+
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
 // **Helper function untuk mendapatkan status yang ditampilkan**
 const getDisplayStatus = (purchase: any) => {
   if ((userRole.value === 'Finance' || userRole.value === 'Direksi') && purchase.purchaseStatus === 'Diajukan') {
@@ -252,26 +430,6 @@ const getDisplayStatus = (purchase: any) => {
     return 'Menunggu Pembayaran';
   } else {
     return purchase.purchaseStatus;
-  }
-};
-
-// **Handle sorting**
-const handleSort = (field: string) => {
-  if (currentSort.value.field === field) {
-    // Toggle direction
-    if (currentSort.value.direction === 'asc') {
-      currentSort.value.direction = 'desc';
-    } else if (currentSort.value.direction === 'desc') {
-      // Reset sorting
-      currentSort.value.field = '';
-      currentSort.value.direction = '';
-    } else {
-      currentSort.value.direction = 'asc';
-    }
-  } else {
-    // New field, start with ascending
-    currentSort.value.field = field;
-    currentSort.value.direction = 'asc';
   }
 };
 
@@ -284,27 +442,6 @@ const nominalOptions = [
   { label: "> Rp100.000.000", start: 100000000, end: 1000000000 },
 ];
 
-// **Ambil daftar pembelian dari API**
-const fetchPurchases = async () => {
-  loading.value = true;
-  try {
-    await purchaseStore.viewAllPurchase({
-      idSearch: searchId.value || null,
-      startDate: dateRange.value.start || null,
-      endDate: dateRange.value.end || null,
-      startNominal: startNominal.value,
-      endNominal: endNominal.value,
-      highNominal: sortByNominal.value || null,
-      newDate: !sortByDate.value || null,
-      type: selectedType.value,
-    });
-  } catch (error) {
-    console.error('Error fetching purchases:', error);
-  } finally {
-    loading.value = false;
-  }
-};
-
 // **Watch perubahan dropdown nominal & update nilai filter**
 const updateNominalFilter = (selectedLabel: string) => {
   selectedNominalLabel.value = selectedLabel;
@@ -315,11 +452,10 @@ const updateNominalFilter = (selectedLabel: string) => {
   }
 };
 
-// Watch perubahan filter & langsung fetch data
-watch([searchId, dateRange, selectedType, sortByDate, sortByNominal, startNominal, endNominal], fetchPurchases);
-
 // Initial data fetch
-onMounted(fetchPurchases);
+onMounted(() => {
+  fetchPurchases(1);
+});
 
 // **Format Rupiah**
 const formatCurrency = (value: number) => {
@@ -347,6 +483,7 @@ const goToPurchaseDetail = (purchaseId: string) => {
 };
 </script>
 
+<!-- Keep existing styles -->
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
