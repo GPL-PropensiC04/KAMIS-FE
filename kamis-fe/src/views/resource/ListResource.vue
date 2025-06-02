@@ -9,7 +9,7 @@
     </div>
     
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
-      <div v-if="loading" class="flex justify-center items-center py-14">
+      <div v-if="resourceStore.isLoading && resourceStore.resources.length === 0" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       
@@ -47,7 +47,7 @@
               :key="resource.id"
               class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             >
-              <td class="px-3 py-5 font-medium text-gray-600" style="width: 60px;">{{ index + 1 }}</td>
+              <td class="px-3 py-5 font-medium text-gray-600" style="width: 60px;">{{ itemNumber(index) }}</td>
               <td class="px-6 py-5">{{ resource.resourceName }}</td>
               <td class="px-6 py-5">{{ resource.resourceStock }}</td>
               <td v-if="showHargaJual" class="px-6 py-5 font-bold">{{ formatCurrency(resource.resourcePrice) }}</td>
@@ -60,13 +60,52 @@
               </td>
             </tr>
             
-            <tr v-if="sortedAndFilteredResources.length === 0">
+            <tr v-if="!resourceStore.isLoading && sortedAndFilteredResources.length === 0">
               <td :colspan="getColspan" class="text-center text-gray-500 py-6 text-base italic">
                 Data resource tidak ditemukan.
               </td>
             </tr>
           </tbody>
         </table>
+        <div v-if="resourceStore.totalPages > 1" class="mt-6 text-center">
+          <nav class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Menampilkan <span class="font-medium">{{ resourceStore.resources.length > 0 ? (resourceStore.currentPage * resourceStore.pageSize) + 1 : 0 }}</span>
+                sampai <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }}</span>
+                dari <span class="font-medium">{{ resourceStore.totalPages * resourceStore.pageSize }}</span> hasil
+              </p>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button
+                @click="changePage(resourceStore.currentPage)"
+                :disabled="resourceStore.currentPage === 0"
+                class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 cursor-pointer"
+              >
+                Sebelumnya
+              </button>
+              
+              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                <button
+                  v-if="typeof pageNumber === 'number'"
+                  @click="changePage(pageNumber)"
+                  :class="['px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', pageNumber === resourceStore.currentPage + 1 ? 'bg-[#2D6A4F] text-white border border-blue-600' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50']"
+                >
+                  {{ pageNumber }}
+                </button>
+                <span v-else class="px-3 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+              </template>
+              
+              <button
+                @click="changePage(resourceStore.currentPage + 2)"
+                :disabled="resourceStore.currentPage >= resourceStore.totalPages - 1"
+                class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 "
+              >
+                Selanjutnya
+              </button>
+            </div>
+          </nav>
+        </div>
       </div>
     </div>
   </div>
@@ -93,16 +132,21 @@ const loading = ref(true);
 const sortField = ref<string>('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
 
-// Fetch data
-const fetchResources = async () => {
-  loading.value = true;
-  try {
-    await resourceStore.viewAllResources();
-  } catch (error) {
-    console.error('Error fetching resources:', error);
-  } finally {
-    loading.value = false;
+// Fetch initial data
+const fetchResources = async (page: number) => {
+  await resourceStore.viewAllResourcesWithPagination(page - 1, resourceStore.pageSize);
+};
+
+const initialFetchResources = async () => {
+  await fetchResources(1);
+};
+
+// Change page
+const changePage = (page: number) => {
+  if (page < 1 || page > resourceStore.totalPages || page === resourceStore.currentPage + 1) {
+    return;
   }
+  fetchResources(page);
 };
 
 // Rupiah formatter
@@ -169,9 +213,45 @@ const getColspan = computed(() => {
   return colspan;
 });
 
+// Pagination display logic
+const pageNavigation = computed(() => {
+  const current = resourceStore.currentPage + 1; // 1-indexed
+  const total = resourceStore.totalPages;
+  const delta = 1; // How many pages to show before and after current page
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  range.push(1);
+  for (let i = current - delta; i <= current + delta; i++) {
+    if (i < total && i > 1) {
+      range.push(i);
+    }
+  }
+  range.push(total);
+
+  for (const i of range) {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...');
+      }
+    }
+    rangeWithDots.push(i);
+    l = i;
+  }
+  return rangeWithDots;
+});
+
+// Item number
+const itemNumber = (index: number) => {
+  return resourceStore.currentPage * resourceStore.pageSize + index + 1;
+};
+
 // Navigasi
 const goToAddResource = () => router.push("/resource/add");
-const goToUpdateResource = (id: number, event?: Event) => {
+const goToUpdateResource = (id: string | number, event?: Event) => {
   if (event) event.stopPropagation();
   router.push(`/resource/update/${id}`);
 };
@@ -184,7 +264,7 @@ const showAddButton = computed(() => !['Direksi', 'Finance', 'Admin'].includes(a
 
 // Fetch on load
 onMounted(() => {
-  fetchResources();
+  initialFetchResources();
 });
 </script>
 

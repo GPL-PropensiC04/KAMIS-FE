@@ -393,10 +393,12 @@ import Breadcrumb from '@/components/Breadcrumb.vue';
 import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
 import type { ClientInterface } from '@/interfaces/profile/client.interface';
 import type { ProjectResource } from '@/interfaces/project/project.interface';
+import { useResourceStore } from "@/stores/resource"; // Added import for resource store
 
 // Router & Toast
 const router = useRouter();
 const toast = useToast();
+const resourceStore = useResourceStore(); // Instantiate resource store
 
 // Form data
 const formData = ref({
@@ -463,14 +465,9 @@ const fetchClients = async () => {
 // Fetch products (resources) from API
 const fetchProducts = async () => {
   try {
-    const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-
-    availableProducts.value = response.data.data.map((resource: ResourceInterface) => ({
+    await resourceStore.fetchResources(); // Ensure resources are fetched from store
+    const allProducts = resourceStore.resources; // Get resources from store
+    availableProducts.value = allProducts.map((resource: ResourceInterface) => ({
       id: resource.id,
       resourceName: resource.resourceName,
       resourcePrice: resource.resourcePrice, 
@@ -479,7 +476,6 @@ const fetchProducts = async () => {
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
-
   }
 };
 
@@ -635,7 +631,7 @@ const submitForm = async () => {
 // Load data on component mount
 onMounted(() => {
   fetchClients();
-  fetchProducts();
+  fetchProducts(); // Fetches all products via the new store action
   
   // Check for saved form data
   const savedData = localStorage.getItem('salesFormData');

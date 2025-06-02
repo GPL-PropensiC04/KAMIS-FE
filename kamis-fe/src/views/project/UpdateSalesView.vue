@@ -7,6 +7,7 @@ import { API_URLS } from '@/config/api.config';
 import type { UpdateProjectFormData, ProjectInterface } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useProjectStore } from '@/stores/project';
+import { useResourceStore } from "@/stores/resource"; // Added import for resource store
 import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
 import type { ClientInterface } from '@/interfaces/profile/client.interface';
 import type { ProjectResource } from '@/interfaces/project/project.interface';
@@ -17,15 +18,14 @@ const route = useRoute();
 const toast = useToast();
 const projectId = route.params.id as string;
 const projectStore = useProjectStore();
+const resourceStore = useResourceStore(); // Instantiate resource store
 
 // Form data
 const formData = ref<UpdateProjectFormData | null>(null);
 const isLoading = ref(true);
 
-
 const clients = ref<ClientInterface[]>([]);
-
-const availableProducts = ref<ResourceInterface[]>([]);
+const availableProducts = ref<ResourceInterface[]>([]); // Will hold all products
 const productList = ref<ProjectResource[]>([]);
 const selectedProduct = ref('');
 const selectedQuantity = ref<number | null>(null);
@@ -188,38 +188,14 @@ const loadResourceData = async () => {
 // Fetch products (resources) from API
 const fetchProducts = async () => {
   try {
-    const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    console.log('Raw resource data from API:', response.data.data);
-    
-    // Define interface for resource response
-    interface ResourceResponse {
-      id: string | number;
-      resourceName: string;
-      resourcePrice?: number;
-      resourceStock?: number;
-    }
-    
-    // Assuming the API returns resources with this structure
-    availableProducts.value = response.data.data.map((resource: ResourceResponse) => {
-      console.log(`Resource ${resource.id} (${resource.resourceName}) sell price:`, resource.resourcePrice);
-      
-      return {
-        id: String(resource.id).trim(), // Convert to string and trim whitespace
-        resourceName: resource.resourceName,
-        price: resource.resourcePrice || 0,
-        stock: resource.resourceStock || 0
-      };
-    });
-    
-    console.log('Processed available products with prices:', 
-      availableProducts.value.map(p => ({ id: p.id, name: p.resourceName, price: p.resourcePrice }))
-    );
+    await resourceStore.fetchResources(); // Fetch resources from the store
+    const allProducts = resourceStore.resources; 
+    availableProducts.value = allProducts.map((resource: ResourceInterface) => ({
+      id: resource.id,
+      resourceName: resource.resourceName,
+      resourcePrice: resource.resourcePrice, 
+      resourceStock: resource.resourceStock 
+    }));
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
@@ -418,9 +394,10 @@ const submitForm = async () => {
 };
 
 // Load data on component mount
-onMounted(() => {
-  fetchClients();
-  fetchProjectDetails();
+onMounted(async () => {
+  await fetchProjectDetails();
+  await fetchClients();
+  await fetchProducts(); // Fetches all products via the new store action
 });
 </script> 
 
@@ -567,7 +544,6 @@ onMounted(() => {
                   v-model="selectedProduct"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
                   :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !availableProducts.length }"
-                  :disabled="!availableProducts.length"
                 >
                   <option value="" disabled>Pilih Barang</option>
                   <option v-for="product in availableProducts" :key="product.id" :value="product.id">
