@@ -149,6 +149,62 @@
               </tr>
             </tbody>
           </table>
+          <div v-if="totalPages > 1 || accounts.length > 0" class="flex flex-col md:flex-row justify-between items-center p-6 gap-4">
+            <div class="flex items-center space-x-2">
+              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+              <select 
+                id="pageSizeSelect" 
+                v-model="selectedPageSize" 
+                @change="handlePageSizeChange"
+                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option :value="1">1</option>
+                <option :value="3">3</option>
+                <option :value="5">5</option>
+                <option :value="10">10</option>
+              </select>
+            </div>
+            
+            <div class="flex items-center justify-center space-x-2">
+              <button
+                @click="changePage(currentPage)"
+                :disabled="currentPage === 0"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition cursor-pointer hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Sebelumnya
+              </button>
+              
+              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                <button
+                  v-if="typeof pageNumber === 'number'"
+                  @click="changePage(pageNumber)"
+                  :class="[
+                    'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                    pageNumber === currentPage + 1 ? 
+                      'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                      'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pageNumber }}
+                </button>
+                <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+              </template>
+              
+              <button
+                @click="changePage(currentPage + 2)"
+                :disabled="currentPage >= totalPages - 1"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition cursor-pointer hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Selanjutnya
+              </button>
+            </div>
+            
+            <p v-if="accounts.length > 0" class="text-sm text-gray-700 text-center">
+              Menampilkan <span class="font-medium">{{ (currentPage * selectedPageSize) + 1 }}</span>
+              sampai <span class="font-medium">{{ Math.min((currentPage * selectedPageSize) + accounts.length, totalItems) }}</span> hasil
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
         </div>
       </div>
     </div>
@@ -172,6 +228,9 @@ const accountStore = useAccountStore();
 // State variables
 const searchTerm = ref('');
 const roleFilter = ref('Semua');
+const selectedPageSize = ref(accountStore.pageSize || 3); // Default to 3 or use stored value
+const currentPage = computed(() => accountStore.currentPage || 0);
+const totalPages = computed(() => accountStore.totalPages);
 
 // Computed properties
 const isAdmin = computed(() => authStore.userRole === 'Admin');
@@ -204,12 +263,73 @@ const filteredAccounts = computed(() => {
   });
 });
 
-// Methods
-const fetchAccounts = async () => {
-  // Use the store method to fetch accounts
-  await accountStore.getAllAccounts();
+const totalItems = computed(() => {
+  return Math.max(totalPages.value * selectedPageSize.value, accounts.value.length);
+});
+
+const pageNavigation = computed(() => {
+  const current = currentPage.value + 1; // 1-indexed
+  const total = totalPages.value;
   
-  // The store automatically handles errors and loading state
+  // If only 1 page or no pages, don't show complex pagination
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  // If total pages is small (≤ 7), show all pages
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1; // How many pages to show before and after current page
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  // Always include first page
+  range.push(1);
+  
+  // Add pages around current page
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  // Always include last page if total > 1
+  if (total > 1) {
+    range.push(total);
+  }
+
+  // Remove duplicates and sort
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  // Add dots where there are gaps
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        // If gap is exactly 2, show the missing number
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        // If gap is more than 2, show dots
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
+// Methods
+const fetchAccounts = async (page: number = 1) => {
+  // page is 1-indexed from UI, convert to 0-indexed for API
+  await accountStore.getAllAccountsWithPagination(
+    page - 1, 
+    selectedPageSize.value,
+  );
   if (accountStore.error) {
     console.error('Error fetching accounts:', accountStore.error);
   }
@@ -239,23 +359,41 @@ const getRoleBadgeClass = (role: string) => {
   }
 };
 
+const changePage = (page: number) => {
+  // Check if page is valid and different from current page
+  if (page < 1 || page > totalPages.value || page === currentPage.value + 1) {
+    return;
+  }
+  fetchAccounts(page);
+};
+
+const handlePageSizeChange = () => {
+  // Update store's page size and reset to first page
+  accountStore.pageSize = selectedPageSize.value;
+  fetchAccounts(1);
+};
+
 // Set up watchers to filter data when inputs change
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(searchTerm, () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    // Client-side filtering happens via the computed property
+    fetchAccounts(1); // Fetch from the first page with new search term
   }, 300);
 });
 
 watch(roleFilter, () => {
-  // Client-side filtering happens via the computed property
+  fetchAccounts(1); // Fetch from the first page with new role filter
 });
 
 // Initialize component
 onMounted(() => {
-  fetchAccounts();
+  // Set initial page size if needed
+  if (accountStore.pageSize) {
+    selectedPageSize.value = accountStore.pageSize;
+  }
+  fetchAccounts(1);
 });
 </script>
 

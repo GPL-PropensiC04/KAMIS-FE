@@ -11,7 +11,7 @@ export const useResourceStore = defineStore('resource', {
         isLoading: false,
         currentPage: 0,
         totalPages: 0,
-        pageSize: 10,
+        pageSize: 5,
         allResourcesForSales: [] as ResourceInterface[],
         isLoadingAllForSales: false,
         loading: false,

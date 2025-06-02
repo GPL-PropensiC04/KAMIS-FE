@@ -13,17 +13,54 @@ export const useAccountStore = defineStore('account', () => {
     const error = ref<string | null>(null);
     const accounts = ref<AccountInterface[]>([]);
     const currentUser = ref<AccountInterface | null>(null);
+    const currentPage = ref(0);
+    const totalPages = ref(0);
+    const pageSize = ref(5);
 
     async function getAllAccounts() {
         loading.value = true;
         error.value = null;
-        
+
         try {
             const response = await axios.get<CommonResponseInterface<AccountInterface[]>>(
                 `${API_URLS.PROFILE}/profile/all`
             );
-            
+
             accounts.value = response.data.data || [];
+            return accounts.value;
+        } catch (err: any) {
+            error.value = err.response?.data?.message || 'Failed to fetch accounts';
+            toast.error(error.value);
+            return [];
+        } finally {
+            loading.value = false;
+        }
+    }
+
+
+    async function getAllAccountsWithPagination(page: number, size: number) {
+        loading.value = true;
+        error.value = null;
+
+        const params: any = { page, size };
+        console.log('Fetching accounts with params:', params);
+        try {
+            const response = await axios.get<CommonResponseInterface<any>>(
+                `${API_URLS.PROFILE}/profile/all/paginated`,
+                {
+                    params,
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                }
+            );
+
+            const data = response.data.data;
+            accounts.value = data.content;
+            currentPage.value = data.number;
+            totalPages.value = data.totalPages;
+            pageSize.value = data.size;
+
             return accounts.value;
         } catch (err: any) {
             error.value = err.response?.data?.message || 'Failed to fetch accounts';
@@ -37,15 +74,15 @@ export const useAccountStore = defineStore('account', () => {
     async function addAccount(accountData: AddAccountInterface) {
         loading.value = true;
         error.value = null;
-        
+
         try {
             const response = await axios.post<CommonResponseInterface<AddAccountInterface>>(
                 `${API_URLS.PROFILE}/profile/add`,
                 accountData
             );
-            
+
             toast.success('Account added successfully');
-            await getAllAccounts();
+            await getAllAccountsWithPagination(currentPage.value, pageSize.value);
             return response.data;
         } catch (err: any) {
             error.value = err.response?.data?.message || 'Failed to add account';
@@ -55,47 +92,51 @@ export const useAccountStore = defineStore('account', () => {
             loading.value = false;
         }
     }
-    
-        // Update an account
-        async function updateAccount(accountEmail: string, accountData: UpdateAccountInterface) {
-            loading.value = true;
-            error.value = null;
-            
-            try {
-                const response = await axios.put<CommonResponseInterface<AccountInterface>>(
-                    `${API_URLS.PROFILE}/profile/${accountEmail}`,
-                    accountData
-                );
-                
-                toast.success('Account updated successfully');
-                
-                // If current user is updating their own profile, update local state
-                if (currentUser.value && currentUser.value.email === accountEmail) {
-                    currentUser.value = {
-                        ...currentUser.value,
-                        ...accountData
-                    };
-                }
-                
-                await getAllAccounts();
-                return response.data;
-            } catch (err: any) {
-                error.value = err.response?.data?.message || 'Failed to update account';
-                toast.error(error.value);
-                throw error.value;
-            } finally {
-                loading.value = false;
+
+    // Update an account
+    async function updateAccount(accountEmail: string, accountData: UpdateAccountInterface) {
+        loading.value = true;
+        error.value = null;
+
+        try {
+            const response = await axios.put<CommonResponseInterface<AccountInterface>>(
+                `${API_URLS.PROFILE}/profile/${accountEmail}`,
+                accountData
+            );
+
+            toast.success('Account updated successfully');
+
+            // If current user is updating their own profile, update local state
+            if (currentUser.value && currentUser.value.email === accountEmail) {
+                currentUser.value = {
+                    ...currentUser.value,
+                    ...accountData
+                };
             }
+
+            await getAllAccountsWithPagination(currentPage.value, pageSize.value);
+            return response.data;
+        } catch (err: any) {
+            error.value = err.response?.data?.message || 'Failed to update account';
+            toast.error(error.value);
+            throw error.value;
+        } finally {
+            loading.value = false;
         }
-        
-        return {
-            loading,
-            error,
-            accounts,
-            currentUser,
-            getAllAccounts,
-            addAccount,
-            updateAccount
-        };
     }
+
+    return {
+        loading,
+        error,
+        accounts,
+        currentUser,
+        currentPage,
+        totalPages,
+        pageSize,
+        getAllAccounts,
+        getAllAccountsWithPagination,
+        addAccount,
+        updateAccount
+    };
+}
 )
