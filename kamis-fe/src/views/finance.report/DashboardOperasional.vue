@@ -505,6 +505,8 @@ const purchaseTableTitle = computed(() => {
       return 'Pembelian Kuartal Ini';
     case 'THIS_MONTH':
       return 'Pembelian Bulan Ini';
+    case 'LAST_YEAR': // Tambahkan case untuk LAST_YEAR
+      return 'Pembelian Tahun Lalu';
     default:
       return 'Pembelian';
   }
@@ -518,6 +520,8 @@ const distributionSalesTableTitle = computed(() => {
       return 'Distribusi dan Penjualan Kuartal Ini';
     case 'THIS_MONTH':
       return 'Distribusi dan Penjualan Bulan Ini';
+    case 'LAST_YEAR': // Tambahkan case untuk LAST_YEAR
+      return 'Distribusi dan Penjualan Tahun Lalu';
     default:
       return 'Distribusi dan Penjualan';
   }
@@ -531,6 +535,8 @@ const timeAgoText = computed(() => {
       return 'kuartal lalu';
     case 'THIS_MONTH':
       return 'bulan lalu';
+    case 'LAST_YEAR': // Tambahkan case untuk LAST_YEAR
+      return '2 tahun lalu'; // Atau teks lain yang sesuai, misal "periode sebelumnya (tahun)"
     default:
       return 'periode lalu';
   }
