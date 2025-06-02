@@ -53,7 +53,7 @@
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
           <h2 class="text-lg font-semibold text-slate-800">Daftar Akun Pengguna</h2>
           <p class="text-sm text-slate-600 mt-1">
-            Total: {{ filteredAccounts.length }} akun
+            Total: {{ accounts.length }} akun
           </p>
         </div>
 
@@ -98,7 +98,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(account) in filteredAccounts"
+                v-for="(account) in accounts"
                 :key="account.email"
                 class="table-row group"
                 @click="goToUpdateAccount(account.email)"
@@ -122,7 +122,7 @@
               </tr>
               
               <!-- Empty State -->
-              <tr v-if="filteredAccounts.length === 0" class="bg-slate-50">
+              <tr v-if="accounts.length === 0" class="bg-slate-50">
                 <td colspan="3" class="text-center py-12">
                   <div class="flex flex-col items-center space-y-3">
                     <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center">
@@ -149,61 +149,68 @@
               </tr>
             </tbody>
           </table>
-          <div v-if="totalPages > 1 || accounts.length > 0" class="flex flex-col md:flex-row justify-between items-center p-6 gap-4">
-            <div class="flex items-center space-x-2">
-              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-              <select 
-                id="pageSizeSelect" 
-                v-model="selectedPageSize" 
-                @change="handlePageSizeChange"
-                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              >
-                <option :value="1">1</option>
-                <option :value="3">3</option>
-                <option :value="5">5</option>
-                <option :value="10">10</option>
-              </select>
-            </div>
-            
-            <div class="flex items-center justify-center space-x-2">
-              <button
-                @click="changePage(currentPage)"
-                :disabled="currentPage === 0"
-                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition cursor-pointer hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Sebelumnya
-              </button>
-              
-              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
-                <button
-                  v-if="typeof pageNumber === 'number'"
-                  @click="changePage(pageNumber)"
-                  :class="[
-                    'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
-                    pageNumber === currentPage + 1 ? 
-                      'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
-                      'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
-                  ]"
+          
+          <!-- Pagination Controls -->
+          <div v-if="totalPages > 1 || accounts.length > 0" class="mt-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 p-6">
+              <!-- Page Size Selector -->
+              <div class="flex items-center space-x-2">
+                <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+                <select 
+                  id="pageSizeSelect" 
+                  v-model="selectedPageSize" 
+                  @change="handlePageSizeChange"
+                  class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 >
-                  {{ pageNumber }}
-                </button>
-                <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
-              </template>
+                  <option :value="1">1</option>
+                  <option :value="3">3</option>
+                  <option :value="5">5</option>
+                  <option :value="10">10</option>
+                </select>
+              </div>
               
-              <button
-                @click="changePage(currentPage + 2)"
-                :disabled="currentPage >= totalPages - 1"
-                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition cursor-pointer hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Selanjutnya
-              </button>
+              <!-- Page Navigation -->
+              <div class="flex items-center justify-center space-x-2">
+                <button
+                  @click="changePage(currentPage)"
+                  :disabled="currentPage === 0"
+                  class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  Sebelumnya
+                </button>
+                
+                <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                  <button
+                    v-if="typeof pageNumber === 'number'"
+                    @click="changePage(pageNumber)"
+                    :class="[
+                      'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                      pageNumber === currentPage + 1 ? 
+                        'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                        'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ pageNumber }}
+                  </button>
+                  <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+                </template>
+                
+                <button
+                  @click="changePage(currentPage + 2)"
+                  :disabled="currentPage >= totalPages - 1"
+                  class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  Selanjutnya
+                </button>
+              </div>
+              
+              <!-- Item Count Display -->
+              <p v-if="accounts.length > 0" class="text-sm text-gray-700 text-center">
+                Menampilkan <span class="font-medium">{{ (currentPage * selectedPageSize) + 1 }}</span>
+                sampai <span class="font-medium">{{ Math.min((currentPage * selectedPageSize) + accounts.length, totalItems) }}</span> hasil
+              </p>
+              <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
             </div>
-            
-            <p v-if="accounts.length > 0" class="text-sm text-gray-700 text-center">
-              Menampilkan <span class="font-medium">{{ (currentPage * selectedPageSize) + 1 }}</span>
-              sampai <span class="font-medium">{{ Math.min((currentPage * selectedPageSize) + accounts.length, totalItems) }}</span> hasil
-            </p>
-            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
           </div>
         </div>
       </div>
@@ -228,7 +235,7 @@ const accountStore = useAccountStore();
 // State variables
 const searchTerm = ref('');
 const roleFilter = ref('Semua');
-const selectedPageSize = ref(accountStore.pageSize || 3); // Default to 3 or use stored value
+const selectedPageSize = ref(accountStore.pageSize || 3);
 const currentPage = computed(() => accountStore.currentPage || 0);
 const totalPages = computed(() => accountStore.totalPages);
 
@@ -236,7 +243,7 @@ const totalPages = computed(() => accountStore.totalPages);
 const isAdmin = computed(() => authStore.userRole === 'Admin');
 const roleOptions = ['Semua', 'Admin', 'Finance', 'Operasional', 'Direksi'];
 
-// Get accounts and loading state from the account store
+// Get accounts and loading state from the account store (now using backend filtered data)
 const accounts = computed(() => accountStore.accounts);
 const loading = computed(() => accountStore.loading);
 
@@ -244,23 +251,6 @@ const loading = computed(() => accountStore.loading);
 const userInfo = computed(() => {
   const user = authStore.user;
   return { username: user ? user.username : 'User' };
-});
-
-const filteredAccounts = computed(() => {
-  return accounts.value.filter(account => {
-    const matchesSearch = 
-      !searchTerm.value || 
-      account.email?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      (account.username && account.username.toLowerCase().includes(searchTerm.value.toLowerCase()));
-    
-    // Handle case-insensitive role matching and special case for "Semua"
-    const matchesRole = 
-      roleFilter.value === 'Semua' || 
-      account.role?.toLowerCase() === roleFilter.value.toLowerCase() ||
-      (roleFilter.value === 'Operasional' && account.role?.toLowerCase() === 'operasional');
-    
-    return matchesSearch && matchesRole;
-  });
 });
 
 const totalItems = computed(() => {
@@ -271,47 +261,38 @@ const pageNavigation = computed(() => {
   const current = currentPage.value + 1; // 1-indexed
   const total = totalPages.value;
   
-  // If only 1 page or no pages, don't show complex pagination
   if (total <= 1) {
     return total === 1 ? [1] : [];
   }
   
-  // If total pages is small (≤ 7), show all pages
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1);
   }
   
-  const delta = 1; // How many pages to show before and after current page
+  const delta = 1;
   const range = [];
   const rangeWithDots: (number | string)[] = [];
   let l: number | undefined;
 
-  // Always include first page
   range.push(1);
   
-  // Add pages around current page
   for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
     range.push(i);
   }
   
-  // Always include last page if total > 1
   if (total > 1) {
     range.push(total);
   }
 
-  // Remove duplicates and sort
   const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
 
-  // Add dots where there are gaps
   for (let i = 0; i < uniqueRange.length; i++) {
     const current = uniqueRange[i];
     
     if (l !== undefined) {
       if (current - l === 2) {
-        // If gap is exactly 2, show the missing number
         rangeWithDots.push(l + 1);
       } else if (current - l > 2) {
-        // If gap is more than 2, show dots
         rangeWithDots.push('...');
       }
     }
@@ -323,12 +304,37 @@ const pageNavigation = computed(() => {
   return rangeWithDots;
 });
 
+// Get current filters for API calls
+const getCurrentFilters = () => {
+  const filters: any = {};
+  
+  if (searchTerm.value && searchTerm.value.trim()) {
+    const trimmedSearch = searchTerm.value.trim();
+    
+    // If search contains @, always search in email field
+    // This covers cases like "@gmail", "gmail.com", "user@domain.com", etc.
+    if (trimmedSearch.includes('@')) {
+      filters.email = trimmedSearch;
+    } else {
+      // If no @, search in username field
+      filters.username = trimmedSearch;
+    }
+  }
+  
+  if (roleFilter.value && roleFilter.value !== 'Semua') {
+    filters.userType = roleFilter.value;
+  }
+  
+  console.log('getCurrentFilters result:', filters); // Add this for debugging
+  return filters;
+};
+
 // Methods
 const fetchAccounts = async (page: number = 1) => {
-  // page is 1-indexed from UI, convert to 0-indexed for API
   await accountStore.getAllAccountsWithPagination(
     page - 1, 
     selectedPageSize.value,
+    getCurrentFilters()
   );
   if (accountStore.error) {
     console.error('Error fetching accounts:', accountStore.error);
@@ -360,7 +366,6 @@ const getRoleBadgeClass = (role: string) => {
 };
 
 const changePage = (page: number) => {
-  // Check if page is valid and different from current page
   if (page < 1 || page > totalPages.value || page === currentPage.value + 1) {
     return;
   }
@@ -368,28 +373,26 @@ const changePage = (page: number) => {
 };
 
 const handlePageSizeChange = () => {
-  // Update store's page size and reset to first page
   accountStore.pageSize = selectedPageSize.value;
   fetchAccounts(1);
 };
 
-// Set up watchers to filter data when inputs change
+// Set up watchers for backend filtering
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(searchTerm, () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    fetchAccounts(1); // Fetch from the first page with new search term
-  }, 300);
+    fetchAccounts(1); // Reset to first page with new search
+  }, 400);
 });
 
 watch(roleFilter, () => {
-  fetchAccounts(1); // Fetch from the first page with new role filter
+  fetchAccounts(1); // Reset to first page with new role filter
 });
 
 // Initialize component
 onMounted(() => {
-  // Set initial page size if needed
   if (accountStore.pageSize) {
     selectedPageSize.value = accountStore.pageSize;
   }

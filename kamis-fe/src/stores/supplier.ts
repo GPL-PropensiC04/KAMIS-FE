@@ -14,6 +14,10 @@ export const useSupplierStore = defineStore('supplier', {
     supplierDetail: null as DetailSupplierInterface | null, // Supplier detail data
     loading: false,
     error: null as null | string,
+    currentPage: 0, // Halaman saat ini
+    totalPages: 0, // Total halaman
+    pageSize: 5, // Ukuran halaman
+    
   }),
   actions: {
     async addSupplier(body: AddSupplierRequestInterface) {
@@ -67,6 +71,43 @@ export const useSupplierStore = defineStore('supplier', {
         this.loading = false;
       }
     },
+
+    async viewAllSupplierPaginated(page: number, size: number, filters = {}) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+          const params = { 
+              page, 
+              size,
+              ...filters
+          };
+          
+          const response = await axios.get<CommonResponseInterface<any>>(
+              `${API_URLS.PROFILE}/supplier/all/paginated`,
+              {
+                  params,
+                  headers: {
+                      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                  }
+              }
+          );
+
+          const data = response.data.data;
+          this.suppliers = data.content;
+          this.currentPage = data.number;
+          this.totalPages = data.totalPages;
+          this.pageSize = data.size;
+          
+          return this.suppliers;
+      } catch (err: unknown) {
+          this.error = `Gagal mengambil data supplier ${err instanceof Error ? err.message : "Unknown error"}`;
+          useToast().error(this.error);
+          return [];
+      } finally {
+          this.loading = false;
+      }
+  },
 
     async getSupplierDetail(supplierId: string) {
       this.loading = true;

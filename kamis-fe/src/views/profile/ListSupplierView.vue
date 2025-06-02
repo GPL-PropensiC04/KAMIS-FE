@@ -46,6 +46,69 @@
           </tr>
         </tbody>
       </table>
+      
+      <!-- Pagination Controls -->
+      <div v-if="supplierStore.totalPages > 1 || supplierStore.suppliers.length > 0" class="mt-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <!-- Page Size Selector -->
+          <div class="flex items-center space-x-2">
+            <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+            <select 
+              id="pageSizeSelect" 
+              v-model="selectedPageSize" 
+              @change="handlePageSizeChange"
+              class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            >
+              <option :value="1">1</option>
+              <option :value="3">3</option>
+              <option :value="5">5</option>
+              <option :value="10">10</option>
+            </select>
+          </div>
+          
+          <!-- Page Navigation -->
+          <div class="flex items-center justify-center space-x-2">
+            <button
+              @click="changePage(supplierStore.currentPage)"
+              :disabled="supplierStore.currentPage === 0"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Sebelumnya
+            </button>
+            
+            <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+              <button
+                v-if="typeof pageNumber === 'number'"
+                @click="changePage(pageNumber)"
+                :class="[
+                  'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                  pageNumber === supplierStore.currentPage + 1 ? 
+                    'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                    'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ pageNumber }}
+              </button>
+              <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+            </template>
+            
+            <button
+              @click="changePage(supplierStore.currentPage + 2)"
+              :disabled="supplierStore.currentPage >= supplierStore.totalPages - 1"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Selanjutnya
+            </button>
+          </div>
+          
+          <!-- Item Count Display -->
+          <p v-if="supplierStore.suppliers.length > 0" class="text-sm text-gray-700 text-center">
+            Menampilkan <span class="font-medium">{{ (supplierStore.currentPage * supplierStore.pageSize) + 1 }}</span>
+            sampai <span class="font-medium">{{ Math.min((supplierStore.currentPage * supplierStore.pageSize) + supplierStore.suppliers.length, totalItems) }}</span> hasil
+          </p>
+          <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -65,22 +128,108 @@ const supplierStore = useSupplierStore();
 const authStore = useAuthStore();
 const router = useRouter();
 
+// Pagination state
+const selectedPageSize = ref(supplierStore.pageSize || 5);
+
+// Fetch paginated suppliers
+const fetchPaginatedSuppliers = async (page: number = 1) => {
+  await supplierStore.viewAllSupplierPaginated(
+    page - 1, // Convert 1-indexed to 0-indexed
+    selectedPageSize.value,
+    { 
+      nameSupplier: searchPIC.value,
+      companySupplier: searchCompany.value
+    }
+  );
+};
+
+// Handle page size change
+const handlePageSizeChange = () => {
+  supplierStore.pageSize = selectedPageSize.value;
+  fetchPaginatedSuppliers(1); // Reset to first page
+};
+
+// Change page
+const changePage = (page: number) => {
+  if (page < 1 || page > supplierStore.totalPages || page === supplierStore.currentPage + 1) {
+    return;
+  }
+  fetchPaginatedSuppliers(page);
+};
+
+// Total items calculation
+const totalItems = computed(() => {
+  return Math.max(supplierStore.totalPages * supplierStore.pageSize, supplierStore.suppliers.length);
+});
+
+// Pagination display logic
+const pageNavigation = computed(() => {
+  const current = supplierStore.currentPage + 1; // 1-indexed
+  const total = supplierStore.totalPages;
+  
+  // If only 1 page or no pages, don't show complex pagination
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  // If total pages is small (≤ 7), show all pages
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1; // How many pages to show before and after current page
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  // Always include first page
+  range.push(1);
+  
+  // Add pages around current page
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  // Always include last page if total > 1
+  if (total > 1) {
+    range.push(total);
+  }
+
+  // Remove duplicates and sort
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  // Add dots where there are gaps
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        // If gap is exactly 2, show the missing number
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        // If gap is more than 2, show dots
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
 const isOperational = computed(() => {
   return authStore.userRole === 'Operasional';
 });
 
-onMounted(() => {
-  supplierStore.viewAllSuppliers();
-});
-
+// Debounce search input
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
 watch([searchPIC, searchCompany], () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    supplierStore.viewAllSuppliers({
-      nameSupplier: searchPIC.value,
-      companySupplier: searchCompany.value,
-    });
+    fetchPaginatedSuppliers(1);
   }, 400);
 });
 
@@ -125,6 +274,16 @@ const goToAddSupplier = () => {
 const goToDetailSupplier = (supplierId: string) => {
   router.push(`/supplier/detail/${supplierId}`);
 };
+
+onMounted(() => {
+  // Set initial page size if needed
+  if (supplierStore.pageSize) {
+    selectedPageSize.value = supplierStore.pageSize;
+  }
+  
+  // Load initial data with pagination
+  fetchPaginatedSuppliers(1);
+});
 </script>
 
 <style scoped>

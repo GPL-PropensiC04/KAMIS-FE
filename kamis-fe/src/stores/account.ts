@@ -38,11 +38,34 @@ export const useAccountStore = defineStore('account', () => {
     }
 
 
-    async function getAllAccountsWithPagination(page: number, size: number) {
+    async function getAllAccountsWithPagination(page: number, size: number, searchParams?: {
+        email?: string;
+        username?: string;
+        userType?: string;
+    }) {
         loading.value = true;
         error.value = null;
-
-        const params: any = { page, size };
+    
+        const params: any = { 
+            page, 
+            size
+        };
+        console.log('Search Params:', searchParams);
+        // Add search parameters if provided
+        if (searchParams?.email && searchParams.email.trim() !== '') {
+            params.email = searchParams.email.trim();
+            console.log('Adding email filter:', params.email);
+        }
+        if (searchParams?.username && searchParams.username.trim() !== '') {
+            params.username = searchParams.username.trim();
+            console.log('Adding username filter:', params.username);
+        }
+        if (searchParams?.userType && searchParams.userType.trim() !== '' && searchParams.userType !== 'Semua') {
+            params.userType = searchParams.userType.trim();
+            console.log('Adding userType filter:', params.userType);
+        }
+        
+        
         console.log('Fetching accounts with params:', params);
         try {
             const response = await axios.get<CommonResponseInterface<any>>(
@@ -54,13 +77,13 @@ export const useAccountStore = defineStore('account', () => {
                     }
                 }
             );
-
+    
             const data = response.data.data;
             accounts.value = data.content;
             currentPage.value = data.number;
             totalPages.value = data.totalPages;
             pageSize.value = data.size;
-
+    
             return accounts.value;
         } catch (err: any) {
             error.value = err.response?.data?.message || 'Failed to fetch accounts';
