@@ -67,20 +67,27 @@
             </tr>
           </tbody>
         </table>
-        <div v-if="resourceStore.totalPages > 1" class="mt-6 text-center">
-          <nav class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-700">
-                Menampilkan <span class="font-medium">{{ resourceStore.resources.length > 0 ? (resourceStore.currentPage * resourceStore.pageSize) + 1 : 0 }}</span>
-                sampai <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }}</span>
-                dari <span class="font-medium">{{ resourceStore.totalPages * resourceStore.pageSize }}</span> hasil
-              </p>
+        <div v-if="resourceStore.totalPages > 1 || resourceStore.resources.length > 0" class="mt-6 text-center">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+              <select 
+                id="pageSizeSelect" 
+                v-model="selectedPageSize" 
+                @change="handlePageSizeChange"
+                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option :value="1">1</option>
+                <option :value="3">3</option>
+                <option :value="5">5</option>
+                <option :value="10">10</option>
+              </select>
             </div>
-            <div class="flex items-center space-x-1">
+            <div class="flex items-center justify-center space-x-2">
               <button
                 @click="changePage(resourceStore.currentPage)"
                 :disabled="resourceStore.currentPage === 0"
-                class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 cursor-pointer"
+                class="bg-[#1E3A5F] text-white px-6 py-2 rounded-md font-inter font-medium text-center transition hover:cursor-pointer active:scale-95"
               >
                 Sebelumnya
               </button>
@@ -99,12 +106,18 @@
               <button
                 @click="changePage(resourceStore.currentPage + 2)"
                 :disabled="resourceStore.currentPage >= resourceStore.totalPages - 1"
-                class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 "
+                class="bg-[#1E3A5F] text-white px-6 py-2 rounded-md font-inter font-medium text-center transition hover:cursor-pointer active:scale-95"
               >
                 Selanjutnya
               </button>
             </div>
-          </nav>
+            
+            <p v-if="resourceStore.resources.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
+              Menampilkan <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + 1 }}</span>
+              sampai <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }} hasil</span>
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
         </div>
       </div>
     </div>
@@ -131,10 +144,11 @@ const searchName = ref('');
 const loading = ref(true);
 const sortField = ref<string>('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
+const selectedPageSize = ref(resourceStore.pageSize || 10); // Initialize with store's page size or default to 10
 
 // Fetch initial data
 const fetchResources = async (page: number) => {
-  await resourceStore.viewAllResourcesWithPagination(page - 1, resourceStore.pageSize);
+  await resourceStore.viewAllResourcesWithPagination(page - 1, selectedPageSize.value);
 };
 
 const initialFetchResources = async () => {
@@ -147,6 +161,12 @@ const changePage = (page: number) => {
     return;
   }
   fetchResources(page);
+};
+
+// Handle page size change
+const handlePageSizeChange = () => {
+  resourceStore.pageSize = selectedPageSize.value; // Update store's page size
+  fetchResources(1); // Fetch first page with new page size
 };
 
 // Rupiah formatter
@@ -217,30 +237,56 @@ const getColspan = computed(() => {
 const pageNavigation = computed(() => {
   const current = resourceStore.currentPage + 1; // 1-indexed
   const total = resourceStore.totalPages;
+  
+  // If only 1 page or no pages, don't show complex pagination
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  // If total pages is small (≤ 7), show all pages
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
   const delta = 1; // How many pages to show before and after current page
   const range = [];
   const rangeWithDots: (number | string)[] = [];
   let l: number | undefined;
 
+  // Always include first page
   range.push(1);
-  for (let i = current - delta; i <= current + delta; i++) {
-    if (i < total && i > 1) {
-      range.push(i);
-    }
+  
+  // Add pages around current page
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
   }
-  range.push(total);
+  
+  // Always include last page if total > 1
+  if (total > 1) {
+    range.push(total);
+  }
 
-  for (const i of range) {
-    if (l) {
-      if (i - l === 2) {
+  // Remove duplicates and sort
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  // Add dots where there are gaps
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        // If gap is exactly 2, show the missing number
         rangeWithDots.push(l + 1);
-      } else if (i - l !== 1) {
+      } else if (current - l > 2) {
+        // If gap is more than 2, show dots
         rangeWithDots.push('...');
       }
     }
-    rangeWithDots.push(i);
-    l = i;
+    
+    rangeWithDots.push(current);
+    l = current;
   }
+  
   return rangeWithDots;
 });
 
@@ -248,6 +294,10 @@ const pageNavigation = computed(() => {
 const itemNumber = (index: number) => {
   return resourceStore.currentPage * resourceStore.pageSize + index + 1;
 };
+
+const totalItems = computed(() => {
+  return resourceStore.totalPages * resourceStore.pageSize;
+});
 
 // Navigasi
 const goToAddResource = () => router.push("/resource/add");
