@@ -155,14 +155,7 @@
                   <!-- Status -->
                   <div class="form-group">
                     <label class="form-label">
-                      <span class="label-text">Status</span>
                     </label>
-                    <VDropDownInput
-                      :options="statusOptions"
-                      v-model="formData.status"
-                      placeholder="Pilih Status"
-                      class="form-dropdown"
-                    />
                   </div>
                 </div>
               </div>
@@ -349,7 +342,6 @@ const jenisAsetOptions = [
   { value: 'Pick Up', label: 'Pick Up' },
 ];
 
-const statusOptions = ['Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
 
 // Formatted plate number computed property
 const formattedPlateNumber = computed(() => {
