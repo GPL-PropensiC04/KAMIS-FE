@@ -1,19 +1,6 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-    <!-- Notification -->
-    <div 
-      v-if="showNotification" 
-      class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-slide-in"
-    >
-      <div class="flex items-center space-x-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span>{{ notificationMessage }}</span>
-      </div>
-    </div>
-
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center h-64">
       <div class="flex items-center space-x-3">
@@ -607,50 +594,20 @@ import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VModal from '@/components/VModal.vue';
+import type { AssetUsageDTO, DistributionProjectData } from '@/interfaces/project/project.interface';
+import type { LogProjectInterface } from '@/interfaces/project/logproject.interface';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const projectId = route.params.id as string;
 
-// State variables
-interface ProjectData {
-  id: string;
-  projectName: string;
-  projectClientId: string;
-  projectClientName: string;
-  projectStartDate: string;
-  projectEndDate: string | null;
-  projectPickupAddress: string;
-  projectDeliveryAddress: string;
-  projectStatus: number;
-  projectPaymentStatus: number;
-  projectPHLCount: number;
-  projectPHLPay: number;
-  projectTotalPemasukkan: number;
-  projectTotalPengeluaran: number;
-  projectType: boolean;
-  projectUseAsset: ProjectAsset[];
-  projectLogs: ProjectLog[];
-}
-
-interface ProjectLog {
-  id: string;
-  user: string;
-  action: string;
-  actionDate: string;
-}
-
-const project = ref<ProjectData>({} as ProjectData);
-const projectData = ref<ProjectData>({} as ProjectData);
+const project = ref<DistributionProjectData>({} as DistributionProjectData);
+const projectData = ref<DistributionProjectData> ({} as DistributionProjectData);
 const isLoading = ref(true);
 const error = ref('');
 const logsLoading = ref(false);
-const assetsLoading = ref(false);
-
-// Notification state
-const showNotification = ref(false);
-const notificationMessage = ref('');
+const assetsLoading = ref(false); // For DetailDistributionView only
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -660,7 +617,7 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Direksi';
+  return userRole === 'Operasional';
 });
 
 const canEditFinancial = computed(() => {
@@ -715,18 +672,12 @@ const getPaymentModalMessage = computed(() => {
     : 'Apakah Anda yakin ingin mengembalikan pembayaran ini?';
 });
 
-// First, define an interface for the asset structure
-interface ProjectAsset {
-  platNomor: string;
-  assetUseCost: number;
-  assetFuelCost: number;
-}
 
 // Now update both computed properties with proper type annotations
 const totalAssetUseCost = computed(() => {
   if (!projectData.value || !projectData.value.projectUseAsset) return 0;
   
-  return projectData.value.projectUseAsset.reduce((total: number, asset: ProjectAsset) => {
+  return projectData.value.projectUseAsset.reduce((total: number, asset: AssetUsageDTO) => {
     return total + (asset.assetUseCost || 0);
   }, 0);
 });
@@ -734,7 +685,7 @@ const totalAssetUseCost = computed(() => {
 const totalAssetFuelCost = computed(() => {
   if (!projectData.value || !projectData.value.projectUseAsset) return 0;
   
-  return projectData.value.projectUseAsset.reduce((total: number, asset: ProjectAsset) => {
+  return projectData.value.projectUseAsset.reduce((total: number, asset: AssetUsageDTO) => {
     return total + (asset.assetFuelCost || 0);
   }, 0);
 });

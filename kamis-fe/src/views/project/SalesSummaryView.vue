@@ -74,10 +74,10 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="(product, index) in productList" :key="index" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ product.name }}</td>
-                <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.quantity }}</td>
-                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.price) }}</td>
-                <td class="px-6 py-4 text-right whitespace-nowrap font-medium">{{ formatCurrency(product.price * product.quantity) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ product.resourceName }}</td>
+                <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.resourceQuantity }}</td>
+                <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.resourcePrice) }}</td>
+                <td class="px-6 py-4 text-right whitespace-nowrap font-medium">{{ formatCurrency(product.resourcePrice * product.resourceQuantity) }}</td>
               </tr>
               <tr v-if="productList.length === 0">
                 <td colspan="5" class="px-6 py-4 text-center">Tidak ada barang yang ditambahkan</td>
@@ -116,7 +116,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useProjectStore } from '@/stores/project';
-import type { SalesFormData } from '@/interfaces/project/project.interface';
+import type { SalesFormData, ProjectResource } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const router = useRouter();
@@ -124,17 +124,12 @@ const toast = useToast();
 const projectStore = useProjectStore();
 
 const formData = ref<SalesFormData>(JSON.parse(localStorage.getItem('salesFormData') || '{}'));
-const clients = ref<Array<{id: string, name: string}>>([]);
-const productList = ref<Array<{
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-}>>([]);
+const clients = ref<Array<{id: string, nameClient: string}>>([]);
+const productList = ref<Array<ProjectResource>>([]);
 
 // Computed values
 const totalProductCost = computed(() => {
-  return productList.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+  return productList.value.reduce((sum, product) => sum + (product.resourcePrice * product.resourceQuantity), 0);
 });
 
 const estimatedProfit = computed(() => {
@@ -157,7 +152,7 @@ const formatDate = (dateString: string): string => {
 // Get client name from client id
 const getClientName = (clientId: string): string => {
   const client = clients.value.find(c => c.id === clientId);
-  return client ? client.name : clientId;
+  return client ? client.nameClient : clientId; // Changed client.name to client.nameClient
 };
 
 // Navigation
@@ -215,4 +210,4 @@ onMounted(() => {
   // Update total income in form data based on products
   formData.value.projectTotalPemasukkan = totalProductCost.value;
 });
-</script> 
+</script>

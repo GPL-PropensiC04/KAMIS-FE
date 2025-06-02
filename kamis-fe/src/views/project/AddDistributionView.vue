@@ -80,7 +80,7 @@
                   >
                     <option value="" disabled>Pilih klien tujuan distribusi</option>
                     <option v-for="client in clients" :key="client.id" :value="client.id">
-                      {{ client.name }}
+                      {{ client.nameClient }}
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
@@ -521,14 +521,15 @@
   import { useToast } from 'vue-toastification';
   import axios from 'axios';
   import { API_URLS } from '@/config/api.config';
-  import type { DistributionFormData, AssetUsageDTO } from '@/interfaces/project/project.interface';
   import Breadcrumb from '@/components/Breadcrumb.vue';
   import VLockedInput from '@/components/VLockedInput.vue';
   import VTextBox from '@/components/VTextBox.vue';
   import { useAssetStore } from '@/stores/assetReservability';
   import SearchableDropdown from '@/components/SearchableDropdown.vue';
-  import VNumberInput from '@/components/VNumberInput.vue';
   import VPriceInput from '@/components/VPriceInput.vue';
+  import type { DistributionFormData, AssetUsageDTO } from '@/interfaces/project/project.interface';
+  import type { ProjectAsset, AvailableAsset } from '@/interfaces/project/project.interface';
+  import type { ClientInterface } from '@/interfaces/profile/client.interface';
 
   // Router & Toast
   const router = useRouter();
@@ -550,35 +551,10 @@
     projectUseAsset: [] as Array<AssetUsageDTO>
   });
 
-  // Client data
-  interface Client {
-    id: string;
-    name: string;
-  }
+  const clients = ref<ClientInterface[]>([]);
 
-  const clients = ref<Client[]>([]);
 
-  // Asset data
-  interface Asset {
-    id: string;
-    assetType: string;
-    assetName: string;
-    assetUsageCost?: number;
-    platNomor?: string;
-  }
-
-  interface ProjectAsset {
-    id: string;
-    type: string;
-    name: string;
-    fuelCost: number;
-    shippingCost: number;
-    usageCost: number;
-    totalCost: number;
-    platNomor?: string;
-  }
-
-  const assets = ref<Asset[]>([]);
+  const assets = ref<AvailableAsset[]>([]);
   const assetList = ref<ProjectAsset[]>([]);
   const assetTypes = ref<string[]>([]);
   const selectedAssetType = ref('');
@@ -591,7 +567,7 @@
   const assetStore = useAssetStore();
 
   // Add a new state variable to track available assets
-  const availableAssets = ref<Asset[]>([]);
+  const availableAssets = ref<AvailableAsset[]>([]);
   const datesSelected = ref(false);
   const loadingAssets = ref(false);
   // Add a flag to track if availability check has run
@@ -628,7 +604,7 @@
       });
       clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
         id: client.id,
-        name: client.nameClient
+        nameClient: client.nameClient
       }));
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -640,20 +616,16 @@
   const fetchAssets = async () => {
     try {
       // Use the asset store instead of direct API call
-      const fetchedAssets = await assetStore.fetchAssets();
+      const fetchedAssets = await assetStore.fetchAssets(); // This returns Asset[] from asset.interface.ts
       
-      // Map the fetched assets to our Asset interface format
+      // Map the fetched assets to our AvailableAsset interface format
       assets.value = fetchedAssets.map(asset => ({
         id: asset.platNomor,
         assetType: asset.tipeAset,
         assetName: asset.nama,
-        assetUsageCost: 0,
+        assetUsageCost: asset.nilaiPerolehan || 0, // Populate from nilaiPerolehan
         platNomor: asset.platNomor
       }));
-      
-      // Extract unique asset types
-      const types = new Set(assets.value.map(asset => asset.assetType));
-      assetTypes.value = Array.from(types) as string[];
     } catch (error) {
       console.error('Error fetching assets:', error);
       toast.error('Gagal mengambil data aset');
@@ -759,7 +731,7 @@
     );
     
     if (!selectedAsset) {
-      toast.error('Aset tidak ditemukan');
+      toast.error('Aset tidak ditemukan atau tidak tersedia');
       return;
     }
     
@@ -775,7 +747,7 @@
       name: selectedAssetName.value,
       fuelCost: fuelCost.value,
       shippingCost: shippingCost.value,
-      usageCost: selectedAsset.assetUsageCost || 0,
+      usageCost: selectedAsset.assetUsageCost || 0, // Use assetUsageCost from selectedAvailableAsset
       totalCost: (selectedAsset.assetUsageCost || 0) + fuelCost.value + shippingCost.value,
       platNomor: selectedAsset.platNomor
     });
@@ -802,9 +774,9 @@
   const updateFormData = () => {
     formData.value.projectTotalPengeluaran = totalExpenses.value;
     formData.value.projectUseAsset = assetList.value.map(asset => ({
-      platNomor: asset.id,
+      platNomor: asset.platNomor || asset.id, // Ensure platNomor is used
       tipeAset: asset.type || '',
-      assetUseCost: asset.usageCost || 0,
+      assetUseCost: asset.usageCost || 0, // This is the base usage cost
       assetFuelCost: asset.fuelCost || 0
     }));
     
@@ -906,44 +878,61 @@
   );
 
   // Load data on component mount
-  onMounted(() => {
-    // Clear any existing form data from localStorage to ensure fresh start
-    localStorage.removeItem('distributionFormData');
-    localStorage.removeItem('distributionAssetList');
-    localStorage.removeItem('clientList');
+  onMounted(async () => { // Made onMounted async
+    await fetchClients(); // await client fetching
+    await fetchAssets(); // await initial asset fetching
     
-    // Reset all reactive variables to initial state
-    formData.value = {
-      projectName: '',
-      projectClientId: '',
-      projectType: true, // True for Distribution
-      projectStartDate: '',
-      projectEndDate: '',
-      projectPHLCount: 0,
-      projectPHLPay: 0,
-      projectPickupAddress: '',
-      projectDeliveryAddress: '',
-      projectTotalPemasukkan: 0,
-      projectTotalPengeluaran: 0,
-      projectUseAsset: [] as Array<AssetUsageDTO>
-    };
-    
-    // Reset asset-related variables
-    assetList.value = [];
-    assetTypes.value = [];
-    selectedAssetType.value = '';
-    selectedAssetName.value = '';
-    assetNames.value = [];
-    fuelCost.value = 0;
-    shippingCost.value = 0;
-    availableAssets.value = [];
-    datesSelected.value = false;
-    loadingAssets.value = false;
-    availabilityChecked.value = false;
-    
-    // Fetch fresh data
-    fetchClients();
-    fetchAssets();
+    // Check for saved form data
+    const savedData = localStorage.getItem('distributionFormData');
+    const savedAssetList = localStorage.getItem('distributionAssetList');
+    const savedClients = localStorage.getItem('clientList');
+
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData) as DistributionFormData;
+        // Restore basic form fields
+        formData.value.projectName = parsedData.projectName || '';
+        formData.value.projectClientId = parsedData.projectClientId || '';
+        formData.value.projectPHLCount = parsedData.projectPHLCount || 0;
+        formData.value.projectPHLPay = parsedData.projectPHLPay || 0;
+        formData.value.projectPickupAddress = parsedData.projectPickupAddress || '';
+        formData.value.projectDeliveryAddress = parsedData.projectDeliveryAddress || '';
+        formData.value.projectTotalPemasukkan = parsedData.projectTotalPemasukkan || 0;
+        // projectTotalPengeluaran will be recalculated by updateFormData
+        // projectUseAsset will be repopulated by updateFormData after assetList is restored
+
+        // Restore dates without time part for display
+        if (parsedData.projectStartDate) {
+          formData.value.projectStartDate = parsedData.projectStartDate.split('T')[0];
+        }
+        if (parsedData.projectEndDate) {
+          formData.value.projectEndDate = parsedData.projectEndDate.split('T')[0];
+        }
+
+        if (savedAssetList) {
+          assetList.value = JSON.parse(savedAssetList) as ProjectAsset[];
+        }
+
+        if (savedClients) {
+          clients.value = JSON.parse(savedClients) as ClientInterface[];
+        }
+
+        // If dates are present from saved data, trigger availability check
+        if (formData.value.projectStartDate && formData.value.projectEndDate) {
+          availabilityChecked.value = false; // Reset flag to allow re-check
+          await checkAvailableAssets();
+        }
+        
+        updateFormData(); // Recalculate totals and update projectUseAsset
+
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('distributionFormData');
+        localStorage.removeItem('distributionAssetList');
+        localStorage.removeItem('clientList');
+      }
+    }
   });
 </script>
 

@@ -275,9 +275,9 @@
             </div>
 
             <!-- Maintenance Table -->
-            <div v-else class="rounded-xl p-6">
+            <div v-else class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
               <div class="overflow-x-auto">
-                <table class="w-full border border-gray-200">
+                <table class="w-full">
                   <thead>
                     <tr class="bg-[#1E3A5F] text-white">
                       <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider rounded-tl-lg">
@@ -285,7 +285,7 @@
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2"></path>
                           </svg>
-                          <span>Tanggal Pengajuan</span>
+                          <span>Tanggal Dibuat</span>
                         </div>
                       </th>
                       <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
@@ -351,7 +351,7 @@
                       <td v-if="canEditAsset" class="px-6 py-4 whitespace-nowrap text-center">
                         <button
                           v-if="item.tanggalSelesaiMaintenance === null"
-                          @click="completeMaintenance(item.id)"
+                          @click="openCompleteModal(item.id, item.tanggalMulaiMaintenance)"
                           class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 mx-auto"
                         >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +445,20 @@
                 placeholder="Masukkan biaya maintenance"
               />
             </div>
-            
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Tanggal Mulai Maintenance <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                v-model="newMaintenance.tanggalMulaiMaintenance"
+                :max="new Date(Date.now()).toISOString().slice(0, 10)"
+                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                required
+              />
+            </div>
+
             <p v-if="maintenanceError" class="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-200">
               {{ maintenanceError }}
             </p>
@@ -466,6 +479,56 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 <span>Tambah</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Complete Maintenance Modal -->
+      <div v-if="showCompleteModal" class="fixed inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-200 m-4">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Selesaikan Maintenance</h3>
+          </div>
+          <form @submit.prevent="submitCompleteMaintenance" class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Tanggal Selesai Maintenance <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                v-model="completeMaintenanceDate"
+                :min="completeMaintenanceStartDate"
+                :max="new Date().toISOString().slice(0, 10)"
+                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                required
+              />
+            </div>
+            <p v-if="completeMaintenanceError" class="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-200">
+              {{ completeMaintenanceError }}
+            </p>
+            <div class="flex justify-end space-x-3 mt-8">
+              <button
+                type="button"
+                @click="showCompleteModal = false"
+                class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Selesaikan</span>
               </button>
             </div>
           </form>
@@ -503,13 +566,18 @@ const imageLoading = ref(true);
 // Modal states
 const showDeleteModal = ref(false);
 const showMaintenanceModal = ref(false);
-const maintenanceError = ref('');
+const showCompleteModal = ref(false);
+const completeMaintenanceId = ref<number | null>(null);
+const completeMaintenanceStartDate = ref('');
+const completeMaintenanceDate = ref(new Date().toISOString().slice(0, 10));
+const completeMaintenanceError = ref('');
 
 // New maintenance form
 const newMaintenance = ref({
   platNomor: '',
   deskripsiPekerjaan: '',
-  biaya: 0
+  biaya: 0,
+  tanggalMulaiMaintenance: new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 });
 
 // Notification state
@@ -518,6 +586,7 @@ const notificationMessage = ref('');
 
 // Maintenance loading state
 const maintenanceLoading = ref(false);
+const maintenanceError = ref('');
 
 // Function to show notification
 const showSuccessNotification = (message: string) => {
@@ -563,7 +632,7 @@ const getStatusColor = (status: string) => {
     'Tidak Tersedia': 'bg-red-100 text-red-800',
     'Maintenance': 'bg-yellow-100 text-yellow-800'
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return (status in colors ? colors[status as keyof typeof colors] : 'bg-gray-100 text-gray-800');
 };
 
 // Add this computed property after your other computed properties
@@ -644,29 +713,35 @@ const fetchMaintenanceHistory = async () => {
 const submitMaintenance = async () => {
   maintenanceError.value = '';
   const loadingToastId = toast.info('Menambah maintenance...', { timeout: false });
-  
+
   try {
     newMaintenance.value.platNomor = platNomor;
-    
-    const response = await axios.post(`${API_URLS.ASSET}/maintenance`, newMaintenance.value, {
+
+    const payload = {
+      ...newMaintenance.value,
+      tanggalMulaiMaintenance: newMaintenance.value.tanggalMulaiMaintenance
+    };
+
+    const response = await axios.post(`${API_URLS.ASSET}/maintenance/`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       }
     });
-    
+
     if (response.data && response.data.status === 201) {
       toast.dismiss(loadingToastId);
       toast.success('Maintenance berhasil ditambah');
       showMaintenanceModal.value = false;
-      
+
       // Reset form
       newMaintenance.value = {
         platNomor: '',
         deskripsiPekerjaan: '',
-        biaya: 0
+        biaya: 0,
+        tanggalMulaiMaintenance: new Date().toISOString().slice(0, 10)
       };
-      
+
       // Refresh data
       await Promise.all([
         loadData(),
@@ -676,7 +751,7 @@ const submitMaintenance = async () => {
   } catch (err: any) {
     toast.dismiss(loadingToastId);
     console.error('Error submitting maintenance:', err);
-    
+
     if (err.response && err.response.data && err.response.data.message) {
       maintenanceError.value = err.response.data.message;
     } else {
@@ -816,6 +891,69 @@ const confirmDelete = async () => {
     error.value = 'Gagal menghapus aset. Silakan coba lagi.';
   } finally {
     showDeleteModal.value = false;
+  }
+};
+
+// Open complete maintenance modal
+const openCompleteModal = (id: number, tanggalMulai: string) => {
+  completeMaintenanceId.value = id;
+  completeMaintenanceStartDate.value = tanggalMulai;
+  // Default tanggal selesai: hari ini, tapi tidak boleh sebelum tanggalMulai
+  const today = new Date().toISOString().slice(0, 10);
+  completeMaintenanceDate.value = today < tanggalMulai ? tanggalMulai : today;
+  showCompleteModal.value = true;
+  completeMaintenanceError.value = '';
+};
+
+// Submit complete maintenance form
+const submitCompleteMaintenance = async () => {
+  completeMaintenanceError.value = '';
+  if (!completeMaintenanceId.value) return;
+  const tanggalSelesai = completeMaintenanceDate.value;
+
+  // Validasi: tanggal selesai harus >= tanggal mulai dan <= hari ini
+  if (
+    tanggalSelesai < completeMaintenanceStartDate.value ||
+    tanggalSelesai > new Date().toISOString().slice(0, 10)
+  ) {
+    completeMaintenanceError.value = 'Tanggal selesai harus di antara tanggal mulai dan hari ini.';
+    return;
+  }
+
+  const loadingToastId = toast.info('Menyelesaikan maintenance...', { timeout: false });
+  
+  try {
+    const response = await axios.patch(
+      `${API_URLS.ASSET}/maintenance/${completeMaintenanceId.value}/complete`, 
+      { tanggalSelesaiMaintenance: completeMaintenanceDate.value },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      }
+    );
+    
+    if (response.data && response.data.status === 200) {
+      toast.dismiss(loadingToastId);
+      toast.success('Maintenance berhasil diselesaikan');
+      showCompleteModal.value = false;
+      
+      // Refresh data
+      await Promise.all([
+        loadData(),
+        fetchMaintenanceHistory()
+      ]);
+    }
+  } catch (err: any) {
+    toast.dismiss(loadingToastId);
+    console.error('Error completing maintenance:', err);
+    
+    if (err.response && err.response.data && err.response.data.message) {
+      completeMaintenanceError.value = err.response.data.message;
+    } else {
+      completeMaintenanceError.value = 'Gagal menyelesaikan maintenance. Silakan coba lagi.';
+    }
   }
 };
 

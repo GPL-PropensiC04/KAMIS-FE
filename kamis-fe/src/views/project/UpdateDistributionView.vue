@@ -8,6 +8,8 @@ import type { UpdateProjectFormData, ProjectInterface } from '@/interfaces/proje
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useProjectStore } from '@/stores/project';
 import { useAssetStore } from '@/stores/assetReservability';
+import type { ProjectAsset, AvailableAsset } from '@/interfaces/project/project.interface';
+import type { ClientInterface } from '@/interfaces/profile/client.interface';
 
 // Router & Toast
 const router = useRouter();
@@ -21,36 +23,13 @@ const assetStore = useAssetStore();
 const formData = ref<UpdateProjectFormData | null>(null);
 const isLoading = ref(true);
 
-// Client data
-interface Client {
-  id: string;
-  name: string;
-}
 
-const clients = ref<Client[]>([]);
 
-// Asset data
-interface Asset {
-  id: string;
-  assetType: string;
-  assetName: string;
-  assetUsageCost?: number;
-  platNomor?: string;
-}
+const clients = ref<ClientInterface[]>([]);
 
-interface ProjectAsset {
-  id: string;
-  type: string;
-  name: string;
-  fuelCost: number;
-  shippingCost: number;
-  usageCost: number;
-  totalCost: number;
-  platNomor?: string;
-}
 
-const assets = ref<Asset[]>([]);
-const assetList = ref<ProjectAsset[]>([]);
+const assets = ref<AvailableAsset[]>([]);
+const selectedAssetList = ref<ProjectAsset[]>([]);
 const assetTypes = ref<string[]>([]);
 const selectedAssetType = ref('');
 const selectedAssetName = ref('');
@@ -59,7 +38,7 @@ const fuelCost = ref(0);
 const shippingCost = ref(0);
 
 // Add a new state variable to track available assets
-const availableAssets = ref<Asset[]>([]);
+const availableAssets = ref<AvailableAsset[]>([]);
 const datesSelected = ref(false);
 const loadingAssets = ref(false);
 // Add a flag to track if availability check has run
@@ -83,7 +62,7 @@ const formatCurrency = (value: number): string => {
 
 // Computed values
 const totalAssetCost = computed(() => {
-  return assetList.value.reduce((sum, asset) => sum + asset.totalCost, 0);
+  return selectedAssetList.value.reduce((sum, asset) => sum + asset.totalCost, 0);
 });
 
 const totalPhlCost = computed(() => {
@@ -203,14 +182,14 @@ const loadAssetData = async () => {
     await fetchAssets();
     
     // Process project assets
-    assetList.value = [];
+    selectedAssetList.value = [];
     
     for (const assetData of formData.value.projectUseAsset) {
       // Find the asset details
       const asset = assets.value.find(a => a.platNomor === assetData.platNomor);
       
       if (asset) {
-        assetList.value.push({
+        selectedAssetList.value.push({
           id: asset.id,
           type: asset.assetType,
           name: asset.assetName,
@@ -333,7 +312,7 @@ const updateAssetNames = () => {
   
   const filteredAssets = availableAssets.value.filter(asset => 
     asset.assetType === selectedAssetType.value &&
-    !assetList.value.some(a => a.id === asset.id)
+    !selectedAssetList.value.some(a => a.id === asset.id)
   );
   
   assetNames.value = filteredAssets.map(asset => asset.assetName);
@@ -357,13 +336,13 @@ const addAsset = () => {
     return;
   }
   
-  if (assetList.value.some(asset => asset.id === selectedAsset.id)) {
+  if (selectedAssetList.value.some(asset => asset.id === selectedAsset.id)) {
     toast.error('Aset sudah ditambahkan');
     return;
   }
   
   // Add asset to list with costs
-  assetList.value.push({
+  selectedAssetList.value.push({
     id: selectedAsset.id,
     type: selectedAssetType.value,
     name: selectedAssetName.value,
@@ -388,7 +367,7 @@ const addAsset = () => {
 
 // Remove asset from list
 const removeAsset = (index: number) => {
-  assetList.value.splice(index, 1);
+  selectedAssetList.value.splice(index, 1);
   updateFormData();
 };
 
@@ -397,7 +376,7 @@ const updateFormData = () => {
   if (!formData.value) return;
 
   formData.value.projectTotalPengeluaran = totalExpenses.value;
-  formData.value.projectUseAsset = assetList.value.map(asset => ({
+  formData.value.projectUseAsset = selectedAssetList.value.map(asset => ({
     id: asset.id,
     platNomor: asset.platNomor || '',
     assetUseCost: asset.shippingCost,
@@ -426,7 +405,7 @@ const submitForm = async () => {
     return;
   }
   
-  if (formData.value.projectStatus === 0 && assetList.value.length === 0) {
+  if (formData.value.projectStatus === 0 && selectedAssetList.value.length === 0) {
     toast.error('Minimal satu aset harus ditambahkan');
     return;
   }
@@ -571,7 +550,7 @@ onMounted(async () => {
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">
-                    {{ client.name }}
+                    {{ client.nameClient }}
                   </option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -803,7 +782,7 @@ onMounted(async () => {
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="(asset, index) in assetList" :key="index" class="hover:bg-gray-50">
+                  <tr v-for="(asset, index) in selectedAssetList" :key="index" class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">{{ asset.type }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{ asset.name }}</td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(asset.totalCost) }}</td>
@@ -818,7 +797,7 @@ onMounted(async () => {
                       </button>
                     </td>
                   </tr>
-                  <tr v-if="assetList.length === 0">
+                  <tr v-if="selectedAssetList.length === 0">
                     <td colspan="4" class="px-6 py-4 text-center text-gray-500">
                       Belum ada aset yang ditambahkan
                     </td>
