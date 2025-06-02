@@ -305,7 +305,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
-import { AsetService } from '@/stores/assetservices';
+import { AsetService } from '@/stores/asset';
 import { byteArrayToImageUrl } from '@/utils/formatters';
 import VLockedInput from '@/components/VLockedInput.vue';
 import VDropDownInput from '@/components/VDropDownInput.vue';

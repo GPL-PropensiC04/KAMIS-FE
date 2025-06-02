@@ -479,7 +479,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
-import { AsetService } from '@/stores/assetservices';
+import { AsetService } from '@/stores/asset';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
