@@ -453,7 +453,6 @@
               <input
                 type="date"
                 v-model="newMaintenance.tanggalMulaiMaintenance"
-                :max="new Date(Date.now()).toISOString().slice(0, 10)"
                 class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                 required
               />
