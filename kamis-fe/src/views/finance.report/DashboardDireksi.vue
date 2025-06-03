@@ -189,39 +189,39 @@
       
       <table class="custom-table w-full">
         <thead class="text-white bg-[#1E3A5F]">
-          <tr>
-            <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-              Nama Klien
-              <span v-if="sortClientKey === 'nameClient'" class="ml-1">
-                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
-              Jumlah Aktivitas
-              <span v-if="sortClientKey === 'projectCount'" class="ml-1">
-                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
-              Total Profit
-              <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
-                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-              Nomor Telepon
-              <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
-                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-            <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-              Perusahaan
-              <span v-if="sortClientKey === 'companyClient'" class="ml-1">
-                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-              </span>
-            </th>
-          </tr>
-        </thead>
+        <tr>
+          <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Nama Klien
+            <span v-if="sortClientKey === 'nameClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Jumlah Aktivitas
+            <span v-if="sortClientKey === 'projectCount'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Total Profit
+            <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Nomor Telepon
+            <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Perusahaan
+            <span v-if="sortClientKey === 'companyClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+        </tr>
+      </thead>
         <tbody>
           <tr v-if="loading" class="text-center">
             <td colspan="5" class="py-4">
