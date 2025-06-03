@@ -111,7 +111,6 @@
                         :min="0"
                         :step="10000"
                         required
-                        class="form-input pl-10"
                         placeholder="Masukkan harga jual"
                       />
                     </div>
@@ -132,7 +131,6 @@
                         v-model="formData.resourceStock"
                         :min="0"
                         required
-                        class="form-input pl-10"
                         placeholder="Masukkan jumlah stok"
                       />
                     </div>

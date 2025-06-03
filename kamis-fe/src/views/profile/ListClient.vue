@@ -16,6 +16,7 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
+            <th class="px-3 py-4 table-header text-base" style="width: 60px;">No</th>
             <th @click="sortBy('nameClient')" class="px-6 py-4 table-header cursor-pointer text-base">
               Nama Klien
               <span v-if="sortKey === 'nameClient'">{{ sortAsc ? '▲' : '▼' }}</span>
@@ -39,11 +40,13 @@
         </thead>
         <tbody>
           <tr
-            v-for="client in sortedClients"
+            v-for="(client, index) in sortedClients"
             :key="client.id"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             @click="goToDetailClient(client)"
           >
+            <!-- PERBAIKAN: Gunakan index dari v-for, bukan indexOf dari array asli -->
+            <td class="px-3 py-5 text-center">{{ (clientStore.currentPage * clientStore.pageSize) + index + 1 }}</td>
             <td class="px-6 py-5">{{ client.nameClient }}</td>
             <td class="px-6 py-5">{{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Perorangan' : client.typeClient }}</td>
             <td class="px-6 py-5">{{ client.companyClient || '-' }}</td>
@@ -68,30 +71,14 @@
       <!-- Pagination Controls -->
       <div v-if="clientStore.totalPages > 1 || clientStore.clientList.length > 0" class="mt-6">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-          <!-- Page Size Selector -->
-          <div class="flex items-center space-x-2">
-          <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-          <select 
-            id="pageSizeSelect" 
-            v-model.number="selectedPageSize" 
-            @change="handlePageSizeChange"
-            class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-          >
-            <option :value="10">10</option>
-            <option :value="20">20</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-          </select>
-          </div>
-          
-          <!-- Page Navigation -->
+        <!-- Page Navigation -->
           <div class="flex items-center justify-center space-x-2">
             <button
               @click="changePage(clientStore.currentPage)"
               :disabled="clientStore.currentPage === 0"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Sebelumnya
+              ◄
             </button>
             
             <template v-for="pageNumber in pageNavigation" :key="pageNumber">
@@ -101,7 +88,7 @@
                 :class="[
                   'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
                   pageNumber === clientStore.currentPage + 1 ? 
-                    'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                    'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
                     'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
                 ]"
               >
@@ -113,16 +100,16 @@
             <button
               @click="changePage(clientStore.currentPage + 2)"
               :disabled="clientStore.currentPage >= clientStore.totalPages - 1"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Selanjutnya
+              ►
             </button>
           </div>
           
           <!-- Item Count Display -->
           <p v-if="clientStore.clientList.length > 0" class="text-sm text-gray-700 text-center">
             Menampilkan <span class="font-medium">{{ (clientStore.currentPage * clientStore.pageSize) + 1 }}</span>
-            sampai <span class="font-medium">{{ Math.min((clientStore.currentPage * clientStore.pageSize) + clientStore.clientList.length, totalItems) }}</span> hasil
+            dari <span class="font-medium">{{ Math.min((clientStore.currentPage * clientStore.pageSize) + clientStore.clientList.length, totalItems) }}</span> klien
           </p>
           <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
         </div>
@@ -186,12 +173,6 @@ const fetchPaginatedClients = async (page: number = 1) => {
     selectedPageSize.value,
     getCurrentFilters()
   );
-};
-
-// Handle page size change
-const handlePageSizeChange = () => {
-  clientStore.pageSize = selectedPageSize.value;
-  fetchPaginatedClients(1); // Reset to first page
 };
 
 // Change page

@@ -21,7 +21,7 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p class="text-lg text-gray-600">Memuat data proyek...</p>
+        <p class="text-lg text-gray-600">Memuat data aktivitas penjualan...</p>
       </div>
     </div>
 
@@ -514,7 +514,7 @@ import VSuccessButton from '@/components/VSuccessButton.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VModal from '@/components/VModal.vue';
-import type { SalesProjectData, ResourceUsageDTO } from '@/interfaces/project/project.interface';
+import type { SalesProjectData } from '@/interfaces/project/project.interface';
 
 const route = useRoute();
 const router = useRouter();
@@ -523,7 +523,6 @@ const projectId = route.params.id as string;
 
 const project = ref<SalesProjectData>({} as SalesProjectData);
 const projectData = ref<SalesProjectData>({} as SalesProjectData);
-const clientName = ref<string>('');
 const isLoading = ref(true);
 const error = ref('');
 const showStatusModal = ref(false);
@@ -535,7 +534,6 @@ const showNotification = ref(false);
 const notificationMessage = ref('');
 
 // Add these state variables
-const clientLoading = ref(true);
 const resourcesLoading = ref(false);
 const logsLoading = ref(false);
 

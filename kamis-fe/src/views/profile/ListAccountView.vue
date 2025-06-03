@@ -152,23 +152,7 @@
           
           <!-- Pagination Controls -->
           <div v-if="totalPages > 1 || accounts.length > 0" class="mt-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 p-6">
-              <!-- Page Size Selector -->
-              <div class="flex items-center space-x-2">
-                <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-                <select 
-                  id="pageSizeSelect" 
-                  v-model="selectedPageSize" 
-                  @change="handlePageSizeChange"
-                  class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-                >
-                <option :value="10">10</option>
-                <option :value="25">25</option>
-                <option :value="20">20</option>
-                <option :value="50">50</option>
-                </select>
-              </div>
-              
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 p-6">              
               <!-- Page Navigation -->
               <div class="flex items-center justify-center space-x-2">
                 <button
@@ -176,7 +160,7 @@
                   :disabled="currentPage === 0"
                   class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Sebelumnya
+                  ◄
                 </button>
                 
                 <template v-for="pageNumber in pageNavigation" :key="pageNumber">
@@ -200,14 +184,14 @@
                   :disabled="currentPage >= totalPages - 1"
                   class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Selanjutnya
+                  ►
                 </button>
               </div>
               
               <!-- Item Count Display -->
               <p v-if="accounts.length > 0" class="text-sm text-gray-700 text-center">
                 Menampilkan <span class="font-medium">{{ (currentPage * selectedPageSize) + 1 }}</span>
-                sampai <span class="font-medium">{{ Math.min((currentPage * selectedPageSize) + accounts.length, totalItems) }}</span> hasil
+                dari <span class="font-medium">{{ Math.min((currentPage * selectedPageSize) + accounts.length, totalItems) }}</span> akun
               </p>
               <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
             </div>
@@ -370,11 +354,6 @@ const changePage = (page: number) => {
     return;
   }
   fetchAccounts(page);
-};
-
-const handlePageSizeChange = () => {
-  accountStore.pageSize = selectedPageSize.value;
-  fetchAccounts(1);
 };
 
 // Set up watchers for backend filtering

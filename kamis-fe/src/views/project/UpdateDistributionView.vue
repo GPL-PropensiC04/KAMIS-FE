@@ -165,7 +165,7 @@ const fetchClients = async () => {
     });
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
-      name: client.nameClient
+      nameClient: client.nameClient
     }));
   } catch (error) {
     console.error('Error fetching clients:', error);
