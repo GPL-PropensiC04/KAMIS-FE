@@ -4,13 +4,18 @@ import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
-import type { UpdateProjectFormData, ProjectInterface } from '@/interfaces/project/project.interface';
-import Breadcrumb from '@/components/Breadcrumb.vue';
-import { useProjectStore } from '@/stores/project';
-import { useResourceStore } from "@/stores/resource"; // Added import for resource store
+import type { 
+  UpdateProjectFormData, 
+  ProjectInterface,
+  ProjectResource,
+  ResourceUsageDTO 
+} from '@/interfaces/project/project.interface';
 import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
 import type { ClientInterface } from '@/interfaces/profile/client.interface';
-import type { ProjectResource } from '@/interfaces/project/project.interface';
+import Breadcrumb from '@/components/Breadcrumb.vue';
+import { useProjectStore } from '@/stores/project';
+import { useResourceStore } from '@/stores/resource';
+import { useClientStore } from '@/stores/client';
 
 // Router & Toast
 const router = useRouter();
@@ -18,14 +23,16 @@ const route = useRoute();
 const toast = useToast();
 const projectId = route.params.id as string;
 const projectStore = useProjectStore();
-const resourceStore = useResourceStore(); // Instantiate resource store
+const resourceStore = useResourceStore();
+const clientStore = useClientStore();
 
 // Form data
 const formData = ref<UpdateProjectFormData | null>(null);
 const isLoading = ref(true);
 
+// Using proper interfaces
 const clients = ref<ClientInterface[]>([]);
-const availableProducts = ref<ResourceInterface[]>([]); // Will hold all products
+const availableProducts = ref<ResourceInterface[]>([]);
 const productList = ref<ProjectResource[]>([]);
 const selectedProduct = ref('');
 const selectedQuantity = ref<number | null>(null);
@@ -47,7 +54,7 @@ const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 };
 
-// Computed values
+// Computed values - updated to use ResourceInterface properties
 const totalRevenue = computed(() => {
   return productList.value.reduce((sum, product) => sum + (product.resourcePrice * product.resourceQuantity), 0);
 });
@@ -101,7 +108,7 @@ const fetchProjectDetails = async () => {
       projectEndDate: formattedEndDate,
       projectDeliveryAddress: projectData.projectDeliveryAddress || '',
       projectTotalPemasukkan: projectData.projectTotalPemasukkan || 0,
-      projectUseResource: projectData.projectUseResource 
+      projectUseResource: projectData.projectUseResource || []
     };
     
     // Load related data
@@ -123,7 +130,7 @@ watch(() => formData.value?.projectStartDate, (newStartDate) => {
   }
 });
 
-// Fetch clients
+// Fetch clients - updated to use ClientInterface
 const fetchClients = async () => {
   try {
     const response = await axios.get(`${API_URLS.PROFILE}/client/all`, {
@@ -135,14 +142,14 @@ const fetchClients = async () => {
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
       nameClient: client.nameClient
-    }));
+    })) as ClientInterface[];
   } catch (error) {
     console.error('Error fetching clients:', error);
     toast.error('Gagal mengambil data klien');
   }
 };
 
-// Load resource data for sales projects
+// Load resource data for sales projects - WITH PROPER DEDUPLICATION AND STOCK MANAGEMENT
 const loadResourceData = async () => {
   if (!formData.value || !formData.value.projectUseResource) return;
   
@@ -150,34 +157,69 @@ const loadResourceData = async () => {
     // Fetch all resources
     await fetchProducts();
     
-    // Process project resources
-    productList.value = [];
-    
+    // Process project resources and combine duplicates using Map
+    const resourceMap = new Map();
+    const usedStockMap = new Map(); // Track how much stock is already used
     
     for (const resourceData of formData.value.projectUseResource) {
-      // Clean the resourceId - trim whitespace and convert to string
       const cleanId = String(resourceData.resourceId).trim();
-      
-      // Find the resource details
       const resource = availableProducts.value.find(p => String(p.id).trim() === cleanId);
       
+      // Track used stock
+      if (usedStockMap.has(cleanId)) {
+        usedStockMap.set(cleanId, usedStockMap.get(cleanId) + resourceData.resourceStockUsed);
+      } else {
+        usedStockMap.set(cleanId, resourceData.resourceStockUsed);
+      }
+      
       if (resource) {
-        productList.value.push({
-          id: String(resource.id),
-          resourceName: resource.resourceName,
-          resourceQuantity: resourceData.resourceStockUsed,
-          resourcePrice: resourceData.sellPrice
-        });
+        const resourceKey = cleanId;
+        
+        if (resourceMap.has(resourceKey)) {
+          // Combine quantities if resource already exists
+          const existing = resourceMap.get(resourceKey);
+          existing.resourceQuantity += resourceData.resourceStockUsed;
+        } else {
+          // Add new resource entry
+          resourceMap.set(resourceKey, {
+            id: resource.id,
+            resourceName: resource.resourceName,
+            resourceQuantity: resourceData.resourceStockUsed,
+            resourcePrice: resourceData.sellPrice
+          } as ProjectResource);
+        }
       } else {
         // If resource not found, still add it with a placeholder name
-        productList.value.push({
-          id: cleanId,
-          resourceName: `Resource ${cleanId}`,
-          resourceQuantity: resourceData.resourceStockUsed,
-          resourcePrice: resourceData.sellPrice
-        });
+        const resourceKey = cleanId;
+        
+        if (resourceMap.has(resourceKey)) {
+          const existing = resourceMap.get(resourceKey);
+          existing.resourceQuantity += resourceData.resourceStockUsed;
+        } else {
+          resourceMap.set(resourceKey, {
+            id: cleanId,
+            resourceName: `Resource ${cleanId}`,
+            resourceQuantity: resourceData.resourceStockUsed,
+            resourcePrice: resourceData.sellPrice
+          } as ProjectResource);
+        }
       }
     }
+    
+    // Update available stock by subtracting already used stock
+    usedStockMap.forEach((usedQuantity, resourceId) => {
+      const availableProductIndex = availableProducts.value.findIndex(p => String(p.id).trim() === resourceId);
+      if (availableProductIndex !== -1) {
+        availableProducts.value[availableProductIndex].resourceStock -= usedQuantity;
+        // Ensure stock doesn't go negative
+        if (availableProducts.value[availableProductIndex].resourceStock < 0) {
+          availableProducts.value[availableProductIndex].resourceStock = 0;
+        }
+      }
+    });
+    
+    // Convert map back to array
+    productList.value = Array.from(resourceMap.values());
     
   } catch (error) {
     console.error('Error loading resource data:', error);
@@ -185,24 +227,38 @@ const loadResourceData = async () => {
   }
 };
 
-// Fetch products (resources) from API
+// Fetch products (resources) from API - updated to use ResourceInterface
 const fetchProducts = async () => {
   try {
-    await resourceStore.fetchResources(); // Fetch resources from the store
-    const allProducts = resourceStore.resources; 
-    availableProducts.value = allProducts.map((resource: ResourceInterface) => ({
-      id: resource.id,
-      resourceName: resource.resourceName,
-      resourcePrice: resource.resourcePrice, 
-      resourceStock: resource.resourceStock 
-    }));
+    await resourceStore.fetchResources();
+    
+    // Access resources from the store's state instead of return value
+    const resources = resourceStore.resources;
+    
+    console.log('Raw resource data from store:', resources);
+    
+    // Using ResourceInterface directly
+    availableProducts.value = resources.map((resource: any) => {
+      console.log(`Resource ${resource.id} (${resource.resourceName}) sell price:`, resource.resourcePrice);
+      
+      return {
+        id: String(resource.id).trim(),
+        resourceName: resource.resourceName,
+        resourcePrice: resource.resourcePrice || 0,
+        resourceStock: resource.resourceStock || 0
+      } as ResourceInterface;
+    });
+    
+    console.log('Processed available products with prices:', 
+      availableProducts.value.map(p => ({ id: p.id, name: p.resourceName, price: p.resourcePrice }))
+    );
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
   }
 };
 
-// Watch selected product to update price
+// Watch selected product to update price - updated for ResourceInterface
 watch(selectedProduct, (newValue) => {
   if (newValue) {
     console.log(`Selected product changed to: ${newValue}`);
@@ -219,7 +275,7 @@ watch(selectedProduct, (newValue) => {
   }
 });
 
-// Add product to cart
+// Add product to cart - updated for interfaces with proper stock management and duplicate prevention
 const addProduct = () => {
   if (!selectedProduct.value || !selectedQuantity.value) {
     toast.error('Pilih nama barang dan jumlah terlebih dahulu');
@@ -248,27 +304,38 @@ const addProduct = () => {
     return;
   }
   
-  // Check if product already exists in cart
-  const existingIndex = productList.value.findIndex(p => p.id === product.id);
+  // Check if product already exists in cart by comparing IDs as strings
+  const existingIndex = productList.value.findIndex(p => String(p.id) === String(product.id));
   
   if (existingIndex >= 0) {
-    // Update existing product
-    const newQuantity = productList.value[existingIndex].resourceQuantity + selectedQuantity.value;
+    // Update existing product quantity
+    const currentQuantityInCart = productList.value[existingIndex].resourceQuantity;
+    const newTotalQuantity = currentQuantityInCart + selectedQuantity.value;
     
-    if (newQuantity > product.resourceStock) {
+    // Check if new total would exceed available stock (current stock + what's already in cart)
+    const totalAvailableStock = product.resourceStock + currentQuantityInCart;
+    
+    if (newTotalQuantity > totalAvailableStock) {
       toast.error(`Stok barang tidak cukup. Sisa stok: ${product.resourceStock}`);
       return;
     }
     
-    productList.value[existingIndex].resourceQuantity = newQuantity;
+    // Update the quantity in the existing item
+    productList.value[existingIndex].resourceQuantity = newTotalQuantity;
   } else {
-    // Add new product
+    // Add new product using ProjectResource interface
     productList.value.push({
-      id: String(product.id),
+      id: product.id,
       resourceName: product.resourceName,
       resourceQuantity: selectedQuantity.value,
       resourcePrice: selectedPrice.value
-    });
+    } as ProjectResource);
+  }
+  
+  // IMPORTANT: Reduce the available stock in the dropdown
+  const availableProductIndex = availableProducts.value.findIndex(p => String(p.id) === String(product.id));
+  if (availableProductIndex !== -1) {
+    availableProducts.value[availableProductIndex].resourceStock -= selectedQuantity.value;
   }
   
   // Reset selection
@@ -280,7 +347,7 @@ const addProduct = () => {
   updateFormData();
 };
 
-// Remove product from cart
+// Remove product from cart - updated for interfaces
 const removeProduct = (index: number) => {
   // Get the product before removing it
   const removedProduct = productList.value[index];
@@ -298,20 +365,17 @@ const removeProduct = (index: number) => {
   updateFormData();
 };
 
-
-// Update form data with current lists
+// Update form data with current lists - updated for interfaces
 const updateFormData = () => {
   if (!formData.value) return;
 
   formData.value.projectTotalPemasukkan = totalRevenue.value;
   formData.value.projectUseResource = productList.value.map(product => ({
     resourceId: product.id,
-    resourceName: product.resourceName,
     resourceStockUsed: product.resourceQuantity,
     sellPrice: product.resourcePrice
-  }));
+  })) as ResourceUsageDTO[];
 };
-
 
 // Form submission
 const submitForm = async () => {
@@ -361,17 +425,6 @@ const submitForm = async () => {
   // Create a copy of the data to avoid modifying the original
   const requestData = { ...formData.value };
   
-  // Limit the size of any large arrays to prevent log message overflow
-  if (requestData.projectUseResource && requestData.projectUseResource.length > 5) {
-    console.log(`Limiting projectUseResource array to prevent log overflow (original size: ${requestData.projectUseResource.length})`);
-    // Keep a reference to the original array for local state
-    const originalResources = [...requestData.projectUseResource];
-    // Truncate to 5 items for the API request
-    requestData.projectUseResource = requestData.projectUseResource.slice(0, 5);
-    // Add a note in console but don't add a summary item to avoid type errors
-    console.log(`Removed ${originalResources.length - 5} items to prevent log overflow`);
-  }
-  
   try {
     await axios.put(
       `${API_URLS.PROJECT}/project/update/${requestData.id}`,
@@ -394,10 +447,9 @@ const submitForm = async () => {
 };
 
 // Load data on component mount
-onMounted(async () => {
-  await fetchProjectDetails();
-  await fetchClients();
-  await fetchProducts(); // Fetches all products via the new store action
+onMounted(() => {
+  fetchClients();
+  fetchProjectDetails();
 });
 </script> 
 
@@ -544,10 +596,16 @@ onMounted(async () => {
                   v-model="selectedProduct"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
                   :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !availableProducts.length }"
+                  :disabled="!availableProducts.length"
                 >
                   <option value="" disabled>Pilih Barang</option>
-                  <option v-for="product in availableProducts" :key="product.id" :value="product.id">
-                    {{ product.resourceName }}
+                  <!-- Only show products that have stock available -->
+                  <option 
+                    v-for="product in availableProducts.filter(p => p.resourceStock > 0)" 
+                    :key="product.id" 
+                    :value="product.id"
+                  >
+                    {{ product.resourceName }} (Stok: {{ product.resourceStock }})
                   </option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
