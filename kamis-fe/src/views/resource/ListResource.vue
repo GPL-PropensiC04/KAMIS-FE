@@ -68,29 +68,16 @@
           </tbody>
         </table>
         <div v-if="resourceStore.totalPages > 1 || resourceStore.resources.length > 0" class="mt-6 text-center">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-2">
-              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-              <select 
-                id="pageSizeSelect" 
-                v-model="selectedPageSize" 
-                @change="handlePageSizeChange"
-                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              >
-                <option :value="10">10</option>
-                <option :value="25">25</option>
-                <option :value="20">20</option>
-                <option :value="50">50</option>
-              </select>
-            </div>          
+          <div class="flex items-center justify-between mb-4">       
           <!-- Page Navigation -->
           <div class="flex items-center justify-center space-x-2">
             <button
               @click="changePage(resourceStore.currentPage)"
               :disabled="resourceStore.currentPage === 0"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center
+                    transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Sebelumnya
+              ◄
             </button>
             
             <template v-for="pageNumber in pageNavigation" :key="pageNumber">
@@ -100,7 +87,7 @@
                 :class="[
                   'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
                   pageNumber === resourceStore.currentPage + 1 ? 
-                    'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                    'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
                     'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
                 ]"
               >
@@ -112,15 +99,16 @@
             <button
               @click="changePage(resourceStore.currentPage + 2)"
               :disabled="resourceStore.currentPage >= resourceStore.totalPages - 1"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center 
+                    transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Selanjutnya
+              ►
             </button>
           </div>
             
             <p v-if="resourceStore.resources.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
               Menampilkan <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + 1 }}</span>
-              sampai <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }} hasil</span>
+              dari <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }} resource</span>
             </p>
             <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
           </div>
@@ -200,18 +188,6 @@ const changePage = (page: number) => {
     return;
   }
   fetchResources(page);
-};
-
-// Handle page size change
-const handlePageSizeChange = () => {
-  resourceStore.pageSize = selectedPageSize.value;
-  fetchResources(1); // Fetch first page with new page size
-};
-
-// Clear search
-const clearSearch = () => {
-  searchName.value = '';
-  // No need to call fetchResources here as the watch will trigger it
 };
 
 // Rupiah formatter
