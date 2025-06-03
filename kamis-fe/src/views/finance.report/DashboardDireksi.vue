@@ -130,25 +130,25 @@
             <th @click="sortTable('supplier', 'nameSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
               Nama Supplier
               <span v-if="sortSupplierKey === 'nameSupplier'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('supplier', 'purchaseCount')" class="px-4 py-3 text-center cursor-pointer table-header">
               Jumlah Pembelian
               <span v-if="sortSupplierKey === 'purchaseCount'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('supplier', 'companySupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
               Perusahaan
               <span v-if="sortSupplierKey === 'companySupplier'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('supplier', 'noTelpSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
               Nomor Telepon
               <span v-if="sortSupplierKey === 'noTelpSupplier'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
           </tr>
@@ -193,31 +193,31 @@
             <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
               Nama Klien
               <span v-if="sortClientKey === 'nameClient'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
               Jumlah Aktivitas
               <span v-if="sortClientKey === 'projectCount'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
               Total Profit
               <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
               Nomor Telepon
               <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
             <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
               Perusahaan
               <span v-if="sortClientKey === 'companyClient'" class="ml-1">
-                <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </th>
           </tr>
