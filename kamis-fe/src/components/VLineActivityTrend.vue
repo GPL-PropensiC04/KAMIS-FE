@@ -74,6 +74,19 @@ const chartOptions: ChartOptions<'line'> = {
   }
 };
 
+// Mapping untuk PeriodType - label Indonesian tapi value tetap English
+const periodTypeOptions = [
+  { label: 'Bulanan', value: 'Monthly' },
+  { label: 'Kuartal', value: 'Quarterly' }
+];
+
+// Mapping untuk Status - label Indonesian tapi value tetap English
+const statusOptions = [
+  { label: 'Semua', value: 'All' },
+  { label: 'Selesai', value: 'Done' },
+  { label: 'Batal', value: 'Cancelled' }
+];
+
 const fetchChartData = async () => {
   try {
     const res = await axios.get(`${API_URLS.FINANCE}/operational-report/activity-chart`, {
@@ -209,17 +222,17 @@ onMounted(fetchChartData);
             class="flex border border-[#1E3A5F] font-inter text-sm"
         >
             <button
-            v-for="option in ['Monthly', 'Quarterly']"
-            :key="option"
-            @click="periodType = option"
+            v-for="option in periodTypeOptions"
+            :key="option.value"
+            @click="periodType = option.value"
             class="px-3 py-1 font-semibold"
             :class="[
-                periodType === option
+                periodType === option.value
                 ? 'bg-[#1E3A5F] text-white'
                 : 'bg-[#E5EAF2] text-[#1E3A5F]'
             ]"
             >
-            {{ option }}
+            {{ option.label }}
             </button>
         </div>
 
@@ -228,17 +241,17 @@ onMounted(fetchChartData);
             class="flex border border-[#1E3A5F] font-inter text-sm"
         >
             <button
-            v-for="option in ['All', 'Done', 'Cancelled']"
-            :key="option"
-            @click="status = option"
+            v-for="option in statusOptions"
+            :key="option.value"
+            @click="status = option.value"
             class="px-3 py-1 font-semibold"
             :class="[
-                status === option
+                status === option.value
                 ? 'bg-[#1E3A5F] text-white'
                 : 'bg-[#E5EAF2] text-[#1E3A5F]'
             ]"
             >
-            {{ option }}
+            {{ option.label }}
             </button>
         </div>
         </div>
