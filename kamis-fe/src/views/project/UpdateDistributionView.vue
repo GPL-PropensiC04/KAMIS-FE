@@ -602,7 +602,7 @@ onMounted(async () => {
                   <span>Klien</span>
                   <span class="text-red-500">*</span>
                 </label>
-                <VLockedInput :value="clients.find(client => client.id === formData.projectClientId)?.nameClient || 'Pilih Klien'" />
+                <VLockedInput :value="clients.find(client => client.id === formData?.projectClientId)?.nameClient || 'Pilih Klien'" />
               </div>
 
               <!-- Alamat Pengambilan -->
@@ -994,7 +994,7 @@ onMounted(async () => {
                 </div>
                 <div>
                   <p class="text-sm font-medium text-blue-700">Biaya Tenaga Kerja</p>
-                  <p class="text-xs text-blue-600">{{ formData.projectPHLCount }} orang x {{ formatCurrency(formData.projectPHLPay) }}</p>
+                  <p class="text-xs text-blue-600">{{ formData.projectPHLCount }} orang x {{ formatCurrency(formData.projectPHLPay || 0) }}</p>
                 </div>
               </div>
               <p class="text-2xl font-bold text-blue-800">{{ formatCurrency(totalPhlCost) }}</p>
