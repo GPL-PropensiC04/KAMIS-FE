@@ -579,7 +579,7 @@ const currentUsername = computed(() => authStore.currentUsername);
 
 // Status color helper
 const getStatusColor = (status: string) => {
-  const colors = {
+  const colors : Record<string, string> =  {
     'Diajukan': 'bg-yellow-100 text-yellow-800',
     'Disetujui': 'bg-blue-100 text-blue-800',
     'Diproses': 'bg-orange-100 text-orange-800',

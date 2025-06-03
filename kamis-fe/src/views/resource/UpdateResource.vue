@@ -329,7 +329,7 @@ onMounted(async () => {
       resourceName.value = resource.resourceName;
       resourceStock.value = resource.resourceStock;
       resourcePrice.value = resource.resourcePrice;
-      resourceDescription.value = resource.resourceDescription;
+      resourceDescription.value = resource.resourceDescription || '';
       // Assuming supplier info is available in the resource object
     } else {
       // Handle case where resource is not found
