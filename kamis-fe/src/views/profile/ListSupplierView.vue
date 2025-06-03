@@ -16,6 +16,7 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
+            <th class="px-3 py-4 table-header text-base" style="width: 60px;">No</th>
             <th @click="sortBy('companySupplier')" class="px-6 py-4 table-header cursor-pointer text-base">
               Nama Perusahaan
               <span v-if="sortKey === 'companySupplier'">{{ sortAsc ? '▲' : '▼' }}</span>
@@ -32,48 +33,34 @@
         </thead>
         <tbody>
           <tr
-            v-for="supplier in sortedSuppliers"
+            v-for="(supplier, index) in sortedSuppliers"
             :key="supplier.id"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             @click="goToDetailSupplier(supplier.id)"
           >
+            <!-- PERBAIKAN: Gunakan index dari v-for + pagination offset -->
+            <td class="px-3 py-5 text-center">{{ (supplierStore.currentPage * supplierStore.pageSize) + index + 1 }}</td>
             <td class="px-6 py-5">{{ supplier.companySupplier }}</td>
             <td class="px-6 py-5">{{ supplier.nameSupplier }}</td>
             <td class="px-6 py-5">{{ supplier.totalPurchases }} Pembelian</td>
           </tr>
           <tr v-if="sortedSuppliers.length === 0">
-            <td colspan="3" class="text-center text-gray-500 py-6 text-base">Data supplier tidak ditemukan.</td>
+            <td colspan="4" class="text-center text-gray-500 py-6 text-base">Data supplier tidak ditemukan.</td>
           </tr>
         </tbody>
       </table>
       
       <!-- Pagination Controls -->
       <div v-if="supplierStore.totalPages > 1 || supplierStore.suppliers.length > 0" class="mt-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-          <!-- Page Size Selector -->
-          <div class="flex items-center space-x-2">
-            <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
-            <select 
-              id="pageSizeSelect" 
-              v-model="selectedPageSize" 
-              @change="handlePageSizeChange"
-              class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-            >
-              <option :value="10">10</option>
-              <option :value="25">25</option>
-              <option :value="20">20</option>
-              <option :value="50">50</option>
-            </select>
-          </div>
-          
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">     
           <!-- Page Navigation -->
           <div class="flex items-center justify-center space-x-2">
             <button
               @click="changePage(supplierStore.currentPage)"
               :disabled="supplierStore.currentPage === 0"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Sebelumnya
+              ◄
             </button>
             
             <template v-for="pageNumber in pageNavigation" :key="pageNumber">
@@ -83,7 +70,7 @@
                 :class="[
                   'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
                   pageNumber === supplierStore.currentPage + 1 ? 
-                    'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                    'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
                     'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
                 ]"
               >
@@ -95,16 +82,16 @@
             <button
               @click="changePage(supplierStore.currentPage + 2)"
               :disabled="supplierStore.currentPage >= supplierStore.totalPages - 1"
-              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
             >
-              Selanjutnya
+              ►
             </button>
           </div>
           
           <!-- Item Count Display -->
           <p v-if="supplierStore.suppliers.length > 0" class="text-sm text-gray-700 text-center">
             Menampilkan <span class="font-medium">{{ (supplierStore.currentPage * supplierStore.pageSize) + 1 }}</span>
-            sampai <span class="font-medium">{{ Math.min((supplierStore.currentPage * supplierStore.pageSize) + supplierStore.suppliers.length, totalItems) }}</span> hasil
+            dari <span class="font-medium">{{ Math.min((supplierStore.currentPage * supplierStore.pageSize) + supplierStore.suppliers.length, totalItems) }}</span> supplier
           </p>
           <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
         </div>
@@ -141,12 +128,6 @@ const fetchPaginatedSuppliers = async (page: number = 1) => {
       companySupplier: searchCompany.value
     }
   );
-};
-
-// Handle page size change
-const handlePageSizeChange = () => {
-  supplierStore.pageSize = selectedPageSize.value;
-  fetchPaginatedSuppliers(1); // Reset to first page
 };
 
 // Change page
