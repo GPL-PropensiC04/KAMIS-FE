@@ -78,6 +78,18 @@
                       />
                     </div>
                   </div>
+                  <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Supplier</span>
+                    </label>
+                    <div class="relative">
+                      <input 
+                        :value="supplierName"
+                        disabled
+                        class="form-input pl-10 disabled"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -253,6 +265,7 @@ const resourceName = ref('');
 const resourceStock = ref(0);
 const resourcePrice = ref(0);
 const resourceDescription = ref('');
+const supplierName = ref(''); 
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 

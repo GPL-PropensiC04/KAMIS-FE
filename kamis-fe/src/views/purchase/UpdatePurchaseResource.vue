@@ -6,6 +6,7 @@ import axios from "axios";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VNumberInput from "@/components/VNumberInput.vue";
 import VPriceInput from "@/components/VPriceInput.vue";
+import VLockedInput from "@/components/VLockedInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import type { ResourceTempInterface } from "@/interfaces/purchase/resourcetemp.interface";
@@ -267,6 +268,9 @@ const isFormValid = computed(() => {
                 <p class="text-blue-100 mt-1">Perbarui item resource untuk pembelian</p>
               </div>
             </div>
+            <div class="flex items-center space-x-3">
+              <VSuccessButton label="Update" @click="handleUpdatePurchase"/>
+            </div>
           </div>
         </div>
       </div>
@@ -294,7 +298,7 @@ const isFormValid = computed(() => {
                   <label class="form-label">
                     <span class="label-text">Tanggal Pengajuan</span>
                   </label>
-                  <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ purchaseDate || 'Loading...' }}</div>
+                  <div class="form-input bg-gray-50 text-gray-600 font-medium">{{ purchaseDate || 'Loading...' }}</div>
                 </div>
 
                 <!-- Supplier -->
@@ -310,7 +314,7 @@ const isFormValid = computed(() => {
                   <label class="form-label">
                     <span class="label-text">Tipe Barang</span>
                   </label>
-                  <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ purchaseType }}</div>
+                  <VLockedInput :value="purchaseType" class="form-input bg-gray-50 text-gray-600" />
                 </div>
               </div>
             </div>
@@ -476,6 +480,30 @@ const isFormValid = computed(() => {
           <!-- Right Column - Summary & Actions -->
           <div class="col-span-4 bg-gray-50 p-8 pl-6 border-l border-gray-100">
             <div class="sticky top-6">
+              <!-- Preview Summary -->
+              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Preview Form</h3>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Resource:</span>
+                    <span class="font-medium text-gray-900">{{ selectedResource || '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Jumlah:</span>
+                    <span class="font-medium text-gray-900">{{ quantity || '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Harga:</span>
+                    <span class="font-medium text-gray-900">{{ price > 0 ? formatCurrency(price) : '-' }}</span>
+                  </div>
+                  <div class="pt-2 border-t border-gray-100">
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Subtotal:</span>
+                      <span class="font-bold text-blue-600">{{ (price > 0 && quantity > 0) ? formatCurrency(price * quantity) : '-' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <!-- Items Summary -->
               <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100 mb-6">
@@ -494,6 +522,37 @@ const isFormValid = computed(() => {
                 </div>
               </div>
 
+              <!-- Validation Status -->
+              <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 mb-6">
+                <h4 class="text-sm font-medium text-gray-800 mb-3">Status Form</h4>
+                <div class="space-y-2 text-xs">
+                  <div class="flex items-center">
+                    <div :class="selectedResource.trim() ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'" class="w-4 h-4 rounded-full flex items-center justify-center mr-2">
+                      <svg v-if="selectedResource.trim()" class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                        <path d="M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z"/>
+                      </svg>
+                    </div>
+                    <span>Pilih Resource</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div :class="quantity > 0 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'" class="w-4 h-4 rounded-full flex items-center justify-center mr-2">
+                      <svg v-if="quantity > 0" class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                        <path d="M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z"/>
+                      </svg>
+                    </div>
+                    <span>Isi Jumlah</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div :class="price > 0 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'" class="w-4 h-4 rounded-full flex items-center justify-center mr-2">
+                      <svg v-if="price > 0" class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                        <path d="M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z"/>
+                      </svg>
+                    </div>
+                    <span>Isi Harga</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- Action Buttons -->
               <div class="space-y-3">
                 <VSuccessButton 
@@ -502,6 +561,16 @@ const isFormValid = computed(() => {
                   :class="resourceList.length > 0 ? 'btn-primary w-full justify-center' : 'btn-disabled w-full justify-center cursor-not-allowed'"
                   :disabled="resourceList.length === 0"
                 />
+              </div>
+
+              <!-- Purchase Info -->
+              <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h4 class="text-sm font-medium text-blue-900 mb-2">Info Purchase:</h4>
+                <div class="text-xs text-blue-800 space-y-1">
+                  <div>• Tanggal: {{ purchaseDate }}</div>
+                  <div>• Supplier: {{ supplierOptions.find(s => s.value === selectedSupplier)?.label || '-' }}</div>
+                  <div>• Tipe: {{ purchaseType }}</div>
+                </div>
               </div>
 
               <!-- Help Text -->

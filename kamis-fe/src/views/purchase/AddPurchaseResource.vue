@@ -10,7 +10,6 @@ import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import VLockedInput from "@/components/VLockedInput.vue";
 
 // Router & Store
 const router = useRouter();
