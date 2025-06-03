@@ -468,7 +468,6 @@ const fetchProducts = async () => {
       resourceName: resource.resourceName,
       resourcePrice: resource.resourcePrice, 
       resourceStock: resource.resourceStock,
-      resourceSupplierId: resource.resourceSupplierId,
       resourceDescription: resource.resourceDescription
     }));
   } catch (error) {
