@@ -57,11 +57,11 @@
     <!-- Main Content Section -->
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
-        <VOptionInput 
-          v-model="selectedType" 
-          :options="['All', 'Penjualan', 'Distribusi']" 
-          class="w-1/3" 
-        />
+      <VOptionInput 
+        v-model="selectedSalesTypeDisplay" 
+        :options="salesTypeOptionsDisplay" 
+        class="w-1/3" 
+      />
         <div class="flex gap-2">
           <VButton v-if="canEditProject" label="+ Tambah Aktivitas" @click="goToAddProject" />
         </div>
@@ -317,6 +317,29 @@ const nominalOptions = [
   { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
   { label: "100 Juta - 1 Miliar", start: 100000000, end: 1000000000 },
 ];
+
+const salesTypeMapping: { [key: string]: string } = {
+  'All': 'Semua',
+  'Penjualan': 'Penjualan',
+  'Distribusi': 'Distribusi'
+};
+
+const reverseSalesTypeMapping: { [key: string]: string } = {
+  'Semua': 'All',
+  'Penjualan': 'Penjualan',
+  'Distribusi': 'Distribusi'
+};
+
+const salesTypeOptionsDisplay = ['Semua', 'Penjualan', 'Distribusi'];
+
+const selectedSalesTypeDisplay = computed({
+  get() {
+    return salesTypeMapping[selectedType.value] || selectedType.value;
+  },
+  set(newValue: string) {
+    selectedType.value = reverseSalesTypeMapping[newValue] || newValue;
+  }
+});
 
 // Get current filters for API calls
 const getCurrentFilters = () => {
