@@ -1,281 +1,292 @@
 <template>
   <Breadcrumb />
-  <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <!-- Header Section -->
-    <div class="max-w-7xl mx-auto bg-white p-5 rounded-lg shadow-md mb-4">
-      <div class="welcome-message text-5xl font-bold mb-4">
-        Welcome, {{ userInfo.username }}
-      </div>
-      
-      <!-- Filter Buttons -->
-      <div class="flex flex-wrap gap-2">
-        <button
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors',
-            selectedRange === 'LAST_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          ]"
-          @click="setDateRange('LAST_YEAR')">
-          Tahun Lalu
-        </button>
-        <button 
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors', 
-            selectedRange === 'THIS_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_YEAR')">
-          Tahun Ini
-        </button>
-        <button 
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors', 
-            selectedRange === 'THIS_QUARTER' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_QUARTER')">
-          Kuartal Ini
-        </button>
-        <button 
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors', 
-            selectedRange === 'THIS_MONTH' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_MONTH')">
-          Bulan Ini
-        </button>
-      </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <!-- Card Total Profit -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Profit/Loss</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F]" />
+  <div class="min-h-screen bg-gray-50 p-4 lg:p-6">
+    <!-- Welcome Section -->
+    <div class="w-full bg-white p-6 rounded-xl shadow-sm mb-6">
+      <div class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
+        <!-- Left Side: Welcome Message -->
+        <div class="flex-1">
+          <div class="welcome-message text-4xl lg:text-5xl font-bold mb-2 text-gray-800">
+            Welcome, {{ userInfo.username }}
+          </div>
+          <div class="text-gray-600 text-sm lg:text-base">
+            Dashboard eksekutif untuk pengambilan keputusan strategis
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(cardTotalProfit) }}</div>
-        <div :class="{'text-green-500': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" class="text-sm mt-1">
-          {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <!-- Card Total Transaksi -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Transaksi</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-3xl font-semibold mt-2">{{ cardTotalTransaction }}</div>
-        <div :class="{'text-green-500': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" class="text-sm mt-1">
-          {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+        
+        <!-- Right Side: Date Range Buttons -->
+        <div class="flex flex-wrap gap-3 lg:flex-shrink-0">
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'LAST_YEAR' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('LAST_YEAR')">
+            Tahun Lalu
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_YEAR' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_YEAR')">
+            Tahun Ini
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_QUARTER' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_QUARTER')">
+            Kuartal Ini
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_MONTH' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_MONTH')">
+            Bulan Ini
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Charts Section - 2 Column Grid for Bar and Donut Chart -->
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <!-- Pemasukan dan Pengeluaran Chart -->
-      <div class="bg-white rounded-2xl shadow-md p-6">
+    <!-- Stats Cards -->
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
+      <!-- Total Profit/Loss Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="text-lg lg:text-xl font-bold text-gray-800 mb-2">Total Profit/Loss</div>
+            <div class="text-2xl lg:text-3xl font-semibold text-gray-900 mb-2">{{ formatCurrency(cardTotalProfit) }}</div>
+            <div :class="{'text-green-600': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" 
+                 class="text-sm font-medium">
+              {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+            </div>
+          </div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full flex-shrink-0">
+            <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F] text-xl" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Transaksi Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="text-lg lg:text-xl font-bold text-gray-800 mb-2">Total Transaksi</div>
+            <div class="text-2xl lg:text-3xl font-semibold text-gray-900 mb-2">{{ cardTotalTransaction }}</div>
+            <div :class="{'text-green-600': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" 
+                 class="text-sm font-medium">
+              {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+            </div>
+          </div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full flex-shrink-0">
+            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F] text-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
+      <!-- Distribusi Keuangan Chart -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="flex items-center mb-4">
-          <font-awesome-icon
-            :icon="['fas', 'scale-balanced']"
-            class="text-[24px] mr-2"
-            style="color: #2E7D32;"
-          />
-          <h2 class="text-lg font-bold leading-tight">
+          <div class="bg-green-100 p-2 rounded-lg mr-3">
+            <font-awesome-icon
+              :icon="['fas', 'scale-balanced']"
+              class="text-green-700 text-lg"
+            />
+          </div>
+          <h2 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
             Distribusi Keuangan Perusahaan
           </h2>
         </div>
-
-        <div class="h-[320px]">
+        <div class="h-80">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
       </div>
-      
-      <!-- Donut Pengeluaran Chart -->
-      <div class="bg-white rounded-2xl shadow-md p-6">
+
+      <!-- Pengeluaran Chart -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="flex items-center mb-4">
-          <font-awesome-icon
-            :icon="['fas', 'money-bill']"
-            class="text-[24px] mr-2"
-            style="color: #912018;"
-          />
-          <h2 class="text-lg font-bold leading-tight">
+          <div class="bg-red-100 p-2 rounded-lg mr-3">
+            <font-awesome-icon
+              :icon="['fas', 'money-bill']"
+              class="text-red-700 text-lg"
+            />
+          </div>
+          <h2 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
             % Pengeluaran per Jenis Pengeluaran
           </h2>
         </div>
-
-        <div class="h-[320px]">
+        <div class="h-80">
           <VDonutPengeluaran :range="selectedRange" @data-loaded="updateDonutChartData" />
         </div>
       </div>
     </div>
 
-    <!-- Line Income Expense Chart -->
-      <div class="mb-4">
-        <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
-      </div>
+    <!-- Line Chart -->
+    <div class="mb-6">
+      <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
+    </div>
 
-    <!-- Daftar Supplier Section -->
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="mb-4">
-        <h2 class="text-xl font-bold text-center">Daftar Supplier Teratas</h2>
+    <!-- Top Suppliers Table -->
+    <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+      <div class="bg-[#1E3A5F] p-4 lg:p-6">
+        <h2 class="text-lg lg:text-xl font-bold text-white text-center">
+          Daftar Supplier Teratas
+        </h2>
       </div>
       
-      <!-- Loading state untuk tabel supplier -->
-      <div v-if="loading" class="flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
-        <span class="ml-2 text-gray-600">Memuat data supplier...</span>
-      </div>
-
-      <!-- Tabel supplier (existing code) -->
-      <div v-else class="overflow-x-auto">
-        <table class="custom-table w-full">
+      <div class="overflow-x-auto">
+        <table class="custom-table">
           <thead class="text-white bg-[#1E3A5F]">
             <tr>
-              <th @click="sortTable('supplier', 'nameSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              <th @click="sortTable('supplier', 'nameSupplier')" class="table-header">
                 Nama Supplier
-                <span v-if="sortSupplierKey === 'nameSupplier'" class="ml-1">
-                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
+                <span v-if="sortSupplierKey === 'nameSupplier'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'purchaseCount')" class="px-4 py-3 text-center cursor-pointer table-header">
+              <th @click="sortTable('supplier', 'purchaseCount')" class="table-header">
                 Jumlah Pembelian
-                <span v-if="sortSupplierKey === 'purchaseCount'" class="ml-1">
-                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
+                <span v-if="sortSupplierKey === 'purchaseCount'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'companySupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              <th @click="sortTable('supplier', 'companySupplier')" class="table-header">
                 Perusahaan
-                <span v-if="sortSupplierKey === 'companySupplier'" class="ml-1">
-                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
+                <span v-if="sortSupplierKey === 'companySupplier'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'noTelpSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
+              <th @click="sortTable('supplier', 'noTelpSupplier')" class="table-header">
                 Nomor Telepon
-                <span v-if="sortSupplierKey === 'noTelpSupplier'" class="ml-1">
-                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
+                <span v-if="sortSupplierKey === 'noTelpSupplier'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
                 </span>
               </th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading" class="text-center">
-              <td colspan="4" class="py-4">
+              <td colspan="4" class="table-cell py-8">
                 <div class="flex justify-center">
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1E3A5F]"></div>
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
                 </div>
               </td>
             </tr>
             <tr v-else-if="topThreeSuppliers.length === 0">
-              <td colspan="4" class="text-center py-4 text-gray-500 italic">
+              <td colspan="4" class="table-cell text-center py-8 text-gray-500 italic">
                 Tidak ada data supplier.
               </td>
             </tr>
             <tr 
               v-for="supplier in topThreeSuppliers" 
               :key="supplier.id" 
-              class="hover:bg-gray-100 cursor-pointer transition-colors"
+              class="table-row"
               @click="goToSupplierDetail(supplier.id)"
             >
-              <td class="px-4 py-3 text-center">{{ supplier.nameSupplier }}</td>
-              <td class="px-4 py-3 text-center">{{ supplier.purchaseCount || 0 }} Pembelian</td>
-              <td class="px-4 py-3 text-center">{{ supplier.companySupplier || '-' }}</td>
-              <td class="px-4 py-3 text-center">{{ supplier.noTelpSupplier || '-' }}</td>
+              <td class="table-cell">{{ supplier.nameSupplier }}</td>
+              <td class="table-cell">{{ supplier.purchaseCount || 0 }} Pembelian</td>
+              <td class="table-cell">{{ supplier.companySupplier || '-' }}</td>
+              <td class="table-cell">{{ supplier.noTelpSupplier || '-' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Daftar Klien Section -->
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mb-4">
-      <div class="mb-4">
-        <h2 class="text-xl font-bold text-center">Daftar Klien Teratas</h2>
+    <!-- Top Clients Table -->
+    <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+      <div class="bg-[#1E3A5F] p-4 lg:p-6">
+        <h2 class="text-lg lg:text-xl font-bold text-white text-center">
+          Daftar Klien Teratas
+        </h2>
       </div>
       
-      <!-- Loading state untuk tabel client -->
-      <div v-if="loading" class="flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
-        <span class="ml-2 text-gray-600">Memuat data klien...</span>
-      </div>
-
-      <!-- Tabel client (existing code) -->
-      <div v-else class="overflow-x-auto">
-        <table class="custom-table w-full">
+      <div class="overflow-x-auto">
+        <table class="custom-table">
           <thead class="text-white bg-[#1E3A5F]">
-        <tr>
-          <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-            Nama Klien
-            <span v-if="sortClientKey === 'nameClient'" class="ml-1">
-              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
-            Jumlah Aktivitas
-            <span v-if="sortClientKey === 'projectCount'" class="ml-1">
-              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
-            Total Profit
-            <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
-              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-            Nomor Telepon
-            <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
-              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-            </span>
-          </th>
-          <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
-            Perusahaan
-            <span v-if="sortClientKey === 'companyClient'" class="ml-1">
-              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
-            </span>
-          </th>
-        </tr>
-      </thead>
-        <tbody>
-          <tr v-if="loading" class="text-center">
-            <td colspan="5" class="py-4">
-              <div class="flex justify-center">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1E3A5F]"></div>
-              </div>
-            </td>
-          </tr>
-          <tr v-else-if="topThreeClients.length === 0">
-            <td colspan="5" class="text-center py-4 text-gray-500 italic">
-              Tidak ada data klien.
-            </td>
-          </tr>
-          <tr 
-            v-for="client in topThreeClients" 
-            :key="client.id" 
-            class="hover:bg-gray-100 cursor-pointer transition-colors"
-            @click="goToClientDetail(client.id)"
-          >
-            <td class="px-4 py-3 text-center">{{ client.nameClient }}</td>
-            <td class="px-4 py-3 text-center">{{ client.projectCount || 0 }} Aktivitas</td>
-            <td class="px-4 py-3 text-center">{{ formatCurrency(client.totalProfit || 0) }}</td>
-            <td class="px-4 py-3 text-center">{{ client.noTelpClient || '-' }}</td>
-            <td class="px-4 py-3 text-center">{{ client.companyClient || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+            <tr>
+              <th @click="sortTable('client', 'nameClient')" class="table-header">
+                Nama Klien
+                <span v-if="sortClientKey === 'nameClient'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                </span>
+              </th>
+              <th @click="sortTable('client', 'projectCount')" class="table-header">
+                Jumlah Aktivitas
+                <span v-if="sortClientKey === 'projectCount'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                </span>
+              </th>
+              <th @click="sortTable('client', 'totalProfit')" class="table-header">
+                Total Profit
+                <span v-if="sortClientKey === 'totalProfit'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                </span>
+              </th>
+              <th @click="sortTable('client', 'noTelpClient')" class="table-header">
+                Nomor Telepon
+                <span v-if="sortClientKey === 'noTelpClient'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                </span>
+              </th>
+              <th @click="sortTable('client', 'companyClient')" class="table-header">
+                Perusahaan
+                <span v-if="sortClientKey === 'companyClient'" class="sort-indicator">
+                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading" class="text-center">
+              <td colspan="5" class="table-cell py-8">
+                <div class="flex justify-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="topThreeClients.length === 0">
+              <td colspan="5" class="table-cell text-center py-8 text-gray-500 italic">
+                Tidak ada data klien.
+              </td>
+            </tr>
+            <tr 
+              v-for="client in topThreeClients" 
+              :key="client.id" 
+              class="table-row"
+              @click="goToClientDetail(client.id)"
+            >
+              <td class="table-cell">{{ client.nameClient }}</td>
+              <td class="table-cell">{{ client.projectCount || 0 }} Aktivitas</td>
+              <td class="table-cell">{{ formatCurrency(client.totalProfit || 0) }}</td>
+              <td class="table-cell">{{ client.noTelpClient || '-' }}</td>
+              <td class="table-cell">{{ client.companyClient || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useProjectStore } from '@/stores/project';
-import { usePurchaseStore } from '@/stores/purchase';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
@@ -287,11 +298,9 @@ import type { FinancialSummaryResponseDTO } from '@/interfaces/finance.report/la
 import { useFinanceReportStore } from '@/stores/financereport';
 
 // Stores
-const projectStore = useProjectStore();
-const purchaseStore = usePurchaseStore();
 const authStore = useAuthStore();
 
-// Tambahkan useRouter untuk navigasi
+// Router for navigation
 const router = useRouter();
 
 // State variables
@@ -314,12 +323,12 @@ interface Supplier {
   companySupplier: string;
   totalPurchases: number;
   totalAmount: number;
-  purchaseCount: number; // Jumlah pembelian
-  purchaseIds?: string[]; // Daftar ID pembelian
+  purchaseCount: number;
+  purchaseIds?: string[];
 }
 
 interface Client {
-  id: string ;
+  id: string;
   nameClient: string;
   projectCount: number;
   totalProfit: number;
@@ -330,46 +339,14 @@ interface Client {
 const topSuppliers = ref<Supplier[]>([]);
 const topClients = ref<Client[]>([]);
 
-// Tambahkan state untuk pengurutan supplier
-const supplierSortAsc = ref(false);
 
-// Tambahkan state untuk pengurutan klien
-const clientSortAsc = ref(false);
-
-// Ganti dengan variable sorting seperti di ListAsset
 const sortSupplierKey = ref('purchaseCount');
-const sortSupplierOrder = ref('desc'); // Default desc (tertinggi dulu)
+const sortSupplierOrder = ref('desc');
 const sortClientKey = ref('totalProfit');
-const sortClientOrder = ref('desc'); // Default desc (tertinggi dulu)
+const sortClientOrder = ref('desc');
 
-// Computed property untuk mengurutkan supplier berdasarkan jumlah pembelian
-const sortedSuppliers = computed(() => {
-  return [...topSuppliers.value].sort((a, b) => {
-    const aPurchaseCount = a.purchaseCount || 0;
-    const bPurchaseCount = b.purchaseCount || 0;
-    
-    return supplierSortAsc.value 
-      ? aPurchaseCount - bPurchaseCount 
-      : bPurchaseCount - aPurchaseCount;
-  });
-});
-
-// Computed property untuk mengurutkan klien berdasarkan total profit
-const sortedClients = computed(() => {
-  return [...topClients.value].sort((a, b) => {
-    const aProfit = a.totalProfit || 0;
-    const bProfit = b.totalProfit || 0;
-    
-    return clientSortAsc.value 
-      ? aProfit - bProfit 
-      : bProfit - aProfit;
-  });
-});
-
-// Computed property untuk top 3 suppliers berdasarkan kriteria sorting saat ini
-// Meningkatkan fungsi sort untuk menangani semua tipe kolom
+// Computed property for top 3 suppliers
 const topThreeSuppliers = computed(() => {
-  // Jika tidak ada data, kembalikan array kosong
   if (!topSuppliers.value || topSuppliers.value.length === 0) {
     return [];
   }
@@ -379,7 +356,6 @@ const topThreeSuppliers = computed(() => {
       let aValue = a[sortSupplierKey.value as keyof Supplier];
       let bValue = b[sortSupplierKey.value as keyof Supplier];
       
-      // Khusus untuk purchaseCount, jika tidak ada gunakan panjang purchaseIds
       if (sortSupplierKey.value === 'purchaseCount') {
         aValue = typeof aValue === 'number' ? aValue : 
           (a.purchaseIds ? a.purchaseIds.length : 0);
@@ -387,25 +363,21 @@ const topThreeSuppliers = computed(() => {
           (b.purchaseIds ? b.purchaseIds.length : 0);
       }
       
-      // Handle undefined atau null
       if (aValue === undefined || aValue === null) aValue = '';
       if (bValue === undefined || bValue === null) bValue = '';
       
-      // Untuk string, gunakan localeCompare
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortSupplierOrder.value === 'asc' 
           ? aValue.localeCompare(bValue) 
           : bValue.localeCompare(aValue);
       }
       
-      // Untuk angka
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sortSupplierOrder.value === 'asc' 
           ? aValue - bValue 
           : bValue - aValue;
       }
       
-      // Fallback untuk tipe campuran
       const aString = String(aValue);
       const bString = String(bValue);
       
@@ -413,13 +385,11 @@ const topThreeSuppliers = computed(() => {
         ? aString.localeCompare(bString) 
         : bString.localeCompare(aString);
     })
-    .slice(0, 3); // Ambil 3 teratas saja
+    .slice(0, 3);
 });
 
-// Computed property untuk top 3 clients berdasarkan kriteria sorting saat ini
-// Meningkatkan fungsi sort untuk menangani semua tipe kolom
+// Computed property for top 3 clients
 const topThreeClients = computed(() => {
-  // Jika tidak ada data, kembalikan array kosong
   if (!topClients.value || topClients.value.length === 0) {
     return [];
   }
@@ -429,25 +399,21 @@ const topThreeClients = computed(() => {
       let aValue = a[sortClientKey.value as keyof Client];
       let bValue = b[sortClientKey.value as keyof Client];
       
-      // Handle undefined atau null
       if (aValue === undefined || aValue === null) aValue = '';
       if (bValue === undefined || bValue === null) bValue = '';
       
-      // Untuk string, gunakan localeCompare
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortClientOrder.value === 'asc' 
           ? aValue.localeCompare(bValue) 
           : bValue.localeCompare(aValue);
       }
       
-      // Untuk angka
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sortClientOrder.value === 'asc' 
           ? aValue - bValue 
           : bValue - aValue;
       }
       
-      // Fallback untuk tipe campuran
       const aString = String(aValue);
       const bString = String(bValue);
       
@@ -455,7 +421,7 @@ const topThreeClients = computed(() => {
         ? aString.localeCompare(bString) 
         : bString.localeCompare(aString);
     })
-    .slice(0, 3); // Ambil 3 teratas saja
+    .slice(0, 3);
 });
 
 // Time ago text based on selected range
@@ -494,20 +460,16 @@ const setDateRange = (range: string) => {
   fetchData();
 };
 
-// Update bar chart data when loaded
+// Update chart data functions
 const updateBarChartData = (data: any) => {
   barChartData.value = data;
   console.log('Bar chart data loaded:', data);
-
 };
 
-// Update donut chart data when loaded
 const updateDonutChartData = (data: any) => {
   console.log('Donut chart data loaded:', data);
-
 };
 
-// Update line chart data when loaded
 const updateLineChartData = (data: any) => {
   console.log('Line chart data loaded:', data);
 };
@@ -523,7 +485,6 @@ const fetchSummaryData = async () => {
     cardTotalTransaction.value = financialSummary.value?.totalTransactions || 0;
     cardTotalProfitPercentage.value = financialSummary.value?.profitPercentageChange || 0;
     cardTotalTransactionPercentage.value = financialSummary.value?.transactionPercentageChange || 0; 
-
   } catch (error) {
     console.error('Error fetching card summary data', error);
     cardTotalProfit.value = 0;
@@ -531,7 +492,9 @@ const fetchSummaryData = async () => {
     cardTotalProfitPercentage.value = 0;
     cardTotalTransactionPercentage.value = 0;
   }
-};  // Fetch top suppliers data
+};
+
+// Fetch top suppliers data
 const fetchTopSuppliers = async () => {
   try {
     loading.value = true;
@@ -548,12 +511,10 @@ const fetchTopSuppliers = async () => {
     console.log('Supplier API response:', response.data);
     
     if (response.data && response.data.status === 200 && response.data.data) {
-      // Transformasi data supplier untuk menghitung purchaseCount dari purchaseIds
       topSuppliers.value = Array.isArray(response.data.data) ? 
         response.data.data.map((supplier: { purchaseCount: any; purchaseIds: string | any[]; }) => {
           return {
             ...supplier,
-            // Gunakan purchaseCount dari API jika ada, jika tidak hitung dari purchaseIds
             purchaseCount: supplier.purchaseCount || (supplier.purchaseIds ? supplier.purchaseIds.length : 0)
           };
         }) : [];
@@ -570,7 +531,7 @@ const fetchTopSuppliers = async () => {
   }
 };
 
-// Fungsi yang sama untuk klien
+// Fetch top clients data
 const fetchTopClients = async () => {
   try {
     loading.value = true;
@@ -625,124 +586,130 @@ onMounted(() => {
 
 // Watch for chart view changes
 watch(chartView, () => {
-  
+  // Handle chart view changes if needed
 });
 
-// Perbarui fungsi sortTable untuk memastikan semua kolom dapat di-sort
+// Sort table function
 const sortTable = (tableType: string, key: string) => {
   if (tableType === 'supplier') {
     if (sortSupplierKey.value === key) {
-      // Toggle urutan jika key yang sama
       sortSupplierOrder.value = sortSupplierOrder.value === 'asc' ? 'desc' : 'asc';
     } else {
-      // Set key baru dan default ke descending
       sortSupplierKey.value = key;
       sortSupplierOrder.value = 'desc';
     }
   } else if (tableType === 'client') {
     if (sortClientKey.value === key) {
-      // Toggle urutan jika key yang sama
       sortClientOrder.value = sortClientOrder.value === 'asc' ? 'desc' : 'asc';
     } else {
-      // Set key baru dan default ke descending
       sortClientKey.value = key;
       sortClientOrder.value = 'desc';
     }
   }
 };
 
-/// Fungsi untuk navigasi ke halaman detail supplier
+// Navigation functions
 const goToSupplierDetail = (supplierId: string) => {
   console.log('Navigating to supplier detail with ID:', supplierId);
   router.push({
-    name: 'supplier-detail', // Perbaikan: nama rute yang benar dari router
+    name: 'supplier-detail',
     params: { id: supplierId }
   });
 };
 
-// Fungsi untuk navigasi ke halaman detail klien
 const goToClientDetail = (clientId: string) => {
   console.log('Navigating to client detail with ID:', clientId);
   router.push({
-    name: 'client-detail', // Perbaikan: nama rute yang benar dari router
+    name: 'client-detail',
     params: { id: clientId }
   });
 };
 </script>
 
 <style scoped>
+/* Table Styles */
 .custom-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  table-layout: fixed;
 }
 
-.custom-table thead {
-  background-color: #1E3A5F;
-  color: white;
-}
-
-.custom-table th, .custom-table td {
-  padding: 12px 16px;
+.table-header {
+  padding: 1rem 1.5rem;
   text-align: center;
-}
-
-.custom-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.custom-table tbody tr:nth-child(odd) {
-  background-color: #ffffff;
-}
-
-.custom-table tbody tr:nth-child(even) {
-  background-color: #f9fafb;
-}
-
-.text-green-500 {
-  color: #16A34A;
-}
-
-.text-red-500 {
-  color: #EF4444;
-}
-
-/* Tambahkan style untuk sort indicator dari ListAsset */
-.table-header:hover {
-  background-color: #32486B;
-}
-
-/* Tambahkan style untuk baris tabel yang dapat diklik */
-.custom-table tbody tr {
-  transition: background-color 0.2s ease;
+  font-weight: 600;
   cursor: pointer;
-}
-
-.custom-table tbody tr:hover {
-  background-color: #EDF2F7;
-}
-
-/* Tambahkan efek visual seperti pada ListAsset */
-.custom-table tbody tr td {
-  border-bottom: 1px solid #E2E8F0;
-}
-
-/* Tambahkan highlight effect saat hover */
-.custom-table tbody tr:hover td {
+  transition: background-color 0.2s ease;
   position: relative;
 }
 
-.custom-table tbody tr:hover td::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 1px;
-  background-color: #4299E1;
+.table-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-cell {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.table-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.table-row:hover {
+  background-color: #f0f4f8;
+}
+
+/* Sort Indicator */
+.sort-indicator {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  display: inline-block;
+}
+
+/* Stats Cards Enhancement */
+.text-green-600 {
+  color: #059669;
+}
+
+.text-red-500 {
+  color: #ef4444;
+}
+
+.text-green-700 {
+  color: #047857;
+}
+
+.text-red-700 {
+  color: #b91c1c;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .table-header,
+  .table-cell {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
 }
 </style>
