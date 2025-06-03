@@ -634,7 +634,7 @@ const canViewFinancialInfo = computed(() => {
 
 const canEditProject = computed(() => {
   const userRole = authStore.userRole;
-  return userRole === 'Operasional' || userRole === 'Direksi';
+  return userRole === 'Operasional';
 });
 
 const canEditFinancial = computed(() => {
