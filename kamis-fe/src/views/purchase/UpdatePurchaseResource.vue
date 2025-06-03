@@ -6,7 +6,6 @@ import axios from "axios";
 import VDropDownInput from "@/components/VDropDownInput.vue";
 import VNumberInput from "@/components/VNumberInput.vue";
 import VPriceInput from "@/components/VPriceInput.vue";
-import VLockedInput from "@/components/VLockedInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import type { ResourceTempInterface } from "@/interfaces/purchase/resourcetemp.interface";

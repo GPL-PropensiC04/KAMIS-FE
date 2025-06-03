@@ -253,7 +253,6 @@ const resourceName = ref('');
 const resourceStock = ref(0);
 const resourcePrice = ref(0);
 const resourceDescription = ref('');
-const supplierName = ref(''); 
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 

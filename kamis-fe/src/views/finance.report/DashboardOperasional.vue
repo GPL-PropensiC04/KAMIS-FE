@@ -576,7 +576,7 @@ const goToPurchaseDetail = (purchaseItem: PurchaseItem) => {
   }
 
   if (conditional && idPurchase) {
-    router.push(`/purchase/detail/${conditional}/${idPurchase}`);
+    router.push(`/purchase/detail/${conditional}/$ da`);
   } else {
     console.warn('Tidak dapat menentukan conditional atau ID untuk detail pembelian:', purchaseItem);
   }
