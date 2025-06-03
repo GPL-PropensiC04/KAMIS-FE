@@ -4,6 +4,7 @@ export interface ResourceInterface {
   resourcePrice: number;
   resourceStock: number;
   resourceDescription?: string;
+  resourceSupplierId: string;
 }
 
 export interface AddResourceRequestInterface {

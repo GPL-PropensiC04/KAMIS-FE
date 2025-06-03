@@ -173,8 +173,13 @@
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none text-sm"
                   >
                     <option value="" disabled>Pilih Barang</option>
-                    <option v-for="product in availableProducts" :key="product.id" :value="product.id">
-                      {{ product.resourceName }}
+                    <!-- Only show products that have stock available -->
+                    <option 
+                      v-for="product in availableProducts.filter(p => p.resourceStock > 0)" 
+                      :key="product.id" 
+                      :value="product.id"
+                    >
+                      {{ product.resourceName }} (Stok: {{ product.resourceStock }})
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
@@ -373,7 +378,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
@@ -453,7 +458,7 @@ const fetchClients = async () => {
   }
 };
 
-// Fetch products (resources) from API
+// Fetch products (resources) from API with stock management
 const fetchProducts = async () => {
   try {
     await resourceStore.fetchResources(); // Ensure resources are fetched from store
@@ -462,7 +467,9 @@ const fetchProducts = async () => {
       id: resource.id,
       resourceName: resource.resourceName,
       resourcePrice: resource.resourcePrice, 
-      resourceStock: resource.resourceStock 
+      resourceStock: resource.resourceStock,
+      resourceSupplierId: resource.resourceSupplierId,
+      resourceDescription: resource.resourceDescription
     }));
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -475,7 +482,7 @@ const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 };
 
-// Add product to cart
+// Add product to cart with stock management
 const addProduct = () => {
   if (!selectedProduct.value || !selectedQuantity.value) {
     toast.error('Pilih nama barang dan jumlah terlebih dahulu');
@@ -499,27 +506,38 @@ const addProduct = () => {
     return;
   }
   
-  // Check if product already exists in cart
-  const existingIndex = selectedProductList.value.findIndex(p => p.id === productDetails.id);
+  // Check if product already exists in cart by comparing IDs
+  const existingIndex = selectedProductList.value.findIndex(p => String(p.id) === String(productDetails.id));
   
   if (existingIndex >= 0) {
-    // Update existing product
-    const newQuantity = selectedProductList.value[existingIndex].resourceQuantity + selectedQuantity.value;
+    // Update existing product quantity
+    const currentQuantityInCart = selectedProductList.value[existingIndex].resourceQuantity;
+    const newTotalQuantity = currentQuantityInCart + selectedQuantity.value;
     
-    if (newQuantity > productDetails.resourceStock) {
+    // Check if new total would exceed available stock (current stock + what's already in cart)
+    const totalAvailableStock = productDetails.resourceStock + currentQuantityInCart;
+    
+    if (newTotalQuantity > totalAvailableStock) {
       toast.error(`Stok barang tidak cukup. Sisa stok: ${productDetails.resourceStock}`);
       return;
     }
     
-    selectedProductList.value[existingIndex].resourceQuantity = newQuantity;
+    // Update the quantity in the existing item
+    selectedProductList.value[existingIndex].resourceQuantity = newTotalQuantity;
   } else {
-    // Add new product, ensuring it matches ProjectResource interface
+    // Add new product to cart
     selectedProductList.value.push({
       id: String(productDetails.id),
       resourceName: productDetails.resourceName,
       resourceQuantity: selectedQuantity.value,
       resourcePrice: productDetails.resourcePrice
     });
+  }
+  
+  // IMPORTANT: Reduce the available stock in the dropdown
+  const availableProductIndex = availableProducts.value.findIndex(p => String(p.id) === String(productDetails.id));
+  if (availableProductIndex !== -1) {
+    availableProducts.value[availableProductIndex].resourceStock -= selectedQuantity.value;
   }
   
   // Update total in form data
@@ -531,9 +549,20 @@ const addProduct = () => {
   selectedPrice.value = 0;
 };
 
-// Remove product from cart
+// Remove product from cart with stock restoration
 const removeProduct = (index: number) => {
+  // Get the product before removing it
+  const removedProduct = selectedProductList.value[index];
+  
+  // Remove the product from the list
   selectedProductList.value.splice(index, 1);
+  
+  // IMPORTANT: Add the quantity back to the available stock
+  const availableProductIndex = availableProducts.value.findIndex(p => p.id === removedProduct.id);
+  if (availableProductIndex !== -1) {
+    availableProducts.value[availableProductIndex].resourceStock += removedProduct.resourceQuantity;
+  }
+  
   updateFormData();
 };
 
@@ -558,6 +587,42 @@ const handleDateInput = (event: Event) => {
   if (target) {
     formData.value.projectStartDate = target.value;
   }
+};
+
+// Reset function to clear all selected data and restore stock
+const resetFormAndStock = () => {
+  // Restore stock for all items in the cart
+  selectedProductList.value.forEach(product => {
+    const availableProductIndex = availableProducts.value.findIndex(p => p.id === product.id);
+    if (availableProductIndex !== -1) {
+      availableProducts.value[availableProductIndex].resourceStock += product.resourceQuantity;
+    }
+  });
+  
+  // Clear selected product list
+  selectedProductList.value = [];
+  
+  // Reset form data
+  formData.value = {
+    projectName: '',
+    projectClientId: '',
+    projectType: false,
+    projectStartDate: '',
+    projectEndDate: '',
+    projectDeliveryAddress: '',
+    projectTotalPemasukkan: 0,
+    projectUseResource: []
+  };
+  
+  // Reset selection fields
+  selectedProduct.value = '';
+  selectedQuantity.value = null;
+  selectedPrice.value = 0;
+  
+  // Clear localStorage
+  localStorage.removeItem('salesFormData');
+  localStorage.removeItem('salesProductList');
+  localStorage.removeItem('clientList');
 };
 
 // Form submission
@@ -636,6 +701,14 @@ onMounted(() => {
       // Restore product list if available
       if (savedSelectedProductList) {
         selectedProductList.value = JSON.parse(savedSelectedProductList);
+        
+        // Reduce stock for items that were already in cart
+        selectedProductList.value.forEach(product => {
+          const availableProductIndex = availableProducts.value.findIndex(p => p.id === product.id);
+          if (availableProductIndex !== -1) {
+            availableProducts.value[availableProductIndex].resourceStock -= product.resourceQuantity;
+          }
+        });
       }
       updateFormData();
     } catch (error) {
@@ -643,6 +716,28 @@ onMounted(() => {
     }
   }
 });
+
+// Cleanup when component is unmounted (user navigates away)
+onBeforeUnmount(() => {
+  // Only reset if not going to summary page
+  const currentRoute = router.currentRoute.value;
+  const isGoingToSummary = currentRoute.path.includes('sales-summary');
+  
+  if (!isGoingToSummary) {
+    resetFormAndStock();
+  }
+});
+
+// Add a method to handle manual reset (if you want a reset button)
+const handleReset = () => {
+  if (selectedProductList.value.length > 0) {
+    const confirmation = confirm('Apakah Anda yakin ingin mengosongkan semua barang yang dipilih?');
+    if (confirmation) {
+      resetFormAndStock();
+      toast.success('Form berhasil direset');
+    }
+  }
+};
 </script>
 
 <style scoped>
