@@ -29,11 +29,6 @@
                 @click="goToEditClient"
                 class="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 transition-all duration-200"
               />
-              <div class="flex items-center space-x-2 text-white/80">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
             </div>
           </div>
         </div>
@@ -212,7 +207,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                       </svg>
                     </div>
-                    <span class="text-sm font-medium text-gray-700">Total Proyek</span>
+                    <span class="text-sm font-medium text-gray-700">Total Aktivitas</span>
                   </div>
                   <span class="text-lg font-bold text-blue-600">{{ client.projects?.length || 0 }}</span>
                 </div>
@@ -230,33 +225,6 @@
                       {{ client.projects.filter(p => p.projectType === false).length }}
                     </span>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Client Metadata -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Tambahan</h3>
-              <div class="text-sm">
-                <div class="flex justify-between items-center mb-3">
-                  <span class="text-gray-600">Terdaftar:</span>
-                  <span class="font-medium text-gray-900">
-                    {{ new Date(client.createdDate).toLocaleDateString('id-ID', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    }) }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">Terakhir Update:</span>
-                  <span class="font-medium text-gray-900">
-                    {{ new Date(client.updatedDate).toLocaleDateString('id-ID', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    }) }}
-                  </span>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { 
-    AddProjectRequestDTO, 
+import type {
+    AddProjectRequestDTO,
     DistributionFormData,
     SalesFormData,
     AssetUsageDTO,
@@ -10,7 +10,8 @@ import type {
     ListProjectResponseInterface,
     UpdateProjectStatusInterface,
     UpdateProjectPaymentStatusInterface,
-    SellDistributionSummaryDTO
+    SellDistributionSummaryDTO,
+    UpdateProjectFormData
 } from '@/interfaces/project/project.interface';
 import type { CommonResponseInterface, PaginatedResponse } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
@@ -27,7 +28,7 @@ export const useProjectStore = defineStore('project', {
         loading: false,
         error: null as null | string,
         sellDistributionSummary: null as SellDistributionSummaryDTO | null,
-        
+
         // NEW PAGINATION STATE
         currentPage: 0,
         totalPages: 0,
@@ -54,7 +55,7 @@ export const useProjectStore = defineStore('project', {
         ) {
             this.isLoading = true;
             this.error = null;
-            
+
             try {
                 const params: any = { page, size };
 
@@ -62,35 +63,35 @@ export const useProjectStore = defineStore('project', {
                 if (filters.idProject && filters.idProject.trim() !== '') {
                     params.idProject = filters.idProject.trim();
                 }
-                
+
                 if (filters.namaProject && filters.namaProject.trim() !== '') {
                     params.namaProject = filters.namaProject.trim();
                 }
-                
+
                 if (filters.statusProject && filters.statusProject.trim() !== '') {
                     params.statusProject = filters.statusProject.trim();
                 }
-                
+
                 if (filters.tipeProject !== null && filters.tipeProject !== undefined) {
                     params.tipeProject = filters.tipeProject;
                 }
-                
+
                 if (filters.clientProject && filters.clientProject.trim() !== '') {
                     params.clientProject = filters.clientProject.trim();
                 }
-                
+
                 if (filters.tanggalMulai && filters.tanggalMulai.trim() !== '') {
                     params.tanggalMulai = filters.tanggalMulai.trim();
                 }
-                
+
                 if (filters.tanggalSelesai && filters.tanggalSelesai.trim() !== '') {
                     params.tanggalSelesai = filters.tanggalSelesai.trim();
                 }
-                
+
                 if (filters.startNominal !== null && filters.startNominal !== undefined) {
                     params.startNominal = filters.startNominal;
                 }
-                
+
                 if (filters.endNominal !== null && filters.endNominal !== undefined) {
                     params.endNominal = filters.endNominal;
                 }
@@ -109,13 +110,13 @@ export const useProjectStore = defineStore('project', {
                 );
 
                 const paginatedData = response.data.data;
-                
+
                 this.projects = paginatedData.content;
                 this.currentPage = paginatedData.number;
                 this.totalPages = paginatedData.totalPages;
                 this.pageSize = paginatedData.size;
                 this.totalElements = paginatedData.totalElements;
-                
+
                 return paginatedData.content;
             } catch (err: unknown) {
                 // Handle 404 Not Found as an empty result rather than an error
@@ -126,7 +127,7 @@ export const useProjectStore = defineStore('project', {
                     this.totalElements = 0;
                     return [];
                 }
-                
+
                 this.error = `Gagal mengambil data proyek ${err instanceof Error ? err.message : "Unknown error"}`;
                 useToast().error(this.error);
                 throw err;
@@ -143,7 +144,6 @@ export const useProjectStore = defineStore('project', {
             this.error = null;
         },
 
-        // EXISTING METHOD - KEEP FOR BACKWARD COMPATIBILITY
         async fetchProjects(filters = {}) {
             this.loading = true;
             this.error = null;
@@ -151,7 +151,7 @@ export const useProjectStore = defineStore('project', {
             try {
                 const response = await axios.get<ListProjectResponseInterface>(
                     `${API_URLS.PROJECT}/project/all`,
-                    { 
+                    {
                         params: filters,
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -162,17 +162,17 @@ export const useProjectStore = defineStore('project', {
 
             } catch (error: unknown) {
                 const err = error as Error | { response?: { data?: { message?: string }, status?: number } };
-                
+
                 // Handle 404 Not Found as an empty result rather than an error
                 if ('response' in err && err.response?.status === 404) {
                     this.projects = [];
                     return;
                 }
-                
+
                 // For other errors, show error message
                 this.error = err instanceof Error ? err.message : 'Failed to fetch projects';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
                     : 'Failed to fetch projects';
                 useToast().error(errorMessage);
             } finally {
@@ -193,15 +193,15 @@ export const useProjectStore = defineStore('project', {
                         }
                     }
                 );
-                
+
                 // Handle nested data structure in the response
                 const projectData = response.data.data.data || response.data.data;
                 return projectData;
             } catch (error: unknown) {
                 const err = error as Error | { response?: { data?: { message?: string } } };
                 this.error = err instanceof Error ? err.message : 'Failed to fetch project by ID';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
                     : 'Failed to fetch project by ID';
                 useToast().error(errorMessage);
                 throw error;
@@ -238,8 +238,8 @@ export const useProjectStore = defineStore('project', {
             } catch (error: unknown) {
                 const err = error as Error | { response?: { data?: { message?: string } } };
                 this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat update status proyek';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
                     : 'Terjadi kesalahan saat update status proyek';
                 useToast().error(errorMessage);
                 throw error;
@@ -297,8 +297,8 @@ export const useProjectStore = defineStore('project', {
             } catch (error: unknown) {
                 const err = error as Error | { response?: { data?: { message?: string } } };
                 this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat proyek distribusi';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
                     : 'Terjadi kesalahan saat membuat proyek distribusi';
                 useToast().error(errorMessage);
                 throw error;
@@ -351,8 +351,8 @@ export const useProjectStore = defineStore('project', {
             } catch (error: unknown) {
                 const err = error as Error | { response?: { data?: { message?: string } } };
                 this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat proyek penjualan';
-                const errorMessage = 'response' in err && err.response?.data?.message 
-                    ? err.response.data.message 
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
                     : 'Terjadi kesalahan saat membuat proyek penjualan';
                 useToast().error(errorMessage);
                 throw error;
@@ -360,45 +360,84 @@ export const useProjectStore = defineStore('project', {
                 this.loading = false;
             }
         },
-        
+
         async updateProjectPayment(id: string, projectPaymentStatus: number) {
             this.loading = true;
             this.error = null;
-            
+
             try {
-              const response = await axios.put<CommonResponseInterface<UpdateProjectPaymentStatusInterface>>(
-                `${API_URLS.PROJECT}/project/update-payment/${id}`,
-                { projectPaymentStatus },
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                  }
+                const response = await axios.put<CommonResponseInterface<UpdateProjectPaymentStatusInterface>>(
+                    `${API_URLS.PROJECT}/project/update-payment/${id}`,
+                    { projectPaymentStatus },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+
+                if (response.data.status === 200) {
+                    const updated = response.data.data;
+                    // Update project in state if it exists
+                    const index = this.projects.findIndex(proj => proj.id === id);
+                    if (index !== -1) {
+                        this.projects[index] = { ...this.projects[index], ...updated };
+                    }
+                    useToast().success('Status pembayaran berhasil diperbarui!');
+                    return updated;
                 }
-              );
-          
-              if (response.data.status === 200) {
-                const updated = response.data.data;
-                // Update project in state if it exists
-                const index = this.projects.findIndex(proj => proj.id === id);
-                if (index !== -1) {
-                    this.projects[index] = { ...this.projects[index], ...updated };
-                }
-                useToast().success('Status pembayaran berhasil diperbarui!');
-                return updated;
-              }
             } catch (error: unknown) {
-              const err = error as Error | { response?: { data?: { message?: string } } };
-              this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat update status pembayaran';
-              const errorMessage = 'response' in err && err.response?.data?.message 
-                ? err.response.data.message 
-                : 'Terjadi kesalahan saat update status pembayaran';
-              useToast().error(errorMessage);
-              throw error;
+                const err = error as Error | { response?: { data?: { message?: string } } };
+                this.error = err instanceof Error ? err.message : 'Terjadi kesalahan saat update status pembayaran';
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
+                    : 'Terjadi kesalahan saat update status pembayaran';
+                useToast().error(errorMessage);
+                throw error;
             } finally {
-              this.loading = false;
+                this.loading = false;
             }
-          },
+        },
+
+        async updateProject(id: string, projectData: UpdateProjectFormData) {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await axios.put<CommonResponseInterface<ProjectInterface>>(
+                    `${API_URLS.PROJECT}/project/update/${id}`,
+                    projectData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+
+                if (response.data.status === 200) {
+                    const updatedProject = response.data.data;
+                    // Update project in state if it exists
+                    const index = this.projects.findIndex(proj => proj.id === id);
+                    if (index !== -1) {
+                        this.projects[index] = updatedProject;
+                    }
+                    useToast().success('Proyek berhasil diperbarui');
+                    return updatedProject;
+                }
+            } catch (error: unknown) {
+                const err = error as Error | { response?: { data?: { message?: string } } };
+                this.error = err instanceof Error ? err.message : 'Gagal memperbarui proyek';
+                const errorMessage = 'response' in err && err.response?.data?.message
+                    ? err.response.data.message
+                    : 'Gagal memperbarui proyek';
+                useToast().error(errorMessage);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
 
         // Fetch daftar proyek berdasarkan rentang waktu tertentu
         async getProjectListByRange(range: string = 'THIS_YEAR') {

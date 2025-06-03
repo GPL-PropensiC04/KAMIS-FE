@@ -191,7 +191,7 @@ onMounted(fetchChartData);
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-7xl mx-auto flex flex-col">
+  <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-full mx-auto flex flex-col">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center">
         <font-awesome-icon
