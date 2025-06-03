@@ -9,7 +9,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <button 
-                @click="router.back()" 
+                @click="router.push('/client')"
                 class="flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg transition-colors duration-200 text-white hover:scale-105 transform"
                 title="Kembali"
               >
@@ -162,7 +162,6 @@
                       v-for="project in client.projects" 
                       :key="project.id" 
                       class="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                      @click="goToProjectDetail(project)"
                     >
                       <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">{{ project.projectName }}</div>
@@ -309,13 +308,6 @@ function getStatusClass(status: number) {
   return "bg-gray-100 text-gray-800";
 }
 
-function goToProjectDetail(project: any) {
-  if (project.projectType === true) {
-    router.push(`/project/distribution/${project.id}`);
-  } else {
-    router.push(`/project/sale/${project.id}`);
-  }
-}
 
 onMounted(fetchClientDetail);
 </script>

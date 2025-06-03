@@ -36,7 +36,7 @@
 
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
-        <VOptionInput v-model="selectedType" :options="['All', 'Aset', 'Resource']" class="w-1/4" />
+        <VOptionInput v-model="selectedTypeDisplay" :options="typeOptionsDisplay" class="w-1/4" />
         <VButton v-if="canEditPurchase" label="+ Tambah Pembelian" @click="goToAddPurchase" />
       </div>
 
@@ -254,6 +254,30 @@ const canViewFinancialInfo = computed(() => {
 const canEditPurchase = computed(() => {
   const userRole = authStore.userRole;
   return userRole === "Operasional";
+});
+
+// Tambahkan setelah deklarasi selectedType
+const typeMapping: { [key: string]: string } = {
+  'All': 'Semua',
+  'Aset': 'Aset',
+  'Resource': 'Resource'
+};
+
+const reverseTypeMapping: { [key: string]: string } = {
+  'Semua': 'All',
+  'Aset': 'Aset',
+  'Resource': 'Resource'
+};
+
+const typeOptionsDisplay = ['Semua', 'Aset', 'Resource'];
+
+const selectedTypeDisplay = computed({
+  get() {
+    return typeMapping[selectedType.value] || selectedType.value;
+  },
+  set(newValue) {
+    selectedType.value = reverseTypeMapping[newValue] || newValue;
+  }
 });
 
 // **Computed untuk data yang sudah disort (client-side sorting for current page)**

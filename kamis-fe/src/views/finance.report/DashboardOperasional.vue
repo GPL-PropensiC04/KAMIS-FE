@@ -122,7 +122,7 @@
     <!-- Purchase Table -->
     <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
-        <h2 class="text-xl lg:text-2xl font-bold text-gray-800">{{ purchaseTableTitle }}</h2>
+        <h2 class="lg:text-xl font-bold text-gray-800">{{ purchaseTableTitle }}</h2>
       </div>
       
       <div v-if="loading" class="text-center py-12">
@@ -194,7 +194,7 @@
     <!-- Distribution & Sales Table -->
     <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
-        <h2 class="text-xl lg:text-2xl font-bold text-gray-800">{{ distributionSalesTableTitle }}</h2>
+        <h2 class="lg:text-xl font-bold text-gray-800">{{ distributionSalesTableTitle }}</h2>
       </div>
       
       <div v-if="loading" class="text-center py-12">
@@ -266,7 +266,7 @@
     <!-- Assets in Maintenance Table -->
     <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
-        <h2 class="text-xl lg:text-2xl font-bold text-gray-800">Asset yang Sedang dalam Maintenance</h2>
+        <h2 class="lg:text-xl font-bold text-gray-800">Asset yang Sedang dalam Maintenance</h2>
       </div>
       
       <div v-if="loading" class="text-center py-12">
@@ -570,13 +570,13 @@ const goToPurchaseDetail = (purchaseItem: PurchaseItem) => {
   const idPurchase = String(purchaseItem.purchaseId);
   let conditional = '';
   if (idPurchase.startsWith('R')) {
-    conditional = 'Resource';
+    conditional = 'resource';
   } else if (idPurchase.startsWith('A')) {
-    conditional = 'Asset';
+    conditional = 'asset';
   }
 
   if (conditional && idPurchase) {
-    router.push(`/purchase/detail/${conditional}/$ da`);
+    router.push(`/purchase/detail/${conditional}/${idPurchase}`);
   } else {
     console.warn('Tidak dapat menentukan conditional atau ID untuk detail pembelian:', purchaseItem);
   }
