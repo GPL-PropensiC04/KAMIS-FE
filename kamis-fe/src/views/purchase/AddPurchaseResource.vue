@@ -10,6 +10,7 @@ import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import VLockedInput from "@/components/VLockedInput.vue";
 
 // Router & Store
 const router = useRouter();
@@ -231,20 +232,20 @@ const goToSummary = () => {
 
               <div class="grid grid-cols-2 gap-4">
                 <!-- Supplier -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Supplier</span>
-                  </label>
-                  <div class="form-input bg-gray-50 text-gray-600">{{ supplierName || 'Loading...' }}</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Supplier</span>
+                    </label>
+                    <VLockedInput :value="supplierName" />
+                  </div>
 
                 <!-- Type -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Tipe Barang</span>
-                  </label>
-                  <div class="form-input bg-gray-50 text-gray-600">{{ purchaseType }}</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Tipe Barang</span>
+                    </label>
+                    <VLockedInput :value="purchaseType" />
+                  </div>
               </div>
             </div>
 
