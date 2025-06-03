@@ -171,9 +171,6 @@ onMounted(() => {
                 <p class="text-blue-100 mt-1">Perbarui informasi pembelian aset</p>
               </div>
             </div>
-            <div class="flex items-center space-x-3">
-              <VSuccessButton label="Update" @click="handleUpdatePurchase" :disabled="!assetDetails" />
-            </div>
           </div>
         </div>
       </div>
@@ -197,12 +194,12 @@ onMounted(() => {
 
               <div class="grid grid-cols-3 gap-4">
                 <!-- Purchase Date -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Tanggal Pengajuan</span>
-                  </label>
-                  <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ purchaseDate || 'Loading...' }}</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Tanggal Pengajuan</span>
+                    </label>
+                    <VLockedInput :value="purchaseDate" />
+                  </div>
 
                 <!-- Supplier -->
                 <div class="form-group">
@@ -213,12 +210,12 @@ onMounted(() => {
                 </div>
 
                 <!-- Type -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Tipe Barang</span>
-                  </label>
-                  <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">Aset</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Tipe Barang</span>
+                    </label>
+                    <VLockedInput :value="'Aset'" />
+                  </div>
               </div>
             </div>
 
@@ -241,15 +238,15 @@ onMounted(() => {
                     <label class="form-label">
                       <span class="label-text">Nama Aset</span>
                     </label>
-                    <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ assetDetails.assetNameString }}</div>
+                    <VLockedInput :value="assetDetails.assetNameString" />
                   </div>
 
                   <!-- Jenis Aset -->
-                  <div class="form-group">
+                   <div class="form-group">
                     <label class="form-label">
                       <span class="label-text">Jenis Aset</span>
                     </label>
-                    <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ assetDetails.assetType || '-' }}</div>
+                    <VLockedInput :value="assetDetails.assetType" />
                   </div>
 
                   <!-- Nilai Perolehan -->
@@ -257,7 +254,7 @@ onMounted(() => {
                     <label class="form-label">
                       <span class="label-text">Nilai Perolehan</span>
                     </label>
-                    <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">{{ formatCurrency(assetDetails.assetPrice) }}</div>
+                    <VLockedInput :value="formatCurrency(assetDetails.assetPrice)" />
                   </div>
                 </div>
 
@@ -359,25 +356,6 @@ onMounted(() => {
                   <div class="animate-pulse">
                     <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                     <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Purchase Info -->
-              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Info Purchase</h3>
-                <div class="space-y-3 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Tanggal:</span>
-                    <span class="font-medium text-gray-900">{{ purchaseDate || '-' }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Supplier:</span>
-                    <span class="font-medium text-gray-900">{{ supplierOptions.find(s => s.value === selectedSupplier)?.label || '-' }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Tipe:</span>
-                    <span class="font-medium text-gray-900">Aset</span>
                   </div>
                 </div>
               </div>
