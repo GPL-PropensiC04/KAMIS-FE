@@ -447,9 +447,10 @@ const submitForm = async () => {
 };
 
 // Load data on component mount
-onMounted(() => {
-  fetchClients();
-  fetchProjectDetails();
+onMounted(async () => {
+  await fetchProjectDetails();
+  await fetchClients();
+  await fetchProducts(); // Fetches all products via the new store action
 });
 </script> 
 
@@ -596,7 +597,6 @@ onMounted(() => {
                   v-model="selectedProduct"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
                   :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !availableProducts.length }"
-                  :disabled="!availableProducts.length"
                 >
                   <option value="" disabled>Pilih Barang</option>
                   <!-- Only show products that have stock available -->

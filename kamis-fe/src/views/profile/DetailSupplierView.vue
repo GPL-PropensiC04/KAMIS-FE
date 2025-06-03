@@ -29,11 +29,6 @@
                 @click="goToEditSupplier"
                 class="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 transition-all duration-200"
               />
-              <div class="flex items-center space-x-2 text-white/80">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-              </div>
             </div>
           </div>
         </div>
@@ -64,60 +59,57 @@
         </div>
       </div>
 
-      <!-- Content -->
-      <div v-else class="grid grid-cols-12 gap-6">
-        <!-- Main Content - Supplier Information -->
-        <div class="col-span-8">
-          <!-- Supplier Info Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="bg-gradient-to-r bg-[#1e3a5f] px-8 py-4">
-              <div class="flex items-center">
-                <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-bold text-white">Informasi Supplier</h2>
+      <!-- Content - Full Screen Layout -->
+      <div v-else class="space-y-6">
+        <!-- Supplier Info Card - Full Width -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r bg-[#1e3a5f] px-8 py-4">
+            <div class="flex items-center">
+              <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+              <h2 class="text-xl font-bold text-white">Informasi Supplier</h2>
+            </div>
+          </div>
+          
+          <div class="p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-6">
+              <div>
+                <label class="info-label">Nama PIC</label>
+                <p class="info-value">{{ supplierDetail?.supplierName }}</p>
+              </div>
+              
+              <div>
+                <label class="info-label">Nomor Telepon</label>
+                <p class="info-value">{{ supplierDetail?.supplierPhone }}</p>
+              </div>
+              
+              <div>
+                <label class="info-label">Perusahaan</label>
+                <p class="info-value">{{ supplierDetail?.supplierCompany || '-' }}</p>
+              </div>
+              
+              <div>
+                <label class="info-label">Alamat Email</label>
+                <p class="info-value break-all">{{ supplierDetail?.supplierEmail }}</p>
               </div>
             </div>
             
-            <div class="p-8">
-              <div class="grid grid-cols-2 gap-8 mb-6">
-                <div>
-                  <div class="mb-6">
-                    <label class="info-label">Nama PIC</label>
-                    <p class="info-value">{{ supplierDetail?.supplierName }}</p>
-                  </div>
-                  
-                  <div class="mb-6">
-                    <label class="info-label">Nomor Telepon</label>
-                    <p class="info-value">{{ supplierDetail?.supplierPhone }}</p>
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="mb-6">
-                    <label class="info-label">Perusahaan</label>
-                    <p class="info-value">{{ supplierDetail?.supplierCompany || '-' }}</p>
-                  </div>
-                  <div class="mb-6">
-                    <label class="info-label">Alamat Email</label>
-                    <p class="info-value break-all">{{ supplierDetail?.supplierEmail }}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="pt-6 border-t border-gray-100">
-                <div>
-                  <label class="info-label">Alamat Lengkap</label>
-                  <p class="info-value leading-relaxed">{{ supplierDetail?.supplierAddress }}</p>
-                </div>
+            <div class="pt-6 border-t border-gray-100">
+              <div>
+                <label class="info-label">Alamat Lengkap</label>
+                <p class="info-value leading-relaxed">{{ supplierDetail?.supplierAddress }}</p>
               </div>
             </div>
           </div>
+        </div>
 
+        <!-- Grid Layout untuk Items dan Purchase History -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Items List Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="bg-gradient-to-r bg-[#1e3a5f] px-8 py-4">
               <div class="flex items-center">
                 <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
@@ -303,200 +295,148 @@
             </div>
           </div>
         </div>
-
-        <!-- Sidebar - Summary Info -->
-        <div class="col-span-4">
-          <div class="sticky top-6">
-            <!-- Quick Stats Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan</h3>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                      </svg>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">Total Barang</span>
-                  </div>
-                  <span class="text-lg font-bold text-purple-600">{{ items?.length || 0 }}</span>
-                </div>
-
-                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                      </svg>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">Total Pembelian</span>
-                  </div>
-                  <span class="text-lg font-bold text-green-600">{{ purchases?.length || 0 }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Supplier Metadata -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Tambahan</h3>
-              <div class="text-sm space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">Status:</span>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Aktif
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">Kategori:</span>
-                  <span class="font-medium text-gray-900">Supplier</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
-  
-  <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue';
-  import { useRouter, useRoute } from 'vue-router';
-  import { useSupplierStore } from '@/stores/supplier';
-  import { useAuthStore } from '@/stores/auth';
-  import VButton from '@/components/VButton.vue';
-  import Breadcrumb from '@/components/Breadcrumb.vue';
-  
-  const route = useRoute();
-  const router = useRouter();
-  const supplierStore = useSupplierStore();
-  const authStore = useAuthStore();
-  
-  const supplierId = route.params.id as string;
-  
-  const loading = ref(true);
-  const error = ref('');
-  
-  const supplierDetail = computed(() => supplierStore.supplierDetail);
-  
-  const isOperationalOrAdmin = computed(() => {
-    return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
-  });
-  
-  // Fetch supplier detail
-  const fetchSupplierDetail = async () => {
-    loading.value = true;
-    error.value = '';
-    try {
-      await supplierStore.getSupplierDetail(supplierId);
-    } catch (e) {
-      if (e instanceof Error) {
-        error.value = e.message || 'Gagal memuat detail supplier';
-      }
-    } finally {
-      loading.value = false;
+
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useSupplierStore } from '@/stores/supplier';
+import { useAuthStore } from '@/stores/auth';
+import VButton from '@/components/VButton.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
+
+const route = useRoute();
+const router = useRouter();
+const supplierStore = useSupplierStore();
+const authStore = useAuthStore();
+
+const supplierId = route.params.id as string;
+
+const loading = ref(true);
+const error = ref('');
+
+const supplierDetail = computed(() => supplierStore.supplierDetail);
+
+const isOperationalOrAdmin = computed(() => {
+  return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
+});
+
+// Fetch supplier detail
+const fetchSupplierDetail = async () => {
+  loading.value = true;
+  error.value = '';
+  try {
+    await supplierStore.getSupplierDetail(supplierId);
+  } catch (e) {
+    if (e instanceof Error) {
+      error.value = e.message || 'Gagal memuat detail supplier';
     }
-  };
-  
-  onMounted(fetchSupplierDetail);
-  
-  // Navigate to Edit
-  const goToEditSupplier = () => {
-    router.push(`/supplier/update/${supplierId}`);
-  };
-  
-  // Items (List Barang = assets + resources)
-  const items = computed(() => {
-    const assetItems = supplierDetail.value?.assets.map(asset => ({
-      id: asset.platNomor,
-      resourceName: asset.nama,
-      resourcePrice: asset.nilaiPerolehan
-    })) || [];
-  
-    const resourceItems = supplierDetail.value?.resources.map(resource => ({
-      id: resource.id,
-      resourceName: resource.resourceName,
-      resourcePrice: resource.resourcePrice
-    })) || [];
-  
-    return [...assetItems, ...resourceItems];
-  });
-  
-  // Sorting Barang
-  const itemSortKey = ref('');
-  const itemSortAsc = ref(true);
-  
-  const sortByItem = (key: string) => {
-    if (itemSortKey.value === key) {
-      itemSortAsc.value = !itemSortAsc.value;
-    } else {
-      itemSortKey.value = key;
-      itemSortAsc.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(fetchSupplierDetail);
+
+// Navigate to Edit
+const goToEditSupplier = () => {
+  router.push(`/supplier/update/${supplierId}`);
+};
+
+// Items (List Barang = assets + resources)
+const items = computed(() => {
+  const assetItems = supplierDetail.value?.assets.map(asset => ({
+    id: asset.platNomor,
+    resourceName: asset.nama,
+    resourcePrice: asset.nilaiPerolehan
+  })) || [];
+
+  const resourceItems = supplierDetail.value?.resources.map(resource => ({
+    id: resource.id,
+    resourceName: resource.resourceName,
+    resourcePrice: resource.resourcePrice
+  })) || [];
+
+  return [...assetItems, ...resourceItems];
+});
+
+// Sorting Barang
+const itemSortKey = ref('');
+const itemSortAsc = ref(true);
+
+const sortByItem = (key: string) => {
+  if (itemSortKey.value === key) {
+    itemSortAsc.value = !itemSortAsc.value;
+  } else {
+    itemSortKey.value = key;
+    itemSortAsc.value = true;
+  }
+};
+
+const sortedItems = computed(() => {
+  return [...items.value].sort((a, b) => {
+    const valA = (a as any)[itemSortKey.value];
+    const valB = (b as any)[itemSortKey.value];
+    if (typeof valA === 'string') {
+      return itemSortAsc.value ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else if (typeof valA === 'number') {
+      return itemSortAsc.value ? valA - valB : valB - valA;
     }
-  };
-  
-  const sortedItems = computed(() => {
-    return [...items.value].sort((a, b) => {
-      const valA = (a as any)[itemSortKey.value];
-      const valB = (b as any)[itemSortKey.value];
-      if (typeof valA === 'string') {
-        return itemSortAsc.value ? valA.localeCompare(valB) : valB.localeCompare(valA);
-      } else if (typeof valA === 'number') {
-        return itemSortAsc.value ? valA - valB : valB - valA;
-      }
-      return 0;
-    });
+    return 0;
   });
-  
-  // Pagination Barang
-  const itemPage = ref(1);
-  const itemsPerPage = 5;
-  const totalItemPages = computed(() => Math.ceil(sortedItems.value.length / itemsPerPage));
-  const paginatedItems = computed(() => {
-    const start = (itemPage.value - 1) * itemsPerPage;
-    return sortedItems.value.slice(start, start + itemsPerPage);
+});
+
+// Pagination Barang
+const itemPage = ref(1);
+const itemsPerPage = 5;
+const totalItemPages = computed(() => Math.ceil(sortedItems.value.length / itemsPerPage));
+const paginatedItems = computed(() => {
+  const start = (itemPage.value - 1) * itemsPerPage;
+  return sortedItems.value.slice(start, start + itemsPerPage);
+});
+
+// Purchases
+const purchases = computed(() => supplierDetail.value?.purchases || []);
+
+// Sorting Purchases
+const purchaseSortKey = ref('');
+const purchaseSortAsc = ref(true);
+
+const sortByPurchase = (key: string) => {
+  if (purchaseSortKey.value === key) {
+    purchaseSortAsc.value = !purchaseSortAsc.value;
+  } else {
+    purchaseSortKey.value = key;
+    purchaseSortAsc.value = true;
+  }
+};
+
+const sortedPurchases = computed(() => {
+  return [...purchases.value].sort((a, b) => {
+    const dateA = new Date(a.purchaseSubmissionDate).getTime();
+    const dateB = new Date(b.purchaseSubmissionDate).getTime();
+    return purchaseSortAsc.value ? dateA - dateB : dateB - dateA;
   });
-  
-  // Purchases
-  const purchases = computed(() => supplierDetail.value?.purchases || []);
-  
-  // Sorting Purchases
-  const purchaseSortKey = ref('');
-  const purchaseSortAsc = ref(true);
-  
-  const sortByPurchase = (key: string) => {
-    if (purchaseSortKey.value === key) {
-      purchaseSortAsc.value = !purchaseSortAsc.value;
-    } else {
-      purchaseSortKey.value = key;
-      purchaseSortAsc.value = true;
-    }
-  };
-  
-  const sortedPurchases = computed(() => {
-    return [...purchases.value].sort((a, b) => {
-      const dateA = new Date(a.purchaseSubmissionDate).getTime();
-      const dateB = new Date(b.purchaseSubmissionDate).getTime();
-      return purchaseSortAsc.value ? dateA - dateB : dateB - dateA;
-    });
-  });
-  
-  // Pagination Purchases
-  const purchasePage = ref(1);
-  const purchasesPerPage = 5;
-  const totalPurchasePages = computed(() => Math.ceil(sortedPurchases.value.length / purchasesPerPage));
-  const paginatedPurchases = computed(() => {
-    const start = (purchasePage.value - 1) * purchasesPerPage;
-    return sortedPurchases.value.slice(start, start + purchasesPerPage);
-  });
-  
-  // Format Date
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID');
-  };
-  </script>
-  
+});
+
+// Pagination Purchases
+const purchasePage = ref(1);
+const purchasesPerPage = 5;
+const totalPurchasePages = computed(() => Math.ceil(sortedPurchases.value.length / purchasesPerPage));
+const paginatedPurchases = computed(() => {
+  const start = (purchasePage.value - 1) * purchasesPerPage;
+  return sortedPurchases.value.slice(start, start + purchasesPerPage);
+});
+
+// Format Date
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('id-ID');
+};
+</script>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -624,45 +564,6 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Pagination Styles */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.pagination-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #4b5563;
-  background-color: white;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background-color: #f9fafb;
-  color: #374151;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pagination-info {
-  font-size: 0.875rem;
-  color: #374151;
-  padding: 0.5rem 1rem;
-}
-
 /* Loading Animation */
 .loading-spinner {
   animation: spin 1s linear infinite;
@@ -679,194 +580,6 @@
   }
 }
 
-/* Empty State Styling */
-.empty-state {
-  text-align: center;
-  padding: 4rem 0;
-}
-
-.empty-state-icon {
-  width: 5rem;
-  height: 5rem;
-  background-color: #f3f4f6;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}
-
-.empty-state-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 0.75rem;
-}
-
-.empty-state-description {
-  color: #6b7280;
-  font-size: 1rem;
-  line-height: 1.625;
-}
-
-/* Summary Cards */
-.summary-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-}
-
-.summary-card:hover {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.summary-card-purple {
-  background-color: #faf5ff;
-}
-
-.summary-card-purple:hover {
-  background-color: #f3e8ff;
-}
-
-.summary-card-green {
-  background-color: #f0fdf4;
-}
-
-.summary-card-green:hover {
-  background-color: #dcfce7;
-}
-
-.summary-card-blue {
-  background-color: #eff6ff;
-}
-
-.summary-card-blue:hover {
-  background-color: #dbeafe;
-}
-
-.summary-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-}
-
-.summary-icon-purple {
-  background-color: #e9d5ff;
-  color: #7c3aed;
-}
-
-.summary-icon-green {
-  background-color: #bbf7d0;
-  color: #059669;
-}
-
-.summary-icon-blue {
-  background-color: #bfdbfe;
-  color: #2563eb;
-}
-
-/* Back Button Special Styling */
-.back-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-  color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.back-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-/* Card Shadow Variants */
-.shadow-soft {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s ease;
-}
-
-.shadow-soft:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-medium {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s ease;
-}
-
-.shadow-medium:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Responsive Grid Adjustments */
-@media (max-width: 1024px) {
-  .grid-responsive {
-    grid-template-columns: 1fr;
-  }
-  
-  .sidebar-sticky {
-    position: static;
-  }
-}
-
-/* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Text Gradient */
-.text-gradient {
-  background: linear-gradient(to right, #1E3A5F, #2A4A6B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Focus States */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.5);
-}
-
-/* Interactive Elements */
-.interactive-element {
-  transition: all 0.2s ease;
-}
-
-.interactive-element:hover {
-  transform: scale(1.05);
-}
-
-.interactive-element:active {
-  transform: scale(0.95);
-}
-
 /* Additional utility classes */
 .break-all {
   word-break: break-all;
@@ -874,5 +587,22 @@
 
 .leading-relaxed {
   line-height: 1.625;
+}
+
+/* Responsive adjustments for full screen layout */
+@media (max-width: 1024px) {
+  .grid.grid-cols-1.lg\\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid.grid-cols-1.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid.grid-cols-1.lg\\:grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

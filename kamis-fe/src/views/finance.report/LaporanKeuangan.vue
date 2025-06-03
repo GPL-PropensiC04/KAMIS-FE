@@ -2,7 +2,7 @@
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
     <!-- Filter Section in separate card -->
-    <div class="max-w-7xl mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <VDateRangeFilter v-model="dateRange" />
         <div class="flex items-center gap-2">
@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
         <div>
           <h1 class="text-2xl font-bold mb-1 text-[#1E3A5F]">

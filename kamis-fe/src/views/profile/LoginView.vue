@@ -103,6 +103,7 @@ const handleLogin = async () => {
       router.push('/'); // Default home for other roles
     }
   } catch (error) {
+      console.error('Login failed:', error);
     // Error handling
   }
 };

@@ -144,7 +144,6 @@ export const useProjectStore = defineStore('project', {
             this.error = null;
         },
 
-        // EXISTING METHOD - KEEP FOR BACKWARD COMPATIBILITY
         async fetchProjects(filters = {}) {
             this.loading = true;
             this.error = null;
@@ -181,6 +180,7 @@ export const useProjectStore = defineStore('project', {
             }
         },
 
+        // ... keep all other existing methods unchanged ...
         async fetchProjectById(id: string) {
             this.loading = true;
             this.error = null;
