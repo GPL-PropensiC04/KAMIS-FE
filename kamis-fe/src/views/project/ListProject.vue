@@ -1,54 +1,58 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <!-- Filter Section -->
-    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
-      <template v-if="canViewFinancialInfo">
-        <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
-          <div class="relative">
-            <VSearchBar 
-              v-model="searchQuery" 
-              placeholder="Cari ID atau nama proyek..." 
-              class="w-full pr-10" 
+  <!-- Filter Section -->
+  <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <template v-if="canViewFinancialInfo">
+      <div class="grid grid-cols-1 gap-2 items-center">
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <div class="flex flex-1 gap-2 items-center">
+    
+              <VSearchBar 
+                v-model="searchQuery" 
+                placeholder="Cari ID atau nama proyek..." 
+                class="flex-1" 
+              />
+              <VDropDownInput
+              :options="nominalOptions.map((opt) => opt.label)"
+              v-model="selectedNominalLabel"
+              @update:modelValue="updateNominalFilter"
+              class="flex-1"
+              placeholder="Filter berdasarkan profit"
             />
-            <button 
-              v-if="searchQuery" 
-              @click="clearSearch" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <span class="text-xl">×</span>
-            </button>
           </div>
-          <VDateRangeFilter v-model="dateRange" class="w-full" />
-          <VDropDownInput
-            :options="nominalOptions.map((opt) => opt.label)"
-            v-model="selectedNominalLabel"
-            @update:modelValue="updateNominalFilter"
-            class="w-full"
-            placeholder="Filter berdasarkan profit"
-          />
-        </div>
-      </template>
-      <template v-else>
-        <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-          <div class="relative">
-            <VSearchBar 
-              v-model="searchQuery" 
-              placeholder="Cari ID atau nama proyek..." 
-              class="w-full pr-10" 
-            />
-            <button 
-              v-if="searchQuery" 
-              @click="clearSearch" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <span class="text-xl">×</span>
-            </button>
+          <div class="flex-shrink-0 min-w-[250px]">
+            <VDateRangeFilter v-model="dateRange" />
           </div>
-          <VDateRangeFilter v-model="dateRange" class="w-full" />
         </div>
-      </template>
-    </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="grid grid-cols-1 gap-2 items-center">
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <div class="flex flex-1 gap-2 items-center">
+            <div class="relative flex-1">
+              <VSearchBar 
+                v-model="searchQuery" 
+                placeholder="Cari ID atau nama proyek..." 
+                class="w-full pr-10" 
+              />
+              <button 
+                v-if="searchQuery" 
+                @click="clearSearch" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <span class="text-xl">×</span>
+              </button>
+            </div>
+          </div>
+          <div class="flex-shrink-0 min-w-[250px]">
+            <VDateRangeFilter v-model="dateRange" />
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
 
     <!-- Main Content Section -->
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">

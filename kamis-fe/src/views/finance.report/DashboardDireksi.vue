@@ -143,8 +143,8 @@
 
     <!-- Top Suppliers Table -->
     <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
-      <div class="bg-[#1E3A5F] p-4 lg:p-6">
-        <h2 class="text-lg lg:text-xl font-bold text-white text-center">
+      <div class="p-6 border-b border-gray-100">
+        <h2 class="lg:text-xl font-bold text-gray-800">
           Daftar Supplier Teratas
         </h2>
       </div>
@@ -210,8 +210,8 @@
 
     <!-- Top Clients Table -->
     <div class="w-full bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
-      <div class="bg-[#1E3A5F] p-4 lg:p-6">
-        <h2 class="text-lg lg:text-xl font-bold text-white text-center">
+      <div class="p-6 border-b border-gray-100">
+        <h2 class="lg:text-xl font-bold text-gray-800">
           Daftar Klien Teratas
         </h2>
       </div>
