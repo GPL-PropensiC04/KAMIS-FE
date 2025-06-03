@@ -10,6 +10,14 @@
         <button
           :class="[
             'px-6 py-2 rounded-md font-medium transition-colors',
+            selectedRange === 'LAST_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
+          @click="setDateRange('LAST_YEAR')">
+          Tahun Lalu
+        </button>
+        <button
+          :class="[
+            'px-6 py-2 rounded-md font-medium transition-colors',
             selectedRange === 'THIS_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
           ]"
           @click="setDateRange('THIS_YEAR')">
@@ -192,6 +200,8 @@ const timeAgoText = computed(() => {
       return 'kuartal lalu';
     case 'THIS_MONTH':
       return 'bulan lalu';
+    case 'LAST_YEAR': // Tambahkan case untuk LAST_YEAR
+      return '2 tahun lalu'; // Periode perbandingan untuk 'Tahun Lalu' adalah '2 Tahun Lalu'
     default:
       return 'periode lalu';
   }
@@ -221,7 +231,8 @@ const dynamicTitle = computed(() => {
     case 'THIS_YEAR': return 'Tahun Ini';
     case 'THIS_QUARTER': return 'Kuartal Ini';
     case 'THIS_MONTH': return 'Bulan Ini';
-    default: return 'Bulan Ini'; // Default to 'Bulan Ini'
+    case 'LAST_YEAR': return 'Tahun Lalu'; // Tambahkan case untuk LAST_YEAR
+    default: return 'Periode Ini'; // Default yang lebih umum jika ada range tak terduga
   }
 });
 

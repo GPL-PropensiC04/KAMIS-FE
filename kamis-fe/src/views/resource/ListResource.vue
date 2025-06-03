@@ -9,7 +9,7 @@
     </div>
     
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
-      <div v-if="loading" class="flex justify-center items-center py-14">
+      <div v-if="resourceStore.isLoading && resourceStore.resources.length === 0" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
       
@@ -43,11 +43,11 @@
           </thead>
           <tbody>
             <tr 
-              v-for="(resource, index) in sortedAndFilteredResources" 
+              v-for="(resource, index) in sortedResources" 
               :key="resource.id"
               class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             >
-              <td class="px-3 py-5 font-medium text-gray-600" style="width: 60px;">{{ index + 1 }}</td>
+              <td class="px-3 py-5 font-medium text-gray-600" style="width: 60px;">{{ itemNumber(index) }}</td>
               <td class="px-6 py-5">{{ resource.resourceName }}</td>
               <td class="px-6 py-5">{{ resource.resourceStock }}</td>
               <td v-if="showHargaJual" class="px-6 py-5 font-bold">{{ formatCurrency(resource.resourcePrice) }}</td>
@@ -60,20 +60,78 @@
               </td>
             </tr>
             
-            <tr v-if="sortedAndFilteredResources.length === 0">
+            <tr v-if="!resourceStore.isLoading && sortedResources.length === 0">
               <td :colspan="getColspan" class="text-center text-gray-500 py-6 text-base italic">
                 Data resource tidak ditemukan.
               </td>
             </tr>
           </tbody>
         </table>
+        <div v-if="resourceStore.totalPages > 1 || resourceStore.resources.length > 0" class="mt-6 text-center">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <label for="pageSizeSelect" class="text-sm text-gray-700 whitespace-nowrap">Item per halaman:</label>
+              <select 
+                id="pageSizeSelect" 
+                v-model="selectedPageSize" 
+                @change="handlePageSizeChange"
+                class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+              </select>
+            </div>          
+          <!-- Page Navigation -->
+          <div class="flex items-center justify-center space-x-2">
+            <button
+              @click="changePage(resourceStore.currentPage)"
+              :disabled="resourceStore.currentPage === 0"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Sebelumnya
+            </button>
+            
+            <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+              <button
+                v-if="typeof pageNumber === 'number'"
+                @click="changePage(pageNumber)"
+                :class="[
+                  'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                  pageNumber === resourceStore.currentPage + 1 ? 
+                    'bg-[#2D6A4F] text-white border border-[#2D6A4F]' : 
+                    'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ pageNumber }}
+              </button>
+              <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+            </template>
+            
+            <button
+              @click="changePage(resourceStore.currentPage + 2)"
+              :disabled="resourceStore.currentPage >= resourceStore.totalPages - 1"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Selanjutnya
+            </button>
+          </div>
+            
+            <p v-if="resourceStore.resources.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
+              Menampilkan <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + 1 }}</span>
+              sampai <span class="font-medium">{{ (resourceStore.currentPage * resourceStore.pageSize) + resourceStore.resources.length }} hasil</span>
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useResourceStore } from "@/stores/resource";
 import { useAuthStore } from "@/stores/auth";
@@ -92,12 +150,43 @@ const searchName = ref('');
 const loading = ref(true);
 const sortField = ref<string>('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
+const selectedPageSize = ref(resourceStore.pageSize || 10);
 
-// Fetch data
-const fetchResources = async () => {
+// Simple debounce function for frontend optimization
+let searchTimeout: ReturnType<typeof setTimeout>;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchResources(1); // Reset to first page when searching
+  }, 500);
+};
+
+// Watch for search changes
+watch(searchName, () => {
+  debouncedSearch();
+});
+
+// Get current filters for API calls
+const getCurrentFilters = () => {
+  const filters: any = {};
+  
+  if (searchName.value && searchName.value.trim()) {
+    filters.resourceName = searchName.value.trim();
+  }
+  
+  console.log('getCurrentFilters result:', filters);
+  return filters;
+};
+
+// Fetch resources with search parameters
+const fetchResources = async (page: number = 1) => {
   loading.value = true;
   try {
-    await resourceStore.viewAllResources();
+    await resourceStore.viewAllResourcesWithPagination(
+      page - 1, 
+      selectedPageSize.value,
+      getCurrentFilters()
+    );
   } catch (error) {
     console.error('Error fetching resources:', error);
   } finally {
@@ -105,32 +194,32 @@ const fetchResources = async () => {
   }
 };
 
+// Change page
+const changePage = (page: number) => {
+  if (page < 1 || page > resourceStore.totalPages || page === resourceStore.currentPage + 1) {
+    return;
+  }
+  fetchResources(page);
+};
+
+// Handle page size change
+const handlePageSizeChange = () => {
+  resourceStore.pageSize = selectedPageSize.value;
+  fetchResources(1); // Fetch first page with new page size
+};
+
+// Clear search
+const clearSearch = () => {
+  searchName.value = '';
+  // No need to call fetchResources here as the watch will trigger it
+};
+
 // Rupiah formatter
 const formatCurrency = (value: number) => `Rp ${value.toLocaleString("id-ID")},00`;
 
-// Search & filter data
-const filteredResources = computed(() => {
-  if (!searchName.value) return resourceStore.resources;
-  return resourceStore.resources.filter(res =>
-    res.resourceName.toLowerCase().includes(searchName.value.toLowerCase())
-  );
-});
-
-// Sorting function
-const sortBy = (field: string) => {
-  if (sortField.value === field) {
-    // Toggle sort order if same field
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    // Set new field and default to ascending
-    sortField.value = field;
-    sortOrder.value = 'asc';
-  }
-};
-
-// Sorted and filtered resources
-const sortedAndFilteredResources = computed(() => {
-  const resources = [...filteredResources.value];
+// Use store resources directly (already filtered by backend) with client-side sorting
+const sortedResources = computed(() => {
+  const resources = [...resourceStore.resources];
   
   if (sortField.value) {
     resources.sort((a, b) => {
@@ -148,7 +237,7 @@ const sortedAndFilteredResources = computed(() => {
         return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue;
       }
       
-      // Handle string comparison
+      // Handle null values
       if (aValue == null && bValue == null) return 0;
       if (aValue == null) return sortOrder.value === 'asc' ? 1 : -1;
       if (bValue == null) return sortOrder.value === 'asc' ? -1 : 1;
@@ -161,30 +250,97 @@ const sortedAndFilteredResources = computed(() => {
   return resources;
 });
 
-// Dynamic colspan for empty state message
+// Sorting function
+const sortBy = (field: string) => {
+  if (sortField.value === field) {
+    // Toggle sort order if same field
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Set new field and default to ascending
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+};
+
+// Pagination display logic (keep your existing pagination logic)
+const pageNavigation = computed(() => {
+  const current = resourceStore.currentPage + 1; // 1-indexed
+  const total = resourceStore.totalPages;
+  
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1;
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  range.push(1);
+  
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  if (total > 1) {
+    range.push(total);
+  }
+
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
+// Item number
+const itemNumber = (index: number) => {
+  return resourceStore.currentPage * resourceStore.pageSize + index + 1;
+};
+
+// Navigation functions
+const goToAddResource = () => router.push("/resource/add");
+const goToUpdateResource = (id: string | number, event?: Event) => {
+  if (event) event.stopPropagation();
+  router.push(`/resource/update/${id}`);
+};
+
+// Role-based visibility (keep your existing logic)
+const showHargaJual = computed(() => authStore.userRole !== 'Operasional');
+const showAction = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
+const showAddButton = computed(() => !['Direksi', 'Finance', 'Admin'].includes(authStore.userRole || ''));
+
+// Dynamic colspan for empty state
 const getColspan = computed(() => {
-  let colspan = 4; // Base columns (no, name, stock, description)
+  let colspan = 4; // Base columns
   if (showHargaJual.value) colspan++;
   if (showAction.value) colspan++;
   return colspan;
 });
 
-// Navigasi
-const goToAddResource = () => router.push("/resource/add");
-const goToUpdateResource = (id: number, event?: Event) => {
-  if (event) event.stopPropagation();
-  router.push(`/resource/update/${id}`);
-};
-
-// Role-based visibility
-const showHargaJual = computed(() => authStore.userRole !== 'Operasional');
-const showAction = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
-// Role-based visibility tombol Tambah Resource
-const showAddButton = computed(() => !['Direksi', 'Finance'].includes(authStore.userRole || ''));
-
-// Fetch on load
-onMounted(() => {
-  fetchResources();
+// Initial load
+onMounted(async () => {
+  if (resourceStore.pageSize) {
+    selectedPageSize.value = 10;
+  }
+  await fetchResources(1);
 });
 </script>
 

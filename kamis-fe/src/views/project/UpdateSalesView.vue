@@ -7,6 +7,10 @@ import { API_URLS } from '@/config/api.config';
 import type { UpdateProjectFormData, ProjectInterface } from '@/interfaces/project/project.interface';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useProjectStore } from '@/stores/project';
+import { useResourceStore } from "@/stores/resource"; // Added import for resource store
+import type { ResourceInterface } from '@/interfaces/resource/resource.interface';
+import type { ClientInterface } from '@/interfaces/profile/client.interface';
+import type { ProjectResource } from '@/interfaces/project/project.interface';
 
 // Router & Toast
 const router = useRouter();
@@ -14,36 +18,15 @@ const route = useRoute();
 const toast = useToast();
 const projectId = route.params.id as string;
 const projectStore = useProjectStore();
+const resourceStore = useResourceStore(); // Instantiate resource store
 
 // Form data
 const formData = ref<UpdateProjectFormData | null>(null);
 const isLoading = ref(true);
 
-// Client data
-interface Client {
-  id: string;
-  name: string;
-}
-
-const clients = ref<Client[]>([]);
-
-// Product data
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-}
-
-interface CartProduct {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-const availableProducts = ref<Product[]>([]);
-const productList = ref<CartProduct[]>([]);
+const clients = ref<ClientInterface[]>([]);
+const availableProducts = ref<ResourceInterface[]>([]); // Will hold all products
+const productList = ref<ProjectResource[]>([]);
 const selectedProduct = ref('');
 const selectedQuantity = ref<number | null>(null);
 const selectedPrice = ref(0);
@@ -66,7 +49,7 @@ const formatCurrency = (value: number): string => {
 
 // Computed values
 const totalRevenue = computed(() => {
-  return productList.value.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+  return productList.value.reduce((sum, product) => sum + (product.resourcePrice * product.resourceQuantity), 0);
 });
 
 // Custom date input handler
@@ -151,7 +134,7 @@ const fetchClients = async () => {
     });
     clients.value = response.data.data.map((client: {id: string; nameClient: string}) => ({
       id: client.id,
-      name: client.nameClient
+      nameClient: client.nameClient
     }));
   } catch (error) {
     console.error('Error fetching clients:', error);
@@ -180,18 +163,18 @@ const loadResourceData = async () => {
       
       if (resource) {
         productList.value.push({
-          id: resource.id,
-          name: resource.name,
-          quantity: resourceData.resourceStockUsed,
-          price: resourceData.sellPrice
+          id: String(resource.id),
+          resourceName: resource.resourceName,
+          resourceQuantity: resourceData.resourceStockUsed,
+          resourcePrice: resourceData.sellPrice
         });
       } else {
         // If resource not found, still add it with a placeholder name
         productList.value.push({
           id: cleanId,
-          name: `Resource ${cleanId}`,
-          quantity: resourceData.resourceStockUsed,
-          price: resourceData.sellPrice
+          resourceName: `Resource ${cleanId}`,
+          resourceQuantity: resourceData.resourceStockUsed,
+          resourcePrice: resourceData.sellPrice
         });
       }
     }
@@ -205,38 +188,14 @@ const loadResourceData = async () => {
 // Fetch products (resources) from API
 const fetchProducts = async () => {
   try {
-    const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall`, {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    });
-    
-    console.log('Raw resource data from API:', response.data.data);
-    
-    // Define interface for resource response
-    interface ResourceResponse {
-      id: string | number;
-      resourceName: string;
-      resourcePrice?: number;
-      resourceStock?: number;
-    }
-    
-    // Assuming the API returns resources with this structure
-    availableProducts.value = response.data.data.map((resource: ResourceResponse) => {
-      console.log(`Resource ${resource.id} (${resource.resourceName}) sell price:`, resource.resourcePrice);
-      
-      return {
-        id: String(resource.id).trim(), // Convert to string and trim whitespace
-        name: resource.resourceName,
-        price: resource.resourcePrice || 0,
-        stock: resource.resourceStock || 0
-      };
-    });
-    
-    console.log('Processed available products with prices:', 
-      availableProducts.value.map(p => ({ id: p.id, name: p.name, price: p.price }))
-    );
+    await resourceStore.fetchResources(); // Fetch resources from the store
+    const allProducts = resourceStore.resources; 
+    availableProducts.value = allProducts.map((resource: ResourceInterface) => ({
+      id: resource.id,
+      resourceName: resource.resourceName,
+      resourcePrice: resource.resourcePrice, 
+      resourceStock: resource.resourceStock 
+    }));
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.error('Gagal mengambil data produk');
@@ -249,8 +208,8 @@ watch(selectedProduct, (newValue) => {
     console.log(`Selected product changed to: ${newValue}`);
     const product = availableProducts.value.find(p => p.id === newValue);
     if (product) {
-      console.log(`Found product: ${product.name}, price: ${product.price}`);
-      selectedPrice.value = product.price;
+      console.log(`Found product: ${product.resourceName}, price: ${product.resourcePrice}`);
+      selectedPrice.value = product.resourcePrice;
     } else {
       console.log(`No product found with id: ${newValue}`);
       selectedPrice.value = 0;
@@ -284,8 +243,8 @@ const addProduct = () => {
     return;
   }
   
-  if (selectedQuantity.value > product.stock) {
-    toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
+  if (selectedQuantity.value > product.resourceStock) {
+    toast.error(`Stok barang tidak cukup. Sisa stok: ${product.resourceStock}`);
     return;
   }
   
@@ -294,21 +253,21 @@ const addProduct = () => {
   
   if (existingIndex >= 0) {
     // Update existing product
-    const newQuantity = productList.value[existingIndex].quantity + selectedQuantity.value;
+    const newQuantity = productList.value[existingIndex].resourceQuantity + selectedQuantity.value;
     
-    if (newQuantity > product.stock) {
-      toast.error(`Stok barang tidak cukup. Sisa stok: ${product.stock}`);
+    if (newQuantity > product.resourceStock) {
+      toast.error(`Stok barang tidak cukup. Sisa stok: ${product.resourceStock}`);
       return;
     }
     
-    productList.value[existingIndex].quantity = newQuantity;
+    productList.value[existingIndex].resourceQuantity = newQuantity;
   } else {
     // Add new product
     productList.value.push({
-      id: product.id,
-      name: product.name,
-      quantity: selectedQuantity.value,
-      price: selectedPrice.value
+      id: String(product.id),
+      resourceName: product.resourceName,
+      resourceQuantity: selectedQuantity.value,
+      resourcePrice: selectedPrice.value
     });
   }
   
@@ -333,7 +292,7 @@ const removeProduct = (index: number) => {
   const availableProductIndex = availableProducts.value.findIndex(p => p.id === removedProduct.id);
   if (availableProductIndex !== -1) {
     // Add the quantity back to the available stock
-    availableProducts.value[availableProductIndex].stock += removedProduct.quantity;
+    availableProducts.value[availableProductIndex].resourceStock += removedProduct.resourceQuantity;
   }
   
   updateFormData();
@@ -347,8 +306,9 @@ const updateFormData = () => {
   formData.value.projectTotalPemasukkan = totalRevenue.value;
   formData.value.projectUseResource = productList.value.map(product => ({
     resourceId: product.id,
-    resourceStockUsed: product.quantity,
-    sellPrice: product.price
+    resourceName: product.resourceName,
+    resourceStockUsed: product.resourceQuantity,
+    sellPrice: product.resourcePrice
   }));
 };
 
@@ -434,9 +394,10 @@ const submitForm = async () => {
 };
 
 // Load data on component mount
-onMounted(() => {
-  fetchClients();
-  fetchProjectDetails();
+onMounted(async () => {
+  await fetchProjectDetails();
+  await fetchClients();
+  await fetchProducts(); // Fetches all products via the new store action
 });
 </script> 
 
@@ -504,7 +465,7 @@ onMounted(() => {
                 >
                   <option value="" disabled>Nama Klien Tujuan Barang</option>
                   <option v-for="client in clients" :key="client.id" :value="client.id">
-                    {{ client.name }}
+                    {{ client.nameClient }}
                   </option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -583,11 +544,10 @@ onMounted(() => {
                   v-model="selectedProduct"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
                   :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !availableProducts.length }"
-                  :disabled="!availableProducts.length"
                 >
                   <option value="" disabled>Pilih Barang</option>
                   <option v-for="product in availableProducts" :key="product.id" :value="product.id">
-                    {{ product.name }}
+                    {{ product.resourceName }}
                   </option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -602,11 +562,11 @@ onMounted(() => {
                 <select 
                   v-model="selectedQuantity"
                   class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none text-sm"
-                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.stock || 0) === 0 }"
-                  :disabled="!selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.stock || 0) === 0"
+                  :class="{ 'w-full p-2 bg-gray-200 border border-gray-300 rounded text-gray-700': !selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.resourceStock || 0) === 0 }"
+                  :disabled="!selectedProduct || (availableProducts.find(p => p.id === selectedProduct)?.resourceStock || 0) === 0"
                 >
                   <option value="" disabled>Pilih Jumlah</option>
-                  <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.stock || 0)" :key="num" :value="num">{{ num }}</option>
+                  <option v-for="num in (availableProducts.find(p => p.id === selectedProduct)?.resourceStock || 0)" :key="num" :value="num">{{ num }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg class="w-4 h-4 fill-current text-gray-400" viewBox="0 0 20 20"><path d="M7 7l3-3 3 3m0 6l-3 3-3-3"></path></svg>
@@ -650,9 +610,9 @@ onMounted(() => {
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="(product, index) in productList" :key="index" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">{{ product.name }}</td>
-                  <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.quantity }}</td>
-                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.price) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ product.resourceName }}</td>
+                  <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.resourceQuantity }}</td>
+                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.resourcePrice) }}</td>
                   <td class="px-6 py-4 text-center whitespace-nowrap">
                     <button 
                       @click="removeProduct(index)"
@@ -690,9 +650,9 @@ onMounted(() => {
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="(product, index) in productList" :key="index" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">{{ product.name }}</td>
-                  <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.quantity }}</td>
-                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.price) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ product.resourceName }}</td>
+                  <td class="px-6 py-4 text-center whitespace-nowrap">{{ product.resourceQuantity }}</td>
+                  <td class="px-6 py-4 text-right whitespace-nowrap">{{ formatCurrency(product.resourcePrice) }}</td>
                 </tr>
                 <tr v-if="productList.length === 0">
                   <td colspan="3" class="px-6 py-4 text-center text-gray-500">

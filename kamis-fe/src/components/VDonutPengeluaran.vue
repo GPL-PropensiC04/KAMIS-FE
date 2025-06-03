@@ -248,8 +248,8 @@ onMounted(fetchPengeluaran);
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="w-full h-full flex justify-center items-center text-red-600">
-      <p>{{ error }}</p>
+    <div v-else-if="error" class="w-full h-full flex justify-center items-center text-gray-500 italic">
+      <p>{{ "Tidak ada data pengeluaran untuk periode yang dipilih" }}</p>
     </div>
 
     <!-- Chart Container -->

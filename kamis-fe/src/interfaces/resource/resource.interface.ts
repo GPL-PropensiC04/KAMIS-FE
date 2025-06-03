@@ -1,9 +1,9 @@
 export interface ResourceInterface {
-  id?: number;
+  id?: number | string;
   resourceName: string;
   resourcePrice: number;
   resourceStock: number;
-  resourceDescription: string;
+  resourceDescription?: string;
 }
 
 export interface AddResourceRequestInterface {

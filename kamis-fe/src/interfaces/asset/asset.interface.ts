@@ -32,8 +32,10 @@ export interface Asset {
   tanggalPerolehan?: string;
   lokasi?: string;
   merek?: string;
+  
   tipe?: string;
 }
+
 
 export interface AssetResponseDTO {
   status: number;

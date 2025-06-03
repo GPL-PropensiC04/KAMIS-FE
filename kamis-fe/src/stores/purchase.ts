@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import type { PurchaseInterface, AddPurchaseRequestInterface, UpdatePurchaseRequestInterface, UpdatePurchaseStatusRequestInterface, PurchaseSummaryResponseDTO } from '@/interfaces/purchase/purchase.interface';
-// import type { ResourceTempInterface, AddResourceTempRequestInterface } from '@/interfaces/resourcetemp.interface';
-import type { CommonResponseInterface } from '@/interfaces/common.interface';
+import type { CommonResponseInterface, PaginatedResponse } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import router from '@/router';
 import type { AddAssetTemp } from '@/interfaces/purchase/assettemp.interface';
 import { API_URLS } from '@/config/api.config';
+
 export const usePurchaseStore = defineStore('purchase', {
   state: () => ({
     purchases: [] as PurchaseInterface[],
@@ -18,19 +18,124 @@ export const usePurchaseStore = defineStore('purchase', {
     loading: false,
     error: null as null | string,
     purchaseSummary: null as PurchaseSummaryResponseDTO | null,
+    
+    // NEW PAGINATION STATE
+    currentPage: 0,
+    totalPages: 0,
+    pageSize: 10,
+    totalElements: 0,
+    isLoading: false,
   }),
   actions: {
     setDraftPurchase(data: PurchaseInterface) {
       this.draftPurchase = data;
-      localStorage.setItem("draftPurchase", JSON.stringify(data)); // Simpan ke localStorage
+      localStorage.setItem("draftPurchase", JSON.stringify(data));
     },
 
     clearDraftPurchase() {
       this.draftPurchase = null;
-      localStorage.removeItem("draftPurchase"); // Hapus dari localStorage
+      localStorage.removeItem("draftPurchase");
     },
 
+    // NEW PAGINATION METHOD
+    async viewAllPurchasesPaginated(
+      page: number, 
+      size: number = 10, 
+      filters: {
+        startNominal?: number | null;
+        endNominal?: number | null;
+        highNominal?: boolean | null;
+        startDate?: string | null;
+        endDate?: string | null;
+        newDate?: boolean | null;
+        type?: string;
+        idSearch?: string | null;
+        status?: string | null;
+      } = {}
+    ) {
+      this.isLoading = true;
+      this.error = null;
+      
+      try {
+        const params: any = { page, size };
 
+        // Add filters to params
+        if (filters.startNominal !== null && filters.startNominal !== undefined) {
+          params.startNominal = filters.startNominal;
+        }
+        
+        if (filters.endNominal !== null && filters.endNominal !== undefined) {
+          params.endNominal = filters.endNominal;
+        }
+        
+        if (filters.highNominal !== null && filters.highNominal !== undefined) {
+          params.highNominal = filters.highNominal;
+        }
+        
+        if (filters.startDate && filters.startDate.trim() !== '') {
+          params.startDate = filters.startDate.trim();
+        }
+        
+        if (filters.endDate && filters.endDate.trim() !== '') {
+          params.endDate = filters.endDate.trim();
+        }
+        
+        if (filters.newDate !== null && filters.newDate !== undefined) {
+          params.newDate = filters.newDate;
+        }
+        
+        if (filters.type && filters.type !== 'All' && filters.type !== 'all') {
+          params.type = filters.type.toLowerCase();
+        }
+        
+        if (filters.idSearch && filters.idSearch.trim() !== '') {
+          params.idSearch = filters.idSearch.trim();
+        }
+        
+        if (filters.status && filters.status.trim() !== '') {
+          params.status = filters.status.trim();
+        }
+
+        console.log('Purchase pagination params:', params);
+
+        const response = await axios.get<CommonResponseInterface<PaginatedResponse<PurchaseInterface>>>(
+          `${API_URLS.PURCHASE}/purchase/viewall/paginated`,
+          {
+            params,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          }
+        );
+
+        const paginatedData = response.data.data;
+        
+        this.purchases = paginatedData.content;
+        this.currentPage = paginatedData.number;
+        this.totalPages = paginatedData.totalPages;
+        this.pageSize = paginatedData.size;
+        this.totalElements = paginatedData.totalElements;
+        
+        return paginatedData.content;
+      } catch (err: unknown) {
+        this.error = `Gagal mengambil data pembelian ${err instanceof Error ? err.message : "Unknown error"}`;
+        useToast().error(this.error);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    resetPaginationStore() {
+      this.purchases = [];
+      this.currentPage = 0;
+      this.totalPages = 0;
+      this.totalElements = 0;
+      this.error = null;
+    },
+
+    // EXISTING METHODS REMAIN UNCHANGED
     async addPurchase(body: AddPurchaseRequestInterface) {
       this.loading = true;
       this.error = null;
@@ -217,6 +322,8 @@ export const usePurchaseStore = defineStore('purchase', {
         this.loading = false;
       }
     },
+
+    // EXISTING METHOD - KEEP FOR BACKWARD COMPATIBILITY
     async viewAllPurchase(filters = {}) {
       this.loading = true;
       this.error = null;
@@ -224,7 +331,7 @@ export const usePurchaseStore = defineStore('purchase', {
       try {
         const response = await axios.get<CommonResponseInterface<PurchaseInterface[]>>(
           `${API_URLS.PURCHASE}/purchase/viewall`,
-          { params: filters } // ✅ Kirim filter sebagai query parameters
+          { params: filters }
         );
 
         this.purchases = response.data.data;
@@ -235,7 +342,8 @@ export const usePurchaseStore = defineStore('purchase', {
         this.loading = false;
       }
     },
-        // Method untuk mendapatkan daftar pembelian berdasarkan rentang
+
+    // Method untuk mendapatkan daftar pembelian berdasarkan rentang
     async getPurchaseListByRange(range: string = 'THIS_YEAR') {
       this.loading = true;
       this.error = null;
