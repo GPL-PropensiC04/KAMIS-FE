@@ -169,9 +169,6 @@ const submitForm = async () => {
     // Clear stored form data
     localStorage.removeItem('salesFormData');
     
-    // Show success message
-    toast.success('Proyek penjualan berhasil dibuat!');
-    
     // Navigate to project list
     router.push('/project');
   } catch (error) {

@@ -506,7 +506,7 @@
                 v-model="completeMaintenanceDate"
                 :min="completeMaintenanceStartDate"
                 :max="new Date().toISOString().slice(0, 10)"
-                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                 required
               />
             </div>
@@ -542,7 +542,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
-import { AsetService } from '@/stores/assetservices';
+import { AsetService } from '@/stores/asset';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
@@ -909,23 +909,25 @@ const openCompleteModal = (id: number, tanggalMulai: string) => {
 const submitCompleteMaintenance = async () => {
   completeMaintenanceError.value = '';
   if (!completeMaintenanceId.value) return;
-  const tanggalSelesai = completeMaintenanceDate.value;
+  // Set default tanggal selesai ke hari ini
+  const tanggalSelesai = ref(new Date().toISOString().slice(0, 10));
 
-  // Validasi: tanggal selesai harus >= tanggal mulai dan <= hari ini
+
+    // Validasi tanggal selesai
   if (
-    tanggalSelesai < completeMaintenanceStartDate.value ||
-    tanggalSelesai > new Date().toISOString().slice(0, 10)
+    tanggalSelesai.value < completeMaintenanceStartDate.value ||
+    tanggalSelesai.value > new Date().toISOString().slice(0, 10)
   ) {
-    completeMaintenanceError.value = 'Tanggal selesai harus di antara tanggal mulai dan hari ini.';
+    completeMaintenanceError.value = 'Tanggal selesai harus antara tanggal mulai dan hari ini.';
     return;
   }
 
   const loadingToastId = toast.info('Menyelesaikan maintenance...', { timeout: false });
-  
+
   try {
     const response = await axios.patch(
-      `${API_URLS.ASSET}/maintenance/${completeMaintenanceId.value}/complete`, 
-      { tanggalSelesaiMaintenance: completeMaintenanceDate.value },
+      `${API_URLS.ASSET}/maintenance/${completeMaintenanceId.value}/complete`,
+      { tanggalSelesaiMaintenance: tanggalSelesai },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -933,27 +935,16 @@ const submitCompleteMaintenance = async () => {
         }
       }
     );
-    
+
     if (response.data && response.data.status === 200) {
       toast.dismiss(loadingToastId);
       toast.success('Maintenance berhasil diselesaikan');
       showCompleteModal.value = false;
-      
-      // Refresh data
-      await Promise.all([
-        loadData(),
-        fetchMaintenanceHistory()
-      ]);
+      await Promise.all([loadData(), fetchMaintenanceHistory()]);
     }
   } catch (err: any) {
     toast.dismiss(loadingToastId);
-    console.error('Error completing maintenance:', err);
-    
-    if (err.response && err.response.data && err.response.data.message) {
-      completeMaintenanceError.value = err.response.data.message;
-    } else {
-      completeMaintenanceError.value = 'Gagal menyelesaikan maintenance. Silakan coba lagi.';
-    }
+    completeMaintenanceError.value = err.response?.data?.message || 'Gagal menyelesaikan maintenance. Silakan coba lagi.';
   }
 };
 
@@ -1029,12 +1020,6 @@ textarea::-webkit-scrollbar-thumb {
 
 textarea::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
-}
-
-/* Table hover effects */
-tbody tr:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive design */
