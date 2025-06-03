@@ -112,7 +112,7 @@ const resourceOptions = computed(() => resourceStore.resources.map(res => res.re
 function handleSelectResource(name: string) {
   const selected = resourceStore.resources.find(r => r.resourceName === name);
   if (selected) {
-    selectedResourceId.value = selected.id ?? null;
+    selectedResourceId.value = typeof selected.id === 'string' ? parseInt(selected.id, 10) : selected.id ?? null;
     selectedResourcePrice.value = selected.resourcePrice;
     selectedResourceName.value = selected.resourceName;
   } else {

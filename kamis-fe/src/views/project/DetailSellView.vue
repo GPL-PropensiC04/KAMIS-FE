@@ -734,7 +734,7 @@ const formatStatus = (status: number): string => {
 
 // Status color helper
 const getStatusColor = (status: number) => {
-  const colors = {
+  const colors : Record<number, string> = {
     0: 'bg-blue-100 text-blue-800',      // Direncanakan
     1: 'bg-yellow-100 text-yellow-800',  // Sedang Dikerjakan
     2: 'bg-green-100 text-green-800',    // Selesai
@@ -754,7 +754,7 @@ const formatPaymentStatus = (paymentStatus: number): string => {
 
 // Payment status color helper
 const getPaymentStatusColor = (status: number) => {
-  const colors = {
+  const colors : Record<number, string> =  {
     0: 'bg-red-100 text-red-800',      // Belum bayar
     1: 'bg-green-100 text-green-800',  // Sudah bayar
     2: 'bg-gray-100 text-gray-800'     // Dikembalikan
