@@ -623,7 +623,7 @@
         id: asset.platNomor,
         assetType: asset.tipeAset,
         assetName: asset.nama,
-        assetUsageCost: asset.nilaiPerolehan || 0, // Populate from nilaiPerolehan
+        // assetUsageCost: asset.nilaiPerolehan || 0, // Populate from nilaiPerolehan
         platNomor: asset.platNomor
       }));
     } catch (error) {

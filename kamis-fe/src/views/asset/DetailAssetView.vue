@@ -453,7 +453,6 @@
               <input
                 type="date"
                 v-model="newMaintenance.tanggalMulaiMaintenance"
-                :max="new Date(Date.now()).toISOString().slice(0, 10)"
                 class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                 required
               />
@@ -505,7 +504,6 @@
                 type="date"
                 v-model="completeMaintenanceDate"
                 :min="completeMaintenanceStartDate"
-                :max="new Date().toISOString().slice(0, 10)"
                 class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 required
               />
@@ -542,7 +540,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
-import { AsetService } from '@/stores/assetservices';
+import { AsetService } from '@/stores/asset';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
@@ -913,9 +911,7 @@ const submitCompleteMaintenance = async () => {
 
   // Validasi: tanggal selesai harus >= tanggal mulai dan <= hari ini
   if (
-    tanggalSelesai < completeMaintenanceStartDate.value ||
-    tanggalSelesai > new Date().toISOString().slice(0, 10)
-  ) {
+    tanggalSelesai < completeMaintenanceStartDate.value   ) {
     completeMaintenanceError.value = 'Tanggal selesai harus di antara tanggal mulai dan hari ini.';
     return;
   }

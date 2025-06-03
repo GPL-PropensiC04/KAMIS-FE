@@ -12,7 +12,7 @@ import type {
     UpdateProjectPaymentStatusInterface,
     SellDistributionSummaryDTO
 } from '@/interfaces/project/project.interface';
-import type { CommonResponseInterface } from '@/interfaces/common.interface';
+import type { CommonResponseInterface, PaginatedResponse } from '@/interfaces/common.interface';
 import { useToast } from 'vue-toastification';
 import { API_URLS } from '@/config/api.config';
 
@@ -26,9 +26,124 @@ export const useProjectStore = defineStore('project', {
         projects: [] as ProjectInterface[],
         loading: false,
         error: null as null | string,
-        sellDistributionSummary: null as SellDistributionSummaryDTO | null,  // Untuk menyimpan ringkasan penjualan dan distribusi
+        sellDistributionSummary: null as SellDistributionSummaryDTO | null,
+        
+        // NEW PAGINATION STATE
+        currentPage: 0,
+        totalPages: 0,
+        pageSize: 10,
+        totalElements: 0,
+        isLoading: false,
     }),
     actions: {
+        // NEW PAGINATION METHOD
+        async fetchProjectsPaginated(
+            page: number = 0,
+            size: number = 10,
+            filters: {
+                idProject?: string | null;
+                namaProject?: string | null;
+                statusProject?: string | null;
+                tipeProject?: boolean | null;
+                clientProject?: string | null;
+                tanggalMulai?: string | null;
+                tanggalSelesai?: string | null;
+                startNominal?: number | null;
+                endNominal?: number | null;
+            } = {}
+        ) {
+            this.isLoading = true;
+            this.error = null;
+            
+            try {
+                const params: any = { page, size };
+
+                // Add filters to params
+                if (filters.idProject && filters.idProject.trim() !== '') {
+                    params.idProject = filters.idProject.trim();
+                }
+                
+                if (filters.namaProject && filters.namaProject.trim() !== '') {
+                    params.namaProject = filters.namaProject.trim();
+                }
+                
+                if (filters.statusProject && filters.statusProject.trim() !== '') {
+                    params.statusProject = filters.statusProject.trim();
+                }
+                
+                if (filters.tipeProject !== null && filters.tipeProject !== undefined) {
+                    params.tipeProject = filters.tipeProject;
+                }
+                
+                if (filters.clientProject && filters.clientProject.trim() !== '') {
+                    params.clientProject = filters.clientProject.trim();
+                }
+                
+                if (filters.tanggalMulai && filters.tanggalMulai.trim() !== '') {
+                    params.tanggalMulai = filters.tanggalMulai.trim();
+                }
+                
+                if (filters.tanggalSelesai && filters.tanggalSelesai.trim() !== '') {
+                    params.tanggalSelesai = filters.tanggalSelesai.trim();
+                }
+                
+                if (filters.startNominal !== null && filters.startNominal !== undefined) {
+                    params.startNominal = filters.startNominal;
+                }
+                
+                if (filters.endNominal !== null && filters.endNominal !== undefined) {
+                    params.endNominal = filters.endNominal;
+                }
+
+                console.log('Project pagination params:', params);
+
+                const response = await axios.get<CommonResponseInterface<PaginatedResponse<ProjectInterface>>>(
+                    `${API_URLS.PROJECT}/project/all/paginated`,
+                    {
+                        params,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        },
+                    }
+                );
+
+                const paginatedData = response.data.data;
+                
+                this.projects = paginatedData.content;
+                this.currentPage = paginatedData.number;
+                this.totalPages = paginatedData.totalPages;
+                this.pageSize = paginatedData.size;
+                this.totalElements = paginatedData.totalElements;
+                
+                return paginatedData.content;
+            } catch (err: unknown) {
+                // Handle 404 Not Found as an empty result rather than an error
+                if ('response' in (err as any) && (err as any).response?.status === 404) {
+                    this.projects = [];
+                    this.currentPage = 0;
+                    this.totalPages = 0;
+                    this.totalElements = 0;
+                    return [];
+                }
+                
+                this.error = `Gagal mengambil data proyek ${err instanceof Error ? err.message : "Unknown error"}`;
+                useToast().error(this.error);
+                throw err;
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        resetPaginationStore() {
+            this.projects = [];
+            this.currentPage = 0;
+            this.totalPages = 0;
+            this.totalElements = 0;
+            this.error = null;
+        },
+
+        // EXISTING METHOD - KEEP FOR BACKWARD COMPATIBILITY
         async fetchProjects(filters = {}) {
             this.loading = true;
             this.error = null;
@@ -65,6 +180,7 @@ export const useProjectStore = defineStore('project', {
             }
         },
 
+        // ... keep all other existing methods unchanged ...
         async fetchProjectById(id: string) {
             this.loading = true;
             this.error = null;
@@ -283,6 +399,7 @@ export const useProjectStore = defineStore('project', {
               this.loading = false;
             }
           },
+
         // Fetch daftar proyek berdasarkan rentang waktu tertentu
         async getProjectListByRange(range: string = 'THIS_YEAR') {
             this.loading = true;
