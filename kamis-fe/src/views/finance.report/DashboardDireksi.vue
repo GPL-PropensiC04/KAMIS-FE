@@ -149,59 +149,66 @@
         </h2>
       </div>
       
-      <div class="overflow-x-auto">
-        <table class="custom-table">
+      <!-- Loading state untuk tabel supplier -->
+      <div v-if="loading" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+        <span class="ml-2 text-gray-600">Memuat data supplier...</span>
+      </div>
+
+      <!-- Tabel supplier (existing code) -->
+      <div v-else class="overflow-x-auto">
+        <table class="custom-table w-full">
           <thead class="text-white bg-[#1E3A5F]">
             <tr>
-              <th @click="sortTable('supplier', 'nameSupplier')" class="table-header">
+              <th @click="sortTable('supplier', 'nameSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
                 Nama Supplier
-                <span v-if="sortSupplierKey === 'nameSupplier'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                <span v-if="sortSupplierKey === 'nameSupplier'" class="ml-1">
+                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'purchaseCount')" class="table-header">
+              <th @click="sortTable('supplier', 'purchaseCount')" class="px-4 py-3 text-center cursor-pointer table-header">
                 Jumlah Pembelian
-                <span v-if="sortSupplierKey === 'purchaseCount'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                <span v-if="sortSupplierKey === 'purchaseCount'" class="ml-1">
+                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'companySupplier')" class="table-header">
+              <th @click="sortTable('supplier', 'companySupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
                 Perusahaan
-                <span v-if="sortSupplierKey === 'companySupplier'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                <span v-if="sortSupplierKey === 'companySupplier'" class="ml-1">
+                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
                 </span>
               </th>
-              <th @click="sortTable('supplier', 'noTelpSupplier')" class="table-header">
+              <th @click="sortTable('supplier', 'noTelpSupplier')" class="px-4 py-3 text-center cursor-pointer table-header">
                 Nomor Telepon
-                <span v-if="sortSupplierKey === 'noTelpSupplier'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortSupplierOrder === 'asc' ? 'sort-up' : 'sort-down']" />
+                <span v-if="sortSupplierKey === 'noTelpSupplier'" class="ml-1">
+                  {{ sortSupplierOrder === 'asc' ? '▲' : '▼' }}
                 </span>
               </th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading" class="text-center">
-              <td colspan="4" class="table-cell py-8">
+              <td colspan="4" class="py-4">
                 <div class="flex justify-center">
-                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1E3A5F]"></div>
                 </div>
               </td>
             </tr>
             <tr v-else-if="topThreeSuppliers.length === 0">
-              <td colspan="4" class="table-cell text-center py-8 text-gray-500 italic">
+              <td colspan="4" class="text-center py-4 text-gray-500 italic">
                 Tidak ada data supplier.
               </td>
             </tr>
             <tr 
               v-for="supplier in topThreeSuppliers" 
               :key="supplier.id" 
-              class="table-row"
+              class="hover:bg-gray-100 cursor-pointer transition-colors"
               @click="goToSupplierDetail(supplier.id)"
             >
-              <td class="table-cell">{{ supplier.nameSupplier }}</td>
-              <td class="table-cell">{{ supplier.purchaseCount || 0 }} Pembelian</td>
-              <td class="table-cell">{{ supplier.companySupplier || '-' }}</td>
-              <td class="table-cell">{{ supplier.noTelpSupplier || '-' }}</td>
+              <td class="px-4 py-3 text-center">{{ supplier.nameSupplier }}</td>
+              <td class="px-4 py-3 text-center">{{ supplier.purchaseCount || 0 }} Pembelian</td>
+              <td class="px-4 py-3 text-center">{{ supplier.companySupplier || '-' }}</td>
+              <td class="px-4 py-3 text-center">{{ supplier.noTelpSupplier || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -216,72 +223,79 @@
         </h2>
       </div>
       
-      <div class="overflow-x-auto">
-        <table class="custom-table">
-          <thead class="text-white bg-[#1E3A5F]">
-            <tr>
-              <th @click="sortTable('client', 'nameClient')" class="table-header">
-                Nama Klien
-                <span v-if="sortClientKey === 'nameClient'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
-                </span>
-              </th>
-              <th @click="sortTable('client', 'projectCount')" class="table-header">
-                Jumlah Aktivitas
-                <span v-if="sortClientKey === 'projectCount'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
-                </span>
-              </th>
-              <th @click="sortTable('client', 'totalProfit')" class="table-header">
-                Total Profit
-                <span v-if="sortClientKey === 'totalProfit'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
-                </span>
-              </th>
-              <th @click="sortTable('client', 'noTelpClient')" class="table-header">
-                Nomor Telepon
-                <span v-if="sortClientKey === 'noTelpClient'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
-                </span>
-              </th>
-              <th @click="sortTable('client', 'companyClient')" class="table-header">
-                Perusahaan
-                <span v-if="sortClientKey === 'companyClient'" class="sort-indicator">
-                  <font-awesome-icon :icon="['fas', sortClientOrder === 'asc' ? 'sort-up' : 'sort-down']" />
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading" class="text-center">
-              <td colspan="5" class="table-cell py-8">
-                <div class="flex justify-center">
-                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
-                </div>
-              </td>
-            </tr>
-            <tr v-else-if="topThreeClients.length === 0">
-              <td colspan="5" class="table-cell text-center py-8 text-gray-500 italic">
-                Tidak ada data klien.
-              </td>
-            </tr>
-            <tr 
-              v-for="client in topThreeClients" 
-              :key="client.id" 
-              class="table-row"
-              @click="goToClientDetail(client.id)"
-            >
-              <td class="table-cell">{{ client.nameClient }}</td>
-              <td class="table-cell">{{ client.projectCount || 0 }} Aktivitas</td>
-              <td class="table-cell">{{ formatCurrency(client.totalProfit || 0) }}</td>
-              <td class="table-cell">{{ client.noTelpClient || '-' }}</td>
-              <td class="table-cell">{{ client.companyClient || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Loading state untuk tabel client -->
+      <div v-if="loading" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A5F]"></div>
+        <span class="ml-2 text-gray-600">Memuat data klien...</span>
       </div>
+
+      <!-- Tabel client (existing code) -->
+      <div v-else class="overflow-x-auto">
+        <table class="custom-table w-full">
+          <thead class="text-white bg-[#1E3A5F]">
+        <tr>
+          <th @click="sortTable('client', 'nameClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Nama Klien
+            <span v-if="sortClientKey === 'nameClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'projectCount')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Jumlah Aktivitas
+            <span v-if="sortClientKey === 'projectCount'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'totalProfit')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Total Profit
+            <span v-if="sortClientKey === 'totalProfit'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'noTelpClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Nomor Telepon
+            <span v-if="sortClientKey === 'noTelpClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+          <th @click="sortTable('client', 'companyClient')" class="px-4 py-3 text-center cursor-pointer table-header">
+            Perusahaan
+            <span v-if="sortClientKey === 'companyClient'" class="ml-1">
+              {{ sortClientOrder === 'asc' ? '▲' : '▼' }}
+            </span>
+          </th>
+        </tr>
+      </thead>
+        <tbody>
+          <tr v-if="loading" class="text-center">
+            <td colspan="5" class="py-4">
+              <div class="flex justify-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1E3A5F]"></div>
+              </div>
+            </td>
+          </tr>
+          <tr v-else-if="topThreeClients.length === 0">
+            <td colspan="5" class="text-center py-4 text-gray-500 italic">
+              Tidak ada data klien.
+            </td>
+          </tr>
+          <tr 
+            v-for="client in topThreeClients" 
+            :key="client.id" 
+            class="hover:bg-gray-100 cursor-pointer transition-colors"
+            @click="goToClientDetail(client.id)"
+          >
+            <td class="px-4 py-3 text-center">{{ client.nameClient }}</td>
+            <td class="px-4 py-3 text-center">{{ client.projectCount || 0 }} Aktivitas</td>
+            <td class="px-4 py-3 text-center">{{ formatCurrency(client.totalProfit || 0) }}</td>
+            <td class="px-4 py-3 text-center">{{ client.noTelpClient || '-' }}</td>
+            <td class="px-4 py-3 text-center">{{ client.companyClient || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
