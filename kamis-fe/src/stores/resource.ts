@@ -85,27 +85,6 @@ export const useResourceStore = defineStore('resource', {
             }
         },
 
-        async viewAllResources() {
-            this.loading = true;
-            this.error = null;
-            try {
-                const response = await axios.get<CommonResponseInterface<ResourceInterface[]>>(
-                    `${API_URLS.RESOURCE}/resource/viewall`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                        }
-                    }
-                );
-                this.resources = response.data.data;
-            } catch (error: any) {
-                this.error = error instanceof Error ? error.message : 'Failed to fetch all resources';
-                useToast().error(error.response.data.message);
-            } finally {
-                this.loading = false;
-            }
-        },
-
         async viewAllResourcesWithPagination(page: number, size: number = 10, searchParams?: {
             resourceName?: string;
 
