@@ -10,7 +10,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <button 
-                @click="router.back()" 
+                @click="router.push('/resource')" 
                 class="flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg transition-colors duration-200 text-white hover:scale-105 transform"
                 title="Kembali"
               >
@@ -111,7 +111,6 @@
                         :min="0"
                         :step="10000"
                         required
-                        class="form-input pl-10"
                         placeholder="Masukkan harga jual"
                       />
                     </div>
@@ -132,7 +131,6 @@
                         v-model="formData.resourceStock"
                         :min="0"
                         required
-                        class="form-input pl-10"
                         placeholder="Masukkan jumlah stok"
                       />
                     </div>

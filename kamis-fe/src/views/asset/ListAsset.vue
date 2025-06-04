@@ -1,6 +1,7 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
+    <!-- Notification -->
     <div 
       v-if="showNotification" 
       class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-slide-in"
@@ -8,50 +9,112 @@
       {{ notificationMessage }}
     </div>
 
+    <!-- Search Bar -->
     <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
       <div class="grid grid-cols-1 gap-2 items-center">
         <VSearchBar v-model="searchQuery" placeholder="Cari Nama Aset..." />
       </div>
     </div>
 
+    <!-- Asset Table -->
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
-      <div v-if="loading" class="flex justify-center items-center py-14">
+      <div v-if="assetStore.isLoading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
-      <table v-else class="custom-table">
-        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
-          <tr>
-            <th @click="sortTable('nama')" class="px-6 py-4 table-header cursor-pointer text-base">
-              Nama Aset
-              <span v-if="sortKey === 'nama' && sortOrder === 'asc'">▲</span>
-              <span v-if="sortKey === 'nama' && sortOrder === 'desc'">▼</span>
-            </th>
-            <th class="px-6 py-4 table-header text-base">Jenis Aset</th>
-            <th @click="sortTable('tanggalPerolehan')" class="px-6 py-4 table-header cursor-pointer text-base">
-              Tanggal Perolehan
-              <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'asc'">▲</span>
-              <span v-if="sortKey === 'tanggalPerolehan' && sortOrder === 'desc'">▼</span>
-            </th>
-            <th class="px-6 py-4 table-header text-base">{{ thirdColumnHeader }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="asset in sortedAssets"
-            :key="asset.platNomor"
-            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
-            @click="goToDetailAsset(asset.platNomor)"
-          >
-            <td class="px-6 py-5">{{ asset.nama }}</td>
-            <td class="px-6 py-5">{{ asset.tipeAset }}</td>
-            <td class="px-6 py-5">{{ formatDate(asset.tanggalPerolehan) }}</td>
-            <td class="px-6 py-5">{{ thirdColumnValue(asset) }}</td>
-          </tr>
-          <tr v-if="sortedAssets.length === 0">
-            <td colspan="4" class="text-center text-gray-500 py-6 text-base">Data aset tidak ditemukan.</td>
-          </tr>
-        </tbody>
-      </table>
+      
+      <div v-else class="overflow-x-auto">
+        <table class="custom-table">
+          <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+            <tr>
+              <th @click="sortTable('nama')" class="px-6 py-4 table-header cursor-pointer text-base">
+                <div class="flex items-center justify-center gap-2">
+                  <span>Nama Aset</span>
+                  <span v-if="sortKey === 'nama'" class="sort-indicator">
+                    <span v-if="sortOrder === 'asc'" class="text-white">▲</span>
+                    <span v-else class="text-white">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header text-base">Jenis Aset</th>
+              <th @click="sortTable('tanggalPerolehan')" class="px-6 py-4 table-header cursor-pointer text-base">
+                <div class="flex items-center justify-center gap-2">
+                  <span>Tanggal Perolehan</span>
+                  <span v-if="sortKey === 'tanggalPerolehan'" class="sort-indicator">
+                    <span v-if="sortOrder === 'asc'" class="text-white">▲</span>
+                    <span v-else class="text-white">▼</span>
+                  </span>
+                </div>
+              </th>
+              <th class="px-6 py-4 table-header text-base">{{ thirdColumnHeader }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="asset in sortedAssets"
+              :key="asset.platNomor"
+              class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
+              @click="goToDetailAsset(asset.platNomor)"
+            >
+              <td class="px-6 py-5">{{ asset.nama }}</td>
+              <td class="px-6 py-5">{{ asset.tipeAset }}</td>
+              <td class="px-6 py-5">{{ formatDate(asset.tanggalPerolehan) }}</td>
+              <td class="px-6 py-5">{{ thirdColumnValue(asset) }}</td>
+            </tr>
+            
+            <tr v-if="!assetStore.isLoading && sortedAssets.length === 0">
+              <td colspan="4" class="text-center text-gray-500 py-6 text-base italic">
+                {{ searchQuery ? `Tidak ada aset dengan pencarian "${searchQuery}"` : 'Data aset tidak ditemukan.' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination Navigation (Same as ListResource) -->
+        <div v-if="assetStore.totalPages > 1 || assetStore.assets.length > 0" class="mt-6 text-center">
+          <div class="flex items-center justify-between mb-4">   
+            <!-- Page Navigation -->
+            <div class="flex items-center justify-center space-x-2">
+              <button
+                @click="changePage(assetStore.currentPage)"
+                :disabled="assetStore.currentPage === 0"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                ◄
+              </button>
+              
+              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                <button
+                  v-if="typeof pageNumber === 'number'"
+                  @click="changePage(pageNumber)"
+                  :class="[
+                    'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                    pageNumber === assetStore.currentPage + 1 ? 
+                      'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
+                      'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pageNumber }}
+                </button>
+                <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+              </template>
+              
+              <button
+                @click="changePage(assetStore.currentPage + 2)"
+                :disabled="assetStore.currentPage >= assetStore.totalPages - 1"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                ►
+              </button>
+            </div>
+              
+            <p v-if="assetStore.assets.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
+              Menampilkan <span class="font-medium">{{ (assetStore.currentPage * assetStore.pageSize) + 1 }}</span>
+              dari <span class="font-medium">{{ (assetStore.currentPage * assetStore.pageSize) + assetStore.assets.length }} aset</span>
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -59,17 +122,154 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { AsetService } from '@/stores/assetservices';
+import { useAssetStore } from '@/stores/asset';
 import type { AsetListInterface } from '@/interfaces/asset/asset.interface';
 import { useAuthStore } from '@/stores/auth';
 import VSearchBar from '@/components/VSearchBar.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 
-const assets = ref<AsetListInterface[]>([]);
-const loading = ref(true);
-const searchQuery = ref('');
+// Store & Router
+const assetStore = useAssetStore();
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 
+// State
+const searchQuery = ref('');
+const sortKey = ref<string>('nama');
+const sortOrder = ref<string>('asc');
+const selectedPageSize = ref(assetStore.pageSize || 10);
+
+// Notification state
+const showNotification = ref(false);
+const notificationMessage = ref('');
+
+// Debounce search
+let searchTimeout: ReturnType<typeof setTimeout>;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchAssets(1); // Reset to first page when searching
+  }, 500);
+};
+
+// Watch for search changes
+watch(searchQuery, () => {
+  debouncedSearch();
+});
+
+// Get current filters for API calls
+const getCurrentFilters = () => {
+  const filters: any = {};
+  
+  if (searchQuery.value && searchQuery.value.trim()) {
+    filters.nama = searchQuery.value.trim();
+  }
+  
+  console.log('getCurrentFilters result:', filters);
+  return filters;
+};
+
+// Fetch assets with search parameters
+const fetchAssets = async (page: number = 1) => {
+  try {
+    await assetStore.viewAllAssetsWithPagination(
+      page - 1, 
+      selectedPageSize.value,
+      getCurrentFilters()
+    );
+  } catch (error) {
+    console.error('Error fetching assets:', error);
+  }
+};
+
+// Use store assets directly with client-side sorting for current page
+const sortedAssets = computed(() => {
+  const assets = [...assetStore.assets];
+  
+  if (sortKey.value) {
+    assets.sort((a, b) => {
+      let modifier = 1;
+      if (sortOrder.value === 'desc') modifier = -1;
+      
+      if (sortKey.value === 'nama') {
+        if (a.nama < b.nama) return -1 * modifier;
+        if (a.nama > b.nama) return 1 * modifier;
+        return 0;
+      } else if (sortKey.value === 'tanggalPerolehan') {
+        if (a.tanggalPerolehan < b.tanggalPerolehan) return -1 * modifier;
+        if (a.tanggalPerolehan > b.tanggalPerolehan) return 1 * modifier;
+        return 0;
+      }
+      return 0;
+    });
+  }
+  
+  return assets;
+});
+
+// Pagination functions
+const changePage = (page: number) => {
+  if (page < 1 || page > assetStore.totalPages || page === assetStore.currentPage + 1) {
+    return;
+  }
+  fetchAssets(page);
+};
+
+const handlePageSizeChange = () => {
+  assetStore.pageSize = selectedPageSize.value;
+  fetchAssets(1);
+};
+
+// Pagination navigation computed (Same logic as ListResource)
+const pageNavigation = computed(() => {
+  const current = assetStore.currentPage + 1; // 1-indexed
+  const total = assetStore.totalPages;
+  
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1;
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  range.push(1);
+  
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  if (total > 1) {
+    range.push(total);
+  }
+
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
+// Role-based computed properties
 const canViewFinancialInfo = computed(() => {
   const userRole = authStore.userRole;
   return userRole === 'Direksi' || userRole === 'Finance';
@@ -78,97 +278,6 @@ const canViewFinancialInfo = computed(() => {
 const canViewMaintenanceInfo = computed(() => {
   return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
 });
-
-// Notifikasi state
-const showNotification = ref(false);
-const notificationMessage = ref('');
-
-const router = useRouter();
-const route = useRoute();
-
-// Sorting state
-const sortKey = ref<string>('nama');
-const sortOrder = ref<string>('asc');
-
-// Fungsi untuk menampilkan notifikasi
-const showSuccessNotification = (message: string) => {
-  notificationMessage.value = message;
-  showNotification.value = true;
-  
-  // Auto hide setelah 3 detik
-  setTimeout(() => {
-    showNotification.value = false;
-  }, 3000);
-};
-
-// Watch perubahan query untuk menampilkan notifikasi saat navigasi dari halaman detail setelah penghapusan
-watch(() => route.query, (query) => {
-  if (query.deleted === 'true') {
-    const platNomor = query.platNomor as string;
-    showSuccessNotification(`Aset ${platNomor} berhasil dihapus`);
-    
-    // Bersihkan parameter query
-    router.replace({ path: route.path });
-  }
-}, { immediate: true });
-
-onMounted(async () => {
-  await fetchAssets();
-});
-
-const fetchAssets = async () => {
-  try {
-    const data = await AsetService.viewAllAsset();
-    assets.value = data.map((item: any) => ({
-      ...item,
-      tipeAset: item.tipeAset ?? '',
-      tanggalPerolehan: item.tanggalPerolehan ?? '',
-      deskripsi: item.deskripsi ?? '',
-      assetMaintenance: item.assetMaintenance ?? '',
-      supplierId: item.supplierId ?? '', 
-      lastMaintenance: item.lastMaintenance ?? '',
-    }));
-  } catch (err) {
-    console.error('Error fetching assets:', err);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const filteredAssets = computed(() => {
-  if (!searchQuery.value) {
-    return assets.value;
-  }
-  return assets.value.filter(asset =>
-    asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const sortedAssets = computed(() => {
-  return filteredAssets.value.slice().sort((a, b) => {
-    let modifier = 1;
-    if (sortOrder.value === 'desc') modifier = -1;
-    if (sortKey.value === 'nama') {
-      if (a.nama < b.nama) return -1 * modifier;
-      if (a.nama > b.nama) return 1 * modifier;
-      return 0;
-    } else if (sortKey.value === 'tanggalPerolehan') {
-      if (a.tanggalPerolehan < b.tanggalPerolehan) return -1 * modifier;
-      if (a.tanggalPerolehan > b.tanggalPerolehan) return 1 * modifier;
-      return 0;
-    }
-    return 0;
-  });
-});
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${String(date.getDate()).padStart(2, '0')} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${date.getFullYear()}`;
-};
-
-const formatCurrency = (value: number) => {
-  return `Rp${value.toLocaleString('id-ID')}`;
-};
 
 const thirdColumnHeader = computed(() => {
   if (canViewMaintenanceInfo.value) {
@@ -191,6 +300,16 @@ const thirdColumnValue = (asset: AsetListInterface) => {
   return '';
 };
 
+// Utility functions
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${String(date.getDate()).padStart(2, '0')} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${date.getFullYear()}`;
+};
+
+const formatCurrency = (value: number) => {
+  return `Rp${value.toLocaleString('id-ID')}`;
+};
+
 const goToDetailAsset = (platNomor: string) => {
   router.push(`/asset/${platNomor}`);
 };
@@ -203,6 +322,31 @@ const sortTable = (key: string) => {
     sortOrder.value = 'asc';
   }
 };
+
+// Notification functions
+const showSuccessNotification = (message: string) => {
+  notificationMessage.value = message;
+  showNotification.value = true;
+  
+  setTimeout(() => {
+    showNotification.value = false;
+  }, 3000);
+};
+
+// Watch for deletion notification
+watch(() => route.query, (query) => {
+  if (query.deleted === 'true') {
+    const platNomor = query.platNomor as string;
+    showSuccessNotification(`Aset ${platNomor} berhasil dihapus`);
+    
+    router.replace({ path: route.path });
+  }
+}, { immediate: true });
+
+// Initial load
+onMounted(async () => {
+  await fetchAssets(1);
+});
 </script>
 
 <style scoped>
@@ -247,6 +391,15 @@ const sortTable = (key: string) => {
 
 .table-header:hover {
   background-color: #32486B;
+}
+
+.sort-indicator {
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 12px;
 }
 
 @keyframes slide-in {

@@ -13,6 +13,9 @@ export const useClientStore = defineStore('client', {
         clientDetail: null as ClientDetailInterface | null,
         loading: false,
         error: null as null | string,
+        currentPage: 0,
+        totalPages: 0,
+        pageSize: 5,
     }),
     actions: {
         async addClient(body: AddClientRequestInterface) {
@@ -58,6 +61,43 @@ export const useClientStore = defineStore('client', {
             } catch (err: unknown) {
                 this.error = `Gagal mengambil data client ${err instanceof Error ? err.message : "Unknown error"}`;
                 useToast().error(this.error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async viewAllClientPaginated(page: number, size: number, filters = {}) {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const params = {
+                    page,
+                    size,
+                    ...filters
+                };
+
+                const response = await axios.get<CommonResponseInterface<any>>(
+                    `${API_URLS.PROFILE}/client/all/paginated`,
+                    {
+                        params,
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                );
+
+                const data = response.data.data;
+                this.clientList = data.content;
+                this.currentPage = data.number;
+                this.totalPages = data.totalPages;
+                this.pageSize = data.size;
+
+                return this.clientList;
+            } catch (err: unknown) {
+                this.error = `Gagal mengambil data client ${err instanceof Error ? err.message : "Unknown error"}`;
+                useToast().error(this.error);
+                return [];
             } finally {
                 this.loading = false;
             }

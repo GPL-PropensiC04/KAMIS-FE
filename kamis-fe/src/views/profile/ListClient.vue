@@ -16,6 +16,7 @@
       <table v-else class="custom-table">
         <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
           <tr>
+            <th class="px-3 py-4 table-header text-base" style="width: 60px;">No</th>
             <th @click="sortBy('nameClient')" class="px-6 py-4 table-header cursor-pointer text-base">
               Nama Klien
               <span v-if="sortKey === 'nameClient'">{{ sortAsc ? '▲' : '▼' }}</span>
@@ -39,11 +40,13 @@
         </thead>
         <tbody>
           <tr
-            v-for="client in sortedClients"
+            v-for="(client, index) in sortedClients"
             :key="client.id"
             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
             @click="goToDetailClient(client)"
           >
+            <!-- PERBAIKAN: Gunakan index dari v-for, bukan indexOf dari array asli -->
+            <td class="px-3 py-5 text-center">{{ (clientStore.currentPage * clientStore.pageSize) + index + 1 }}</td>
             <td class="px-6 py-5">{{ client.nameClient }}</td>
             <td class="px-6 py-5">{{ client.typeClient === true ? 'Perusahaan' : client.typeClient === false ? 'Perorangan' : client.typeClient }}</td>
             <td class="px-6 py-5">{{ client.companyClient || '-' }}</td>
@@ -64,6 +67,53 @@
           </tr>
         </tbody>
       </table>
+      
+      <!-- Pagination Controls -->
+      <div v-if="clientStore.totalPages > 1 || clientStore.clientList.length > 0" class="mt-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <!-- Page Navigation -->
+          <div class="flex items-center justify-center space-x-2">
+            <button
+              @click="changePage(clientStore.currentPage)"
+              :disabled="clientStore.currentPage === 0"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+            >
+              ◄
+            </button>
+            
+            <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+              <button
+                v-if="typeof pageNumber === 'number'"
+                @click="changePage(pageNumber)"
+                :class="[
+                  'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                  pageNumber === clientStore.currentPage + 1 ? 
+                    'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
+                    'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ pageNumber }}
+              </button>
+              <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+            </template>
+            
+            <button
+              @click="changePage(clientStore.currentPage + 2)"
+              :disabled="clientStore.currentPage >= clientStore.totalPages - 1"
+              class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+            >
+              ►
+            </button>
+          </div>
+          
+          <!-- Item Count Display -->
+          <p v-if="clientStore.clientList.length > 0" class="text-sm text-gray-700 text-center">
+            Menampilkan <span class="font-medium">{{ (clientStore.currentPage * clientStore.pageSize) + 1 }}</span>
+            dari <span class="font-medium">{{ Math.min((clientStore.currentPage * clientStore.pageSize) + clientStore.clientList.length, totalItems) }}</span> klien
+          </p>
+          <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -89,6 +139,9 @@ const typeClient = ref('Semua');
 const sortKey = ref('');
 const sortAsc = ref(true);
 
+// Pagination state
+const selectedPageSize = ref(clientStore.pageSize || 10);
+
 const nominalOptions = [
   { label: "Semua Profit", min: null, max: null },
   { label: "0 - 10 Juta", min: 0, max: 10_000_000 },
@@ -98,30 +151,116 @@ const nominalOptions = [
 ];
 const selectedNominal = ref(nominalOptions[0].label);
 
-// Fungsi untuk filter client
-const fetchFilteredClients = async () => {
+// Get current filters for API calls
+const getCurrentFilters = () => {
   const selected = nominalOptions.find(opt => opt.label === selectedNominal.value);
   let type = undefined;
   if (typeClient.value === 'Perusahaan') type = true;
   else if (typeClient.value === 'Perorangan') type = false;
-  await clientStore.viewAllClient({
+
+  return {
     nameClient: searchName.value,
     typeClient: type,
     minProfit: selected?.min,
     maxProfit: selected?.max,
-  });
+  };
 };
 
-watch(typeClient, fetchFilteredClients);
+// Fetch paginated clients
+const fetchPaginatedClients = async (page: number = 1) => {
+  await clientStore.viewAllClientPaginated(
+    page - 1, // Convert 1-indexed to 0-indexed
+    selectedPageSize.value,
+    getCurrentFilters()
+  );
+};
 
-watch(selectedNominal, fetchFilteredClients);
+// Change page
+const changePage = (page: number) => {
+  if (page < 1 || page > clientStore.totalPages || page === clientStore.currentPage + 1) {
+    return;
+  }
+  fetchPaginatedClients(page);
+};
 
+// Total items calculation
+const totalItems = computed(() => {
+  return Math.max(clientStore.totalPages * clientStore.pageSize, clientStore.clientList.length);
+});
+
+// Pagination display logic
+const pageNavigation = computed(() => {
+  const current = clientStore.currentPage + 1; // 1-indexed
+  const total = clientStore.totalPages;
+  
+  // If only 1 page or no pages, don't show complex pagination
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  // If total pages is small (≤ 7), show all pages
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1; // How many pages to show before and after current page
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  // Always include first page
+  range.push(1);
+  
+  // Add pages around current page
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  // Always include last page if total > 1
+  if (total > 1) {
+    range.push(total);
+  }
+
+  // Remove duplicates and sort
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  // Add dots where there are gaps
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        // If gap is exactly 2, show the missing number
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        // If gap is more than 2, show dots
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
+// Watch for filter changes
+watch(typeClient, () => {
+  fetchPaginatedClients(1); // Reset to first page when filter changes
+});
+
+watch(selectedNominal, () => {
+  fetchPaginatedClients(1); // Reset to first page when filter changes
+});
+
+// Debounce search input
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(searchName, () => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
-    fetchFilteredClients();
+    fetchPaginatedClients(1);
   }, 400);
 });
 
@@ -171,7 +310,13 @@ const isOperational = computed(() => authStore.userRole === 'Operasional');
 const isDireksi = computed(() => authStore.userRole === 'Direksi');
 
 onMounted(() => {
-  clientStore.viewAllClient();
+  // Set initial page size if needed
+  if (clientStore.pageSize) {
+    selectedPageSize.value = 10;
+  }
+  
+  // Load initial data with pagination
+  fetchPaginatedClients(1);
 });
 </script>
 

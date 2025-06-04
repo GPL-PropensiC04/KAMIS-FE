@@ -155,14 +155,7 @@
                   <!-- Status -->
                   <div class="form-group">
                     <label class="form-label">
-                      <span class="label-text">Status</span>
                     </label>
-                    <VDropDownInput
-                      :options="statusOptions"
-                      v-model="formData.status"
-                      placeholder="Pilih Status"
-                      class="form-dropdown"
-                    />
                   </div>
                 </div>
               </div>
@@ -305,7 +298,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { AsetInterface } from '@/interfaces/asset/asset.interface';
-import { AsetService } from '@/stores/assetservices';
+import { AsetService } from '@/stores/asset';
 import { byteArrayToImageUrl } from '@/utils/formatters';
 import VLockedInput from '@/components/VLockedInput.vue';
 import VDropDownInput from '@/components/VDropDownInput.vue';
@@ -349,7 +342,6 @@ const jenisAsetOptions = [
   { value: 'Pick Up', label: 'Pick Up' },
 ];
 
-const statusOptions = ['Tersedia', 'Sedang Maintenance', 'Dalam Proyek'];
 
 // Formatted plate number computed property
 const formattedPlateNumber = computed(() => {

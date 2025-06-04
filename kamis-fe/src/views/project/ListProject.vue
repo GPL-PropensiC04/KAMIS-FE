@@ -1,161 +1,217 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <!-- Filter Section -->
-    <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
-      <template v-if="canViewFinancialInfo">
-        <div class="grid grid-cols-[1fr_auto_auto_1fr_auto_auto] gap-2 items-center">
-          <div class="relative">
-            <VSearchBar 
-              v-model="searchQuery" 
-              placeholder="Cari ID atau nama proyek..." 
-              class="w-full pr-10" 
+  <!-- Filter Section -->
+  <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
+    <template v-if="canViewFinancialInfo">
+      <div class="grid grid-cols-1 gap-2 items-center">
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <div class="flex flex-1 gap-2 items-center">
+    
+              <VSearchBar 
+                v-model="searchQuery" 
+                placeholder="Cari ID atau nama proyek..." 
+                class="flex-1" 
+              />
+              <VDropDownInput
+              :options="nominalOptions.map((opt) => opt.label)"
+              v-model="selectedNominalLabel"
+              @update:modelValue="updateNominalFilter"
+              class="flex-1"
+              placeholder="Filter berdasarkan profit"
             />
-            <button 
-              v-if="searchQuery" 
-              @click="clearSearch" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <span class="text-xl">×</span>
-            </button>
           </div>
-          <VDateRangeFilter v-model="dateRange" class="w-full" />
-          <VDropDownInput
-            :options="nominalOptions.map((opt) => opt.label)"
-            v-model="selectedNominalLabel"
-            @update:modelValue="updateNominalFilter"
-            class="w-full"
-            placeholder="Filter berdasarkan profit"
-          />
-        </div>
-      </template>
-      <template v-else>
-        <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-          <div class="relative">
-            <VSearchBar 
-              v-model="searchQuery" 
-              placeholder="Cari ID atau nama proyek..." 
-              class="w-full pr-10" 
-            />
-            <button 
-              v-if="searchQuery" 
-              @click="clearSearch" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <span class="text-xl">×</span>
-            </button>
+          <div class="flex-shrink-0 min-w-[250px]">
+            <VDateRangeFilter v-model="dateRange" />
           </div>
-          <VDateRangeFilter v-model="dateRange" class="w-full" />
         </div>
-      </template>
-    </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="grid grid-cols-1 gap-2 items-center">
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <div class="flex flex-1 gap-2 items-center">
+            <div class="relative flex-1">
+              <VSearchBar 
+                v-model="searchQuery" 
+                placeholder="Cari ID atau nama proyek..." 
+                class="w-full pr-10" 
+              />
+              <button 
+                v-if="searchQuery" 
+                @click="clearSearch" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <span class="text-xl">×</span>
+              </button>
+            </div>
+          </div>
+          <div class="flex-shrink-0 min-w-[250px]">
+            <VDateRangeFilter v-model="dateRange" />
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
 
     <!-- Main Content Section -->
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
-        <VOptionInput 
-          v-model="selectedType" 
-          :options="['All', 'Penjualan', 'Distribusi']" 
-          class="w-1/3" 
-        />
+      <VOptionInput 
+        v-model="selectedSalesTypeDisplay" 
+        :options="salesTypeOptionsDisplay" 
+        class="w-1/3" 
+      />
         <div class="flex gap-2">
           <VButton v-if="canEditProject" label="+ Tambah Aktivitas" @click="goToAddProject" />
         </div>
       </div>
 
-      <!-- Table -->
-      <div v-if="projectStore.loading" class="flex justify-center items-center py-14">
+      <!-- Loading State -->
+      <div v-if="projectStore.isLoading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
-      <table v-else class="custom-table">
-        <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
-          <tr>
-            <th class="px-6 py-4 table-header text-base">ID Aktivitas</th>
-            <th class="px-6 py-4 table-header text-base">Nama Aktivitas</th>
-            <th class="px-6 py-4 table-header text-base">Tipe</th>
-            <th class="px-6 py-4 table-header text-base">Status</th>
-            <th class="px-6 py-4 table-header text-base">Tanggal Mulai</th>
-            <th class="px-6 py-4 table-header text-base">Tanggal Selesai</th>
-            <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Pemasukkan</th>
-            <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Pengeluaran</th>
-            <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Profit</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr 
-            v-for="project in projectStore.projects" 
-            :key="project.id" 
-            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
-            @click="goToProjectDetails(project)"
-          >
-            <td class="px-6 py-5">{{ project.id }}</td>
-            <td class="px-6 py-5">{{ project.projectName }}</td>
-            <td class="px-6 py-5">{{ formatType(project.projectType) }}</td>
-            <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType, project.projectPaymentStatus) }}</td>
-            <td class="px-6 py-5">{{ formatDate(project.projectStartDate) }}</td>
-            <td class="px-6 py-5">{{ formatDate(project.projectEndDate) }}</td>
-            <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-green-600">
-              {{ formatCurrency(project.projectTotalPemasukkan) }}
-            </td>
-            <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-red-600">
-              {{ formatCurrency(project.projectTotalPengeluaran) }}
-            </td>
-            <td v-if="canViewFinancialInfo" 
-                class="px-6 py-5"
-                :class="{
-                  'text-right font-bold': true,
-                  'text-green-600': (project.projectProfit ?? 0) >= 0,
-                  'text-red-600': (project.projectProfit ?? 0) < 0
-                }">
-              {{ project.projectProfit !== undefined ? formatCurrency(project.projectProfit) : '-' }}
-            </td>
-          </tr>
-          
-          <!-- No Data Message -->
-          <tr v-if="projectStore.projects.length === 0">
-            <td :colspan="canViewFinancialInfo ? 9 : 6" class="text-center text-gray-500 py-6 text-base">
-              <p class="italic">
-                <template v-if="searchQuery && dateRange.start && dateRange.end">
-                  Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
-                </template>
-                <template v-else-if="searchQuery && dateRange.start">
-                  Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal mulai {{ dateRange.start }}.
-                </template>
-                <template v-else-if="searchQuery && dateRange.end">
-                  Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal selesai {{ dateRange.end }}.
-                </template>
-                <template v-else-if="dateRange.start && dateRange.end">
-                  Tidak ada data proyek dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
-                </template>
-                <template v-else-if="dateRange.start">
-                  Tidak ada data proyek dengan tanggal mulai {{ dateRange.start }}.
-                </template>
-                <template v-else-if="dateRange.end">
-                  Tidak ada data proyek dengan tanggal selesai {{ dateRange.end }}.
-                </template>
-                <template v-else-if="searchQuery">
-                  Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}".
-                </template>
-                <template v-else-if="startNominal !== null && endNominal !== null">
-                  Tidak ada data proyek dengan profit antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
-                </template>
-                <template v-else-if="hasActiveFilters">
-                  Tidak ada data proyek yang sesuai dengan filter yang dipilih.
-                </template>
-                <template v-else-if="selectedType === 'All'">
-                  Tidak ada data proyek ditemukan.
-                </template>
-                <template v-else-if="selectedType === 'Penjualan'">
-                  Tidak ada data proyek penjualan ditemukan.
-                </template>
-                <template v-else>
-                  Tidak ada data proyek distribusi ditemukan.
-                </template>
-              </p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+
+      <!-- Table -->
+      <div v-else>
+        <table class="custom-table">
+          <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+            <tr>
+              <th class="px-6 py-4 table-header text-base">ID Aktivitas</th>
+              <th class="px-6 py-4 table-header text-base">Nama Aktivitas</th>
+              <th class="px-6 py-4 table-header text-base">Tipe</th>
+              <th class="px-6 py-4 table-header text-base">Status</th>
+              <th class="px-6 py-4 table-header text-base">Tanggal Mulai</th>
+              <th class="px-6 py-4 table-header text-base">Tanggal Selesai</th>
+              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Pemasukkan</th>
+              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Pengeluaran</th>
+              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Profit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="project in projectStore.projects" 
+              :key="project.id" 
+              class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
+              @click="goToProjectDetails(project)"
+            >
+              <td class="px-6 py-5">{{ project.id }}</td>
+              <td class="px-6 py-5">{{ project.projectName }}</td>
+              <td class="px-6 py-5">{{ formatType(project.projectType) }}</td>
+              <td class="px-6 py-5">{{ formatStatus(project.projectStatus, project.projectType, project.projectPaymentStatus) }}</td>
+              <td class="px-6 py-5">{{ formatDate(project.projectStartDate) }}</td>
+              <td class="px-6 py-5">{{ formatDate(project.projectEndDate) }}</td>
+              <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-green-600">
+                {{ formatCurrency(project.projectTotalPemasukkan) }}
+              </td>
+              <td v-if="canViewFinancialInfo" class="px-6 py-5 text-right text-red-600">
+                {{ formatCurrency(project.projectTotalPengeluaran) }}
+              </td>
+              <td v-if="canViewFinancialInfo" 
+                  class="px-6 py-5"
+                  :class="{
+                    'text-right font-bold': true,
+                    'text-green-600': (project.projectProfit ?? 0) >= 0,
+                    'text-red-600': (project.projectProfit ?? 0) < 0
+                  }">
+                {{ project.projectProfit !== undefined ? formatCurrency(project.projectProfit) : '-' }}
+              </td>
+            </tr>
+            
+            <!-- No Data Message -->
+            <tr v-if="projectStore.projects.length === 0">
+              <td :colspan="canViewFinancialInfo ? 9 : 6" class="text-center text-gray-500 py-6 text-base">
+                <p class="italic">
+                  <template v-if="searchQuery && dateRange.start && dateRange.end">
+                    Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
+                  </template>
+                  <template v-else-if="searchQuery && dateRange.start">
+                    Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal mulai {{ dateRange.start }}.
+                  </template>
+                  <template v-else-if="searchQuery && dateRange.end">
+                    Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}" dan tanggal selesai {{ dateRange.end }}.
+                  </template>
+                  <template v-else-if="dateRange.start && dateRange.end">
+                    Tidak ada data proyek dalam rentang tanggal {{ dateRange.start }} hingga {{ dateRange.end }}.
+                  </template>
+                  <template v-else-if="dateRange.start">
+                    Tidak ada data proyek dengan tanggal mulai {{ dateRange.start }}.
+                  </template>
+                  <template v-else-if="dateRange.end">
+                    Tidak ada data proyek dengan tanggal selesai {{ dateRange.end }}.
+                  </template>
+                  <template v-else-if="searchQuery">
+                    Tidak ada data proyek dengan nama atau ID "{{ searchQuery }}".
+                  </template>
+                  <template v-else-if="startNominal !== null && endNominal !== null">
+                    Tidak ada data proyek dengan profit antara {{ formatCurrency(startNominal) }} - {{ formatCurrency(endNominal) }}.
+                  </template>
+                  <template v-else-if="hasActiveFilters">
+                    Tidak ada data proyek yang sesuai dengan filter yang dipilih.
+                  </template>
+                  <template v-else-if="selectedType === 'All'">
+                    Tidak ada data proyek ditemukan.
+                  </template>
+                  <template v-else-if="selectedType === 'Penjualan'">
+                    Tidak ada data proyek penjualan ditemukan.
+                  </template>
+                  <template v-else>
+                    Tidak ada data proyek distribusi ditemukan.
+                  </template>
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination Navigation -->
+        <div v-if="projectStore.totalPages > 1 || projectStore.projects.length > 0" class="mt-6 text-center">
+          <div class="flex items-center justify-between mb-4">
+            <!-- Page Navigation -->
+            <div class="flex items-center justify-center space-x-2">
+              <button
+                @click="changePage(projectStore.currentPage)"
+                :disabled="projectStore.currentPage === 0"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                ◄
+              </button>
+              
+              <template v-for="pageNumber in pageNavigation" :key="pageNumber">
+                <button
+                  v-if="typeof pageNumber === 'number'"
+                  @click="changePage(pageNumber)"
+                  :class="[
+                    'px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 cursor-pointer', 
+                    pageNumber === projectStore.currentPage + 1 ? 
+                      'bg-[#1E3A5F] text-white border border-[#1E3A5F]' : 
+                      'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pageNumber }}
+                </button>
+                <span v-else class="px-2 py-2 text-sm font-medium text-gray-600">{{ pageNumber }}</span>
+              </template>
+              
+              <button
+                @click="changePage(projectStore.currentPage + 2)"
+                :disabled="projectStore.currentPage >= projectStore.totalPages - 1"
+                class="bg-[#1E3A5F] text-white px-4 py-2 rounded-md font-medium text-center 
+                      transition hover:bg-[#2A4A6B] disabled:bg-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                ►
+              </button>
+            </div>
+              
+            <p v-if="projectStore.projects.length > 0" class="text-sm text-gray-700 text-center sm:text-left">
+              Menampilkan <span class="font-medium">{{ (projectStore.currentPage * projectStore.pageSize) + 1 }}</span>
+              sampai <span class="font-medium">{{ (projectStore.currentPage * projectStore.pageSize) + projectStore.projects.length }}</span>
+              dari <span class="font-medium">{{ projectStore.totalElements }}</span> aktivitas
+            </p>
+            <p v-else class="text-sm text-gray-700">Tidak ada data untuk ditampilkan</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -212,8 +268,7 @@ const router = useRouter();
 const searchQuery = ref("");
 const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
-const sortByDate = ref(null);
-const sortByNominal = ref(null);
+const selectedPageSize = ref(projectStore.pageSize || 10);
 
 // State for price range filter
 const startNominal = ref<number | null>(null);
@@ -223,6 +278,25 @@ const selectedNominalLabel = ref("Seluruh Profit");
 // Modal state
 const showModal = ref(false);
 const tipeProyekOption = ref("Penjualan");
+
+// Debounce search
+let searchTimeout: ReturnType<typeof setTimeout>;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchProjects(1); // Reset to first page when searching
+  }, 500);
+};
+
+// Watch for search changes
+watch(searchQuery, () => {
+  debouncedSearch();
+});
+
+// Watch for other filter changes
+watch([dateRange, selectedType, startNominal, endNominal], () => {
+  fetchProjects(1); // Reset to first page when filters change
+});
 
 // Role-based permission computed properties
 const canViewFinancialInfo = computed(() => {
@@ -244,25 +318,48 @@ const nominalOptions = [
   { label: "100 Juta - 1 Miliar", start: 100000000, end: 1000000000 },
 ];
 
-// Clear search function
-const clearSearch = () => {
-  searchQuery.value = "";
+const salesTypeMapping: { [key: string]: string } = {
+  'All': 'Semua',
+  'Penjualan': 'Penjualan',
+  'Distribusi': 'Distribusi'
 };
 
-// Fetch projects from API
-const fetchProjects = async () => {
-  const filters: Record<string, string | number | null> = {
+const reverseSalesTypeMapping: { [key: string]: string } = {
+  'Semua': 'All',
+  'Penjualan': 'Penjualan',
+  'Distribusi': 'Distribusi'
+};
+
+const salesTypeOptionsDisplay = ['Semua', 'Penjualan', 'Distribusi'];
+
+const selectedSalesTypeDisplay = computed({
+  get() {
+    return salesTypeMapping[selectedType.value] || selectedType.value;
+  },
+  set(newValue: string) {
+    selectedType.value = reverseSalesTypeMapping[newValue] || newValue;
+  }
+});
+
+// Get current filters for API calls
+const getCurrentFilters = () => {
+  const filters: any = {
     idProject: searchQuery.value || null,
     namaProject: searchQuery.value || null,
-    tipeProject: selectedType.value === "All" ? null : (selectedType.value === "Penjualan" ? "false" : "true"),
-    // The API uses startNominal/endNominal parameters for filtering by profit
     startNominal: startNominal.value,
     endNominal: endNominal.value,
   };
 
+  // Handle project type filter
+  if (selectedType.value === "Penjualan") {
+    filters.tipeProject = false;
+  } else if (selectedType.value === "Distribusi") {
+    filters.tipeProject = true;
+  }
+  // Don't set tipeProject for "All"
+
   // Format dates from DD-MM-YYYY to YYYY-MM-DD format for the backend
   if (dateRange.value.start) {
-    // Convert from DD-MM-YYYY to YYYY-MM-DD
     const parts = dateRange.value.start.split('-');
     if (parts.length === 3) {
       filters.tanggalMulai = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -270,22 +367,87 @@ const fetchProjects = async () => {
   }
 
   if (dateRange.value.end) {
-    // Convert from DD-MM-YYYY to YYYY-MM-DD
     const parts = dateRange.value.end.split('-');
     if (parts.length === 3) {
       filters.tanggalSelesai = `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
   }
 
-  // Remove null values
-  Object.keys(filters).forEach(key => {
-    if (filters[key] === null || filters[key] === "") {
-      delete filters[key];
-    }
-  });
+  return filters;
+};
 
-  console.log("Sending filters to API:", filters);
-  await projectStore.fetchProjects(filters);
+// Fetch projects with pagination
+const fetchProjects = async (page: number = 1) => {
+  try {
+    await projectStore.fetchProjectsPaginated(
+      page - 1, 
+      selectedPageSize.value,
+      getCurrentFilters()
+    );
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+  }
+};
+
+// Pagination functions
+const changePage = (page: number) => {
+  if (page < 1 || page > projectStore.totalPages || page === projectStore.currentPage + 1) {
+    return;
+  }
+  fetchProjects(page);
+};
+
+// Pagination navigation computed
+const pageNavigation = computed(() => {
+  const current = projectStore.currentPage + 1; // 1-indexed
+  const total = projectStore.totalPages;
+  
+  if (total <= 1) {
+    return total === 1 ? [1] : [];
+  }
+  
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const delta = 1;
+  const range = [];
+  const rangeWithDots: (number | string)[] = [];
+  let l: number | undefined;
+
+  range.push(1);
+  
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+    range.push(i);
+  }
+  
+  if (total > 1) {
+    range.push(total);
+  }
+
+  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+  for (let i = 0; i < uniqueRange.length; i++) {
+    const current = uniqueRange[i];
+    
+    if (l !== undefined) {
+      if (current - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (current - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    
+    rangeWithDots.push(current);
+    l = current;
+  }
+  
+  return rangeWithDots;
+});
+
+// Clear search function
+const clearSearch = () => {
+  searchQuery.value = "";
 };
 
 // Update nominal filter when dropdown selection changes
@@ -298,20 +460,9 @@ const updateNominalFilter = (selectedLabel: string) => {
   }
 };
 
-// Watch for filter changes and fetch data
-watch([searchQuery, dateRange, selectedType, sortByDate, sortByNominal, startNominal, endNominal], fetchProjects);
-
 // Initial data fetch
-onMounted(async () => {
-  await fetchProjects();
-  // Log projects with profit for debugging
-  console.log("Fetched projects with profit:", projectStore.projects.map(p => ({
-    id: p.id,
-    name: p.projectName,
-    pemasukkan: p.projectTotalPemasukkan,
-    pengeluaran: p.projectTotalPengeluaran,
-    profit: p.projectProfit
-  })));
+onMounted(() => {
+  fetchProjects(1);
 });
 
 // Format date
@@ -377,9 +528,11 @@ const goToProjectDetails = (project: ListProject) => {
     router.push(`/project/sale/${project.id}`);
   }
 };
+
 const goToAddProject = () => {
   showModal.value = true;
 };
+
 const proceedToAddProject = () => {
   if (tipeProyekOption.value === "Distribusi") {
     router.push("/project/add/distribution");
@@ -388,11 +541,13 @@ const proceedToAddProject = () => {
   }
   showModal.value = false;
 };
+
 const closeModal = () => {
   showModal.value = false;
 };
 </script>
 
+<!-- Keep existing styles -->
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 

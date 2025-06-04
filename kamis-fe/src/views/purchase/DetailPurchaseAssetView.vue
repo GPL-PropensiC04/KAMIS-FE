@@ -39,7 +39,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <button 
-                @click="router.back()" 
+                @click="router.push('/purchase')"
                 class="flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg transition-colors duration-200 text-white hover:scale-105 transform"
                 title="Kembali"
               >
@@ -642,7 +642,7 @@ const loadPurchaseData = async () => {
 
 // Status color helper
 const getStatusColor = (status: string) => {
-  const colors = {
+  const colors : Record<string, string> =  {
     'Diajukan': 'bg-yellow-100 text-yellow-800',
     'Disetujui': 'bg-blue-100 text-blue-800',
     'Diproses': 'bg-orange-100 text-orange-800',

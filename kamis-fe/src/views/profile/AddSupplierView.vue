@@ -42,7 +42,7 @@ const resourceOptions = computed(() => {
 const handleSelectResource = (name: string) => {
   const selected = resourceStore.resources.find((r) => r.resourceName === name);
   if (selected) {
-    selectedResourceId.value = selected.id ?? null;
+    selectedResourceId.value = typeof selected.id === 'string' ? parseInt(selected.id, 10) : selected.id ?? null;
     selectedResourcePrice.value = selected.resourcePrice;
     selectedResourceName.value = selected.resourceName;
   }
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <button 
-                @click="router.back()" 
+                @click="router.push('/supplier')"
                 class="flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg transition-colors duration-200 text-white hover:scale-105 transform"
                 title="Kembali"
               >

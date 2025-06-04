@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { Line } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -71,6 +71,12 @@ const chartOptions: ChartOptions<'line'> = {
   }
 };
 
+// Mapping untuk PeriodType - label Indonesian tapi value tetap English
+const periodTypeOptions = [
+  { label: 'Bulanan', value: 'Monthly' },
+  { label: 'Kuartal', value: 'Quarterly' }
+];
+
 const fetchChartData = async () => {
   try {
     const res = await axios.get(`${API_URLS.FINANCE}/lapkeu/chart-pemasukan-pengeluaran`, {
@@ -134,7 +140,6 @@ const formatPeriodLabel = (label: string): string => {
 
   return label;
 };
-import { computed } from 'vue';
 
 const chartTitle = computed(() => {
   switch (props.range) {
@@ -154,7 +159,6 @@ const chartTitle = computed(() => {
       return 'Trend Pemasukan dan Pengeluaran';
   }
 });
-
 
 watch(periodType, fetchChartData);
 watch(
@@ -179,7 +183,7 @@ onMounted(fetchChartData);
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-7xl mx-auto flex flex-col">
+  <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-full mx-auto flex flex-col">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center">
         <font-awesome-icon
@@ -196,17 +200,17 @@ onMounted(fetchChartData);
         class="flex border border-[#1E3A5F] rounded-md overflow-hidden font-inter h-[38px] text-sm"
       >
         <button
-          v-for="option in ['Monthly', 'Quarterly']"
-          :key="option"
-          @click="periodType = option"
+          v-for="option in periodTypeOptions"
+          :key="option.value"
+          @click="periodType = option.value"
           class="px-3 py-1 font-semibold"
           :class="[
-            periodType === option
+            periodType === option.value
               ? 'bg-[#1E3A5F] text-white'
               : 'bg-[#E5EAF2] text-[#1E3A5F]'
           ]"
         >
-          {{ option }}
+          {{ option.label }}
         </button>
       </div>
     </div>

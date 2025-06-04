@@ -1,149 +1,190 @@
 <template>
   <Breadcrumb />
-  <div class="min-h-screen bg-[#E5EAF2] p-6">
-    <div class="max-w-7xl mx-auto bg-white p-5 rounded-lg shadow-md mb-6">
-      <div class="welcome-message text-5xl font-bold mb-4">
-        Welcome, {{ userInfo.username }}
-      </div>
-
-      <div class="flex flex-wrap gap-2">
-        <button
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors',
-            selectedRange === 'LAST_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          ]"
-          @click="setDateRange('LAST_YEAR')">
-          Tahun Lalu
-        </button>
-        <button
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors',
-            selectedRange === 'THIS_YEAR' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_YEAR')">
-          Tahun Ini
-        </button>
-        <button
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors',
-            selectedRange === 'THIS_QUARTER' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_QUARTER')">
-          Kuartal Ini
-        </button>
-        <button
-          :class="[
-            'px-6 py-2 rounded-md font-medium transition-colors',
-            selectedRange === 'THIS_MONTH' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-          @click="setDateRange('THIS_MONTH')">
-          Bulan Ini
-        </button>
-      </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <!-- Card Total Profit -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Profit/Loss</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F]" />
+  <div class="min-h-screen bg-gray-50 p-4 lg:p-6">
+    <!-- Welcome Section -->
+    <div class="w-full bg-white p-6 rounded-xl shadow-sm mb-6">
+      <div class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
+        <!-- Left Side: Welcome Message -->
+        <div class="flex-1">
+          <div class="welcome-message text-4xl lg:text-5xl font-bold mb-2 text-gray-800">
+            Welcome, {{ userInfo.username }}
+          </div>
+          <div class="text-gray-600 text-sm lg:text-base">
+            Mari kelola keuangan dengan bijak!
           </div>
         </div>
-        <div class="text-3xl font-semibold mt-2">{{ formatCurrency(cardTotalProfit) }}</div>
-        <div :class="{'text-green-500': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" class="text-sm mt-1">
-          {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
-        </div>
-      </div>
-
-      <!-- Card Total Transaksi -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center">
-          <div class="text-xl font-bold">Total Transaksi</div>
-          <div class="bg-[#E5EAF2] p-3 rounded-full">
-            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F]" />
-          </div>
-        </div>
-        <div class="text-3xl font-semibold mt-2">{{ cardTotalTransaction }}</div>
-        <div :class="{'text-green-500': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" class="text-sm mt-1">
-          {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+        
+        <!-- Right Side: Date Range Buttons -->
+        <div class="flex flex-wrap gap-3 lg:flex-shrink-0">
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'LAST_YEAR' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('LAST_YEAR')">
+            Tahun Lalu
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_YEAR' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_YEAR')">
+            Tahun Ini
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_QUARTER' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_QUARTER')">
+            Kuartal Ini
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 lg:px-5 lg:py-3 rounded-lg font-medium transition-all duration-200 text-sm lg:text-base',
+              selectedRange === 'THIS_MONTH' 
+                ? 'bg-[#1E3A5F] text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+            ]"
+            @click="setDateRange('THIS_MONTH')">
+            Bulan Ini
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div class="bg-white rounded-2xl shadow-md p-6">
+    <!-- Stats Cards -->
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
+      <!-- Total Profit/Loss Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="text-lg lg:text-xl font-bold text-gray-800 mb-2">Total Profit/Loss</div>
+            <div class="text-2xl lg:text-3xl font-semibold text-gray-900 mb-2">{{ formatCurrency(cardTotalProfit) }}</div>
+            <div :class="{'text-green-600': cardTotalProfitPercentage >= 0, 'text-red-500': cardTotalProfitPercentage < 0}" 
+                 class="text-sm font-medium">
+              {{ cardTotalProfitPercentage >= 0 ? '+' : '' }}{{ cardTotalProfitPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+            </div>
+          </div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full flex-shrink-0">
+            <font-awesome-icon :icon="['fas', 'dollar-sign']" class="text-[#1E3A5F] text-xl" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Transaksi Card -->
+      <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="text-lg lg:text-xl font-bold text-gray-800 mb-2">Total Transaksi</div>
+            <div class="text-2xl lg:text-3xl font-semibold text-gray-900 mb-2">{{ cardTotalTransaction }}</div>
+            <div :class="{'text-green-600': cardTotalTransactionPercentage >= 0, 'text-red-500': cardTotalTransactionPercentage < 0}" 
+                 class="text-sm font-medium">
+              {{ cardTotalTransactionPercentage >= 0 ? '+' : '' }}{{ cardTotalTransactionPercentage.toFixed(2) }}% dari {{ timeAgoText }}
+            </div>
+          </div>
+          <div class="bg-[#E5EAF2] p-3 rounded-full flex-shrink-0">
+            <font-awesome-icon :icon="['fas', 'shopping-cart']" class="text-[#1E3A5F] text-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
+      <!-- Distribusi Keuangan Chart -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="flex items-center mb-4">
-          <font-awesome-icon
-            :icon="['fas', 'scale-balanced']"
-            class="text-[24px] mr-2"
-            style="color: #2E7D32;"
-          />
-          <h2 class="text-lg font-bold leading-tight">
+          <div class="bg-green-100 p-2 rounded-lg mr-3">
+            <font-awesome-icon
+              :icon="['fas', 'scale-balanced']"
+              class="text-green-700 text-lg"
+            />
+          </div>
+          <h2 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
             Distribusi Keuangan Perusahaan
           </h2>
         </div>
-        <div class="h-[320px]">
+        <div class="h-80">
           <VBarTotalPemasukkanPengeluaran :range="selectedRange" @data-loaded="updateBarChartData" />
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md p-6">
+      <!-- Pengeluaran Chart -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="flex items-center mb-4">
-          <font-awesome-icon
-            :icon="['fas', 'money-bill']"
-            class="text-[24px] mr-2"
-            style="color: #912018;"
-          />
-          <h2 class="text-lg font-bold leading-tight">
+          <div class="bg-red-100 p-2 rounded-lg mr-3">
+            <font-awesome-icon
+              :icon="['fas', 'money-bill']"
+              class="text-red-700 text-lg"
+            />
+          </div>
+          <h2 class="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
             % Pengeluaran per Jenis Pengeluaran
           </h2>
         </div>
-        <div class="h-[320px]">
+        <div class="h-80">
           <VDonutPengeluaran :range="selectedRange" @data-loaded="updateDonutChartData" />
         </div>
       </div>
     </div>
 
+    <!-- Line Chart -->
     <div class="mb-6">
-        <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
+      <VLineIncomeExpense :range="selectedRange" :view="chartView" @data-loaded="updateLineChartData" />
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mb-6">
-      <h2 class="text-lg font-semibold text-white bg-[#1E3A5F] p-4">
-        Informasi Keuangan Perusahaan {{ dynamicTitle }}
-      </h2>
-      <div class="p-6 bg-[#F0F2F5]">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-          <div class="flex justify-between">
+    <!-- Financial Summary -->
+    <div class="w-full bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+      <div class="bg-[#1E3A5F] p-4 lg:p-6">
+        <h2 class="text-lg lg:text-xl font-bold text-white">
+          Informasi Keuangan Perusahaan {{ dynamicTitle }}
+        </h2>
+      </div>
+      
+      <div class="p-6 bg-gray-50">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm lg:text-base">
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Total Pemasukan</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncome) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalIncome) }}</span>
           </div>
-          <div class="flex justify-between">
+          
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Total Pembelian</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalPurchase) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalPurchase) }}</span>
           </div>
-          <div class="flex justify-between">
+          
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Pemasukan dari Distribusi</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncomeFromDistribusi) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalIncomeFromDistribusi) }}</span>
           </div>
-          <div class="flex justify-between">
+          
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Pengeluaran Maintenance</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalMaintenanceExpense) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalMaintenanceExpense) }}</span>
           </div>
-          <div class="flex justify-between">
+          
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Pemasukan dari Penjualan</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalIncomeFromPenjualan) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalIncomeFromPenjualan) }}</span>
           </div>
-          <div class="flex justify-between">
+          
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
             <span class="font-medium text-gray-700">Pengeluaran Proyek</span>
-            <span class="font-semibold text-gray-900">: {{ formatCurrency(financialSummary?.totalProjectExpense) }}</span>
+            <span class="font-semibold text-gray-900">{{ formatCurrency(financialSummary?.totalProjectExpense) }}</span>
           </div>
-          <div class="flex justify-between md:col-start-1">
-            <span class="font-medium text-gray-700">Total Profit</span>
-            <span class="font-semibold" :class="financialSummary && financialSummary.totalProfit < 0 ? 'text-red-600' : 'text-gray-900'">
-              : {{ formatCurrency(financialSummary?.totalProfit) }}
+          
+          <div class="md:col-span-2 flex justify-between items-center py-3 mt-2 bg-white rounded-lg p-4 border-2 border-[#1E3A5F]">
+            <span class="font-bold text-lg text-gray-800">Total Profit</span>
+            <span class="font-bold text-lg" :class="financialSummary && financialSummary.totalProfit < 0 ? 'text-red-600' : 'text-green-600'">
+              {{ formatCurrency(financialSummary?.totalProfit) }}
             </span>
           </div>
         </div>
@@ -156,8 +197,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useFinanceReportStore } from '@/stores/financereport';
-import { useProjectStore } from '@/stores/project';
-import { usePurchaseStore } from '@/stores/purchase';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import VDonutPengeluaran from '@/components/VDonutPengeluaran.vue';
 import VBarTotalPemasukkanPengeluaran from '@/components/VBarTotalPemasukkanPengeluaran.vue';
@@ -171,9 +210,9 @@ export interface FinancialSummaryResponseDTO {
   totalMaintenanceExpense: number;
   totalProjectExpense: number;
   totalProfit: number;
-  totalTransactions: number;                 // Total Transaction
-  transactionPercentageChange: number; // Transaction Percentage Change
-  profitPercentageChange: number;       // Profit Percentage Change
+  totalTransactions: number;
+  transactionPercentageChange: number;
+  profitPercentageChange: number;
 }
 
 const selectedRange = ref('THIS_YEAR');
@@ -182,8 +221,6 @@ const loading = ref(true);
 
 const authStore = useAuthStore();
 const financeReportStore = useFinanceReportStore();
-const projectStore = useProjectStore();
-const purchaseStore = usePurchaseStore();
 
 const financialSummary = computed<FinancialSummaryResponseDTO | null | undefined>(() => financeReportStore.financialSummary);
 
@@ -255,7 +292,6 @@ const fetchCardSummaryData = async () => {
     cardTotalTransaction.value = financialSummary.value?.totalTransactions || 0;
     cardTotalProfitPercentage.value = financialSummary.value?.profitPercentageChange || 0;
     cardTotalTransactionPercentage.value = financialSummary.value?.transactionPercentageChange || 0;  
-
   } catch (error) {
     console.error('Error fetching card summary data', error);
     cardTotalProfit.value = 0;
@@ -285,11 +321,34 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.text-green-500 {
-  color: #16A34A;
+.text-green-600 {
+  color: #059669;
 }
 
 .text-red-500 {
-  color: #EF4444;
+  color: #ef4444;
+}
+
+.text-green-700 {
+  color: #047857;
+}
+
+.text-red-700 {
+  color: #b91c1c;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
 }
 </style>

@@ -10,13 +10,7 @@ import VSuccessButton from "@/components/VSuccessButton.vue";
 import { useToast } from "vue-toastification";
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue'
-
-interface ResourceItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-}
+import VLockedInput from "@/components/VLockedInput.vue";
 
 // Router & Store
 const router = useRouter();
@@ -238,20 +232,20 @@ const goToSummary = () => {
 
               <div class="grid grid-cols-2 gap-4">
                 <!-- Supplier -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Supplier</span>
-                  </label>
-                  <div class="form-input bg-gray-50 text-gray-600">{{ supplierName || 'Loading...' }}</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Supplier</span>
+                    </label>
+                    <VLockedInput :value="supplierName" />
+                  </div>
 
                 <!-- Type -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Tipe Barang</span>
-                  </label>
-                  <div class="form-input bg-gray-50 text-gray-600">{{ purchaseType }}</div>
-                </div>
+                 <div class="form-group">
+                    <label class="form-label">
+                      <span class="label-text">Tipe Barang</span>
+                    </label>
+                    <VLockedInput :value="purchaseType" />
+                  </div>
               </div>
             </div>
 
@@ -429,13 +423,11 @@ const goToSummary = () => {
                     <span class="font-medium text-gray-900">{{ resourceList.length }}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-gray-600">Total Unit:</span>
-                    <span class="font-medium text-gray-900">{{ resourceList.reduce((sum: number, item: ResourceItem) => sum + item.quantity, 0) }}</span>
-                  <div class="pt-2 border-t border-gray-100">
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Grand Total:</span>
-                      <span class="font-bold text-green-600 text-lg">{{ resourceList.length > 0 ? formatCurrency(totalPrice) : 'Rp 0' }}</span>
-                    </div>
+                    <div class="pt-2 border-t border-gray-100">
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Grand Total:</span>
+                        <span class="font-bold text-green-600 text-lg">{{ resourceList.length > 0 ? formatCurrency(totalPrice) : 'Rp 0' }}</span>
+                      </div>
                   </div>
                 </div>
               </div>

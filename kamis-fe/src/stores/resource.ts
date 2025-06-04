@@ -8,6 +8,12 @@ import { API_URLS } from '@/config/api.config';
 export const useResourceStore = defineStore('resource', {
     state: () => ({
         resources: [] as ResourceInterface[],
+        isLoading: false,
+        currentPage: 0,
+        totalPages: 0,
+        pageSize: 5,
+        allResourcesForSales: [] as ResourceInterface[],
+        isLoadingAllForSales: false,
         loading: false,
         error: null as null | string,
         draftAddResource: (() => {
@@ -100,6 +106,38 @@ export const useResourceStore = defineStore('resource', {
             }
         },
 
+        async viewAllResourcesWithPagination(page: number, size: number = 10, searchParams?: {
+            resourceName?: string;
+
+        }) {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                const params: any = { page, size };
+
+                if (searchParams?.resourceName && searchParams.resourceName.trim() !== '') {
+                    params.resourceName = searchParams.resourceName;
+                }
+
+                const response = await axios.get(`${API_URLS.RESOURCE}/resource/viewall/paginated`, {
+                    params,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                });
+                const data = response.data.data;
+                this.resources = data.content;
+                this.currentPage = data.number;
+                this.totalPages = data.totalPages;
+                this.pageSize = data.size;
+            } catch (err) {
+                console.error('Error fetching paginated resources:', err);
+                throw err;
+            } finally {
+                this.isLoading = false;
+            }
+        },
 
         async fetchResourceById(id: number) {
             this.loading = true;
@@ -140,7 +178,6 @@ export const useResourceStore = defineStore('resource', {
 
                 if (response.data.status === 200) {
                     const updated = response.data.data;
-                    // Update resource di state
                     const index = this.resources.findIndex(res => res.id === id);
                     if (index !== -1) {
                         this.resources[index] = updated;
