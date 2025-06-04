@@ -1,9 +1,7 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-    <!-- Main Content -->
     <div class="max-w-full mx-auto px-8 py-6">
-      <!-- Header Card -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
         <div class="bg-[#1E3A5F] px-8 py-5">
           <div class="flex items-center justify-between">
@@ -34,7 +32,6 @@
         </div>
       </div>
 
-      <!-- Loading State -->
       <div v-if="loading" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
         <div class="flex items-center justify-center py-12">
           <div class="flex items-center space-x-4">
@@ -44,7 +41,6 @@
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
         <div class="flex items-center justify-center py-12">
           <div class="text-center">
@@ -59,9 +55,7 @@
         </div>
       </div>
 
-      <!-- Content - Full Screen Layout -->
       <div v-else class="space-y-6">
-        <!-- Supplier Info Card - Full Width -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div class="bg-gradient-to-r bg-[#1e3a5f] px-8 py-4">
             <div class="flex items-center">
@@ -106,9 +100,7 @@
           </div>
         </div>
 
-        <!-- Grid Layout untuk Items dan Purchase History -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Items List Card -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="bg-gradient-to-r bg-[#1e3a5f] px-8 py-4">
               <div class="flex items-center">
@@ -165,14 +157,13 @@
                           <div class="text-sm font-medium text-gray-900">{{ item.resourceName }}</div>
                         </td>
                         <td class="px-6 py-4">
-                          <div class="text-sm font-medium text-gray-900">Rp{{ item.resourcePrice.toLocaleString('id-ID') }}</div>
+                          <div class="text-sm font-medium text-gray-900">{{ formatCurrency(item.resourcePrice) }}</div>
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <!-- Pagination Barang -->
                 <div v-if="totalItemPages > 1" class="flex justify-center items-center space-x-4">
                   <button 
                     :disabled="itemPage === 1" 
@@ -202,7 +193,6 @@
             </div>
           </div>
 
-          <!-- Purchase History Card -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4">
               <div class="flex items-center">
@@ -247,7 +237,8 @@
                       <tr 
                         v-for="purchase in paginatedPurchases" 
                         :key="purchase.purchaseId"
-                        class="hover:bg-gray-50 transition-colors duration-200"
+                        class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                        @click="goToPurchaseDetail(purchase)"
                       >
                         <td class="px-6 py-4">
                           <div class="text-sm font-medium text-gray-900">{{ purchase.activityName }}</div>
@@ -256,7 +247,12 @@
                           <div class="text-sm text-gray-900">{{ formatDate(purchase.purchaseSubmissionDate) }}</div>
                         </td>
                         <td class="px-6 py-4">
-                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span 
+                            :class="[
+                              'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                              getPurchaseStatusClass(purchase.purchaseStatus, currentUserRole)
+                            ]"
+                          >
                             {{ purchase.purchaseStatus }}
                           </span>
                         </td>
@@ -265,7 +261,6 @@
                   </table>
                 </div>
 
-                <!-- Pagination Pembelian -->
                 <div v-if="totalPurchasePages > 1" class="flex justify-center items-center space-x-4">
                   <button 
                     :disabled="purchasePage === 1" 
@@ -301,12 +296,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, type Ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useSupplierStore } from '@/stores/supplier';
+import { useSupplierStore, type SupplierDetail } from '@/stores/supplier'; // Pastikan SupplierDetail diexport dari store
 import { useAuthStore } from '@/stores/auth';
 import VButton from '@/components/VButton.vue';
 import Breadcrumb from '@/components/Breadcrumb.vue';
+
+// Interface untuk item dalam tabel list barang
+interface Item {
+  id: string; 
+  resourceName: string;
+  resourcePrice: number;
+}
+
+// Interface untuk item dalam tabel histori pembelian
+interface PurchaseHistoryItem {
+  purchaseId: string;
+  activityName: string; 
+  purchaseSubmissionDate: string;
+  purchaseStatus: string; 
+}
 
 const route = useRoute();
 const router = useRouter();
@@ -318,11 +328,13 @@ const supplierId = route.params.id as string;
 const loading = ref(true);
 const error = ref('');
 
-const supplierDetail = computed(() => supplierStore.supplierDetail);
+const supplierDetail = computed<SupplierDetail | null>(() => supplierStore.supplierDetail);
 
 const isOperationalOrAdmin = computed(() => {
   return authStore.userRole === 'Operasional' || authStore.userRole === 'Admin';
 });
+
+const currentUserRole = computed(() => authStore.userRole);
 
 // Fetch supplier detail
 const fetchSupplierDetail = async () => {
@@ -330,10 +342,9 @@ const fetchSupplierDetail = async () => {
   error.value = '';
   try {
     await supplierStore.getSupplierDetail(supplierId);
-  } catch (e) {
-    if (e instanceof Error) {
-      error.value = e.message || 'Gagal memuat detail supplier';
-    }
+  } catch (e: any) { 
+    error.value = e.message || 'Gagal memuat detail supplier.';
+    console.error("Error fetching supplier detail:", e);
   } finally {
     loading.value = false;
   }
@@ -347,14 +358,16 @@ const goToEditSupplier = () => {
 };
 
 // Items (List Barang = assets + resources)
-const items = computed(() => {
-  const assetItems = supplierDetail.value?.assets.map(asset => ({
-    id: asset.platNomor,
+const items: Ref<Item[]> = computed(() => {
+  if (!supplierDetail.value) return [];
+  
+  const assetItems: Item[] = supplierDetail.value.assets?.map(asset => ({
+    id: asset.platNomor, 
     resourceName: asset.nama,
     resourcePrice: asset.nilaiPerolehan
   })) || [];
 
-  const resourceItems = supplierDetail.value?.resources.map(resource => ({
+  const resourceItems: Item[] = supplierDetail.value.resources?.map(resource => ({
     id: resource.id,
     resourceName: resource.resourceName,
     resourcePrice: resource.resourcePrice
@@ -364,25 +377,28 @@ const items = computed(() => {
 });
 
 // Sorting Barang
-const itemSortKey = ref('');
+const itemSortKey = ref<keyof Item | ''>('');
 const itemSortAsc = ref(true);
 
-const sortByItem = (key: string) => {
+const sortByItem = (key: keyof Item) => {
   if (itemSortKey.value === key) {
     itemSortAsc.value = !itemSortAsc.value;
   } else {
     itemSortKey.value = key;
     itemSortAsc.value = true;
   }
+  itemPage.value = 1; 
 };
 
 const sortedItems = computed(() => {
+  if (!itemSortKey.value) return items.value;
+  const key = itemSortKey.value as keyof Item; 
   return [...items.value].sort((a, b) => {
-    const valA = (a as any)[itemSortKey.value];
-    const valB = (b as any)[itemSortKey.value];
-    if (typeof valA === 'string') {
+    const valA = a[key];
+    const valB = b[key];
+    if (typeof valA === 'string' && typeof valB === 'string') {
       return itemSortAsc.value ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } else if (typeof valA === 'number') {
+    } else if (typeof valA === 'number' && typeof valB === 'number') {
       return itemSortAsc.value ? valA - valB : valB - valA;
     }
     return 0;
@@ -399,26 +415,46 @@ const paginatedItems = computed(() => {
 });
 
 // Purchases
-const purchases = computed(() => supplierDetail.value?.purchases || []);
+const purchases: Ref<PurchaseHistoryItem[]> = computed(() => 
+  (supplierDetail.value?.purchases as PurchaseHistoryItem[]) || []
+);
 
 // Sorting Purchases
-const purchaseSortKey = ref('');
-const purchaseSortAsc = ref(true);
+const purchaseSortKey = ref<keyof PurchaseHistoryItem | ''>('purchaseSubmissionDate'); 
+const purchaseSortAsc = ref(false); 
 
-const sortByPurchase = (key: string) => {
+const sortByPurchase = (key: keyof PurchaseHistoryItem) => { 
   if (purchaseSortKey.value === key) {
     purchaseSortAsc.value = !purchaseSortAsc.value;
   } else {
     purchaseSortKey.value = key;
-    purchaseSortAsc.value = true;
+    purchaseSortAsc.value = key === 'purchaseSubmissionDate' ? false : true; 
   }
+  purchasePage.value = 1;
 };
 
 const sortedPurchases = computed(() => {
+  const key = purchaseSortKey.value as keyof PurchaseHistoryItem;
+  if (!key && purchases.value.length > 0) { 
+      return [...purchases.value].sort((a,b) => new Date(b.purchaseSubmissionDate).getTime() - new Date(a.purchaseSubmissionDate).getTime());
+  }
+  if (!key) return purchases.value;
+
   return [...purchases.value].sort((a, b) => {
-    const dateA = new Date(a.purchaseSubmissionDate).getTime();
-    const dateB = new Date(b.purchaseSubmissionDate).getTime();
-    return purchaseSortAsc.value ? dateA - dateB : dateB - dateA;
+    let valA = a[key];
+    let valB = b[key];
+
+    if (key === 'purchaseSubmissionDate') {
+      valA = new Date(valA as string).getTime();
+      valB = new Date(valB as string).getTime();
+    }
+    
+    if (typeof valA === 'string' && typeof valB === 'string') {
+        return purchaseSortAsc.value ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else if (typeof valA === 'number' && typeof valB === 'number') {
+        return purchaseSortAsc.value ? valA - valB : valB - valA;
+    }
+    return 0;
   });
 });
 
@@ -432,9 +468,75 @@ const paginatedPurchases = computed(() => {
 });
 
 // Format Date
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('id-ID');
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return '-';
+  try {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  } catch (error) {
+    console.error("Invalid date for formatting:", dateString, error);
+    return 'Tanggal Tidak Valid';
+  }
 };
+
+// Format Currency
+const formatCurrency = (amount: number | null | undefined): string => {
+  if (amount === null || amount === undefined) return 'Rp 0';
+  return 'Rp' + amount.toLocaleString('id-ID');
+};
+
+// Fungsi untuk navigasi ke detail pembelian
+const goToPurchaseDetail = (purchaseItem: PurchaseHistoryItem) => {
+  const idPurchase = String(purchaseItem.purchaseId);
+  let conditional = '';
+  if (idPurchase.startsWith('R')) { 
+    conditional = 'resource';
+  } else if (idPurchase.startsWith('A')) {
+    conditional = 'asset';
+  }
+
+  if (conditional && idPurchase) {
+    router.push(`/purchase/detail/${conditional}/${idPurchase}`);
+  } else {
+    console.warn('Tidak dapat menentukan conditional atau ID untuk detail pembelian:', purchaseItem);
+  }
+};
+
+// Fungsi untuk mendapatkan kelas CSS status pembelian (MODIFIKASI)
+const getPurchaseStatusClass = (status: string | null | undefined, userRole: string | null | undefined): string => {
+    const currentStatus = status || 'Tidak Diketahui'; // Gunakan status apa adanya
+    const role = userRole; // Asumsi nilai peran di store sudah konsisten
+
+    // Kondisi spesifik untuk warna hijau berdasarkan peran dan status (case-sensitive)
+    // Pastikan string 'Disetujui' dan 'Diajukan' SAMA PERSIS dengan nilai di purchase.purchaseStatus
+    if (role === 'Operasional' && currentStatus === 'Disetujui') {
+        return 'bg-green-100 text-green-800'; 
+    }
+    if (role === 'Direksi' && currentStatus === 'Diajukan') {
+        return 'bg-green-100 text-green-800'; 
+    }
+
+    // Warna default berdasarkan status (case-sensitive)
+    if (currentStatus === 'Diajukan') { 
+        return 'bg-yellow-100 text-yellow-800'; 
+    }
+    if (currentStatus === 'Disetujui') { 
+        return 'bg-blue-100 text-blue-800';    
+    }
+    if (currentStatus === 'Diproses') { 
+        return 'bg-indigo-100 text-indigo-800'; 
+    }
+    if (currentStatus === 'Selesai') { 
+        return 'bg-emerald-100 text-emerald-800'; 
+    }
+    if (currentStatus === 'Dibatalkan' || currentStatus === 'Ditolak') { 
+        return 'bg-red-100 text-red-800';       
+    }
+    
+    return 'bg-gray-100 text-gray-700'; 
+};
+
 </script>
 
 <style scoped>
@@ -443,144 +545,69 @@ const formatDate = (date: string) => {
 /* Info Label dan Value Classes */
 .info-label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* 14px */
   font-weight: 600;
-  color: #4b5563;
-  margin-bottom: 0.5rem;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 0.5rem; /* 8px */
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .info-value {
-  font-size: 1rem;
+  font-size: 1rem; /* 16px */
   font-weight: 500;
-  color: #111827;
+  color: #111827; /* gray-900 */
   line-height: 1.625;
 }
 
-/* Table Styling */
-.custom-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+/* Table Styling (generik untuk kedua tabel) */
+.min-w-full.divide-y.divide-gray-200 { /* Target specific table */
+  border-radius: 0.5rem; /* rounded-lg */
+  overflow: hidden; /* Ensure border-radius clips content */
+  border: 1px solid #e5e7eb; /* border border-gray-200 */
 }
 
-.custom-table thead {
-  background-color: #f9fafb;
-}
-
-.custom-table th {
-  padding: 1rem 1.5rem;
+.min-w-full.divide-y.divide-gray-200 thead.bg-gray-50 th {
+  padding: 1rem 1.5rem; /* px-6 py-4 */
   text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500; /* font-medium */
+  color: #6b7280; /* text-gray-500 */
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e5e7eb;
+  letter-spacing: 0.05em; /* tracking-wider */
+}
+.min-w-full.divide-y.divide-gray-200 thead.bg-gray-50 th.cursor-pointer:hover {
+    background-color: #f3f4f6; /* hover:bg-gray-100 */
 }
 
-.custom-table td {
-  padding: 1rem 1.5rem;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  color: #111827;
-  border-bottom: 1px solid #f3f4f6;
+
+.min-w-full.divide-y.divide-gray-200 tbody.bg-white.divide-y.divide-gray-200 td {
+  padding: 1rem 1.5rem; /* px-6 py-4 */
+  white-space: normal; /* Allow text wrapping */
+  word-break: break-word; /* Break long words */
 }
 
-.custom-table td:last-child {
-  border-bottom: 0;
+.min-w-full.divide-y.divide-gray-200 tbody.bg-white.divide-y.divide-gray-200 tr.hover\\:bg-gray-50:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+}
+.min-w-full.divide-y.divide-gray-200 tbody.bg-white.divide-y.divide-gray-200 tr.cursor-pointer {
+  cursor: pointer;
 }
 
-.custom-table tbody tr {
-  transition: background-color 0.2s ease;
+
+/* Pagination Button Styling (generik) */
+.flex.justify-center.items-center.space-x-4 button {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+.flex.justify-center.items-center.space-x-4 button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.custom-table tbody tr:hover {
-  background-color: #f9fafb;
-}
 
-/* Status Badge Variants */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.status-active {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-completed {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-/* Button Styles */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: #1E3A5F;
-  color: white;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.btn-primary:hover {
-  background-color: #2A4A6B;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: white;
-  color: #374151;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.btn-secondary:hover {
-  background-color: #f9fafb;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Loading Animation */
-.loading-spinner {
-  animation: spin 1s linear infinite;
-  border-radius: 50%;
-  height: 2rem;
-  width: 2rem;
-  border: 2px solid #d1d5db;
-  border-top-color: #1E3A5F;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Additional utility classes */
+/* Utility classes */
 .break-all {
   word-break: break-all;
 }
@@ -596,13 +623,13 @@ const formatDate = (date: string) => {
   }
   
   .grid.grid-cols-1.lg\\:grid-cols-4 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* 2 kolom untuk tablet */
   }
 }
 
 @media (max-width: 640px) {
   .grid.grid-cols-1.lg\\:grid-cols-4 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* 1 kolom untuk mobile */
   }
 }
 </style>
