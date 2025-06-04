@@ -435,6 +435,35 @@ const applyStyle = (worksheet: XLSX.WorkSheet, cellRef: string, style: any) => {
   Object.assign(worksheet[cellRef].s, style);
 };
 
+const getSortedDataForPDF = () => {
+  const getActivityOrder = (activityType: number): number => {
+    switch (activityType) {
+      case 1: return 0; // distribusi
+      case 3: return 1; // maintenance
+      case 2: return 2; // pembelian
+      case 0: return 3; // penjualan
+      default: return 999;
+    }
+  };
+  
+  const sortedData = [...lapkeuStore.lapkeuList].sort((a, b) => {
+    const aOrder = getActivityOrder(a.activityType);
+    const bOrder = getActivityOrder(b.activityType);
+    
+    if (aOrder === bOrder) {
+      const parseDate = (dateStr) => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day).getTime();
+      };
+      return parseDate(a.paymentDate) - parseDate(b.paymentDate);
+    }
+    
+    return aOrder - bOrder;
+  });
+  
+  return sortedData;
+};
+
 const downloadPDF = async () => {
   // Buat instance PDF dengan orientasi landscape untuk laporan keuangan
   const doc = new jsPDF({
@@ -519,7 +548,7 @@ const downloadPDF = async () => {
   // Tabel utama dengan styling yang lebih baik
   autoTable(doc, {
     head: [["Tanggal", "Jenis Aktivitas", "Deskripsi", "Pemasukan", "Pengeluaran"]],
-    body: lapkeuStore.lapkeuList.map(item => [
+    body: getSortedDataForPDF().map(item => [ 
       formatDisplayDate(item.paymentDate),
       activityTypeLabel(item.activityType),
       item.description,
