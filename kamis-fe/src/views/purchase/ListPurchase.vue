@@ -38,6 +38,19 @@
       <div class="flex justify-between items-center mb-4">
         <VOptionInput v-model="selectedTypeDisplay" :options="typeOptionsDisplay" class="w-1/4" />
         <VButton v-if="canEditPurchase" label="+ Tambah Pembelian" @click="goToAddPurchase" />
+        <!-- Toggle Filter Menunggu Persetujuan -->
+        <div class="mb-4 flex items-center gap-2" v-if="userRole === 'Direksi'">
+          <button
+            v-if="userRole === 'Direksi'"
+            @click="approvalFilterActive = !approvalFilterActive"
+            :class="[
+              'px-4 py-2 rounded font-semibold transition',
+              approvalFilterActive ? 'bg-[#1E3A5F] text-white shadow' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ]"
+          >
+            {{ approvalFilterActive ? 'Filter Aktif: Menunggu Persetujuan' : 'Tampilkan Menunggu Persetujuan' }}
+          </button>
+        </div>
       </div>
 
       <div v-if="purchaseStore.isLoading" class="flex justify-center items-center py-14">
@@ -213,10 +226,12 @@ const dateRange = ref({ start: "", end: "" });
 const selectedType = ref("All");
 const selectedPageSize = ref(purchaseStore.pageSize || 10);
 
+const approvalFilterActive = ref(false);
+
 // **State untuk sorting**
 const currentSort = ref({
-  field: '',
-  direction: ''
+  field: 'date',
+  direction: 'desc'
 });
 
 const userRole = computed(() => authStore.userRole);
@@ -286,8 +301,19 @@ const sortedPurchases = computed(() => {
     return purchaseStore.purchases;
   }
 
-  const purchases = [...purchaseStore.purchases];
-  
+  let purchases = [...purchaseStore.purchases];
+
+  // Filter Menunggu Persetujuan jika toggle aktif
+  if (approvalFilterActive.value && userRole.value === 'Direksi') {
+    purchases = purchases.filter(
+      (p) => getDisplayStatus(p) === 'Menunggu Persetujuan'
+    );
+  }
+
+  if (!currentSort.value.field || !currentSort.value.direction) {
+    return purchases;
+  }
+
   purchases.sort((a, b) => {
     let valueA, valueB;
     
