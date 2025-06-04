@@ -1,6 +1,6 @@
 <!-- filepath: e:\Propen\KAMIS-FE\kamis-fe\src\components\VBarTotalPemasukanPengeluaran.vue -->
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -30,19 +30,45 @@ const emit = defineEmits(['data-loaded', 'error']);
 const toast = useToast();
 
 // State
-const Pemasukan = ref(0);
-const pengeluaran = ref(0);
+const pemasukanBreakdown = ref<Record<string, number>>({});
+const pengeluaranBreakdown = ref<Record<string, number>>({});
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-// Fix the chart data initialization to include all required properties
-const chartData = ref({
-  labels: ['Pemasukan', 'Pengeluaran'],
-  datasets: [{
-    data: [0, 0],
-    backgroundColor: ['#2E7D32', '#B42318'], // Green for income, Red for expenses
-    borderWidth: 0
-  }]
+// Computed property to generate chart data from breakdown
+const chartData = computed(() => {
+  const datasets = [];
+  const labels: string[] = [];
+  const data: number[] = [];
+  const backgroundColors: string[] = [];
+  
+  // Process pemasukan breakdown
+  Object.entries(pemasukanBreakdown.value).forEach(([key, value]) => {
+    if (value > 0) { // Only show categories with values > 0
+      labels.push(`Pemasukan ${key}`);
+      data.push(value);
+      backgroundColors.push('#059669'); // Green for pemasukan
+    }
+  });
+  
+  // Process pengeluaran breakdown
+  Object.entries(pengeluaranBreakdown.value).forEach(([key, value]) => {
+    if (value > 0) { // Only show categories with values > 0
+      labels.push(`Pengeluaran ${key}`);
+      data.push(value);
+      backgroundColors.push('#DC2626'); // Red for pengeluaran
+    }
+  });
+  
+  return {
+    labels,
+    datasets: [{
+      label: 'Jumlah',
+      data,
+      backgroundColor: backgroundColors,
+      borderWidth: 0,
+    }]
+  };
 });
 
 const chartOptions: ChartOptions<'bar'> = {
@@ -50,17 +76,18 @@ const chartOptions: ChartOptions<'bar'> = {
   maintainAspectRatio: false,
   plugins: {
     legend: { 
-      display: false // Hide the legend since it's clear from context
+      display: false // Hide legend since we use colors to distinguish
     },
     tooltip: {
       callbacks: {
         label: (context) => {
           const value = context.raw as number;
-          return new Intl.NumberFormat('id-ID', {
+          const formatted = new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0
           }).format(value);
+          return `${context.label}: ${formatted}`;
         }
       }
     },
@@ -92,70 +119,69 @@ const chartOptions: ChartOptions<'bar'> = {
     x: {
       grid: {
         display: false
+      },
+      ticks: {
+        maxRotation: 45,
+        minRotation: 0,
+        font: {
+          size: 10
+        }
       }
     }
+  },
+  interaction: {
+    mode: 'index',
+    intersect: false
   }
 };
 
-// Update chart data with current values
+// Update chart data and emit event
 const updateChartData = () => {
-  // Log the values before updating
-  console.log('Updating chart with values:', {
-    Pemasukan: Pemasukan.value,
-    pengeluaran: pengeluaran.value
+  console.log('Updating chart with breakdown data:', {
+    pemasukanBreakdown: pemasukanBreakdown.value,
+    pengeluaranBreakdown: pengeluaranBreakdown.value
   });
   
-  // Ensure we're using integers or safe numbers
-  const income = Number(Pemasukan.value) || 0;
-  const expense = Number(pengeluaran.value) || 0;
+  // Calculate totals for emission
+  const totalPemasukan = Object.values(pemasukanBreakdown.value).reduce((sum, val) => sum + val, 0);
+  const totalPengeluaran = Object.values(pengeluaranBreakdown.value).reduce((sum, val) => sum + val, 0);
   
-  chartData.value = {
-    labels: ['Pemasukan', 'Pengeluaran'],
-    datasets: [{
-      data: [income, expense],
-      backgroundColor: ['#14532D', '#912018'],
-      borderWidth: 0
-    }]
-  };
-  
-  // Emit the data-loaded event with a small delay to ensure the chart has updated
+  // Emit the data-loaded event with breakdown data
   setTimeout(() => {
-    console.log('Emitting data-loaded event with values:', {
-      Pemasukan: income,
-      pengeluaran: expense
+    console.log('Emitting data-loaded event with breakdown:', {
+      pemasukanBreakdown: pemasukanBreakdown.value,
+      pengeluaranBreakdown: pengeluaranBreakdown.value,
+      totalPemasukan,
+      totalPengeluaran
     });
     
     emit('data-loaded', {
-      Pemasukan: income,
-      pengeluaran: expense
+      pemasukanBreakdown: pemasukanBreakdown.value,
+      pengeluaranBreakdown: pengeluaranBreakdown.value,
+      totalPemasukan,
+      totalPengeluaran
     });
     
     loading.value = false;
   }, 100);
 };
 
-// Update fetchData function to sum all values in the array
+// Fetch breakdown data from API
 const fetchData = async () => {
   loading.value = true;
   error.value = null;
   
-  // Set default values before fetching
-  Pemasukan.value = 0;
-  pengeluaran.value = 0;
+  // Reset data
+  pemasukanBreakdown.value = {};
+  pengeluaranBreakdown.value = {};
   
-  console.log('Fetching bar chart data, range:', props.range);
-  
-  // Set a timeout to ensure loading doesn't last forever if the request hangs
-  const timeoutId = setTimeout(() => {
-    console.error('Request timeout for Pemasukan/pengeluaran data');
-    updateChartData();
-    error.value = 'Data tidak tersedia saat ini. Menampilkan placeholder.';
-  }, 5000); // 5 second timeout
+  console.log('Fetching breakdown data, range:', props.range);
   
   try {
     const token = localStorage.getItem('auth_token');
     console.log('Auth token available:', token ? 'Yes (redacted)' : 'No');
     
+    // API endpoint for breakdown data
     const response = await axios.get(`${API_URLS.FINANCE}/lapkeu/chart-total-pemasukan-pengeluaran`, {
       params: { range: props.range || 'THIS_YEAR' },
       headers: {
@@ -163,70 +189,45 @@ const fetchData = async () => {
       }
     });
     
-    clearTimeout(timeoutId);
-    console.log('Bar chart API response:', response.status, response.statusText);
+    console.log('Breakdown API response:', response.status, response.statusText);
     
-    // Check if the response is valid
     if (response.data && response.data.status === 200 && response.data.data) {
       const responseData = response.data.data;
-      console.log('Bar chart full response data:', responseData);
+      console.log('Breakdown response data:', responseData);
       
-      // Handle different possible data formats
       if (Array.isArray(responseData) && responseData.length > 0) {
-        // If it's an array, sum all items
-        console.log('Summing array data with', responseData.length, 'items');
+        // Process breakdown data from the first item (assuming single period)
+        const item = responseData[0];
         
-        // Sum up all totalPemasukan and totalPengeluaran values
-        let totalPemasukan = 0;
-        let totalPengeluaran = 0;
+        // Set pemasukan breakdown
+        if (item.pemasukanBreakdown) {
+          pemasukanBreakdown.value = { ...item.pemasukanBreakdown };
+        }
         
-        responseData.forEach(item => {
-          // Check for valid numbers and add them to running totals
-          const itemPemasukan = parseFloat(item.totalPemasukan) || 0;
-          const itemPengeluaran = parseFloat(item.totalPengeluaran) || 0;
-          
-          totalPemasukan += itemPemasukan;
-          totalPengeluaran += itemPengeluaran;
-          
-          console.log(`Period: ${item.period}, Pemasukan: ${itemPemasukan}, Pengeluaran: ${itemPengeluaran}`);
-        });
+        // Set pengeluaran breakdown
+        if (item.pengeluaranBreakdown) {
+          pengeluaranBreakdown.value = { ...item.pengeluaranBreakdown };
+        }
         
-        Pemasukan.value = totalPemasukan;
-        pengeluaran.value = totalPengeluaran;
-        
-        console.log('Total summed values:', {
-          totalPemasukan: totalPemasukan,
-          totalPengeluaran: totalPengeluaran
+        console.log('Final breakdown data:', {
+          pemasukan: pemasukanBreakdown.value,
+          pengeluaran: pengeluaranBreakdown.value
         });
       } else {
-        // If it's a direct object with the fields
-        console.log('Using direct object data');
-        
-        // Try both possible field names
-        Pemasukan.value = parseFloat(responseData.totalPemasukan || 
-                                    responseData.totalPemasukan) || 0;
-        pengeluaran.value = parseFloat(responseData.totalPengeluaran) || 0;
+        console.warn('Invalid response format or empty data:', responseData);
       }
       
-      console.log('Final values for chart:', {
-        Pemasukan: Pemasukan.value,
-        pengeluaran: pengeluaran.value
-      });
-      
-
-      
-      // Update chart
       updateChartData();
     } else {
       console.warn('Invalid response format:', response.data);
-      // Use default values
       updateChartData();
     }
   } catch (err: any) {
-    clearTimeout(timeoutId);
-    console.error('Error fetching bar chart data:', err.message);
+    console.error('Error fetching breakdown data:', err.message);
+    
+    
     updateChartData();
-    error.value = 'Terjadi kesalahan saat memuat data';
+    error.value = 'Terjadi kesalahan saat memuat data (menampilkan data sample)';
     emit('error', error.value);
   }
 };
@@ -239,21 +240,47 @@ watch(() => props.range, (newRange) => {
 
 // Initialize on component mount
 onMounted(() => {
-  console.log('Bar chart component mounted');
+  console.log('Breakdown bar chart component mounted');
   fetchData();
 });
 </script>
 
 <template>
   <div class="w-full h-full">
-    <!-- Loading State - Removed because parent already handles this -->
-    
-    <!-- Error State - Show a message but render the chart anyway with default data -->
-    <div v-if="error" class="absolute top-0 left-0 right-0 p-2 text-center text-xs text-red-600 bg-red-50 rounded">
+    <!-- Error State -->
+    <div v-if="error" class="absolute top-0 left-0 right-0 p-2 text-center text-xs text-red-600 bg-red-50 rounded z-10">
       {{ error }}
     </div>
 
-    <!-- Chart Container - Always render the chart -->
+    <!-- Chart Container -->
     <Bar :data="chartData" :options="chartOptions" />
+    
+    <!-- Data Summary -->
+    <div v-if="!loading" class="mt-2 text-xs text-gray-600">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <h4 class="font-semibold text-green-700 mb-1">Pemasukan</h4>
+          <ul class="space-y-1">
+            <li v-for="(value, key) in pemasukanBreakdown" :key="`pemasukan-${key}`" 
+                v-show="value > 0"
+                class="flex justify-between">
+              <span>{{ key }}:</span>
+              <span class="font-medium">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value) }}</span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-red-700 mb-1">Pengeluaran</h4>
+          <ul class="space-y-1">
+            <li v-for="(value, key) in pengeluaranBreakdown" :key="`pengeluaran-${key}`" 
+                v-show="value > 0"
+                class="flex justify-between">
+              <span>{{ key }}:</span>
+              <span class="font-medium">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value) }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
