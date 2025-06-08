@@ -12,15 +12,32 @@ import 'vue-toastification/dist/index.css'
 // === Font Awesome Setup ===
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety } from '@fortawesome/free-solid-svg-icons'
+import { faCircleUser, faUsers, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faMoneyBill,
+    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear, faTasks, 
+    faChartLine, faShoppingCart, faDollarSign, faChartColumn, faChartPie, 
+    faScaleBalanced} from '@fortawesome/free-solid-svg-icons'
 
 
-// import $ from 'jquery';
-// window.$ = $;
-// window.jQuery = $;
+// Debug FontAwesome icons
+console.log('Loading FontAwesome icons:', {
+    shoppingCart: Boolean(faShoppingCart), 
+    dollarSign: Boolean(faDollarSign),
+    chartColumn: Boolean(faChartColumn),
+    chartPie: Boolean(faChartPie)
+})
 
 // Tambahkan ikon ke library
-library.add(faUser, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTruck, faBars, faUpload, faHelmetSafety)
+library.add(faCircleUser, faUsers, faScrewdriverWrench, faFile, faBagShopping, faRightFromBracket, faChartSimple, faTasks,
+    faTruck, faBars, faUpload, faHelmetSafety, faBoxesStacked, faEye, faEyeSlash, faCaretRight, faCaretLeft, faGear, faMoneyBill, 
+    faChartLine, faShoppingCart, faDollarSign, faChartColumn, faChartPie,faScaleBalanced)
+
+// Verify FontAwesome icons are loaded
+console.log('FontAwesome icons loaded:', {
+    shoppingCart: !!faShoppingCart, 
+    dollarSign: !!faDollarSign,
+    chartColumn: !!faChartColumn,
+    chartPie: !!faChartPie
+})
 
 // ===========================
 
