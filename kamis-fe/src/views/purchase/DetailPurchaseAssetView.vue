@@ -397,7 +397,11 @@
                     </span>
                   </div>
                   <div class="flex items-start space-x-2">
-                    <p class="text-gray-700 leading-relaxed">{{ log.action }}</p>
+                    <div class="text-gray-700 leading-relaxed">
+                      <div v-for="(line, index) in formatLogAction(log.action)" :key="index" class="mb-1">
+                        {{ line }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -660,6 +664,26 @@ const openModal = (next: boolean) => {
   errorUpdate.value = ''
   showUpdateModal.value = true
 }
+
+// Format log action untuk memisah berdasarkan tanda "-"
+const formatLogAction = (action: string): string[] => {
+  if (!action) return [''];
+  
+  // Split berdasarkan " - " dan filter yang kosong
+  const parts = action.split(' - ').filter(part => part.trim());
+  
+  if (parts.length <= 1) {
+    return [action]; // Jika tidak ada pemisah, return as is
+  }
+  
+  // Format ulang: bagian pertama tanpa dash, sisanya dengan dash
+  const formatted = [parts[0]];
+  for (let i = 1; i < parts.length; i++) {
+    formatted.push(`- ${parts[i]}`);
+  }
+  
+  return formatted;
+};
 
 // Buka Modal Pembayaran
 const openPaymentModal = () => {
