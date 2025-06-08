@@ -29,7 +29,7 @@ const focusTextarea = () => {
 </script>
 
 <template>
-    <div class="relative w-full max-w-md font-inter">
+    <div class="relative w-full max-w-full font-inter">
         <!-- Textarea -->
         <div 
             class="border px-4 py-2 cursor-text relative"

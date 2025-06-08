@@ -60,169 +60,176 @@
       </div>
 
       <!-- Content -->
-      <div v-else class="grid grid-cols-12 gap-6">
-        <!-- Main Content - Client Information -->
-        <div class="col-span-8">
-          <!-- Client Info Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4">
-              <div class="flex items-center">
-                <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-bold text-white">Informasi Klien</h2>
+      <div v-else>
+        <!-- Client Info Card - Full Width at Top -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div class="bg-gradient-to-r bg-[#1E3A5F] px-8 py-4">
+            <div class="flex items-center">
+              <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
               </div>
+              <h2 class="text-xl font-bold text-white">Informasi Klien</h2>
             </div>
-            
-            <div class="p-8">
-              <div class="grid grid-cols-2 gap-8 mb-6">
-                <div>
-                  <div class="mb-6">
-                    <label class="info-label">Nama Klien</label>
-                    <p class="info-value">{{ client.nameClient }}</p>
-                  </div>
-                  
-                  <div class="mb-6">
-                    <label class="info-label">Nomor Telepon</label>
-                    <p class="info-value">{{ client.noTelpClient }}</p>
-                  </div>
-                  
-                  <div class="mb-6">
-                    <label class="info-label">Tipe Klien</label>
-                    <p class="info-value">
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                            :class="client.typeClient ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
-                        {{ client.typeClient ? 'Perusahaan' : 'Perorangan' }}
-                      </span>
-                    </p>
-                  </div>
+          </div>
+          
+          <div class="p-8">
+            <!-- Layout 3 Kolom -->
+            <div class="grid grid-cols-3 gap-8 mb-6">
+              <!-- Kolom 1: Nama Klien & Nomor Telepon -->
+              <div>
+                <div class="mb-6">
+                  <label class="info-label">Nama Klien</label>
+                  <p class="info-value">{{ client.nameClient }}</p>
                 </div>
-                
                 <div>
-                  <div class="mb-6">
-                    <label class="info-label">Alamat Email</label>
-                    <p class="info-value break-all">{{ client.emailClient }}</p>
-                  </div>
-                  
-                  <div class="mb-6">
-                    <label class="info-label">Perusahaan</label>
-                    <p class="info-value">{{ client.companyClient || '-' }}</p>
-                  </div>
+                  <label class="info-label">Nomor Telepon</label>
+                  <p class="info-value">{{ client.noTelpClient }}</p>
                 </div>
               </div>
               
-              <div class="pt-6 border-t border-gray-100">
+              <!-- Kolom 2: Tipe Klien & Alamat Email -->
+              <div>
+                <div class="mb-6">
+                  <label class="info-label">Tipe Klien</label>
+                  <p class="info-value">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                          :class="client.typeClient ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
+                      {{ client.typeClient ? 'Perusahaan' : 'Perorangan' }}
+                    </span>
+                  </p>
+                </div>
                 <div>
-                  <label class="info-label">Alamat Lengkap</label>
-                  <p class="info-value leading-relaxed">{{ client.addressClient }}</p>
+                  <label class="info-label">Alamat Email</label>
+                  <p class="info-value break-all">{{ client.emailClient }}</p>
+                </div>
+              </div>
+              
+              <!-- Kolom 3: Nama Perusahaan -->
+              <div>
+                <div>
+                  <label class="info-label">Nama Perusahaan</label>
+                  <p class="info-value">{{ client.companyClient || '-' }}</p>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Projects History Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4">
-              <div class="flex items-center">
-                <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-bold text-white">Histori Distribusi & Penjualan</h2>
-              </div>
-            </div>
-
-            <div class="p-8">
-              <div v-if="!client.projects || client.projects.length === 0" class="text-center py-12">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Belum Ada Proyek</h3>
-                <p class="text-gray-500">Klien ini belum memiliki histori proyek distribusi atau penjualan.</p>
-              </div>
-
-              <div v-else class="overflow-hidden rounded-lg border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Proyek</th>
-                      <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
-                      <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th v-if="isFinance" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemasukkan</th>
-                      <th v-if="isFinance" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengeluaran</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr 
-                      v-for="project in client.projects" 
-                      :key="project.id" 
-                      class="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                    >
-                      <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">{{ project.projectName }}</div>
-                      </td>
-                      <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              :class="project.projectType === true ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
-                          {{ project.projectType === true ? 'Distribusi' : project.projectType === false ? 'Penjualan' : project.projectType }}
-                        </span>
-                      </td>
-                      <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              :class="getStatusClass(Number(project.projectStatus))">
-                          {{ getStatusText(Number(project.projectStatus), project.projectType) }}
-                        </span>
-                      </td>
-                      <td v-if="isFinance" class="px-6 py-4 text-sm text-gray-900 font-medium">
-                        {{ project.projectTotalPemasukkan != null ? 'Rp' + project.projectTotalPemasukkan.toLocaleString('id-ID') : 'Rp0' }}
-                      </td>
-                      <td v-if="isFinance" class="px-6 py-4 text-sm text-gray-900 font-medium">
-                        {{ project.projectTotalPengeluaran != null ? 'Rp' + project.projectTotalPengeluaran.toLocaleString('id-ID') : 'Rp0' }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            
+            <!-- Alamat Lengkap (Full Width) -->
+            <div class="pt-6 border-t border-gray-100">
+              <div class="w-full">
+                <label class="info-label">Alamat Lengkap</label>
+                <p class="info-value leading-relaxed">{{ client.addressClient }}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar - Summary Info -->
-        <div class="col-span-4">
-          <div class="sticky top-6">
-            <!-- Quick Stats Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan</h3>
-              <div class="text-center py-4">
-                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                      </svg>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">Total Aktivitas</span>
+        <!-- Bottom Section: History & Summary -->
+        <div class="grid grid-cols-12 gap-6">
+          <!-- Left Column: Projects History -->
+          <div class="col-span-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-4">
+                <div class="flex items-center">
+                  <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg mr-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
                   </div>
-                  <span class="text-lg font-bold text-blue-600">{{ client.projects?.length || 0 }}</span>
+                  <h2 class="text-xl font-bold text-white">Histori Distribusi & Penjualan</h2>
+                </div>
+              </div>
+
+              <div class="p-8">
+                <div v-if="!client.projects || client.projects.length === 0" class="text-center py-12">
+                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">Belum Ada Proyek</h3>
+                  <p class="text-gray-500">Klien ini belum memiliki histori proyek distribusi atau penjualan.</p>
                 </div>
 
-                <div v-if="client.projects && client.projects.length > 0" class="mt-4">
-                  <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg mb-2">
-                    <span class="text-sm font-medium text-gray-700">Distribusi</span>
-                    <span class="text-sm font-bold text-green-600">
-                      {{ client.projects.filter(p => p.projectType === true).length }}
-                    </span>
+                <div v-else class="overflow-hidden rounded-lg border border-gray-200">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Proyek</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th v-if="isFinance" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemasukan</th>
+                        <th v-if="isFinance" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengeluaran</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr 
+                        v-for="project in client.projects" 
+                        :key="project.id" 
+                        class="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                      >
+                        <td class="px-6 py-4">
+                          <div class="text-sm font-medium text-gray-900">{{ project.projectName }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                :class="project.projectType === true ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
+                            {{ project.projectType === true ? 'Distribusi' : project.projectType === false ? 'Penjualan' : project.projectType }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                :class="getStatusClass(Number(project.projectStatus))">
+                            {{ getStatusText(Number(project.projectStatus), project.projectType) }}
+                          </span>
+                        </td>
+                        <td v-if="isFinance" class="px-6 py-4 text-sm text-green-600 font-medium">
+                          {{ project.projectTotalPemasukkan != null ? 'Rp' + project.projectTotalPemasukkan.toLocaleString('id-ID') : 'Rp0' }}
+                        </td>
+                        <td v-if="isFinance" class="px-6 py-4 text-sm text-red-600 font-medium">
+                          {{ project.projectTotalPengeluaran != null ? 'Rp' + project.projectTotalPengeluaran.toLocaleString('id-ID') : 'Rp0' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Summary -->
+          <div class="col-span-4">
+            <div class="sticky top-6">
+              <!-- Quick Stats Card -->
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan</h3>
+                <div class="text-center py-4">
+                  <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                      </div>
+                      <span class="text-sm font-medium text-gray-700">Total Aktivitas</span>
+                    </div>
+                    <span class="text-lg font-bold text-blue-600">{{ client.projects?.length || 0 }}</span>
                   </div>
-                  <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                    <span class="text-sm font-medium text-gray-700">Penjualan</span>
-                    <span class="text-sm font-bold text-purple-600">
-                      {{ client.projects.filter(p => p.projectType === false).length }}
-                    </span>
+
+                  <div v-if="client.projects && client.projects.length > 0" class="mt-4">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg mb-2">
+                      <span class="text-sm font-medium text-gray-700">Distribusi</span>
+                      <span class="text-sm font-bold text-green-600">
+                        {{ client.projects.filter(p => p.projectType === true).length }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                      <span class="text-sm font-medium text-gray-700">Penjualan</span>
+                      <span class="text-sm font-bold text-purple-600">
+                        {{ client.projects.filter(p => p.projectType === false).length }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

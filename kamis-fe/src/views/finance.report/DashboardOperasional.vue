@@ -179,13 +179,13 @@
           <button :disabled="purchaseTablePage === 1" 
                   @click="purchaseTablePage--" 
                   class="pagination-btn">
-            &larr; Prev
+            ◄
           </button>
-          <span class="pagination-info">Page {{ purchaseTablePage }} of {{ totalPurchaseTablePages }}</span>
+          <span class="pagination-info">Halaman {{ purchaseTablePage }} dari {{ totalPurchaseTablePages }}</span>
           <button :disabled="purchaseTablePage === totalPurchaseTablePages" 
                   @click="purchaseTablePage++" 
                   class="pagination-btn">
-            Next &rarr;
+            ►;
           </button>
         </div>
       </div>
@@ -251,13 +251,13 @@
           <button :disabled="distributionSalesTablePage === 1" 
                   @click="distributionSalesTablePage--" 
                   class="pagination-btn">
-            &larr; Prev
+            ◄
           </button>
-          <span class="pagination-info">Page {{ distributionSalesTablePage }} of {{ totalDistributionSalesTablePages }}</span>
+          <span class="pagination-info">Halaman {{ distributionSalesTablePage }} dari {{ totalDistributionSalesTablePages }}</span>
           <button :disabled="distributionSalesTablePage === totalDistributionSalesTablePages" 
                   @click="distributionSalesTablePage++" 
                   class="pagination-btn">
-            Next &rarr;
+            ►
           </button>
         </div>
       </div>
@@ -316,13 +316,13 @@
           <button :disabled="maintenanceTablePage === 1" 
                   @click="maintenanceTablePage--" 
                   class="pagination-btn">
-            &larr; Prev
+            ◄
           </button>
-          <span class="pagination-info">Page {{ maintenanceTablePage }} of {{ totalMaintenanceTablePages }}</span>
+          <span class="pagination-info">Halaman {{ maintenanceTablePage }} dari {{ totalMaintenanceTablePages }}</span>
           <button :disabled="maintenanceTablePage === totalMaintenanceTablePages" 
                   @click="maintenanceTablePage++" 
                   class="pagination-btn">
-            Next &rarr;
+            ►
           </button>
         </div>
       </div>
@@ -614,7 +614,7 @@ onMounted(() => {
 const purchaseTableTitle = computed(() => {
   switch (selectedRange.value) {
     case 'THIS_YEAR':
-      return 'Pembelian Tahun Ini';
+      return 'Pembelian Terbaru Tahun Ini';
     case 'THIS_QUARTER':
       return 'Pembelian Kuartal Ini';
     case 'THIS_MONTH':
@@ -674,7 +674,7 @@ const userInfo = computed(() => {
 
 .table-header {
   padding: 1rem 1.5rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -687,7 +687,7 @@ const userInfo = computed(() => {
 
 .table-cell {
   padding: 1rem 1.5rem;
-  text-align: left;
+  text-align: center;
   border-bottom: 1px solid #f3f4f6;
 }
 

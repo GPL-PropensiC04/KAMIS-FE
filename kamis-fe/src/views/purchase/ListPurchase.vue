@@ -46,10 +46,10 @@
       
       <div v-else>
         <!-- 📋 Table -->
-        <table class="custom-table">
-          <thead class="text-white bg-[#1E3A5F] rounded-t-lg">
+        <table class="custom-table w-full">
+          <thead class="text-white bg-[#1E3A5F]">
             <tr>
-              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('id')">
+              <th class="px-6 py-4 table-header cursor-pointer text-base text-center" @click="handleSort('id')">
                 <div class="flex items-center justify-center gap-1">
                   ID Pembelian
                   <span class="sort-indicator">
@@ -58,7 +58,7 @@
                   </span>
                 </div>
               </th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('date')">
+              <th class="px-6 py-4 table-header cursor-pointer text-base text-center" @click="handleSort('date')">
                 <div class="flex items-center justify-center gap-1">
                   Tanggal Pengajuan
                   <span class="sort-indicator">
@@ -67,7 +67,7 @@
                   </span>
                 </div>
               </th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('status')">
+              <th class="px-6 py-4 table-header cursor-pointer text-base text-center" @click="handleSort('status')">
                 <div class="flex items-center justify-center gap-1">
                   Status
                   <span class="sort-indicator">
@@ -76,7 +76,7 @@
                   </span>
                 </div>
               </th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('supplier')">
+              <th class="px-6 py-4 table-header cursor-pointer text-base text-center" @click="handleSort('supplier')">
                 <div class="flex items-center justify-center gap-1">
                   Supplier
                   <span class="sort-indicator">
@@ -85,9 +85,9 @@
                   </span>
                 </div>
               </th>
-              <th class="px-6 py-4 table-header text-base">Tipe Barang</th>
-              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base">Total Harga</th>
-              <th class="px-6 py-4 table-header cursor-pointer text-base" @click="handleSort('lastUpdate')">
+              <th class="px-6 py-4 table-header text-base text-center">Tipe Barang</th>
+              <th v-if="canViewFinancialInfo" class="px-6 py-4 table-header text-base text-center">Total Harga</th>
+              <th class="px-6 py-4 table-header cursor-pointer text-base text-center" @click="handleSort('lastUpdate')">
                 <div class="flex items-center justify-center gap-1">
                   Last Updated
                   <span class="sort-indicator">
@@ -106,9 +106,9 @@
                 class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer text-base"
                 @click="goToPurchaseDetail(purchase.purchaseId)"
               >
-                <td class="px-6 py-5">{{ purchase.purchaseId }}</td>
-                <td class="px-6 py-5">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
-                <td class="px-6 py-5">
+                <td class="px-6 py-5 text-center">{{ purchase.purchaseId }}</td>
+                <td class="px-6 py-5 text-center">{{ formatDate(purchase.purchaseSubmissionDate) }}</td>
+                <td class="px-6 py-5 text-center">
                   <template v-if="(userRole === 'Finance' || userRole === 'Direksi') && purchase.purchaseStatus === 'Diajukan'">
                     Menunggu Persetujuan
                   </template>
@@ -120,12 +120,12 @@
                     {{ purchase.purchaseStatus }}
                   </template>
                 </td>
-                <td class="px-6 py-5">{{ purchase.purchaseSupplier }}</td>
-                <td class="px-6 py-5">{{ purchase.purchaseType }}</td>
-                <td v-if="canViewFinancialInfo" class="px-6 py-5 font-bold">
+                <td class="px-6 py-5 text-center">{{ purchase.purchaseSupplier }}</td>
+                <td class="px-6 py-5 text-center">{{ purchase.purchaseType }}</td>
+                <td v-if="canViewFinancialInfo" class="px-6 py-5 font-bold text-center">
                   {{ formatCurrency(purchase.purchasePrice) }}
                 </td>
-                <td class="px-6 py-5 text-sm">
+                <td class="px-6 py-5 text-sm text-center">
                   {{ formatDate(purchase.purchaseUpdateDate) }}
                 </td>
               </tr>
@@ -526,6 +526,10 @@ const goToPurchaseDetail = (purchaseId: string) => {
 
 .custom-table tbody tr:hover {
   background-color: #f3f4f6;
+}
+
+.table-header {
+  text-align: center;
 }
 
 .table-header:hover {
