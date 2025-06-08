@@ -182,17 +182,18 @@
                 </div>
               </div>
 
-              <!-- Delivery Address -->
+              <!-- Payment Status -->
               <div class="flex items-start space-x-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg mt-1">
-                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <div class="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-lg mt-1">
+                  <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-600 mb-1">Alamat Pengiriman</p>
-                  <p class="text-[#1E3A5F] font-bold">{{ projectData.projectDeliveryAddress }}</p>
+                  <p class="text-sm font-medium text-gray-600 mb-1">Status Pembayaran</p>
+                  <span :class="getPaymentStatusColor(projectData.projectPaymentStatus)" class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full">
+                    {{ formatPaymentStatus(projectData.projectPaymentStatus) }}
+                  </span>
                 </div>
               </div>
 
@@ -225,19 +226,18 @@
               </div>
             </div>
 
-            <!-- Payment Status -->
+            <!-- Delivery Address -->
             <div class="mt-6">
-              <div class="flex items-start space-x-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm max-w-md">
-                <div class="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-lg mt-1">
-                  <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              <div class="flex items-start space-x-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg mt-1">
+                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-600 mb-1">Status Pembayaran</p>
-                  <span :class="getPaymentStatusColor(projectData.projectPaymentStatus)" class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full">
-                    {{ formatPaymentStatus(projectData.projectPaymentStatus) }}
-                  </span>
+                  <p class="text-sm font-medium text-gray-600 mb-1">Alamat Pengiriman</p>
+                  <p class="text-[#1E3A5F] font-bold">{{ projectData.projectDeliveryAddress }}</p>
                 </div>
               </div>
             </div>

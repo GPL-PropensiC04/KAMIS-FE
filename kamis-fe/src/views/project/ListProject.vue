@@ -312,10 +312,10 @@ const canEditProject = computed(() => {
 // Price range options
 const nominalOptions = [
   { label: "Seluruh Profit", start: null, end: null },
-  { label: "0 - 1 Juta", start: 0, end: 1000000 },
-  { label: "1 Juta - 10 Juta", start: 1000000, end: 10000000 },
-  { label: "10 Juta - 100 Juta", start: 10000000, end: 100000000 },
-  { label: "100 Juta - 1 Miliar", start: 100000000, end: 1000000000 },
+  { label: "Rp0 - Rp1.000.000", start: 0, end: 1000000 },
+  { label: "Rp1.000.000 - Rp10.000.000", start: 1000000, end: 10000000 },
+  { label: "Rp10.000.000 - Rp100.000.000", start: 10000000, end: 100000000 },
+  { label: "Rp100.000.000 - Rp1.000.000.000", start: 100000000, end: 1000000000 },
 ];
 
 const salesTypeMapping: { [key: string]: string } = {

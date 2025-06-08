@@ -219,7 +219,7 @@ onMounted(fetchChartData);
         <!-- PeriodType Toggle -->
         <div
             v-if="props.range === 'THIS_YEAR' || props.range === 'LAST_YEAR'"
-            class="flex border border-[#1E3A5F] font-inter text-sm"
+            class="flex border border-[#1E3A5F] font-inter text-sm rounded-lg overflow-hidden"
         >
             <button
             v-for="option in periodTypeOptions"
@@ -238,7 +238,7 @@ onMounted(fetchChartData);
 
         <!-- Status Toggle -->
         <div
-            class="flex border border-[#1E3A5F] font-inter text-sm"
+            class="flex border border-[#1E3A5F] font-inter text-sm rounded-lg overflow-hidden"
         >
             <button
             v-for="option in statusOptions"

@@ -1,15 +1,27 @@
 <template>
   <Breadcrumb />
   <div class="min-h-screen bg-[#E5EAF2] p-6">
+    <!-- Search Bar dan Filter Profit -->
     <div class="max-w-full mx-auto bg-white p-3 rounded-lg shadow-md mb-4">
-      <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+      <div class="grid grid-cols-[1fr_200px_auto] gap-4 items-center">
         <VSearchBar v-model="searchName" placeholder="Cari Nama Klien..." />
-        <VOptionInput v-model="typeClient" :options="['Semua', 'Perusahaan', 'Perorangan']"/>
-        <VDropDownInput v-if="isFinance || isDireksi" v-model="selectedNominal" :options="nominalOptions.map(opt => opt.label)" class="w-48"/>
-        <VButton v-if="isOperational" class="ml-auto" label="+ Tambah Klien" @click="goToAddClient"/>
+        <VDropDownInput 
+          v-if="isFinance || isDireksi" 
+          v-model="selectedNominal" 
+          :options="nominalOptions.map(opt => opt.label)" 
+          class="w-full"
+        />
+        <VButton v-if="isOperational" class="whitespace-nowrap" label="+ Tambah Klien" @click="goToAddClient"/>
       </div>
     </div>
+    
+    <!-- Container untuk tabel -->
     <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+      <!-- Filter Tipe Client di atas tabel -->
+      <div class="mb-4 flex justify-start">
+        <VOptionInput v-model="typeClient" :options="['Semua', 'Perusahaan', 'Perorangan']" class="w-1/3"/>
+      </div>
+      
       <div v-if="clientStore.loading" class="flex justify-center items-center py-14">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
@@ -144,10 +156,10 @@ const selectedPageSize = ref(clientStore.pageSize || 10);
 
 const nominalOptions = [
   { label: "Semua Profit", min: null, max: null },
-  { label: "0 - 10 Juta", min: 0, max: 10_000_000 },
-  { label: "10 Juta - 100 Juta", min: 10_000_000, max: 100_000_000 },
-  { label: "100 Juta - 1 Miliar", min: 100_000_000, max: 1_000_000_000 },
-  { label: "1 Miliar ke atas", min: 1_000_000_000, max: null },
+  { label: "Rp0 - Rp10.000.000", min: 0, max: 10_000_000 },
+  { label: "Rp10.000.000 - Rp100.000.000", min: 10_000_000, max: 100_000_000 },
+  { label: "Rp100.000.000 - Rp1.000.000.000", min: 100_000_000, max: 1_000_000_000 },
+  { label: "> Rp1.000.000.000", min: 1_000_000_000, max: null },
 ];
 const selectedNominal = ref(nominalOptions[0].label);
 
