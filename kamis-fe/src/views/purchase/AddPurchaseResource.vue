@@ -7,6 +7,7 @@ import VDropDownInput from "@/components/VDropDownInput.vue";
 import VNumberInput from "@/components/VNumberInput.vue";
 import VPriceInput from "@/components/VPriceInput.vue";
 import VSuccessButton from "@/components/VSuccessButton.vue";
+import VLockedInput from "@/components/VLockedInput.vue";
 import { useToast } from "vue-toastification";
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue'
