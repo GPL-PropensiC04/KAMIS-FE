@@ -110,14 +110,14 @@
                   <h2 class="text-lg font-semibold text-gray-800">Informasi Dasar</h2>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                   <!-- Nama Aset -->
                   <div class="form-group">
                     <label class="form-label">
                       <span class="label-text">Nama Aset</span>
                       <span class="text-red-500 ml-1">*</span>
                     </label>
-                    <VTextArea
+                    <VTextBox
                       v-model="formData.nama"
                       placeholder="Masukkan nama aset"
                       class="w-full"
@@ -138,9 +138,7 @@
                       class="form-dropdown"
                     />
                   </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4 mt-4">
                   <!-- No Polisi -->
                   <div class="form-group">
                     <label class="form-label">
@@ -150,12 +148,6 @@
                       :value="formattedPlateNumber"
                       class="w-full"
                     />
-                  </div>
-
-                  <!-- Status -->
-                  <div class="form-group">
-                    <label class="form-label">
-                    </label>
                   </div>
                 </div>
               </div>
@@ -178,7 +170,7 @@
                       <span class="label-text">Deskripsi Aset</span>
                       <span class="text-red-500 ml-1">*</span>
                     </label>
-                    <VTextBox
+                    <VTextArea
                       v-model="formData.deskripsi"
                       placeholder="Masukkan deskripsi detail aset..."
                       class="w-full h-32"
@@ -268,12 +260,6 @@
                   :class="isFormValid ? 'btn-primary w-full justify-center' : 'btn-disabled w-full justify-center cursor-not-allowed'"
                   :disabled="!isFormValid"
                 />
-                <VCancelButton 
-                  @click="cancel"
-                  class="w-full justify-center"
-                >
-                  Batal
-                </VCancelButton>
               </div>
 
               <!-- Help Text -->
@@ -303,13 +289,13 @@ import { byteArrayToImageUrl } from '@/utils/formatters';
 import VLockedInput from '@/components/VLockedInput.vue';
 import VDropDownInput from '@/components/VDropDownInput.vue';
 import VTextBox from '@/components/VTextBox.vue';
-import VTextArea from '@/components/VTextArea.vue';
 import VCancelButton from '@/components/VCancelButton.vue';
 import VSuccessButton from '@/components/VSuccessButton.vue';
 import axios from 'axios';
 import { API_URLS } from '@/config/api.config';
 import Breadcrumb from '@/components/Breadcrumb.vue';
 import { useToast } from 'vue-toastification';
+import VTextArea from '@/components/VTextArea.vue';
 
 const route = useRoute();
 const router = useRouter();

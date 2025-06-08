@@ -387,7 +387,8 @@ const router = createRouter({
       component: DashboardDireksi,
       meta: {
         requiresAuth: true,
-        roles: ['Direksi']
+        roles: ['Direksi'],
+        breadcrumb: 'Dashboard'
       }
     }
   ]

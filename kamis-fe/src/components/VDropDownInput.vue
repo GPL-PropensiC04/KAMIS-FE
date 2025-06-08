@@ -28,7 +28,7 @@ const selectOption = (option: string) => {
 </script>
 
 <template>
-  <div class="relative w-full max-w-md font-inter">
+  <div class="relative w-full max-w-full font-inter">
     <!-- Input Field -->
     <div 
       class="flex items-center justify-between border border-[#1E3A5F] bg-[#ffffff] text-black px-4 py-2 rounded-md h-[45px]"

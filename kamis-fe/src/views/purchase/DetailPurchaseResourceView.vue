@@ -39,7 +39,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <button 
-                @click="router.push('/resource')"
+                @click="router.push('/purchase')"
                 class="flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg transition-colors duration-200 text-white hover:scale-105 transform"
                 title="Kembali"
               >

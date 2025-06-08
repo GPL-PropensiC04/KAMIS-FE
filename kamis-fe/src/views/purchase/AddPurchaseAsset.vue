@@ -130,103 +130,92 @@ const formatPrice = (price: number) => {
         <div class="grid grid-cols-12 gap-0">
           <!-- Left Column - Form Fields -->
           <div class="col-span-8 p-8 pr-6">
-            <!-- Upload Foto Section -->
-            <div class="mb-6">
-              <div class="flex items-center mb-4">
-                <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
-                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-semibold text-gray-800">Foto Aset</h2>
+          <!-- Upload Foto Section -->
+          <div class="mb-6">
+            <div class="flex items-center mb-4">
+              <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
               </div>
+              <h2 class="text-lg font-semibold text-gray-800">Foto Aset</h2>
+            </div>
 
-              <div class="flex justify-center">
-                <div class="w-full max-w-md">
-                  <VUploadPhoto class="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors" @file-change="handleFileChange" />
-                </div>
-              </div>
-
-              <!-- File info -->
-              <div v-if="foto" class="mt-2 text-center">
-                <div class="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs">
-                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                  </svg>
-                  {{ foto.name }} ({{ Math.round(foto.size / 1024) }} KB)
-                </div>
+            <div class="flex justify-center">
+              <div class="w-full max-w-md">
+                <VUploadPhoto class="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors" @file-change="handleFileChange" />
               </div>
             </div>
 
-            <!-- Informasi Dasar Section -->
-            <div class="mb-6">
-              <div class="flex items-center mb-4">
-                <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mr-3">
-                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2"></path>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-semibold text-gray-800">Informasi Dasar</h2>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <!-- Nama Aset -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Nama Aset</span>
-                    <span class="text-red-500 ml-1">*</span>
-                  </label>
-                  <VTextBox v-model="assetName" placeholder="Masukkan nama aset" class="w-full" />
-                </div>
-
-                <!-- Jenis Aset -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Jenis Aset</span>
-                    <span class="text-red-500 ml-1">*</span>
-                  </label>
-                  <VDropDownInput 
-                    v-model="assetType" 
-                    :options="['Truk', 'Mobil', 'Pickup']" 
-                    placeholder="Pilih Jenis Aset" 
-                    class="form-dropdown"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Detail Section -->
-            <div class="mb-6">
-              <div class="flex items-center mb-4">
-                <div class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg mr-3">
-                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-semibold text-gray-800">Detail & Harga</h2>
-              </div>
-
-              <div class="grid grid-cols-1 gap-4">
-                <!-- Deskripsi Aset -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Deskripsi Aset</span>
-                    <span class="text-red-500 ml-1">*</span>
-                  </label>
-                  <VTextArea v-model="assetDescription" placeholder="Masukkan deskripsi detail aset..." class="w-full h-32" />
-                </div>
-
-                <!-- Nilai Perolehan -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <span class="label-text">Nilai Perolehan</span>
-                    <span class="text-red-500 ml-1">*</span>
-                  </label>
-                  <VPriceInput v-model="assetPrice" placeholder="Rp0,00" class="w-full" />
-                </div>
+            <!-- File info -->
+            <div v-if="foto" class="mt-2 text-center">
+              <div class="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ foto.name }} ({{ Math.round(foto.size / 1024) }} KB)
               </div>
             </div>
           </div>
+
+          <!-- Informasi Dasar Section -->
+          <div class="mb-6">
+            <div class="flex items-center mb-4">
+              <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mr-3">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2"></path>
+                </svg>
+              </div>
+              <h2 class="text-lg font-semibold text-gray-800">Informasi Dasar</h2>
+            </div>
+
+            <!-- Baris pertama: Nama Aset, Jenis Aset, Nilai Perolehan -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <!-- Nama Aset -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="label-text">Nama Aset</span>
+                  <span class="text-red-500 ml-1">*</span>
+                </label>
+                <VTextBox v-model="assetName" placeholder="Masukkan nama aset" class="w-full" />
+              </div>
+
+              <!-- Jenis Aset -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="label-text">Jenis Aset</span>
+                  <span class="text-red-500 ml-1">*</span>
+                </label>
+                <VDropDownInput 
+                  v-model="assetType" 
+                  :options="['Truk', 'Mobil', 'Pickup']" 
+                  placeholder="Pilih Jenis Aset" 
+                  class="form-dropdown"
+                />
+              </div>
+
+              <!-- Nilai Perolehan -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="label-text">Nilai Perolehan</span>
+                  <span class="text-red-500 ml-1">*</span>
+                </label>
+                <VPriceInput v-model="assetPrice" placeholder="Rp0,00" class="w-full" />
+              </div>
+            </div>
+
+            <!-- Baris kedua: Deskripsi Aset -->
+            <div class="grid grid-cols-1 gap-4">
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="label-text">Deskripsi Aset</span>
+                  <span class="text-red-500 ml-1">*</span>
+                </label>
+                <VTextArea v-model="assetDescription" placeholder="Masukkan deskripsi detail aset..." class="w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
 
           <!-- Right Column - Summary & Actions -->
           <div class="col-span-4 bg-gray-50 p-8 pl-6 border-l border-gray-100">
